@@ -69,7 +69,7 @@ class Transport(ContextManager['Transport'], ABC):
     def request(self, req: str, request_id: str, method_name: str) -> str:
         base_name = self._bug_report_id if self._bug_report_id is not None else 'kore_rpc'
         req_name = f'{base_name}/{id(self)}/{request_id}'
-        if self._bug_report:
+        if self._bug_report is not None:
             bug_report_request = f'{req_name}_request.json'
             self._bug_report.add_file_contents(req, Path(bug_report_request))
             self._bug_report.add_request(f'{req_name}_request.json')
@@ -81,7 +81,7 @@ class Transport(ContextManager['Transport'], ABC):
         _LOGGER.info(f'Received response from {server_addr}: {request_id} - {method_name}')
         _LOGGER.debug(f'Received response from {server_addr}: {resp}')
 
-        if self._bug_report:
+        if self._bug_report is not None:
             bug_report_response = f'{req_name}_response.json'
             self._bug_report.add_file_contents(resp, Path(bug_report_response))
             self._bug_report.add_request(f'{req_name}_response.json')
@@ -417,7 +417,7 @@ class InvalidModuleError(KoreClientError):
     def __init__(self, error: str, context: Iterable[str] | None):
         self.error = error
         self.context = tuple(context) if context else None
-        context_str = ' Context: ' + ' ;; '.join(self.context) if self.context else ''
+        context_str = ' Context: ' + ' ;; '.join(self.context) if self.context is not None else ''
         super().__init__(f'Could not verify module: {self.error}{context_str}')
 
 
@@ -633,7 +633,9 @@ class RewriteSuccess(RewriteResult):
         )
 
     def to_dict(self) -> dict[str, Any]:
-        rewritten_term = {'rewritten-term': KoreClient._state(self.rewritten_term)} if self.rewritten_term else {}
+        rewritten_term = (
+            {'rewritten-term': KoreClient._state(self.rewritten_term)} if self.rewritten_term is not None else {}
+        )
         return {'tag': 'success', 'rule-id': self.rule_id} | rewritten_term
 
 
@@ -1176,7 +1178,7 @@ class KoreServer(ContextManager['KoreServer']):
         self.close()
 
     def start(self) -> None:
-        if self._bug_report:
+        if self._bug_report is not None:
             self._populate_bug_report(self._bug_report)
 
         cli_args = self._cli_args()
@@ -1244,16 +1246,16 @@ class KoreServer(ContextManager['KoreServer']):
     def _extra_args(self) -> list[str]:
         """Command line arguments that are intended to be included in the bug report."""
         smt_server_args = []
-        if self._smt_timeout:
+        if self._smt_timeout is not None:
             smt_server_args += ['--smt-timeout', str(self._smt_timeout)]
-        if self._smt_retry_limit:
+        if self._smt_retry_limit is not None:
             smt_server_args += ['--smt-retry-limit', str(self._smt_retry_limit)]
-        if self._smt_reset_interval:
+        if self._smt_reset_interval is not None:
             smt_server_args += ['--smt-reset-interval', str(self._smt_reset_interval)]
-        if self._smt_tactic:
+        if self._smt_tactic is not None:
             smt_server_args += ['--smt-tactic', self._smt_tactic]
 
-        if self._log_axioms_file:
+        if self._log_axioms_file is not None:
             haskell_log_args = [
                 '--log',
                 str(self._log_axioms_file),
@@ -1357,7 +1359,7 @@ class BoosterServer(KoreServer):
         if self._fallback_on is not None and not self._fallback_on:
             raise ValueError("'fallback_on' must not be empty")
 
-        if self._interim_simplification and self._interim_simplification < 0:
+        if self._interim_simplification is not None and self._interim_simplification < 0:
             raise ValueError(f"'interim_simplification' must not be negative, got: {self._interim_simplification}")
 
     def _extra_args(self) -> list[str]:
