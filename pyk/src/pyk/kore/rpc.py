@@ -570,8 +570,6 @@ class LogEntry(ABC):
     @classmethod
     def from_dict(cls: type[LE], dct: Mapping[str, Any]) -> LE:
         match dct['tag']:
-            case 'processing-time':
-                return LogTiming.from_dict(dct)  # type: ignore
             case 'rewrite':
                 return LogRewrite.from_dict(dct)  # type: ignore
             case _:
@@ -579,27 +577,6 @@ class LogEntry(ABC):
 
     @abstractmethod
     def to_dict(self) -> dict[str, Any]: ...
-
-
-@final
-@dataclass(frozen=True)
-class LogTiming(LogEntry):
-    class Component(Enum):
-        KORE_RPC = 'kore-rpc'
-        BOOSTER = 'booster'
-        PROXY = 'proxy'
-
-    time: float
-    component: Component | None
-
-    @classmethod
-    def from_dict(cls, dct: Mapping[str, Any]) -> LogTiming:
-        return LogTiming(
-            time=dct['time'], component=LogTiming.Component(dct['component']) if 'component' in dct else None
-        )
-
-    def to_dict(self) -> dict[str, Any]:
-        return {'tag': 'processing-time', 'time': self.time, 'component': self.component}
 
 
 @final
@@ -1025,7 +1002,6 @@ class KoreClient(ContextManager['KoreClient']):
         module_name: str | None = None,
         log_successful_rewrites: bool | None = None,
         log_failed_rewrites: bool | None = None,
-        log_timing: bool | None = None,
     ) -> ExecuteResult:
         params = filter_none(
             {
@@ -1039,7 +1015,6 @@ class KoreClient(ContextManager['KoreClient']):
                 'state': self._state(pattern),
                 'log-successful-rewrites': log_successful_rewrites,
                 'log-failed-rewrites': log_failed_rewrites,
-                'log-timing': log_timing,
             }
         )
 
@@ -1052,14 +1027,14 @@ class KoreClient(ContextManager['KoreClient']):
         consequent: Pattern,
         *,
         module_name: str | None = None,
-        log_timing: bool | None = None,
+        assume_defined: bool = False,
     ) -> ImpliesResult:
         params = filter_none(
             {
                 'antecedent': self._state(antecedent),
                 'consequent': self._state(consequent),
                 'module': module_name,
-                'log-timing': log_timing,
+                'assume-defined': assume_defined,
             }
         )
 
@@ -1071,13 +1046,11 @@ class KoreClient(ContextManager['KoreClient']):
         pattern: Pattern,
         *,
         module_name: str | None = None,
-        log_timing: bool | None = None,
     ) -> tuple[Pattern, tuple[LogEntry, ...]]:
         params = filter_none(
             {
                 'state': self._state(pattern),
                 'module': module_name,
-                'log-timing': log_timing,
             }
         )
 

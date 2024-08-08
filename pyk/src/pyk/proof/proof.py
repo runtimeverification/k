@@ -279,6 +279,10 @@ class Proof(Generic[PS, SR]):
         subproofs_summaries = [subproof.summary for subproof in self.subproofs]
         return CompositeSummary([BaseSummary(self.id, self.status), *subproofs_summaries])
 
+    @property
+    def one_line_summary(self) -> str:
+        return self.status.name
+
     @abstractmethod
     def get_steps(self) -> Iterable[PS]:
         """Return all currently available steps associated with this Proof. Should not modify `self`."""
@@ -321,6 +325,8 @@ def parallel_advance_proof(
     max_iterations: int | None = None,
     fail_fast: bool = False,
     max_workers: int = 1,
+    callback: Callable[[P], None] = (lambda x: None),
+    maintenance_rate: int = 1,
 ) -> None:
     """Advance proof with multithreaded strategy.
 
@@ -342,6 +348,8 @@ def parallel_advance_proof(
         fail_fast: If the proof is failing after finishing a step,
           halt execution even if there are still available steps.
         max_workers: Maximum number of worker threads the pool can spawn.
+        callback: Callable to run during proof maintenance, useful for getting real-time information about the proof.
+        maintenance_rate: Number of iterations between proof maintenance (writing to disk and executing callback).
     """
     pending: set[Future[Any]] = set()
     explored: set[PS] = set()
@@ -370,8 +378,10 @@ def parallel_advance_proof(
                 proof_results = future.result()
                 for result in proof_results:
                     proof.commit(result)
-                proof.write_proof_data()
                 iterations += 1
+                if iterations % maintenance_rate == 0:
+                    proof.write_proof_data()
+                    callback(proof)
                 if max_iterations is not None and max_iterations <= iterations:
                     break
                 if fail_fast and proof.failed:
@@ -489,7 +499,14 @@ class Prover(ContextManager['Prover'], Generic[P, PS, SR]):
         """
         ...
 
-    def advance_proof(self, proof: P, max_iterations: int | None = None, fail_fast: bool = False) -> None:
+    def advance_proof(
+        self,
+        proof: P,
+        max_iterations: int | None = None,
+        fail_fast: bool = False,
+        callback: Callable[[P], None] = (lambda x: None),
+        maintenance_rate: int = 1,
+    ) -> None:
         """Advance a proof.
 
         Performs loop `Proof.get_steps()` -> `Prover.step_proof()` -> `Proof.commit()`.
@@ -499,6 +516,8 @@ class Prover(ContextManager['Prover'], Generic[P, PS, SR]):
             max_iterations (optional): Maximum number of steps to take.
             fail_fast: If the proof is failing after finishing a step,
               halt execution even if there are still available steps.
+            callback: Callable to run in between each completed step, useful for getting real-time information about the proof.
+            maintenance_rate: Number of iterations between proof maintenance (writing to disk and executing callback).
         """
         iterations = 0
         _LOGGER.info(f'Initializing proof: {proof.id}')
@@ -519,6 +538,9 @@ class Prover(ContextManager['Prover'], Generic[P, PS, SR]):
                 results = self.step_proof(step)
                 for result in results:
                     proof.commit(result)
-                proof.write_proof_data()
+                if iterations % maintenance_rate == 0:
+                    proof.write_proof_data()
+                    callback(proof)
+
         if proof.failed:
             proof.failure_info = self.failure_info(proof)

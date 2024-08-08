@@ -73,23 +73,18 @@ class KCFGStore:
         return self.kcfg_node_dir / f'{node_id}.json'
 
     def write_cfg_data(
-        self, dct: dict[str, Any], deleted_nodes: Iterable[int] = (), created_nodes: Iterable[int] = ()
+        self, kcfg: KCFG, dct: dict[str, Any], deleted_nodes: Iterable[int] = (), created_nodes: Iterable[int] = ()
     ) -> None:
-        node_dict = {node_dct['id']: node_dct for node_dct in dct['nodes']}
         vacuous_nodes = [
-            node_id for node_id in node_dict.keys() if KCFGNodeAttr.VACUOUS.value in node_dict[node_id]['attrs']
+            node_id for node_id in kcfg._nodes.keys() if KCFGNodeAttr.VACUOUS in kcfg._nodes[node_id].attrs
         ]
-        stuck_nodes = [
-            node_id for node_id in node_dict.keys() if KCFGNodeAttr.STUCK.value in node_dict[node_id]['attrs']
-        ]
+        stuck_nodes = [node_id for node_id in kcfg._nodes.keys() if KCFGNodeAttr.STUCK in kcfg._nodes[node_id].attrs]
         dct['vacuous'] = vacuous_nodes
         dct['stuck'] = stuck_nodes
         for node_id in deleted_nodes:
             self.kcfg_node_path(node_id).unlink(missing_ok=True)
         for node_id in created_nodes:
-            del node_dict[node_id]['attrs']
-            self.kcfg_node_path(node_id).write_text(json.dumps(node_dict[node_id]))
-        dct['nodes'] = list(node_dict.keys())
+            self.kcfg_node_path(node_id).write_text(json.dumps(kcfg._nodes[node_id].to_dict()))
         self.kcfg_json_path.write_text(json.dumps(dct))
 
     def read_cfg_data(self) -> dict[str, Any]:
@@ -541,6 +536,26 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
 
             case _:
                 raise AssertionError()
+
+    def to_dict_no_nodes(self) -> dict[str, Any]:
+        nodes = list(self._nodes.keys())
+        edges = [edge.to_dict() for edge in self.edges()]
+        covers = [cover.to_dict() for cover in self.covers()]
+        splits = [split.to_dict() for split in self.splits()]
+        ndbranches = [ndbranch.to_dict() for ndbranch in self.ndbranches()]
+
+        aliases = dict(sorted(self._aliases.items()))
+
+        res = {
+            'next': self._node_id,
+            'nodes': nodes,
+            'edges': edges,
+            'covers': covers,
+            'splits': splits,
+            'ndbranches': ndbranches,
+            'aliases': aliases,
+        }
+        return {k: v for k, v in res.items() if v}
 
     def to_dict(self) -> dict[str, Any]:
         nodes = [node.to_dict() for node in self.nodes]
@@ -1261,7 +1276,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
     def write_cfg_data(self) -> None:
         assert self._kcfg_store is not None
         self._kcfg_store.write_cfg_data(
-            self.to_dict(), deleted_nodes=self._deleted_nodes, created_nodes=self._created_nodes
+            self, self.to_dict_no_nodes(), deleted_nodes=self._deleted_nodes, created_nodes=self._created_nodes
         )
         self._deleted_nodes.clear()
         self._created_nodes.clear()
