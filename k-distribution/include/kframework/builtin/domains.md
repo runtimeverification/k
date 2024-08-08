@@ -3015,6 +3015,7 @@ than the input.
 
 ```k
   syntax {Width1, Width2} MInt{Width1} ::= roundMInt(MInt{Width2}) [function, total, hook(MINT.round)]
+  syntax {Width1, Width2} MInt{Width1} ::= signExtendMInt(MInt{Width2}) [function, total, hook(MINT.sext)]
 ```
 
 ```k
