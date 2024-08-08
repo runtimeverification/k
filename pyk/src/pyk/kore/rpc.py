@@ -1227,10 +1227,14 @@ class KoreServer(ContextManager['KoreServer']):
             if n is not None and n <= 0:
                 raise ValueError(f'Expected positive integer for: {param_name}, got: {n}')
 
+        def _check_none_or_nonnegative(n: int | None, param_name: str) -> None:
+            if n is not None and n < 0:
+                raise ValueError(f'Expected positive integer for: {param_name}, got: {n}')
+
         check_dir_path(self._kompiled_dir)
         check_file_path(self._definition_file)
         _check_none_or_positive(self._smt_timeout, 'smt_timeout')
-        _check_none_or_positive(self._smt_retry_limit, 'smt_retry_limit')
+        _check_none_or_nonnegative(self._smt_retry_limit, 'smt_retry_limit')
         _check_none_or_positive(self._smt_reset_interval, 'smt_reset_interval')
 
     def _cli_args(self) -> list[str]:
@@ -1359,6 +1363,7 @@ class BoosterServer(KoreServer):
 
         if self._interim_simplification and self._interim_simplification < 0:
             raise ValueError(f"'interim_simplification' must not be negative, got: {self._interim_simplification}")
+        super()._validate()
 
     def _extra_args(self) -> list[str]:
         res = super()._extra_args()
