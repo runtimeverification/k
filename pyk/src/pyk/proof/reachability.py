@@ -671,6 +671,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
     always_check_subsumption: bool
     fast_check_subsumption: bool
     direct_subproof_rules: bool
+    assume_defined: bool
     kcfg_explore: KCFGExplore
 
     def __init__(
@@ -683,6 +684,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         always_check_subsumption: bool = True,
         fast_check_subsumption: bool = False,
         direct_subproof_rules: bool = False,
+        assume_defined: bool = False,
     ) -> None:
 
         self.kcfg_explore = kcfg_explore
@@ -694,6 +696,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         self.always_check_subsumption = always_check_subsumption
         self.fast_check_subsumption = fast_check_subsumption
         self.direct_subproof_rules = direct_subproof_rules
+        self.assume_defined = assume_defined
 
     def close(self) -> None:
         self.kcfg_explore.cterm_symbolic._kore_client.close()
@@ -737,7 +740,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         if self.fast_check_subsumption and not self._may_subsume(node, target_node):
             _LOGGER.info(f'Skipping full subsumption check because of fast may subsume check {proof_id}: {node.id}')
             return None
-        _csubst = self.kcfg_explore.cterm_symbolic.implies(node.cterm, target_cterm)
+        _csubst = self.kcfg_explore.cterm_symbolic.implies(node.cterm, target_cterm, assume_defined=self.assume_defined)
         csubst = _csubst.csubst
         if csubst is not None:
             _LOGGER.info(f'Subsumed into target node {proof_id}: {shorten_hashes((node.id, target_node.id))}')
@@ -804,7 +807,9 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         ]
 
     def failure_info(self, proof: APRProof) -> FailureInfo:
-        return APRFailureInfo.from_proof(proof, self.kcfg_explore, counterexample_info=self.counterexample_info)
+        return APRFailureInfo.from_proof(
+            proof, self.kcfg_explore, counterexample_info=self.counterexample_info, assume_defined=self.assume_defined
+        )
 
 
 @dataclass(frozen=True)
@@ -871,7 +876,9 @@ class APRFailureInfo(FailureInfo):
         )
 
     @staticmethod
-    def from_proof(proof: APRProof, kcfg_explore: KCFGExplore, counterexample_info: bool = False) -> APRFailureInfo:
+    def from_proof(
+        proof: APRProof, kcfg_explore: KCFGExplore, counterexample_info: bool = False, assume_defined: bool = False
+    ) -> APRFailureInfo:
         target = proof.kcfg.node(proof.target)
         pending_nodes = {node.id for node in proof.pending}
         failing_nodes = {node.id for node in proof.failing}
@@ -881,7 +888,7 @@ class APRFailureInfo(FailureInfo):
         for node in proof.failing:
             node_cterm, _ = kcfg_explore.cterm_symbolic.simplify(node.cterm)
             target_cterm, _ = kcfg_explore.cterm_symbolic.simplify(target.cterm)
-            _, reason = kcfg_explore.implication_failure_reason(node_cterm, target_cterm)
+            _, reason = kcfg_explore.implication_failure_reason(node_cterm, target_cterm, assume_defined=assume_defined)
             path_condition = kcfg_explore.pretty_print(proof.path_constraints(node.id))
             failure_reasons[node.id] = reason
             path_conditions[node.id] = path_condition
