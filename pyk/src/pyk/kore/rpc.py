@@ -1027,12 +1027,14 @@ class KoreClient(ContextManager['KoreClient']):
         consequent: Pattern,
         *,
         module_name: str | None = None,
+        assume_defined: bool = False,
     ) -> ImpliesResult:
         params = filter_none(
             {
                 'antecedent': self._state(antecedent),
                 'consequent': self._state(consequent),
                 'module': module_name,
+                'assume-defined': assume_defined,
             }
         )
 
