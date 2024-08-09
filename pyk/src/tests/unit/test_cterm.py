@@ -10,7 +10,7 @@ from pyk.kast import Atts, KAtt
 from pyk.kast.inner import KApply, KLabel, KRewrite, KSequence, KSort, KVariable
 from pyk.kast.outer import KClaim
 from pyk.prelude.k import GENERATED_TOP_CELL
-from pyk.prelude.kint import INT, intToken
+from pyk.prelude.kint import INT, geInt, intToken
 from pyk.prelude.ml import mlAnd, mlEqualsTrue
 
 from .utils import a, b, c, f, g, h, k, x, y, z
@@ -34,8 +34,12 @@ ques_unds_v2 = KVariable('?_V2')
 v1_sorted = KVariable('V1', sort=INT)
 
 
+def generated_top(term: KInner) -> KApply:
+    return KApply(KLabel('<generatedTop>', GENERATED_TOP_CELL), term)
+
+
 def _as_cterm(term: KInner) -> CTerm:
-    return CTerm(KApply(KLabel('<generatedTop>', GENERATED_TOP_CELL), term))
+    return CTerm(generated_top(term))
 
 
 MATCH_TEST_DATA: Final[tuple[tuple[KInner, KInner], ...]] = (
@@ -72,6 +76,19 @@ def test_no_cterm_match(term: KInner, pattern: KInner) -> None:
 
     # Then
     assert subst is None
+
+
+def test_cterm_match_with_constraint() -> None:
+    # Given
+    cpattern = CTerm(generated_top(x))
+    cterm = CTerm(generated_top(x), (mlEqualsTrue(geInt(x, intToken(0))),))
+
+    # When
+    csubst = cpattern.match_with_constraint(cterm)
+
+    # Then
+    assert csubst is not None
+    assert csubst.apply(cpattern) == cterm
 
 
 BUILD_RULE_TEST_DATA: Final = (
