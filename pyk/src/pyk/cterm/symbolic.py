@@ -73,18 +73,21 @@ class CTermSMTError(Exception):
 class CTermSymbolic:
     _kore_client: KoreClient
     _definition: KDefinition
-    _trace_rewrites: bool
+    _log_succ_rewrites: bool
+    _log_fail_rewrites: bool
 
     def __init__(
         self,
         kore_client: KoreClient,
         definition: KDefinition,
         *,
-        trace_rewrites: bool = False,
+        log_succ_rewrites: bool = True,
+        log_fail_rewrites: bool = False,
     ):
         self._kore_client = kore_client
         self._definition = definition
-        self._trace_rewrites = trace_rewrites
+        self._log_succ_rewrites = log_succ_rewrites
+        self._log_fail_rewrites = log_fail_rewrites
 
     def kast_to_kore(self, kinner: KInner) -> Pattern:
         return kast_to_kore(self._definition, kinner, sort=GENERATED_TOP_CELL)
@@ -110,8 +113,8 @@ class CTermSymbolic:
                 cut_point_rules=cut_point_rules,
                 terminal_rules=terminal_rules,
                 module_name=module_name,
-                log_successful_rewrites=True,
-                log_failed_rewrites=self._trace_rewrites,
+                log_successful_rewrites=self._log_succ_rewrites,
+                log_failed_rewrites=self._log_succ_rewrites and self._log_fail_rewrites,
             )
         except SmtSolverError as err:
             raise self._smt_solver_error(err) from err
@@ -309,7 +312,8 @@ def cterm_symbolic(
     haskell_log_format: KoreExecLogFormat = KoreExecLogFormat.ONELINE,
     haskell_log_entries: Iterable[str] = (),
     log_axioms_file: Path | None = None,
-    trace_rewrites: bool = False,
+    log_succ_rewrites: bool = True,
+    log_fail_rewrites: bool = False,
     start_server: bool = True,
     maude_port: int | None = None,
     fallback_on: Iterable[FallbackReason] | None = None,
@@ -336,7 +340,9 @@ def cterm_symbolic(
             no_post_exec_simplify=no_post_exec_simplify,
         ) as server:
             with KoreClient('localhost', server.port, bug_report=bug_report, bug_report_id=id) as client:
-                yield CTermSymbolic(client, definition, trace_rewrites=trace_rewrites)
+                yield CTermSymbolic(
+                    client, definition, log_succ_rewrites=log_succ_rewrites, log_fail_rewrites=log_fail_rewrites
+                )
     else:
         if port is None:
             raise ValueError('Missing port with start_server=False')
@@ -352,4 +358,6 @@ def cterm_symbolic(
                 ],
             }
         with KoreClient('localhost', port, bug_report=bug_report, bug_report_id=id, dispatch=dispatch) as client:
-            yield CTermSymbolic(client, definition, trace_rewrites=trace_rewrites)
+            yield CTermSymbolic(
+                client, definition, log_succ_rewrites=log_succ_rewrites, log_fail_rewrites=log_fail_rewrites
+            )
