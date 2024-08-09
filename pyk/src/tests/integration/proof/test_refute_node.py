@@ -11,7 +11,7 @@ from pyk.kast.inner import KApply, KRewrite, KSequence, KToken, KVariable
 from pyk.kast.manip import free_vars
 from pyk.kast.outer import KClaim
 from pyk.kcfg import KCFG
-from pyk.kcfg.semantics import KCFGSemantics
+from pyk.kcfg.semantics import DefaultSemantics
 from pyk.prelude.kint import gtInt, intToken, leInt
 from pyk.prelude.ml import is_top, mlEqualsTrue
 from pyk.proof import APRProof, APRProver, ImpliesProver, ProofStatus, RefutationProof
@@ -30,12 +30,13 @@ if TYPE_CHECKING:
     from pyk.kast.outer import KDefinition
     from pyk.kcfg import KCFGExplore
     from pyk.kcfg.kcfg import KCFGExtendResult
+    from pyk.kcfg.semantics import KCFGSemantics
     from pyk.ktool.kprove import KProve
 
     STATE = Union[tuple[str, str], tuple[str, str, str]]
 
 
-class RefuteSemantics(KCFGSemantics):
+class RefuteSemantics(DefaultSemantics):
     def is_terminal(self, c: CTerm) -> bool:
         k_cell = c.cell('K_CELL')
         if type(k_cell) is KSequence:
