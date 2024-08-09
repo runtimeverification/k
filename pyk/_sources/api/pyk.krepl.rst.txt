@@ -1,0 +1,15 @@
+pyk.krepl package
+=================
+
+.. automodule:: pyk.krepl
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pyk.krepl.repl

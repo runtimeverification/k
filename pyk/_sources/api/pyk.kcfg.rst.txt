@@ -1,0 +1,21 @@
+pyk.kcfg package
+================
+
+.. automodule:: pyk.kcfg
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pyk.kcfg.exploration
+   pyk.kcfg.explore
+   pyk.kcfg.kcfg
+   pyk.kcfg.semantics
+   pyk.kcfg.show
+   pyk.kcfg.store
+   pyk.kcfg.tui
