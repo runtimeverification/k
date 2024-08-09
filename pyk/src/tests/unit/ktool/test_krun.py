@@ -23,6 +23,7 @@ required_args: dict[str, Any] = OrderedDict(
         ('search_final', False),
         ('no_pattern', False),
         ('debugger', False),
+        ('proof_hint', False),
     ]
 )
 
@@ -40,6 +41,7 @@ optional_args: dict[str, tuple[Any, list[str]]] = {
     'search_final': (True, ['--search-final']),
     'no_pattern': (True, ['--no-pattern']),
     'debugger': (True, ['--debugger']),
+    'proof_hint': (True, ['--proof-hint']),
 }
 
 

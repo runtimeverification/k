@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 from ..cli.utils import check_dir_path, check_file_path
 from ..kore.parser import KoreParser
 from ..kore.tools import PrintOutput, kore_print
-from ..utils import run_process, run_process_2
+from ..utils import run_process, run_process_2, run_proof_hint_process
 from .kprint import KPrint
 
 if TYPE_CHECKING:
@@ -36,6 +36,7 @@ class KRunOutput(Enum):
     LATEX = 'latex'
     KORE = 'kore'
     NONE = 'none'
+    HINTS = 'hints'
 
 
 class KRun(KPrint):
@@ -99,6 +100,50 @@ class KRun(KPrint):
                 debugger=debugger,
             )
 
+    def run_proof_hint(
+        self,
+        pgm: Pattern,
+        *,
+        cmap: Mapping[str, str] | None = None,
+        pmap: Mapping[str, str] | None = None,
+        term: bool = False,
+        depth: int | None = None,
+        expand_macros: bool = True,
+        search_final: bool = False,
+        no_pattern: bool = False,
+        check: bool = False,
+        pipe_stderr: bool = True,
+        debugger: bool = False,
+        proof_hint: bool = False,
+    ) -> bytes:
+        with self._temp_file() as ntf:
+            pgm.write(ntf)
+            ntf.flush()
+
+        args = _build_arg_list(
+            command='krun',
+            input_file=Path(ntf.name),
+            definition_dir=self.definition_dir,
+            output=KRunOutput.NONE,
+            parser='cat',
+            depth=depth,
+            pmap=pmap,
+            cmap=cmap,
+            term=term,
+            temp_dir=self.use_directory,
+            no_expand_macros=not expand_macros,
+            search_final=search_final,
+            no_pattern=no_pattern,
+            debugger=debugger,
+            proof_hint=proof_hint,
+        )
+
+        hints_bytes = run_proof_hint_process(
+            args=args, check=check, pipe_stderr=pipe_stderr, logger=_LOGGER, exec_process=debugger
+        )
+
+        return hints_bytes.stdout
+
     def run(
         self,
         pgm: Pattern,
@@ -115,7 +160,25 @@ class KRun(KPrint):
         pipe_stderr: bool = True,
         bug_report: BugReport | None = None,
         debugger: bool = False,
+        proof_hint: bool = False,
     ) -> None:
+        if proof_hint:
+            output = KRunOutput.HINTS
+            hints = self.run_proof_hint(
+                pgm,
+                cmap=cmap,
+                pmap=pmap,
+                term=term,
+                depth=depth,
+                expand_macros=expand_macros,
+                search_final=search_final,
+                no_pattern=no_pattern,
+                check=check,
+                pipe_stderr=pipe_stderr,
+                debugger=debugger,
+                proof_hint=proof_hint,
+            )
+
         result = self.run_process(
             pgm,
             cmap=cmap,
@@ -140,6 +203,8 @@ class KRun(KPrint):
                     print(output_kore.text)
                 case KRunOutput.PRETTY | KRunOutput.PROGRAM | KRunOutput.KAST | KRunOutput.BINARY | KRunOutput.LATEX:
                     print(kore_print(output_kore, definition_dir=self.definition_dir, output=PrintOutput(output.value)))
+                case KRunOutput.HINTS:
+                    print(hints)
                 case KRunOutput.NONE:
                     raise AssertionError()
 
@@ -205,9 +270,11 @@ def _krun(
     # ---
     check: bool = True,
     pipe_stderr: bool = True,
+    pipe_stdout: bool = True,
     logger: Logger | None = None,
     bug_report: BugReport | None = None,
     debugger: bool = False,
+    proof_hint: bool = False,
 ) -> CompletedProcess:
     if input_file:
         check_file_path(input_file)
@@ -236,6 +303,7 @@ def _krun(
         search_final=search_final,
         no_pattern=no_pattern,
         debugger=debugger,
+        proof_hint=proof_hint,
     )
 
     if bug_report is not None:
@@ -246,7 +314,19 @@ def _krun(
         else:
             bug_report.add_command(args)
 
-    return run_process(args, check=check, pipe_stderr=pipe_stderr, logger=logger or _LOGGER, exec_process=debugger)
+    if proof_hint:
+        return run_proof_hint_process(
+            args=args, check=check, pipe_stderr=pipe_stderr, logger=logger or _LOGGER, exec_process=debugger
+        )
+
+    return run_process(
+        args,
+        check=check,
+        pipe_stderr=pipe_stderr,
+        pipe_stdout=pipe_stdout,
+        logger=logger or _LOGGER,
+        exec_process=debugger,
+    )
 
 
 def _build_arg_list(
@@ -265,6 +345,7 @@ def _build_arg_list(
     search_final: bool,
     no_pattern: bool,
     debugger: bool,
+    proof_hint: bool,
 ) -> list[str]:
     args = [command]
     if input_file:
@@ -293,6 +374,8 @@ def _build_arg_list(
         args += ['--no-pattern']
     if debugger:
         args += ['--debugger']
+    if proof_hint:
+        args += ['--proof-hint']
     return args
 
 

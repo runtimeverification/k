@@ -499,6 +499,57 @@ def run_process_2(
     return res
 
 
+def run_proof_hint_process(
+    args: str | Iterable[str],
+    *,
+    check: bool = True,
+    input: str | None = None,
+    pipe_stdout: bool = True,
+    pipe_stderr: bool = False,
+    cwd: str | Path | None = None,
+    logger: Logger | None = None,
+    exec_process: bool = False,
+) -> CompletedProcess:
+
+    if cwd is not None:
+        cwd = Path(cwd)
+        check_dir_path(cwd)
+
+    if type(args) is str:
+        command = args
+    else:
+        args = tuple(args)
+        command = shlex.join(args)
+
+    if not logger:
+        logger = _LOGGER
+
+    stdout = subprocess.PIPE if pipe_stdout else None
+    stderr = subprocess.PIPE if pipe_stderr else None
+
+    logger.info(f'Running: {command}')
+
+    if exec_process:
+        sys.stdout.flush()
+        sys.stderr.flush()
+        if type(args) is str:
+            args = shlex.split(args)
+        argslist = list(args)
+        os.execvp(argslist[0], argslist)
+
+    start_time = time.time()
+
+    res = subprocess.run(args, input=input, cwd=cwd, stdout=stdout, stderr=stderr, text=False)
+
+    delta_time = time.time() - start_time
+    logger.info(f'Completed in {delta_time:.3f}s with status {res.returncode}: {command}')
+
+    if check:
+        res.check_returncode()
+
+    return res
+
+
 def _subprocess_run(
     args: tuple[Any, ...],
     *,
