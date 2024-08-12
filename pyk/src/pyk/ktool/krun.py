@@ -36,7 +36,6 @@ class KRunOutput(Enum):
     LATEX = 'latex'
     KORE = 'kore'
     NONE = 'none'
-    HINTS = 'hints'
 
 
 class KRun(KPrint):
@@ -106,7 +105,10 @@ class KRun(KPrint):
         *,
         cmap: Mapping[str, str] | None = None,
         pmap: Mapping[str, str] | None = None,
+        output: KRunOutput | None = None,
+        parser: str | None = None,
         term: bool = False,
+        temp_dir: Path | None = None,
         depth: int | None = None,
         expand_macros: bool = True,
         search_final: bool = False,
@@ -124,13 +126,13 @@ class KRun(KPrint):
             command='krun',
             input_file=Path(ntf.name),
             definition_dir=self.definition_dir,
-            output=KRunOutput.NONE,
-            parser='cat',
+            output=output,
+            parser=parser,
             depth=depth,
             pmap=pmap,
             cmap=cmap,
             term=term,
-            temp_dir=self.use_directory,
+            temp_dir=temp_dir,
             no_expand_macros=not expand_macros,
             search_final=search_final,
             no_pattern=no_pattern,
@@ -162,23 +164,6 @@ class KRun(KPrint):
         debugger: bool = False,
         proof_hint: bool = False,
     ) -> None:
-        if proof_hint:
-            output = KRunOutput.HINTS
-            hints = self.run_proof_hint(
-                pgm,
-                cmap=cmap,
-                pmap=pmap,
-                term=term,
-                depth=depth,
-                expand_macros=expand_macros,
-                search_final=search_final,
-                no_pattern=no_pattern,
-                check=check,
-                pipe_stderr=pipe_stderr,
-                debugger=debugger,
-                proof_hint=proof_hint,
-            )
-
         result = self.run_process(
             pgm,
             cmap=cmap,
@@ -203,8 +188,6 @@ class KRun(KPrint):
                     print(output_kore.text)
                 case KRunOutput.PRETTY | KRunOutput.PROGRAM | KRunOutput.KAST | KRunOutput.BINARY | KRunOutput.LATEX:
                     print(kore_print(output_kore, definition_dir=self.definition_dir, output=PrintOutput(output.value)))
-                case KRunOutput.HINTS:
-                    print(hints)
                 case KRunOutput.NONE:
                     raise AssertionError()
 
@@ -303,7 +286,6 @@ def _krun(
         search_final=search_final,
         no_pattern=no_pattern,
         debugger=debugger,
-        proof_hint=proof_hint,
     )
 
     if bug_report is not None:
@@ -313,11 +295,6 @@ def _krun(
             bug_report.add_command([a if a != str(input_file) else str(new_input_file) for a in args])
         else:
             bug_report.add_command(args)
-
-    if proof_hint:
-        return run_proof_hint_process(
-            args=args, check=check, pipe_stderr=pipe_stderr, logger=logger or _LOGGER, exec_process=debugger
-        )
 
     return run_process(
         args,
@@ -345,7 +322,7 @@ def _build_arg_list(
     search_final: bool,
     no_pattern: bool,
     debugger: bool,
-    proof_hint: bool,
+    proof_hint: bool = False,
 ) -> list[str]:
     args = [command]
     if input_file:
