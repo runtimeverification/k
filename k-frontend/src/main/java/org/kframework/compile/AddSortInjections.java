@@ -501,7 +501,9 @@ public class AddSortInjections {
         s ->
             mod.subsorts().lessThanEq(s, Sorts.KBott())
                 || mod.subsorts().greaterThan(s, Sorts.K()));
-    if (expectedSort != null && !expectedSort.name().equals(SORTPARAM_NAME)) {
+    if (expectedSort != null
+        && expectedSort.head().params() == 0
+        && !expectedSort.name().equals(SORTPARAM_NAME)) {
       bounds.removeIf(s -> !mod.subsorts().lessThanEq(s, expectedSort));
     }
 
