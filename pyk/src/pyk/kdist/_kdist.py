@@ -86,6 +86,7 @@ class KDist:
         jobs: int = 1,
         force: bool = False,
         verbose: bool = False,
+        clean: bool = True,
     ) -> None:
         args = dict(args) if args else {}
         dep_ids = target_cache().resolve_deps(target_ids)
@@ -108,6 +109,7 @@ class KDist:
                     args=args,
                     force=force,
                     verbose=verbose,
+                    clean=clean,
                 )
                 pending[future] = target_id
 
@@ -134,6 +136,7 @@ class KDist:
         *,
         force: bool,
         verbose: bool,
+        clean: bool,
     ) -> Path:
         target = target_cache().resolve(target_id)
         output_dir = self._target_dir(target_id)
@@ -145,8 +148,9 @@ class KDist:
             if not force and self._up_to_date(target_id, manifest):
                 return output_dir
 
-            shutil.rmtree(output_dir, ignore_errors=True)
-            output_dir.mkdir(parents=True)
+            if clean:
+                shutil.rmtree(output_dir, ignore_errors=True)
+            output_dir.mkdir(parents=True, exist_ok=True)
             manifest_file.unlink(missing_ok=True)
 
             with (
@@ -156,7 +160,8 @@ class KDist:
                 try:
                     target.target.build(output_dir, deps=self._deps(target), args=args, verbose=verbose)
                 except Exception as err:
-                    shutil.rmtree(output_dir, ignore_errors=True)
+                    if clean:
+                        shutil.rmtree(output_dir, ignore_errors=True)
                     raise RuntimeError(f'Build failed: {target_id.full_name}') from err
 
             manifest_file.write_text(json.dumps(manifest))
