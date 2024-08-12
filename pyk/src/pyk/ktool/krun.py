@@ -339,6 +339,7 @@ def _krun(
         search_final=search_final,
         no_pattern=no_pattern,
         debugger=debugger,
+        proof_hint=False,
     )
 
     if bug_report is not None:
@@ -375,7 +376,7 @@ def _build_arg_list(
     search_final: bool,
     no_pattern: bool,
     debugger: bool,
-    proof_hint: bool = False,
+    proof_hint: bool,
 ) -> list[str]:
     args = [command]
     if input_file:
