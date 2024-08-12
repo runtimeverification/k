@@ -217,7 +217,6 @@ class KRun(KPrint):
         pipe_stderr: bool = True,
         bug_report: BugReport | None = None,
         debugger: bool = False,
-        proof_hint: bool = False,
     ) -> None:
         result = self.run_process(
             pgm,
@@ -312,7 +311,6 @@ def _krun(
     logger: Logger | None = None,
     bug_report: BugReport | None = None,
     debugger: bool = False,
-    proof_hint: bool = False,
 ) -> CompletedProcess:
     if input_file:
         check_file_path(input_file)
