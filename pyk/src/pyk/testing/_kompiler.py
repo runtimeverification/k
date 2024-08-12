@@ -158,47 +158,6 @@ class KRunTest(KompiledTest):
     def _update_symbol_table(symbol_table: SymbolTable) -> None:
         pass
 
-    @pytest.fixture(scope='class')
-    def header(self, definition_dir: Path) -> KoreHeader:
-        process = subprocess.run(['kore-rich-header', str(definition_dir / 'definition.kore')], stdout=subprocess.PIPE)
-        hdr = process.stdout
-        header_file_name = definition_dir.name + '.header'
-        path = definition_dir / header_file_name
-        with path.open('wb') as f:
-            f.write(hdr)
-        from ..kllvm.hints.prooftrace import KoreHeader
-
-        return KoreHeader.create(path)
-
-
-class KRunProofHintsTest(KompiledTest):
-    @pytest.fixture
-    def krun(self, definition_dir: Path, tmp_path: Path) -> KRun:
-        use_directory = tmp_path / 'krun'
-        use_directory.mkdir()
-
-        return KRun(
-            definition_dir,
-            use_directory=use_directory,
-            patch_symbol_table=self._update_symbol_table,
-        )
-
-    @staticmethod
-    def _update_symbol_table(symbol_table: SymbolTable) -> None:
-        pass
-
-    @pytest.fixture(scope='class')
-    def header(self, definition_dir: Path) -> KoreHeader:
-        process = subprocess.run(['kore-rich-header', str(definition_dir / 'definition.kore')], stdout=subprocess.PIPE)
-        hdr = process.stdout
-        header_file_name = definition_dir.name + '.header'
-        path = definition_dir / header_file_name
-        with path.open('wb') as f:
-            f.write(hdr)
-        from ..kllvm.hints.prooftrace import KoreHeader
-
-        return KoreHeader.create(path)
-
 
 class KProveTest(KompiledTest):
     KOMPILE_BACKEND = 'haskell'

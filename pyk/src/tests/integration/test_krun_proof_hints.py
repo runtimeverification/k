@@ -4,13 +4,13 @@ from typing import TYPE_CHECKING
 
 import pyk.kllvm.hints.prooftrace as prooftrace
 from pyk.kore.parser import KoreParser
-from pyk.testing import KRunTest
+from pyk.testing import KRunTest, ProofTraceTest
 
 if TYPE_CHECKING:
     from pyk.ktool.krun import KRun
 
 
-class Test0Decrement(KRunTest):
+class Test0Decrement(KRunTest, ProofTraceTest):
     KOMPILE_DEFINITION = """
         module DECREMENT-SYNTAX
             syntax Nat ::= "0" | s(Nat)

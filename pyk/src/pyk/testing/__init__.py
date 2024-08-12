@@ -7,7 +7,6 @@ from ._kompiler import (
     KoreServerPoolTest,
     KPrintTest,
     KProveTest,
-    KRunProofHintsTest,
     KRunTest,
     ParallelTest,
     ProofTraceTest,
