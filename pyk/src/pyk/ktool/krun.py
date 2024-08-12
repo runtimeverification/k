@@ -2,8 +2,12 @@ from __future__ import annotations
 
 import logging
 from enum import Enum
+from os import execvp
 from pathlib import Path
-from subprocess import CalledProcessError
+from shlex import join, split
+from subprocess import PIPE, CalledProcessError, run
+from sys import stderr, stdout
+from time import time
 from typing import TYPE_CHECKING
 
 from ..cli.utils import check_dir_path, check_file_path
@@ -98,6 +102,104 @@ class KRun(KPrint):
                 pipe_stderr=pipe_stderr,
                 debugger=debugger,
             )
+
+    def run_proof_hint(
+        self,
+        pgm: Pattern,
+        *,
+        cmap: Mapping[str, str] | None = None,
+        pmap: Mapping[str, str] | None = None,
+        output: KRunOutput | None = None,
+        parser: str | None = None,
+        term: bool = False,
+        temp_dir: Path | None = None,
+        depth: int | None = None,
+        expand_macros: bool = True,
+        search_final: bool = False,
+        no_pattern: bool = False,
+        check: bool = False,
+        pipe_stderr: bool = True,
+        debugger: bool = False,
+        proof_hint: bool = False,
+    ) -> bytes:
+        with self._temp_file() as ntf:
+            pgm.write(ntf)
+            ntf.flush()
+
+        args = _build_arg_list(
+            command='krun',
+            input_file=Path(ntf.name),
+            definition_dir=self.definition_dir,
+            output=output,
+            parser=parser,
+            depth=depth,
+            pmap=pmap,
+            cmap=cmap,
+            term=term,
+            temp_dir=temp_dir,
+            no_expand_macros=not expand_macros,
+            search_final=search_final,
+            no_pattern=no_pattern,
+            debugger=debugger,
+            proof_hint=proof_hint,
+        )
+
+        hints_bytes = self.__run_proof_hint_process(
+            args=args, check=check, pipe_stderr=pipe_stderr, logger=_LOGGER, exec_process=debugger
+        )
+
+        return hints_bytes.stdout
+
+    def __run_proof_hint_process(
+        self,
+        args: str | Iterable[str],
+        *,
+        check: bool = True,
+        input: str | None = None,
+        pipe_stdout: bool = True,
+        pipe_stderr: bool = False,
+        cwd: str | Path | None = None,
+        logger: Logger | None = None,
+        exec_process: bool = False,
+    ) -> CompletedProcess:
+
+        if cwd is not None:
+            cwd = Path(cwd)
+            check_dir_path(cwd)
+
+        if type(args) is str:
+            command = args
+        else:
+            args = tuple(args)
+            command = join(args)
+
+        if not logger:
+            logger = _LOGGER
+
+        proc_stdout = PIPE if pipe_stdout else None
+        proc_stderr = PIPE if pipe_stderr else None
+
+        logger.info(f'Running: {command}')
+
+        if exec_process:
+            stdout.flush()
+            stderr.flush()
+            if type(args) is str:
+                args = split(args)
+            argslist = list(args)
+            execvp(argslist[0], argslist)
+
+        start_time = time()
+
+        res = run(args, input=input, cwd=cwd, stdout=proc_stdout, stderr=proc_stderr, text=False)
+
+        delta_time = time() - start_time
+        logger.info(f'Completed in {delta_time:.3f}s with status {res.returncode}: {command}')
+
+        if check:
+            res.check_returncode()
+
+        return res
 
     def run(
         self,
@@ -236,6 +338,7 @@ def _krun(
         search_final=search_final,
         no_pattern=no_pattern,
         debugger=debugger,
+        proof_hint=False,
     )
 
     if bug_report is not None:
@@ -265,6 +368,7 @@ def _build_arg_list(
     search_final: bool,
     no_pattern: bool,
     debugger: bool,
+    proof_hint: bool,
 ) -> list[str]:
     args = [command]
     if input_file:
@@ -293,6 +397,8 @@ def _build_arg_list(
         args += ['--no-pattern']
     if debugger:
         args += ['--debugger']
+    if proof_hint:
+        args += ['--proof-hint']
     return args
 
 
