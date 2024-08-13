@@ -167,7 +167,8 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
                     else:
                         shortest_path.append(succ.source)
 
-            module_name = self.circularities_module_name if self.nonzero_depth(node) else self.dependencies_module_name
+            nonzero_depth = self.nonzero_depth(node)
+            module_name = self.circularities_module_name if nonzero_depth else self.dependencies_module_name
 
             steps.append(
                 APRProofStep(
@@ -179,7 +180,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
                     shortest_path_to_node=tuple(shortest_path),
                     prior_loops_cache=FrozenDict(self.prior_loops_cache),
                     circularity=self.circularity,
-                    nonzero_depth=self.nonzero_depth(node),
+                    nonzero_depth=nonzero_depth,
                     circularity_rule_id=f'{self.rule_id}-{self.init}-TO-{self.target}',
                 )
             )
