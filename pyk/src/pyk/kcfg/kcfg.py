@@ -1188,14 +1188,19 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         return distance
 
     def zero_depth_between(self, node_1_id: NodeIdLike, node_2_id: NodeIdLike) -> bool:
+        _node_1_id = self._resolve(node_1_id)
+        _node_2_id = self._resolve(node_2_id)
+        if _node_1_id == _node_2_id:
+            return True
         # Short-circuit and don't run pathing algorithm if there is no 0 length path on the first step.
-        node_1_successors = self.successors(node_1_id)
-        node_2_successors = self.successors(node_2_id)
+        node_1_successors = self.successors(_node_1_id)
+        node_2_successors = self.successors(_node_2_id)
         path_lengths = [self.path_length([successor]) for successor in node_1_successors + node_2_successors]
         if 0 not in path_lengths:
             return False
 
-        shortest_distance = self.shortest_distance_between(node_1_id, node_2_id)
+        shortest_distance = self.shortest_distance_between(_node_1_id, _node_2_id)
+
         return shortest_distance is not None and shortest_distance == 0
 
     def paths_between(self, source_id: NodeIdLike, target_id: NodeIdLike) -> list[tuple[Successor, ...]]:
