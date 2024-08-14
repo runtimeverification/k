@@ -1193,9 +1193,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         if _node_1_id == _node_2_id:
             return True
         # Short-circuit and don't run pathing algorithm if there is no 0 length path on the first step.
-        node_1_successors = self.successors(_node_1_id)
-        node_2_successors = self.successors(_node_2_id)
-        path_lengths = [self.path_length([successor]) for successor in node_1_successors + node_2_successors]
+        path_lengths = [
+            self.path_length([successor]) for successor in self.successors(_node_1_id) + self.successors(_node_2_id)
+        ]
         if 0 not in path_lengths:
             return False
 
