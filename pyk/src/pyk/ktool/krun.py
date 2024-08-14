@@ -126,29 +126,29 @@ class KRun(KPrint):
             pgm.write(ntf)
             ntf.flush()
 
-        args = _build_arg_list(
-            command='krun',
-            input_file=Path(ntf.name),
-            definition_dir=self.definition_dir,
-            output=output,
-            parser=parser,
-            depth=depth,
-            pmap=pmap,
-            cmap=cmap,
-            term=term,
-            temp_dir=temp_dir,
-            no_expand_macros=not expand_macros,
-            search_final=search_final,
-            no_pattern=no_pattern,
-            debugger=debugger,
-            proof_hint=proof_hint,
-        )
+            args = _build_arg_list(
+                command='krun',
+                input_file=Path(ntf.name),
+                definition_dir=self.definition_dir,
+                output=output,
+                parser=parser,
+                depth=depth,
+                pmap=pmap,
+                cmap=cmap,
+                term=term,
+                temp_dir=temp_dir,
+                no_expand_macros=not expand_macros,
+                search_final=search_final,
+                no_pattern=no_pattern,
+                debugger=debugger,
+                proof_hint=proof_hint,
+            )
 
-        hints_bytes = self.__run_proof_hint_process(
-            args=args, check=check, pipe_stderr=pipe_stderr, logger=_LOGGER, exec_process=debugger
-        )
+            hints_bytes = self.__run_proof_hint_process(
+                args=args, check=check, pipe_stderr=pipe_stderr, logger=_LOGGER, exec_process=debugger
+            )
 
-        return hints_bytes.stdout
+            return hints_bytes.stdout
 
     def __run_proof_hint_process(
         self,
