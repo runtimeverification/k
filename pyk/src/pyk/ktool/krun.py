@@ -148,7 +148,7 @@ class KRun(KPrint):
                 args=args, check=check, pipe_stderr=pipe_stderr, logger=_LOGGER, exec_process=debugger
             )
 
-            return hints_bytes.stdout
+        return hints_bytes.stdout
 
     def __run_proof_hint_process(
         self,
