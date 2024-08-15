@@ -68,6 +68,7 @@ class APRProofStep:
     bmc_depth: int | None
     module_name: str
     shortest_path_to_node: tuple[KCFG.Node, ...]
+    predecessor_node_id: NodeIdLike | None
     prior_loops_cache: FrozenDict[int, tuple[int, ...]] = field(compare=False)
     circularity: bool
     nonzero_depth: bool
@@ -170,11 +171,17 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
             nonzero_depth = self.nonzero_depth(node)
             module_name = self.circularities_module_name if nonzero_depth else self.dependencies_module_name
 
+            predecessor_edges = self.kcfg.edges(target_id=node.id)
+            predecessor_node_id: NodeIdLike | None = (
+                single(predecessor_edges).source.id if predecessor_edges is not None else None
+            )
+
             steps.append(
                 APRProofStep(
                     bmc_depth=self.bmc_depth,
                     module_name=module_name,
                     node=node,
+                    predecessor_node_id=predecessor_node_id,
                     proof_id=self.id,
                     target=self.kcfg.node(self.target),
                     shortest_path_to_node=tuple(shortest_path),
@@ -795,8 +802,8 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         if step.circularity and not step.nonzero_depth and (execute_depth is None or execute_depth > 1):
             execute_depth = 1
 
-        if step.node.id in self.next_steps:
-            extend_results = [self.next_steps.pop(step.node.id)]
+        if step.predecessor_node_id in self.next_steps:
+            extend_results = [self.next_steps.pop(step.predecessor_node_id)]
         else:
             extend_results = self.kcfg_explore.extend_cterm(
                 step.node.cterm,
