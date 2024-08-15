@@ -807,6 +807,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
             execute_depth = 1
 
         if step.predecessor_node_id in self.next_steps:
+            _LOGGER.info(f'Using cached step for edge {step.predecessor_node_id} --> {step.node.id}')
             extend_results = [self.next_steps.pop(step.predecessor_node_id)]
         else:
             extend_results = self.kcfg_explore.extend_cterm(
