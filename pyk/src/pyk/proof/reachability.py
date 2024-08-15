@@ -188,14 +188,14 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
 
     def commit(self, result: APRProofResult) -> None:
         self.prior_loops_cache[result.node_id] = result.prior_loops_cache_update
-        if isinstance(result, APRProofBoundedResult):
-            self.add_bounded(result.node_id)
-        elif isinstance(result, APRProofTerminalResult):
-            self.add_terminal(result.node_id)
+        if isinstance(result, APRProofExtendResult):
+            self.kcfg.extend(result.extend_result, self.kcfg.node(result.node_id), logs=self.logs)
         elif isinstance(result, APRProofSubsumeResult):
             self.kcfg.create_cover(result.node_id, self.target, csubst=result.csubst)
-        elif isinstance(result, APRProofExtendResult):
-            self.kcfg.extend(result.extend_result, self.kcfg.node(result.node_id), logs=self.logs)
+        elif isinstance(result, APRProofTerminalResult):
+            self.add_terminal(result.node_id)
+        elif isinstance(result, APRProofBoundedResult):
+            self.add_bounded(result.node_id)
         else:
             raise ValueError(f'Incorrect result type, expected APRProofResult: {result}')
 
