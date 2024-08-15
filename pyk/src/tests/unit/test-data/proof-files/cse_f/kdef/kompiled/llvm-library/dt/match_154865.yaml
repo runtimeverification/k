@@ -1,0 +1,144 @@
+default: null
+specializations:
+- - Lbl'-LT-'generatedTop'-GT-'{}
+  - default: null
+    specializations:
+    - - Lbl'-LT-'foundry'-GT-'{}
+      - default: null
+        specializations:
+        - - Lbl'-LT-'kevm'-GT-'{}
+          - default: null
+            specializations:
+            - - Lbl'-LT-'k'-GT-'{}
+              - default: null
+                specializations:
+                - - Lbl'-LT-'cheatcodes'-GT-'{}
+                  - default: null
+                    specializations:
+                    - - Lbl'-LT-'expectEmit'-GT-'{}
+                      - default: null
+                        specializations:
+                        - - Lbl'-LT-'expectedEventAddress'-GT-'{}
+                          - default: null
+                            specializations:
+                            - - Lbl'-LT-'checkedData'-GT-'{}
+                              - default: null
+                                specializations:
+                                - - Lbl'-LT-'checkedTopics'-GT-'{}
+                                  - default: null
+                                    specializations:
+                                    - - Lbl'-LT-'isEventExpected'-GT-'{}
+                                      - default: null
+                                        specializations:
+                                        - - Lbl'-LT-'recordEvent'-GT-'{}
+                                          - default: fail
+                                            specializations:
+                                            - - kseq{}
+                                              - default: fail
+                                                specializations:
+                                                - - Lblfoundry'Unds'setExpectEmit{}
+                                                  - action:
+                                                    - 154865
+                                                    - - - ['1', '1']
+                                                        - STRING.String
+                                                      - - ['2', '0', '1']
+                                                        - STRING.String
+                                                      - - ['1', '0', '0', '0', '0',
+                                                          '1']
+                                                        - STRING.String
+                                                      - - ['0', '0', '3', '1', '0',
+                                                          '1']
+                                                        - BOOL.Bool
+                                                      - - ['0', '1', '3', '1', '0',
+                                                          '1']
+                                                        - BOOL.Bool
+                                                      - - ['6', '1', '0', '1']
+                                                        - STRING.String
+                                                      - - ['1', '0', '0', '1']
+                                                        - STRING.String
+                                                      - - ['2', '0', '0', '1']
+                                                        - STRING.String
+                                                      - - ['3', '0', '0', '1']
+                                                        - STRING.String
+                                                      - - ['4', '0', '0', '1']
+                                                        - STRING.String
+                                                      - - ['5', '0', '0', '1']
+                                                        - STRING.String
+                                                      - - ['0', '2', '3', '1', '0',
+                                                          '1']
+                                                        - LIST.List
+                                                      - - ['0', '3', '3', '1', '0',
+                                                          '1']
+                                                        - BOOL.Bool
+                                                      - - ['0', '4', '3', '1', '0',
+                                                          '1']
+                                                        - STRING.String
+                                                      - - ['0', '1', '0', '1']
+                                                        - STRING.String
+                                                      - - ['1', '1', '0', '1']
+                                                        - STRING.String
+                                                      - - ['2', '1', '0', '1']
+                                                        - STRING.String
+                                                      - - ['4', '1', '0', '1']
+                                                        - STRING.String
+                                                      - - ['5', '1', '0', '1']
+                                                        - STRING.String
+                                                      - - ['4', '0', '0', '0', '0',
+                                                          '0', '1']
+                                                        - STRING.String
+                                                      - - ['3', '0', '0', '0', '0',
+                                                          '0', '1']
+                                                        - BOOL.Bool
+                                                      - - ['0', '0', '0', '0', '0',
+                                                          '0', '1']
+                                                        - BOOL.Bool
+                                                      - - ['1', '0', '0', '0', '0',
+                                                          '0', '1']
+                                                        - BOOL.Bool
+                                                      - - ['2', '0', '0', '0', '0',
+                                                          '0', '1']
+                                                        - BOOL.Bool
+                                                  - [BOOL.Bool, BOOL.Bool, BOOL.Bool,
+                                                    BOOL.Bool, STRING.String]
+                                                sort: STRING.String
+                                                occurrence: ['0', '0', '0', '0', '0',
+                                                  '1']
+                                              - [STRING.String, STRING.String]
+                                            sort: STRING.String
+                                            occurrence: ['0', '0', '0', '0', '1']
+                                          - [BOOL.Bool]
+                                        sort: STRING.String
+                                        occurrence: ['0', '3', '1', '0', '1']
+                                      - [BOOL.Bool]
+                                    sort: STRING.String
+                                    occurrence: ['1', '3', '1', '0', '1']
+                                  - [LIST.List]
+                                sort: STRING.String
+                                occurrence: ['2', '3', '1', '0', '1']
+                              - [BOOL.Bool]
+                            sort: STRING.String
+                            occurrence: ['3', '3', '1', '0', '1']
+                          - [STRING.String]
+                        sort: STRING.String
+                        occurrence: ['4', '3', '1', '0', '1']
+                      - [STRING.String, STRING.String, STRING.String, STRING.String,
+                        STRING.String]
+                    sort: STRING.String
+                    occurrence: ['3', '1', '0', '1']
+                  - [STRING.String, STRING.String, STRING.String, STRING.String, STRING.String,
+                    STRING.String, STRING.String]
+                sort: STRING.String
+                occurrence: ['1', '0', '1']
+              - [STRING.String]
+            sort: STRING.String
+            occurrence: ['0', '0', '0', '1']
+          - [STRING.String, STRING.String, STRING.String, STRING.String, STRING.String,
+            STRING.String]
+        sort: STRING.String
+        occurrence: ['0', '0', '1']
+      - [STRING.String, STRING.String, STRING.String]
+    sort: STRING.String
+    occurrence: ['0', '1']
+  - [STRING.String, STRING.String]
+sort: STRING.String
+occurrence: ['1']

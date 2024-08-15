@@ -1,0 +1,18 @@
+default: null
+specializations:
+- - Lbl'UndsLParUndsCommUndsRParUnds'SERIALIZATION'Unds'LengthPrefix'Unds'LengthPrefixType'Unds'Int'Unds'Int{}
+  - action:
+    - 154637
+    - - - ['0', '3']
+        - STRING.String
+      - - ['1']
+        - BYTES.Bytes
+      - - ['1', '3']
+        - INT.Int
+      - - ['2', '3']
+        - INT.Int
+      - - ['2']
+        - INT.Int
+  - [STRING.String, INT.Int, INT.Int]
+sort: STRING.String
+occurrence: ['3']

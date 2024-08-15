@@ -1,0 +1,148 @@
+default: fail
+specializations:
+- - inj{SortBinStackOp{}, SortOpCode{}}
+  - args:
+    - - &id001 ['0', '1']
+      - STRING.String
+    next:
+      default: null
+      specializations:
+      - - '1'
+        - action:
+          - 154691
+          - - - *id001
+              - STRING.String
+        - []
+      - - '0'
+        - fail
+        - []
+      bitwidth: 1
+      sort: BOOL.Bool
+      occurrence: &id002 [side_condition_154691]
+    function: side_condition_154691
+    sort: BOOL.Bool
+    occurrence: *id002
+  - [STRING.String]
+- - inj{SortCallOp{}, SortOpCode{}}
+  - args:
+    - - &id003 ['0', '1']
+      - STRING.String
+    next:
+      default: null
+      specializations:
+      - - '1'
+        - action:
+          - 154692
+          - - - *id003
+              - STRING.String
+        - []
+      - - '0'
+        - fail
+        - []
+      bitwidth: 1
+      sort: BOOL.Bool
+      occurrence: &id004 [side_condition_154692]
+    function: side_condition_154692
+    sort: BOOL.Bool
+    occurrence: *id004
+  - [STRING.String]
+- - inj{SortCallSixOp{}, SortOpCode{}}
+  - action:
+    - 154693
+    - - - ['0', '1']
+        - STRING.String
+  - [STRING.String]
+- - inj{SortInvalidOp{}, SortOpCode{}}
+  - action:
+    - 154694
+    - - - ['0', '1']
+        - STRING.String
+  - [STRING.String]
+- - inj{SortLogOp{}, SortOpCode{}}
+  - args:
+    - - &id005 ['1']
+      - STRING.String
+    next:
+      default: null
+      specializations:
+      - - '1'
+        - action:
+          - 154691
+          - - - *id005
+              - STRING.String
+        - []
+      - - '0'
+        - default: null
+          specializations:
+          - - LblLOG{}
+            - action:
+              - 154695
+              - - - ['0', '0', '1']
+                  - INT.Int
+            - [INT.Int]
+          sort: STRING.String
+          occurrence: ['0', '1']
+        - []
+      bitwidth: 1
+      sort: BOOL.Bool
+      occurrence: &id006 [side_condition_154691]
+    function: side_condition_154691
+    sort: BOOL.Bool
+    occurrence: *id006
+  - [STRING.String]
+- - inj{SortNullStackOp{}, SortOpCode{}}
+  - action:
+    - 154696
+    - - - ['0', '1']
+        - STRING.String
+  - [STRING.String]
+- - inj{SortPushOp{}, SortOpCode{}}
+  - action:
+    - 154697
+    - - - ['0', '1']
+        - STRING.String
+  - [STRING.String]
+- - inj{SortQuadStackOp{}, SortOpCode{}}
+  - action:
+    - 154698
+    - - - ['0', '1']
+        - STRING.String
+  - [STRING.String]
+- - inj{SortStackOp{}, SortOpCode{}}
+  - default: null
+    specializations:
+    - - LblDUP{}
+      - action:
+        - 154699
+        - - - ['0', '0', '1']
+            - INT.Int
+      - [INT.Int]
+    - - LblSWAP{}
+      - action:
+        - 154700
+        - - - ['0', '0', '1']
+            - INT.Int
+      - [INT.Int]
+    sort: STRING.String
+    occurrence: ['0', '1']
+  - [STRING.String]
+- - inj{SortTernStackOp{}, SortOpCode{}}
+  - action:
+    - 154701
+    - - - ['0', '1']
+        - STRING.String
+  - [STRING.String]
+- - inj{SortUnStackOp{}, SortOpCode{}}
+  - action:
+    - 154702
+    - - - ['0', '1']
+        - STRING.String
+  - [STRING.String]
+- - inj{SortPrecompiledOp{}, SortOpCode{}}
+  - action:
+    - 154696
+    - - - *id005
+        - STRING.String
+  - [STRING.String]
+sort: STRING.String
+occurrence: *id005

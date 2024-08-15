@@ -1,0 +1,115 @@
+default: &id001
+  action:
+  - 154712
+  - - - &id002 ['1']
+      - STRING.String
+specializations:
+- - inj{SortBinStackOp{}, SortOpCode{}}
+  - default: *id001
+    specializations:
+    - - LblMSTORE8'Unds'EVM'Unds'BinStackOp{}
+      - action:
+        - 154713
+        - []
+      - []
+    - - LblMSTORE'Unds'EVM'Unds'BinStackOp{}
+      - action:
+        - 154714
+        - []
+      - []
+    - - LblRETURN'Unds'EVM'Unds'BinStackOp{}
+      - action:
+        - 154715
+        - []
+      - []
+    - - LblREVERT'Unds'EVM'Unds'BinStackOp{}
+      - action:
+        - 154716
+        - []
+      - []
+    - - LblSHA3'Unds'EVM'Unds'BinStackOp{}
+      - action:
+        - 154717
+        - []
+      - []
+    sort: STRING.String
+    occurrence: ['0', '1']
+  - [STRING.String]
+- - inj{SortCallOp{}, SortOpCode{}}
+  - action:
+    - 154718
+    - - - ['0', '1']
+        - STRING.String
+  - [STRING.String]
+- - inj{SortCallSixOp{}, SortOpCode{}}
+  - action:
+    - 154719
+    - - - ['0', '1']
+        - STRING.String
+  - [STRING.String]
+- - inj{SortLogOp{}, SortOpCode{}}
+  - action:
+    - 154720
+    - - - ['0', '1']
+        - STRING.String
+  - [STRING.String]
+- - inj{SortQuadStackOp{}, SortOpCode{}}
+  - default: null
+    specializations:
+    - - LblCREATE2'Unds'EVM'Unds'QuadStackOp{}
+      - action:
+        - 154721
+        - []
+      - []
+    - - LblEXTCODECOPY'Unds'EVM'Unds'QuadStackOp{}
+      - action:
+        - 154722
+        - []
+      - []
+    sort: STRING.String
+    occurrence: ['0', '1']
+  - [STRING.String]
+- - inj{SortTernStackOp{}, SortOpCode{}}
+  - default: *id001
+    specializations:
+    - - LblCALLDATACOPY'Unds'EVM'Unds'TernStackOp{}
+      - action:
+        - 154723
+        - []
+      - []
+    - - LblCODECOPY'Unds'EVM'Unds'TernStackOp{}
+      - action:
+        - 154724
+        - []
+      - []
+    - - LblCREATE'Unds'EVM'Unds'TernStackOp{}
+      - action:
+        - 154725
+        - []
+      - []
+    - - LblMCOPY'Unds'EVM'Unds'TernStackOp{}
+      - action:
+        - 154726
+        - []
+      - []
+    - - LblRETURNDATACOPY'Unds'EVM'Unds'TernStackOp{}
+      - action:
+        - 154727
+        - []
+      - []
+    sort: STRING.String
+    occurrence: ['0', '1']
+  - [STRING.String]
+- - inj{SortUnStackOp{}, SortOpCode{}}
+  - default: *id001
+    specializations:
+    - - LblMLOAD'Unds'EVM'Unds'UnStackOp{}
+      - action:
+        - 154728
+        - []
+      - []
+    sort: STRING.String
+    occurrence: ['0', '1']
+  - [STRING.String]
+sort: STRING.String
+occurrence: *id002

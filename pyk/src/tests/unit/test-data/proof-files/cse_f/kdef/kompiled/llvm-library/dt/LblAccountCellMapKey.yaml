@@ -1,0 +1,23 @@
+default: null
+specializations:
+- - Lbl'-LT-'account'-GT-'{}
+  - action:
+    - 155207
+    - - - ['1', '1']
+        - STRING.String
+      - - ['2', '1']
+        - STRING.String
+      - - ['3', '1']
+        - STRING.String
+      - - ['4', '1']
+        - STRING.String
+      - - ['5', '1']
+        - STRING.String
+      - - ['6', '1']
+        - STRING.String
+      - - ['0', '1']
+        - STRING.String
+  - [STRING.String, STRING.String, STRING.String, STRING.String, STRING.String, STRING.String,
+    STRING.String]
+sort: STRING.String
+occurrence: ['1']

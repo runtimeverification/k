@@ -1,0 +1,20 @@
+default: null
+specializations:
+- - Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}
+  - action:
+    - 155328
+    - - - &id001 ['2']
+        - STRING.String
+  - []
+- - LblJSONs{}
+  - action:
+    - 155329
+    - - - ['0', '1']
+        - STRING.String
+      - - ['1', '1']
+        - STRING.String
+      - - *id001
+        - STRING.String
+  - [STRING.String, STRING.String]
+sort: STRING.String
+occurrence: ['1']

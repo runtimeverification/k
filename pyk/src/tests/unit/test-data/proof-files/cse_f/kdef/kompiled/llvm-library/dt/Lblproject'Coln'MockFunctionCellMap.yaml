@@ -1,0 +1,25 @@
+default: fail
+specializations:
+- - kseq{}
+  - default: fail
+    specializations:
+    - - dotk{}
+      - default: fail
+        specializations:
+        - - inj{SortMockFunctionCellMap{}, SortKItem{}}
+          - action:
+            - 158030
+            - - - ['0', '0', '1']
+                - MAP.Map
+          - [MAP.Map]
+        - - inj{SortMockFunctionCell{}, SortKItem{}}
+          - fail
+          - [STRING.String]
+        sort: STRING.String
+        occurrence: ['0', '1']
+      - []
+    sort: STRING.String
+    occurrence: ['1', '1']
+  - [STRING.String, STRING.String]
+sort: STRING.String
+occurrence: ['1']

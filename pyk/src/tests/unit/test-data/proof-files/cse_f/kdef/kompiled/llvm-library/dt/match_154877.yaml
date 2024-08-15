@@ -1,0 +1,143 @@
+default: null
+specializations:
+- - Lbl'-LT-'generatedTop'-GT-'{}
+  - default: null
+    specializations:
+    - - Lbl'-LT-'foundry'-GT-'{}
+      - default: null
+        specializations:
+        - - Lbl'-LT-'kevm'-GT-'{}
+          - default: null
+            specializations:
+            - - Lbl'-LT-'k'-GT-'{}
+              - default: null
+                specializations:
+                - - Lbl'-LT-'ethereum'-GT-'{}
+                  - default: null
+                    specializations:
+                    - - Lbl'-LT-'evm'-GT-'{}
+                      - default: null
+                        specializations:
+                        - - Lbl'-LT-'statusCode'-GT-'{}
+                          - default: fail
+                            specializations:
+                            - - kseq{}
+                              - default: fail
+                                specializations:
+                                - - Lblhalt{}
+                                  - default: fail
+                                    specializations:
+                                    - - kseq{}
+                                      - default: fail
+                                        specializations:
+                                        - - Lbl'Hash'codeDeposit'UndsUnds'EVM'Unds'KItem'Unds'Int{}
+                                          - default: fail
+                                            specializations:
+                                            - - inj{SortEndStatusCode{}, SortStatusCode{}}
+                                              - default: fail
+                                                specializations:
+                                                - - LblEVMC'Unds'SUCCESS'Unds'NETWORK'Unds'EndStatusCode{}
+                                                  - action:
+                                                    - 154877
+                                                    - - - ['1', '1']
+                                                        - STRING.String
+                                                      - - ['1', '1', '0', '0', '0',
+                                                          '0', '1']
+                                                        - STRING.String
+                                                      - - ['1', '5', '0', '0', '1']
+                                                        - STRING.String
+                                                      - - ['0', '0', '5', '0', '0',
+                                                          '1']
+                                                        - STRING.String
+                                                      - - ['2', '0', '5', '0', '0',
+                                                          '1']
+                                                        - STRING.String
+                                                      - - ['1', '0', '0', '1']
+                                                        - STRING.String
+                                                      - - ['2', '0', '0', '1']
+                                                        - STRING.String
+                                                      - - ['3', '0', '0', '1']
+                                                        - STRING.String
+                                                      - - ['4', '0', '0', '1']
+                                                        - STRING.String
+                                                      - - ['1', '0', '1']
+                                                        - STRING.String
+                                                      - - ['2', '0', '1']
+                                                        - STRING.String
+                                                      - - ['3', '0', '5', '0', '0',
+                                                          '1']
+                                                        - STRING.String
+                                                      - - ['5', '0', '0', '1']
+                                                        - STRING.String
+                                                      - - ['4', '0', '5', '0', '0',
+                                                          '1']
+                                                        - STRING.String
+                                                      - - ['5', '0', '5', '0', '0',
+                                                          '1']
+                                                        - STRING.String
+                                                      - - ['6', '0', '5', '0', '0',
+                                                          '1']
+                                                        - STRING.String
+                                                      - - ['7', '0', '5', '0', '0',
+                                                          '1']
+                                                        - STRING.String
+                                                      - - ['8', '0', '5', '0', '0',
+                                                          '1']
+                                                        - STRING.String
+                                                      - - ['9', '0', '5', '0', '0',
+                                                          '1']
+                                                        - STRING.String
+                                                      - - ['10', '0', '5', '0', '0',
+                                                          '1']
+                                                        - STRING.String
+                                                      - - ['0', '0', '1', '0', '0',
+                                                          '0', '0', '1']
+                                                        - INT.Int
+                                                  - []
+                                                sort: STRING.String
+                                                occurrence: ['0', '0', '1', '0', '5',
+                                                  '0', '0', '1']
+                                              - [STRING.String]
+                                            - - inj{SortExceptionalStatusCode{}, SortStatusCode{}}
+                                              - fail
+                                              - [STRING.String]
+                                            sort: STRING.String
+                                            occurrence: ['0', '1', '0', '5', '0',
+                                              '0', '1']
+                                          - [INT.Int]
+                                        sort: STRING.String
+                                        occurrence: ['0', '1', '0', '0', '0', '0',
+                                          '1']
+                                      - [STRING.String, STRING.String]
+                                    sort: STRING.String
+                                    occurrence: ['1', '0', '0', '0', '0', '1']
+                                  - []
+                                sort: STRING.String
+                                occurrence: ['0', '0', '0', '0', '0', '1']
+                              - [STRING.String, STRING.String]
+                            sort: STRING.String
+                            occurrence: ['0', '0', '0', '0', '1']
+                          - [STRING.String]
+                        sort: STRING.String
+                        occurrence: ['1', '0', '5', '0', '0', '1']
+                      - [STRING.String, STRING.String, STRING.String, STRING.String,
+                        STRING.String, STRING.String, STRING.String, STRING.String,
+                        STRING.String, STRING.String, STRING.String]
+                    sort: STRING.String
+                    occurrence: ['0', '5', '0', '0', '1']
+                  - [STRING.String, STRING.String]
+                sort: STRING.String
+                occurrence: ['5', '0', '0', '1']
+              - [STRING.String]
+            sort: STRING.String
+            occurrence: ['0', '0', '0', '1']
+          - [STRING.String, STRING.String, STRING.String, STRING.String, STRING.String,
+            STRING.String]
+        sort: STRING.String
+        occurrence: ['0', '0', '1']
+      - [STRING.String, STRING.String, STRING.String]
+    sort: STRING.String
+    occurrence: ['0', '1']
+  - [STRING.String, STRING.String]
+sort: STRING.String
+occurrence: ['1']

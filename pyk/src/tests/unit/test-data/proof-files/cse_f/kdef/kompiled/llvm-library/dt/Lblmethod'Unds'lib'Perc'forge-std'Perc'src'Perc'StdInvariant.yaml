@@ -1,0 +1,60 @@
+default: null
+specializations:
+- - Lblcontract'Unds'lib'Perc'forge-std'Perc'src'Perc'StdInvariant{}
+  - default: null
+    specializations:
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'StdInvariant'Unds'S2KexcludeArtifacts'Unds'{}
+      - action:
+        - 156894
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'StdInvariant'Unds'S2KexcludeContracts'Unds'{}
+      - action:
+        - 156895
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'StdInvariant'Unds'S2KexcludeSelectors'Unds'{}
+      - action:
+        - 156896
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'StdInvariant'Unds'S2KexcludeSenders'Unds'{}
+      - action:
+        - 156897
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'StdInvariant'Unds'S2KtargetArtifactSelectors'Unds'{}
+      - action:
+        - 156898
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'StdInvariant'Unds'S2KtargetArtifacts'Unds'{}
+      - action:
+        - 156899
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'StdInvariant'Unds'S2KtargetContracts'Unds'{}
+      - action:
+        - 156900
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'StdInvariant'Unds'S2KtargetInterfaces'Unds'{}
+      - action:
+        - 156901
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'StdInvariant'Unds'S2KtargetSelectors'Unds'{}
+      - action:
+        - 156902
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'StdInvariant'Unds'S2KtargetSenders'Unds'{}
+      - action:
+        - 156903
+        - []
+      - []
+    sort: STRING.String
+    occurrence: ['2']
+  - []
+sort: STRING.String
+occurrence: ['1']

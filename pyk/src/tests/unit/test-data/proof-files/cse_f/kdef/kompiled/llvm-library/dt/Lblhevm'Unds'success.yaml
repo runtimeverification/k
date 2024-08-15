@@ -1,0 +1,66 @@
+default: &id003
+  action:
+  - 155875
+  - - - &id006 ['1']
+      - STRING.String
+    - - &id002 ['2']
+      - INT.Int
+    - - &id001 ['3']
+      - BYTES.Bytes
+specializations:
+- - inj{SortEndStatusCode{}, SortStatusCode{}}
+  - default: null
+    specializations:
+    - - LblEVMC'Unds'REVERT'Unds'NETWORK'Unds'EndStatusCode{}
+      - args:
+        - - *id001
+          - BYTES.Bytes
+        next:
+          default: null
+          specializations:
+          - - '1'
+            - action:
+              - 155876
+              - - - *id002
+                  - INT.Int
+                - - *id001
+                  - BYTES.Bytes
+            - []
+          - - '0'
+            - *id003
+            - []
+          bitwidth: 1
+          sort: BOOL.Bool
+          occurrence: &id004 [side_condition_155876]
+        function: side_condition_155876
+        sort: BOOL.Bool
+        occurrence: *id004
+      - []
+    - - LblEVMC'Unds'SUCCESS'Unds'NETWORK'Unds'EndStatusCode{}
+      - args:
+        - - *id002
+          - INT.Int
+        next:
+          default: *id003
+          specializations:
+          - - '0'
+            - action:
+              - 155877
+              - - - *id001
+                  - BYTES.Bytes
+            - []
+          bitwidth: 32
+          sort: MINT.MInt 32
+          occurrence: &id005 [size, '2']
+        function: hook_INT_size_int
+        sort: MINT.MInt 32
+        occurrence: *id005
+      - []
+    sort: STRING.String
+    occurrence: ['0', '1']
+  - [STRING.String]
+- - inj{SortExceptionalStatusCode{}, SortStatusCode{}}
+  - *id003
+  - [STRING.String]
+sort: STRING.String
+occurrence: *id006

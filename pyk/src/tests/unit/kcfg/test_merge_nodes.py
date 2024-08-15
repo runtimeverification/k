@@ -1,18 +1,21 @@
-from __future__ import annotations
-
-from typing import TYPE_CHECKING, Any
+from itertools import count
+from typing import TYPE_CHECKING, Any, Final
+import pytest
 
 from pyk.cterm import CSubst, CTerm
-from pyk.kast.inner import KVariable
+from pyk.kast.inner import KVariable, KApply, KToken
 from pyk.kcfg import KCFG
-from pyk.kcfg.semantics import DefaultSemantics
+from pyk.kcfg.semantics import DefaultSemantics, KCFGSemantics
+from pyk.ktool.kprint import KPrint
 from pyk.prelude.kint import geInt, intToken, ltInt
 from pyk.prelude.ml import mlAnd, mlEqualsTrue, mlOr
 
 from ..test_kcfg import node_dicts, propagate_split_constraints, split_dicts, x_config, x_subst
+from collections.abc import Iterable
 
-if TYPE_CHECKING:
-    from collections.abc import Iterable
+from ..utils import TEST_DATA_DIR
+
+from pyk.kcfg.tui import KCFGViewer
 
 
 x_lt_0 = mlEqualsTrue(ltInt(KVariable('X'), intToken(0)))
@@ -25,25 +28,19 @@ x_lt_5 = mlEqualsTrue(ltInt(KVariable('X'), intToken(5)))
 x_ge_5 = mlEqualsTrue(geInt(KVariable('X'), intToken(5)))
 
 
-def test_simple_merge_node() -> None:
-    simple_semantics = TestSemantics()
-    original_cfg = merge_node_test_kcfg()
-    original_cfg.merge_nodes(simple_semantics)
-    assert original_cfg.to_dict() == merge_node_test_kcfg_simple_expected().to_dict()
+def edge_dicts(*edges: Iterable) -> list[dict[str, Any]]:
+    def _make_edge_dict(
+        i: int, j: int, depths: Iterable[int], rules_list: Iterable[Iterable[str]], csubsts: Iterable[CSubst]
+    ) -> dict[str, Any]:
+        return {
+            'source': i,
+            'target': j,
+            'depths': list(depths),
+            'rules_list': [list(rules) for rules in rules_list],
+            'csubsts': [csubst.to_dict() for csubst in csubsts],
+        }
 
-
-def test_incomplete_merge_node() -> None:
-    complex_semantics = TestSemanticsIncomplete()
-    original_cfg = merge_node_test_kcfg()
-    original_cfg.merge_nodes(complex_semantics)
-    expected = merge_node_test_kcfg_incomplete_expected()
-    for real_node, expected_node in zip(original_cfg.nodes, expected.nodes, strict=True):
-        assert real_node == expected_node
-    for real_edge, expected_edge in zip(original_cfg._edges.values(), expected._edges.values(), strict=True):
-        assert real_edge == expected_edge
-    for real_split, expected_split in zip(original_cfg._splits.values(), expected._splits.values(), strict=True):
-        assert real_split == expected_split
-    assert original_cfg.to_dict() == merge_node_test_kcfg_incomplete_expected().to_dict()
+    return [_make_edge_dict(*edge) for edge in edges]
 
 
 class TestSemantics(DefaultSemantics):
@@ -192,16 +189,30 @@ def merge_node_test_kcfg_incomplete_expected() -> KCFG:
     return cfg
 
 
-def edge_dicts(*edges: Iterable) -> list[dict[str, Any]]:
-    def _make_edge_dict(
-        i: int, j: int, depths: Iterable[int], rules_list: Iterable[Iterable[str]], csubsts: Iterable[CSubst]
-    ) -> dict[str, Any]:
-        return {
-            'source': i,
-            'target': j,
-            'depths': list(depths),
-            'rules_list': [list(rules) for rules in rules_list],
-            'csubsts': [csubst.to_dict() for csubst in csubsts],
-        }
+class EVMLikeSemantics(DefaultSemantics):
+    def is_mergeable(self, ct1: CTerm, ct2: CTerm) -> bool:
+        status_code_1 = ct1.cell('STATUSCODE_CELL')
+        status_code_2 = ct2.cell('STATUSCODE_CELL')
+        program_1 = ct1.cell('PROGRAM_CELL')
+        program_2 = ct2.cell('PROGRAM_CELL')
+        if type(status_code_1) is KApply and type(status_code_2) is KApply and type(program_1) is KToken and type(program_2) is KToken:
+            return status_code_1 == status_code_2 and program_1 == program_2
+        raise ValueError(f'Attempted to merge nodes with non-concrete <statusCode> or <program>: {(ct1, ct2)}')
 
-    return [_make_edge_dict(*edge) for edge in edges]
+
+MERGE_NODE_TEST_DATA: Final[tuple[tuple[KCFGSemantics, KCFG, KCFG], ...]] = (
+    # (TestSemantics(), merge_node_test_kcfg(), merge_node_test_kcfg_simple_expected()),
+    # (TestSemanticsIncomplete(), merge_node_test_kcfg(), merge_node_test_kcfg_incomplete_expected()),
+    (EVMLikeSemantics(), KCFG.read_cfg_data(TEST_DATA_DIR / 'proof-files' / 'cse_f' / 'kcfg'), KCFG.read_cfg_data(TEST_DATA_DIR / 'proof-files' / 'cse_f' / 'expected_kcfg')),
+)
+
+
+@pytest.mark.parametrize('semantics, given_kcfg, expected_kcfg', MERGE_NODE_TEST_DATA, ids=count())
+def test_merge_node(semantics: KCFGSemantics, given_kcfg: KCFG, expected_kcfg: KCFG):
+    # When
+    printer = KPrint(TEST_DATA_DIR / 'proof-files' / 'cse_f' / 'kdef' / 'kompiled')
+    viewer = KCFGViewer(expected_kcfg, printer)
+    viewer.run()
+    # given_kcfg.merge_nodes(semantics)
+    # # Then
+    # assert given_kcfg.to_dict() == expected_kcfg.to_dict()

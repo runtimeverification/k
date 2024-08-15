@@ -1,0 +1,20 @@
+default: null
+specializations:
+- - Lblcontract'Unds'src'Perc'Cse{}
+  - default: null
+    specializations:
+    - - Lblmethod'Unds'src'Perc'Cse'Unds'S2Kf'Unds'uint256'Unds'uint256'Unds'bool{}
+      - action:
+        - 157755
+        - - - ['0', '2']
+            - INT.Int
+          - - ['1', '2']
+            - INT.Int
+          - - ['2', '2']
+            - INT.Int
+      - [INT.Int, INT.Int, INT.Int]
+    sort: STRING.String
+    occurrence: ['2']
+  - []
+sort: STRING.String
+occurrence: ['1']

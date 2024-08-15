@@ -1,0 +1,136 @@
+args:
+- - &id001 ['2']
+  - LIST.List
+next:
+  default: &id007
+    args:
+    - - *id001
+      - LIST.List
+    - - [lit, '0', MINT.MInt 64]
+      - MINT.MInt 64
+    next:
+      next:
+        args:
+        - - &id002 ['1']
+          - MAP.Map
+        - - &id003 [size, '1']
+          - STRING.String
+        next:
+          args:
+          - - *id002
+            - MAP.Map
+          - - *id003
+            - STRING.String
+          next:
+            default: null
+            specializations:
+            - - '1'
+              - default: &id004
+                  args:
+                  - - *id001
+                    - LIST.List
+                  - - [lit, '1', MINT.MInt 64]
+                    - MINT.MInt 64
+                  - - [lit, '0', MINT.MInt 64]
+                    - MINT.MInt 64
+                  next:
+                    action:
+                    - 154331
+                    - - - *id002
+                        - MAP.Map
+                      - - &id006 ['0', '2']
+                        - STRING.String
+                      - - ['1', '2']
+                        - LIST.List
+                      - - &id005 ['3']
+                        - SET.Set
+                  function: hook_LIST_range_long
+                  sort: LIST.List
+                  occurrence: ['1', '2']
+                specializations:
+                - - inj{SortMerkleTree{}, SortKItem{}}
+                  - default: *id004
+                    specializations:
+                    - - Lbl'Stop'MerkleTree'Unds'SERIALIZATION'Unds'MerkleTree{}
+                      - args:
+                        - - *id001
+                          - LIST.List
+                        - - [lit, '1', MINT.MInt 64]
+                          - MINT.MInt 64
+                        - - [lit, '0', MINT.MInt 64]
+                          - MINT.MInt 64
+                        next:
+                          action:
+                          - 154329
+                          - - - ['VariableP(Some(Num(0,Num(2,Base()))),StringS())_rem',
+                                '1']
+                              - MAP.Map
+                            - - ['1', '2']
+                              - LIST.List
+                            - - *id005
+                              - SET.Set
+                            - - *id002
+                              - MAP.Map
+                            - - *id006
+                              - STRING.String
+                        function: hook_LIST_range_long
+                        sort: LIST.List
+                        occurrence: ['1', '2']
+                      - []
+                    sort: STRING.String
+                    occurrence: ['0', 'VariableP(Some(Num(0,Num(2,Base()))),StringS())_val',
+                      '1']
+                  - [STRING.String]
+                sort: STRING.String
+                occurrence: ['VariableP(Some(Num(0,Num(2,Base()))),StringS())_val',
+                  '1']
+              - [STRING.String, MAP.Map, MAP.Map]
+            - - '0'
+              - *id004
+              - [MAP.Map]
+            isnull: true
+            sort: STRING.String
+            occurrence: ['VariableP(Some(Num(0,Num(2,Base()))),StringS())_val', '1']
+          function: hook_MAP_remove
+          sort: MAP.Map
+          occurrence: ['VariableP(Some(Num(0,Num(2,Base()))),StringS())_rem', '1']
+        function: hook_MAP_lookup_null
+        sort: STRING.String
+        occurrence: ['VariableP(Some(Num(0,Num(2,Base()))),StringS())_val', '1']
+      pattern:
+        hook: STRING.String
+        occurrence: *id006
+      occurrence: *id003
+      sort: STRING.String
+    function: hook_LIST_get_long
+    sort: STRING.String
+    occurrence: ['0', '2']
+  specializations:
+  - - '0'
+    - args:
+      - - *id001
+        - LIST.List
+      - - [lit, '0', MINT.MInt 64]
+        - MINT.MInt 64
+      - - [lit, '0', MINT.MInt 64]
+        - MINT.MInt 64
+      next:
+        action:
+        - 154330
+        - - - *id002
+            - MAP.Map
+          - - *id005
+            - SET.Set
+      function: hook_LIST_range_long
+      sort: LIST.List
+      occurrence: ['0', '2']
+    - []
+  - - '1'
+    - *id007
+    - [STRING.String]
+  bitwidth: 64
+  sort: MINT.MInt 64
+  occurrence: &id008 [size, '2']
+function: hook_LIST_size_long
+sort: MINT.MInt 64
+occurrence: *id008

@@ -1,0 +1,33 @@
+default: null
+specializations:
+- - Lbl'Stop'List'LBraQuot'typedArgs'QuotRBra'{}
+  - action:
+    - 155748
+    - []
+  - []
+- - LbltypedArgs{}
+  - default: null
+    specializations:
+    - - LbltypedArgs{}
+      - action:
+        - 155749
+        - - - &id002 ['1', '1']
+            - STRING.String
+          - - &id001 ['0', '1']
+            - STRING.String
+          - - ['0', '1', '1']
+            - STRING.String
+          - - ['1', '1', '1']
+            - STRING.String
+      - [STRING.String, STRING.String]
+    - - Lbl'Stop'List'LBraQuot'typedArgs'QuotRBra'{}
+      - action:
+        - 155750
+        - - - *id001
+            - STRING.String
+      - []
+    sort: STRING.String
+    occurrence: *id002
+  - [STRING.String, STRING.String]
+sort: STRING.String
+occurrence: ['1']

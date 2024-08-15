@@ -1,0 +1,26 @@
+default: &id001
+  action:
+  - 156035
+  - - - &id002 ['1']
+      - STRING.String
+specializations:
+- - kseq{}
+  - default: *id001
+    specializations:
+    - - dotk{}
+      - default: *id001
+        specializations:
+        - - inj{SortAccounts{}, SortKItem{}}
+          - action:
+            - 156036
+            - - - ['0', '0', '1']
+                - STRING.String
+          - [STRING.String]
+        sort: STRING.String
+        occurrence: ['0', '1']
+      - []
+    sort: STRING.String
+    occurrence: ['1', '1']
+  - [STRING.String, STRING.String]
+sort: STRING.String
+occurrence: *id002

@@ -1,0 +1,85 @@
+default: null
+specializations:
+- - LblJSONs{}
+  - default: fail
+    specializations:
+    - - LblJSONEntry{}
+      - default: fail
+        specializations:
+        - - inj{SortString{}, SortJSONKey{}}
+          - args:
+            - - &id001 ['1']
+              - STRING.String
+            - - &id002 ['0', '0', '0', '2']
+              - STRING.String
+            next:
+              default: null
+              specializations:
+              - - '1'
+                - action:
+                  - 154500
+                  - - - &id007 ['0', '2']
+                      - STRING.String
+                    - - *id001
+                      - STRING.String
+                    - - *id002
+                      - STRING.String
+                    - - &id004 ['1', '2']
+                      - STRING.String
+                    - - &id003 ['1', '0', '2']
+                      - STRING.String
+                - []
+              - - '0'
+                - args:
+                  - - *id001
+                    - STRING.String
+                  - - *id002
+                    - STRING.String
+                  next:
+                    default: null
+                    specializations:
+                    - - '1'
+                      - action:
+                        - 154501
+                        - - - *id003
+                            - STRING.String
+                          - - *id001
+                            - STRING.String
+                          - - *id002
+                            - STRING.String
+                          - - *id004
+                            - STRING.String
+                      - []
+                    - - '0'
+                      - fail
+                      - []
+                    bitwidth: 1
+                    sort: BOOL.Bool
+                    occurrence: &id005 [side_condition_154501]
+                  function: side_condition_154501
+                  sort: BOOL.Bool
+                  occurrence: *id005
+                - []
+              bitwidth: 1
+              sort: BOOL.Bool
+              occurrence: &id006 [side_condition_154500]
+            function: side_condition_154500
+            sort: BOOL.Bool
+            occurrence: *id006
+          - [STRING.String]
+        sort: STRING.String
+        occurrence: ['0', '0', '2']
+      - [STRING.String, STRING.String]
+    sort: STRING.String
+    occurrence: *id007
+  - [STRING.String, STRING.String]
+- - Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}
+  - action:
+    - 154502
+    - - - &id008 ['2']
+        - STRING.String
+      - - *id001
+        - STRING.String
+  - []
+sort: STRING.String
+occurrence: *id008

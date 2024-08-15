@@ -1,0 +1,20 @@
+default: null
+specializations:
+- - Lbl'UndsColnUndsUnds'EVM-TYPES'Unds'WordStack'Unds'Int'Unds'WordStack{}
+  - action:
+    - 155557
+    - - - &id001 ['1']
+        - INT.Int
+      - - ['0', '2']
+        - INT.Int
+      - - ['1', '2']
+        - STRING.String
+  - [INT.Int, STRING.String]
+- - Lbl'Stop'WordStack'Unds'EVM-TYPES'Unds'WordStack{}
+  - action:
+    - 155558
+    - - - *id001
+        - INT.Int
+  - []
+sort: STRING.String
+occurrence: ['2']

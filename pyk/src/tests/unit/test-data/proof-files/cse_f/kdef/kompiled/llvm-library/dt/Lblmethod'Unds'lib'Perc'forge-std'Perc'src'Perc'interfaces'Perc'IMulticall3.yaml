@@ -1,0 +1,150 @@
+default: null
+specializations:
+- - Lblcontract'Unds'lib'Perc'forge-std'Perc'src'Perc'interfaces'Perc'IMulticall3{}
+  - default: null
+    specializations:
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'interfaces'Perc'IMulticall3'Unds'S2Kaggregate3Value'Unds'address'Unds'bool'Unds'uint256'Unds'bytes'Unds'address'Unds'bool'Unds'uint256'Unds'bytes{}
+      - action:
+        - 157703
+        - - - ['0', '2']
+            - INT.Int
+          - - ['4', '2']
+            - INT.Int
+          - - ['1', '2']
+            - INT.Int
+          - - ['5', '2']
+            - INT.Int
+          - - ['2', '2']
+            - INT.Int
+          - - ['6', '2']
+            - INT.Int
+          - - ['3', '2']
+            - BYTES.Bytes
+          - - ['7', '2']
+            - BYTES.Bytes
+      - [INT.Int, INT.Int, INT.Int, BYTES.Bytes, INT.Int, INT.Int, INT.Int, BYTES.Bytes]
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'interfaces'Perc'IMulticall3'Unds'S2Kaggregate3'Unds'address'Unds'bool'Unds'bytes'Unds'address'Unds'bool'Unds'bytes{}
+      - action:
+        - 157704
+        - - - ['0', '2']
+            - INT.Int
+          - - ['3', '2']
+            - INT.Int
+          - - ['1', '2']
+            - INT.Int
+          - - ['4', '2']
+            - INT.Int
+          - - ['2', '2']
+            - BYTES.Bytes
+          - - ['5', '2']
+            - BYTES.Bytes
+      - [INT.Int, INT.Int, BYTES.Bytes, INT.Int, INT.Int, BYTES.Bytes]
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'interfaces'Perc'IMulticall3'Unds'S2Kaggregate'Unds'address'Unds'bytes'Unds'address'Unds'bytes{}
+      - action:
+        - 157705
+        - - - ['0', '2']
+            - INT.Int
+          - - ['2', '2']
+            - INT.Int
+          - - ['1', '2']
+            - BYTES.Bytes
+          - - ['3', '2']
+            - BYTES.Bytes
+      - [INT.Int, BYTES.Bytes, INT.Int, BYTES.Bytes]
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'interfaces'Perc'IMulticall3'Unds'S2KblockAndAggregate'Unds'address'Unds'bytes'Unds'address'Unds'bytes{}
+      - action:
+        - 157706
+        - - - ['0', '2']
+            - INT.Int
+          - - ['2', '2']
+            - INT.Int
+          - - ['1', '2']
+            - BYTES.Bytes
+          - - ['3', '2']
+            - BYTES.Bytes
+      - [INT.Int, BYTES.Bytes, INT.Int, BYTES.Bytes]
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'interfaces'Perc'IMulticall3'Unds'S2KgetBasefee'Unds'{}
+      - action:
+        - 157707
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'interfaces'Perc'IMulticall3'Unds'S2KgetBlockHash'Unds'uint256{}
+      - action:
+        - 157708
+        - - - ['0', '2']
+            - INT.Int
+      - [INT.Int]
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'interfaces'Perc'IMulticall3'Unds'S2KgetBlockNumber'Unds'{}
+      - action:
+        - 157709
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'interfaces'Perc'IMulticall3'Unds'S2KgetChainId'Unds'{}
+      - action:
+        - 157710
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'interfaces'Perc'IMulticall3'Unds'S2KgetCurrentBlockCoinbase'Unds'{}
+      - action:
+        - 157711
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'interfaces'Perc'IMulticall3'Unds'S2KgetCurrentBlockDifficulty'Unds'{}
+      - action:
+        - 157712
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'interfaces'Perc'IMulticall3'Unds'S2KgetCurrentBlockGasLimit'Unds'{}
+      - action:
+        - 157713
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'interfaces'Perc'IMulticall3'Unds'S2KgetCurrentBlockTimestamp'Unds'{}
+      - action:
+        - 157714
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'interfaces'Perc'IMulticall3'Unds'S2KgetEthBalance'Unds'address{}
+      - action:
+        - 157715
+        - - - ['0', '2']
+            - INT.Int
+      - [INT.Int]
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'interfaces'Perc'IMulticall3'Unds'S2KgetLastBlockHash'Unds'{}
+      - action:
+        - 157716
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'interfaces'Perc'IMulticall3'Unds'S2KtryAggregate'Unds'bool'Unds'address'Unds'bytes'Unds'address'Unds'bytes{}
+      - action:
+        - 157717
+        - - - ['0', '2']
+            - INT.Int
+          - - ['1', '2']
+            - INT.Int
+          - - ['3', '2']
+            - INT.Int
+          - - ['2', '2']
+            - BYTES.Bytes
+          - - ['4', '2']
+            - BYTES.Bytes
+      - [INT.Int, INT.Int, BYTES.Bytes, INT.Int, BYTES.Bytes]
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'interfaces'Perc'IMulticall3'Unds'S2KtryBlockAndAggregate'Unds'bool'Unds'address'Unds'bytes'Unds'address'Unds'bytes{}
+      - action:
+        - 157718
+        - - - ['0', '2']
+            - INT.Int
+          - - ['1', '2']
+            - INT.Int
+          - - ['3', '2']
+            - INT.Int
+          - - ['2', '2']
+            - BYTES.Bytes
+          - - ['4', '2']
+            - BYTES.Bytes
+      - [INT.Int, INT.Int, BYTES.Bytes, INT.Int, BYTES.Bytes]
+    sort: STRING.String
+    occurrence: ['2']
+  - []
+sort: STRING.String
+occurrence: ['1']

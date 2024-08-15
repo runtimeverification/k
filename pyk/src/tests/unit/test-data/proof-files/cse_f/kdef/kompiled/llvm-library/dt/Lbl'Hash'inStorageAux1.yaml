@@ -1,0 +1,18 @@
+default:
+  action:
+  - 154506
+  - - - &id002 ['1']
+      - STRING.String
+    - - &id001 ['2']
+      - INT.Int
+specializations:
+- - inj{SortSet{}, SortKItem{}}
+  - action:
+    - 154507
+    - - - *id001
+        - INT.Int
+      - - ['0', '1']
+        - SET.Set
+  - [SET.Set]
+sort: STRING.String
+occurrence: *id002

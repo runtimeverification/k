@@ -1,0 +1,59 @@
+default: fail
+specializations:
+- - kseq{}
+  - default: fail
+    specializations:
+    - - dotk{}
+      - default: fail
+        specializations:
+        - - inj{SortPrecompiledOp{}, SortKItem{}}
+          - &id001
+            action:
+            - 158059
+            - - - &id002 ['0', '1']
+                - STRING.String
+          - [STRING.String]
+        - - inj{SortBinStackOp{}, SortKItem{}}
+          - *id001
+          - [STRING.String]
+        - - inj{SortInvalidOp{}, SortKItem{}}
+          - *id001
+          - [STRING.String]
+        - - inj{SortPushOp{}, SortKItem{}}
+          - *id001
+          - [STRING.String]
+        - - inj{SortInternalOp{}, SortKItem{}}
+          - *id001
+          - [STRING.String]
+        - - inj{SortQuadStackOp{}, SortKItem{}}
+          - *id001
+          - [STRING.String]
+        - - inj{SortNullStackOp{}, SortKItem{}}
+          - *id001
+          - [STRING.String]
+        - - inj{SortTernStackOp{}, SortKItem{}}
+          - *id001
+          - [STRING.String]
+        - - inj{SortCallOp{}, SortKItem{}}
+          - *id001
+          - [STRING.String]
+        - - inj{SortStackOp{}, SortKItem{}}
+          - *id001
+          - [STRING.String]
+        - - inj{SortCallSixOp{}, SortKItem{}}
+          - *id001
+          - [STRING.String]
+        - - inj{SortLogOp{}, SortKItem{}}
+          - *id001
+          - [STRING.String]
+        - - inj{SortUnStackOp{}, SortKItem{}}
+          - *id001
+          - [STRING.String]
+        sort: STRING.String
+        occurrence: *id002
+      - []
+    sort: STRING.String
+    occurrence: ['1', '1']
+  - [STRING.String, STRING.String]
+sort: STRING.String
+occurrence: ['1']

@@ -1,0 +1,70 @@
+default: null
+specializations:
+- - Lblcontract'Unds'lib'Perc'forge-std'Perc'src'Perc'Test{}
+  - default: null
+    specializations:
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'Test'Unds'S2KISZUndTEST'Unds'{}
+      - action:
+        - 156904
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'Test'Unds'S2KexcludeArtifacts'Unds'{}
+      - action:
+        - 156905
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'Test'Unds'S2KexcludeContracts'Unds'{}
+      - action:
+        - 156906
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'Test'Unds'S2KexcludeSelectors'Unds'{}
+      - action:
+        - 156907
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'Test'Unds'S2KexcludeSenders'Unds'{}
+      - action:
+        - 156908
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'Test'Unds'S2Kfailed'Unds'{}
+      - action:
+        - 156909
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'Test'Unds'S2KtargetArtifactSelectors'Unds'{}
+      - action:
+        - 156910
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'Test'Unds'S2KtargetArtifacts'Unds'{}
+      - action:
+        - 156911
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'Test'Unds'S2KtargetContracts'Unds'{}
+      - action:
+        - 156912
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'Test'Unds'S2KtargetInterfaces'Unds'{}
+      - action:
+        - 156913
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'Test'Unds'S2KtargetSelectors'Unds'{}
+      - action:
+        - 156914
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'Test'Unds'S2KtargetSenders'Unds'{}
+      - action:
+        - 156915
+        - []
+      - []
+    sort: STRING.String
+    occurrence: ['2']
+  - []
+sort: STRING.String
+occurrence: ['1']

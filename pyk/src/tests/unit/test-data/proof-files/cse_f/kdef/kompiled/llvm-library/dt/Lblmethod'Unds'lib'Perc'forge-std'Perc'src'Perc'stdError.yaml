@@ -1,0 +1,55 @@
+default: null
+specializations:
+- - Lblcontract'Unds'lib'Perc'forge-std'Perc'src'Perc'stdError{}
+  - default: null
+    specializations:
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'stdError'Unds'S2KarithmeticError'Unds'{}
+      - action:
+        - 157746
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'stdError'Unds'S2KassertionError'Unds'{}
+      - action:
+        - 157747
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'stdError'Unds'S2KdivisionError'Unds'{}
+      - action:
+        - 157748
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'stdError'Unds'S2KencodeStorageError'Unds'{}
+      - action:
+        - 157749
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'stdError'Unds'S2KenumConversionError'Unds'{}
+      - action:
+        - 157750
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'stdError'Unds'S2KindexOOBError'Unds'{}
+      - action:
+        - 157751
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'stdError'Unds'S2KmemOverflowError'Unds'{}
+      - action:
+        - 157752
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'stdError'Unds'S2KpopError'Unds'{}
+      - action:
+        - 157753
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'stdError'Unds'S2KzeroVarError'Unds'{}
+      - action:
+        - 157754
+        - []
+      - []
+    sort: STRING.String
+    occurrence: ['2']
+  - []
+sort: STRING.String
+occurrence: ['1']

@@ -1,0 +1,139 @@
+args:
+- - &id007 ['2']
+  - BYTES.Bytes
+- - &id001 ['3']
+  - BYTES.Bytes
+next:
+  default: null
+  specializations:
+  - - '1'
+    - args:
+      - - *id001
+        - BYTES.Bytes
+      - - &id002 ['4']
+        - BYTES.Bytes
+      next:
+        default: null
+        specializations:
+        - - '1'
+          - args:
+            - - *id002
+              - BYTES.Bytes
+            - - &id003 ['5']
+              - BYTES.Bytes
+            next:
+              default: null
+              specializations:
+              - - '1'
+                - args:
+                  - - *id003
+                    - BYTES.Bytes
+                  - - &id004 ['6']
+                    - BYTES.Bytes
+                  next:
+                    default: null
+                    specializations:
+                    - - '1'
+                      - args:
+                        - - *id004
+                          - BYTES.Bytes
+                        - - &id005 ['7']
+                          - BYTES.Bytes
+                        next:
+                          default: null
+                          specializations:
+                          - - '1'
+                            - args:
+                              - - *id005
+                                - BYTES.Bytes
+                              - - &id006 ['8']
+                                - BYTES.Bytes
+                              next:
+                                default: null
+                                specializations:
+                                - - '1'
+                                  - args:
+                                    - - *id006
+                                      - BYTES.Bytes
+                                    - - ['9']
+                                      - BYTES.Bytes
+                                    next:
+                                      default: null
+                                      specializations:
+                                      - - '1'
+                                        - action:
+                                          - 154528
+                                          - - - ['1']
+                                              - INT.Int
+                                            - - *id007
+                                              - BYTES.Bytes
+                                        - []
+                                      - - '0'
+                                        - fail
+                                        - []
+                                      bitwidth: 1
+                                      sort: BOOL.Bool
+                                      occurrence: [eq, '8', and, '9']
+                                    function: hook_KEQUAL_eq
+                                    sort: BOOL.Bool
+                                    occurrence: [eq, '8', and, '9']
+                                  - []
+                                - - '0'
+                                  - fail
+                                  - []
+                                bitwidth: 1
+                                sort: BOOL.Bool
+                                occurrence: [eq, '7', and, '8']
+                              function: hook_KEQUAL_eq
+                              sort: BOOL.Bool
+                              occurrence: [eq, '7', and, '8']
+                            - []
+                          - - '0'
+                            - fail
+                            - []
+                          bitwidth: 1
+                          sort: BOOL.Bool
+                          occurrence: [eq, '6', and, '7']
+                        function: hook_KEQUAL_eq
+                        sort: BOOL.Bool
+                        occurrence: [eq, '6', and, '7']
+                      - []
+                    - - '0'
+                      - fail
+                      - []
+                    bitwidth: 1
+                    sort: BOOL.Bool
+                    occurrence: [eq, '5', and, '6']
+                  function: hook_KEQUAL_eq
+                  sort: BOOL.Bool
+                  occurrence: [eq, '5', and, '6']
+                - []
+              - - '0'
+                - fail
+                - []
+              bitwidth: 1
+              sort: BOOL.Bool
+              occurrence: [eq, '4', and, '5']
+            function: hook_KEQUAL_eq
+            sort: BOOL.Bool
+            occurrence: [eq, '4', and, '5']
+          - []
+        - - '0'
+          - fail
+          - []
+        bitwidth: 1
+        sort: BOOL.Bool
+        occurrence: [eq, '3', and, '4']
+      function: hook_KEQUAL_eq
+      sort: BOOL.Bool
+      occurrence: [eq, '3', and, '4']
+    - []
+  - - '0'
+    - fail
+    - []
+  bitwidth: 1
+  sort: BOOL.Bool
+  occurrence: [eq, '2', and, '3']
+function: hook_KEQUAL_eq
+sort: BOOL.Bool
+occurrence: [eq, '2', and, '3']

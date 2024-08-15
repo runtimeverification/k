@@ -1,0 +1,20 @@
+default:
+  action:
+  - 156061
+  - - - &id001 ['1']
+      - STRING.String
+specializations:
+- - inj{SortCallOp{}, SortOpCode{}}
+  - action:
+    - 156062
+    - - - ['0', '1']
+        - STRING.String
+  - [STRING.String]
+- - inj{SortCallSixOp{}, SortOpCode{}}
+  - action:
+    - 156063
+    - - - ['0', '1']
+        - STRING.String
+  - [STRING.String]
+sort: STRING.String
+occurrence: *id001

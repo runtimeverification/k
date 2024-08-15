@@ -1,0 +1,109 @@
+default: null
+specializations:
+- - Lblcontract'Unds'lib'Perc'forge-std'Perc'src'Perc'mocks'Perc'MockERC20{}
+  - default: null
+    specializations:
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'mocks'Perc'MockERC20'Unds'S2KDOMAINZUndSEPARATOR'Unds'{}
+      - action:
+        - 157719
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'mocks'Perc'MockERC20'Unds'S2Kallowance'Unds'address'Unds'address{}
+      - action:
+        - 157720
+        - - - ['0', '2']
+            - INT.Int
+          - - ['1', '2']
+            - INT.Int
+      - [INT.Int, INT.Int]
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'mocks'Perc'MockERC20'Unds'S2Kapprove'Unds'address'Unds'uint256{}
+      - action:
+        - 157721
+        - - - ['0', '2']
+            - INT.Int
+          - - ['1', '2']
+            - INT.Int
+      - [INT.Int, INT.Int]
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'mocks'Perc'MockERC20'Unds'S2KbalanceOf'Unds'address{}
+      - action:
+        - 157722
+        - - - ['0', '2']
+            - INT.Int
+      - [INT.Int]
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'mocks'Perc'MockERC20'Unds'S2Kdecimals'Unds'{}
+      - action:
+        - 157723
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'mocks'Perc'MockERC20'Unds'S2Kinitialize'Unds'string'Unds'string'Unds'uint8{}
+      - action:
+        - 157724
+        - - - ['0', '2']
+            - STRING.String
+          - - ['1', '2']
+            - STRING.String
+          - - ['2', '2']
+            - INT.Int
+      - [STRING.String, STRING.String, INT.Int]
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'mocks'Perc'MockERC20'Unds'S2Kname'Unds'{}
+      - action:
+        - 157725
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'mocks'Perc'MockERC20'Unds'S2Knonces'Unds'address{}
+      - action:
+        - 157726
+        - - - ['0', '2']
+            - INT.Int
+      - [INT.Int]
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'mocks'Perc'MockERC20'Unds'S2Kpermit'Unds'address'Unds'address'Unds'uint256'Unds'uint256'Unds'uint8'Unds'bytes32'Unds'bytes32{}
+      - action:
+        - 157727
+        - - - ['0', '2']
+            - INT.Int
+          - - ['1', '2']
+            - INT.Int
+          - - ['2', '2']
+            - INT.Int
+          - - ['3', '2']
+            - INT.Int
+          - - ['4', '2']
+            - INT.Int
+          - - ['5', '2']
+            - INT.Int
+          - - ['6', '2']
+            - INT.Int
+      - [INT.Int, INT.Int, INT.Int, INT.Int, INT.Int, INT.Int, INT.Int]
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'mocks'Perc'MockERC20'Unds'S2Ksymbol'Unds'{}
+      - action:
+        - 157728
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'mocks'Perc'MockERC20'Unds'S2KtotalSupply'Unds'{}
+      - action:
+        - 157729
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'mocks'Perc'MockERC20'Unds'S2KtransferFrom'Unds'address'Unds'address'Unds'uint256{}
+      - action:
+        - 157730
+        - - - ['0', '2']
+            - INT.Int
+          - - ['1', '2']
+            - INT.Int
+          - - ['2', '2']
+            - INT.Int
+      - [INT.Int, INT.Int, INT.Int]
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'mocks'Perc'MockERC20'Unds'S2Ktransfer'Unds'address'Unds'uint256{}
+      - action:
+        - 157731
+        - - - ['0', '2']
+            - INT.Int
+          - - ['1', '2']
+            - INT.Int
+      - [INT.Int, INT.Int]
+    sort: STRING.String
+    occurrence: ['2']
+  - []
+sort: STRING.String
+occurrence: ['1']

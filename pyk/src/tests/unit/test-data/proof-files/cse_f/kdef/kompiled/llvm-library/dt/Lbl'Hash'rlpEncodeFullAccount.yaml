@@ -1,0 +1,10 @@
+action:
+- 154644
+- - - ['2']
+    - INT.Int
+  - - ['4']
+    - BYTES.Bytes
+  - - ['1']
+    - INT.Int
+  - - ['3']
+    - MAP.Map

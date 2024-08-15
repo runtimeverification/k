@@ -1,0 +1,74 @@
+next:
+  args:
+  - - &id001 ['1']
+    - MAP.Map
+  - - &id002 [size, '1']
+    - STRING.String
+  next:
+    args:
+    - - *id001
+      - MAP.Map
+    - - *id002
+      - STRING.String
+    next:
+      default: null
+      specializations:
+      - - '1'
+        - default: &id007
+            action:
+            - 154562
+            - - - &id003 ['2']
+                - STRING.String
+              - - *id001
+                - MAP.Map
+              - - &id004 ['4']
+                - BYTES.Bytes
+              - - &id005 ['5']
+                - STRING.String
+              - - &id006 ['3']
+                - INT.Int
+          specializations:
+          - - inj{SortMerkleTree{}, SortKItem{}}
+            - action:
+              - 154563
+              - - - *id003
+                  - STRING.String
+                - - ['SymbolP(inj{SortInt{}, SortKItem{}},List(VariableP(Some(Num(3,Base())),IntS())))_rem',
+                    '1']
+                  - MAP.Map
+                - - *id004
+                  - BYTES.Bytes
+                - - ['0', 'SymbolP(inj{SortInt{}, SortKItem{}},List(VariableP(Some(Num(3,Base())),IntS())))_val',
+                    '1']
+                  - STRING.String
+                - - *id005
+                  - STRING.String
+                - - *id006
+                  - INT.Int
+            - [STRING.String]
+          sort: STRING.String
+          occurrence: ['SymbolP(inj{SortInt{}, SortKItem{}},List(VariableP(Some(Num(3,Base())),IntS())))_val',
+            '1']
+        - [STRING.String, MAP.Map, MAP.Map]
+      - - '0'
+        - *id007
+        - [MAP.Map]
+      isnull: true
+      sort: STRING.String
+      occurrence: ['SymbolP(inj{SortInt{}, SortKItem{}},List(VariableP(Some(Num(3,Base())),IntS())))_val',
+        '1']
+    function: hook_MAP_remove
+    sort: MAP.Map
+    occurrence: ['SymbolP(inj{SortInt{}, SortKItem{}},List(VariableP(Some(Num(3,Base())),IntS())))_rem',
+      '1']
+  function: hook_MAP_lookup_null
+  sort: STRING.String
+  occurrence: ['SymbolP(inj{SortInt{}, SortKItem{}},List(VariableP(Some(Num(3,Base())),IntS())))_val',
+    '1']
+pattern:
+  args:
+  - hook: INT.Int
+    occurrence: *id006
+  constructor: inj{SortInt{}, SortKItem{}}
+occurrence: *id002
+sort: STRING.String

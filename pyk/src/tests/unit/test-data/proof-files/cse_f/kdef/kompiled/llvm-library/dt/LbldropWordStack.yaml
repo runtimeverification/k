@@ -1,0 +1,115 @@
+args:
+- - &id001 ['1']
+  - INT.Int
+next:
+  default: null
+  specializations:
+  - - '1'
+    - action:
+      - 155621
+      - - - *id001
+          - INT.Int
+        - - &id002 ['2']
+          - STRING.String
+    - []
+  - - '0'
+    - default: null
+      specializations:
+      - - Lbl'Stop'WordStack'Unds'EVM-TYPES'Unds'WordStack{}
+        - args:
+          - - *id001
+            - INT.Int
+          next:
+            default: null
+            specializations:
+            - - '1'
+              - action:
+                - 155619
+                - - - *id002
+                    - STRING.String
+                  - - *id001
+                    - INT.Int
+              - []
+            - - '0'
+              - fail
+              - []
+            bitwidth: 1
+            sort: BOOL.Bool
+            occurrence: &id003 [side_condition_155619]
+          function: side_condition_155619
+          sort: BOOL.Bool
+          occurrence: *id003
+        - []
+      - - Lbl'UndsColnUndsUnds'EVM-TYPES'Unds'WordStack'Unds'Int'Unds'WordStack{}
+        - args:
+          - - *id001
+            - INT.Int
+          next:
+            default: null
+            specializations:
+            - - '1'
+              - action:
+                - 155620
+                - - - *id002
+                    - STRING.String
+                  - - *id001
+                    - INT.Int
+                  - - &id004 ['0', '2']
+                    - INT.Int
+                  - - &id005 ['1', '2']
+                    - STRING.String
+              - []
+            - - '0'
+              - args:
+                - - *id001
+                  - INT.Int
+                next:
+                  default: fail
+                  specializations:
+                  - - '1'
+                    - args:
+                      - - *id001
+                        - INT.Int
+                      - - [lit, '0', MINT.MInt 64]
+                        - MINT.MInt 64
+                      next:
+                        default: fail
+                        specializations:
+                        - - '1'
+                          - action:
+                            - 155622
+                            - - - *id004
+                                - INT.Int
+                              - - *id005
+                                - STRING.String
+                          - []
+                        bitwidth: 64
+                        sort: MINT.MInt 64
+                        occurrence: &id006 ['0', '1']
+                      function: hook_INT_limb
+                      sort: MINT.MInt 64
+                      occurrence: *id006
+                    - []
+                  bitwidth: 32
+                  sort: MINT.MInt 32
+                  occurrence: &id007 [size, '1']
+                function: hook_INT_size_int
+                sort: MINT.MInt 32
+                occurrence: *id007
+              - []
+            bitwidth: 1
+            sort: BOOL.Bool
+            occurrence: &id008 [side_condition_155620]
+          function: side_condition_155620
+          sort: BOOL.Bool
+          occurrence: *id008
+        - [INT.Int, STRING.String]
+      sort: STRING.String
+      occurrence: *id002
+    - []
+  bitwidth: 1
+  sort: BOOL.Bool
+  occurrence: &id009 [side_condition_155621]
+function: side_condition_155621
+sort: BOOL.Bool
+occurrence: *id009

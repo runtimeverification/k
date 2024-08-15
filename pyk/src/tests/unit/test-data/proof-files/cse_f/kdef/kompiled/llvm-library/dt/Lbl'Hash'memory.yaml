@@ -1,0 +1,246 @@
+default: &id001
+  action:
+  - 154533
+  - - - &id012 ['1']
+      - STRING.String
+    - - &id002 ['2']
+      - INT.Int
+specializations:
+- - inj{SortInternalOp{}, SortOpCode{}}
+  - default: *id001
+    specializations:
+    - - Lbl'UndsUndsUnds'EVM'Unds'InternalOp'Unds'UnStackOp'Unds'Int{}
+      - default: *id001
+        specializations:
+        - - LblMLOAD'Unds'EVM'Unds'UnStackOp{}
+          - action:
+            - 154534
+            - - - ['1', '0', '1']
+                - INT.Int
+              - - *id002
+                - INT.Int
+          - []
+        sort: STRING.String
+        occurrence: ['0', '0', '1']
+      - [STRING.String, INT.Int]
+    - - Lbl'UndsUndsUndsUnds'EVM'Unds'InternalOp'Unds'BinStackOp'Unds'Int'Unds'Int{}
+      - default: *id001
+        specializations:
+        - - LblMSTORE8'Unds'EVM'Unds'BinStackOp{}
+          - action:
+            - 154535
+            - - - &id003 ['2', '0', '1']
+                - INT.Int
+              - - &id004 ['1', '0', '1']
+                - INT.Int
+              - - *id002
+                - INT.Int
+          - []
+        - - LblMSTORE'Unds'EVM'Unds'BinStackOp{}
+          - action:
+            - 154536
+            - - - *id003
+                - INT.Int
+              - - *id004
+                - INT.Int
+              - - *id002
+                - INT.Int
+          - []
+        - - LblRETURN'Unds'EVM'Unds'BinStackOp{}
+          - action:
+            - 154537
+            - - - *id002
+                - INT.Int
+              - - *id004
+                - INT.Int
+              - - *id003
+                - INT.Int
+          - []
+        - - LblREVERT'Unds'EVM'Unds'BinStackOp{}
+          - action:
+            - 154538
+            - - - *id002
+                - INT.Int
+              - - *id004
+                - INT.Int
+              - - *id003
+                - INT.Int
+          - []
+        - - LblSHA3'Unds'EVM'Unds'BinStackOp{}
+          - action:
+            - 154539
+            - - - *id002
+                - INT.Int
+              - - *id004
+                - INT.Int
+              - - *id003
+                - INT.Int
+          - []
+        - - inj{SortLogOp{}, SortBinStackOp{}}
+          - default: null
+            specializations:
+            - - LblLOG{}
+              - action:
+                - 154540
+                - - - ['0', '0', '0', '0', '1']
+                    - INT.Int
+                  - - *id002
+                    - INT.Int
+                  - - *id004
+                    - INT.Int
+                  - - *id003
+                    - INT.Int
+              - [INT.Int]
+            sort: STRING.String
+            occurrence: ['0', '0', '0', '1']
+          - [STRING.String]
+        sort: STRING.String
+        occurrence: ['0', '0', '1']
+      - [STRING.String, INT.Int, INT.Int]
+    - - Lbl'UndsUndsUndsUndsUnds'EVM'Unds'InternalOp'Unds'TernStackOp'Unds'Int'Unds'Int'Unds'Int{}
+      - default: *id001
+        specializations:
+        - - LblCALLDATACOPY'Unds'EVM'Unds'TernStackOp{}
+          - action:
+            - 154541
+            - - - &id005 ['2', '0', '1']
+                - INT.Int
+              - - *id002
+                - INT.Int
+              - - &id006 ['1', '0', '1']
+                - INT.Int
+              - - &id007 ['3', '0', '1']
+                - INT.Int
+          - []
+        - - LblCODECOPY'Unds'EVM'Unds'TernStackOp{}
+          - action:
+            - 154542
+            - - - *id005
+                - INT.Int
+              - - *id002
+                - INT.Int
+              - - *id006
+                - INT.Int
+              - - *id007
+                - INT.Int
+          - []
+        - - LblCREATE'Unds'EVM'Unds'TernStackOp{}
+          - action:
+            - 154543
+            - - - *id006
+                - INT.Int
+              - - *id002
+                - INT.Int
+              - - *id005
+                - INT.Int
+              - - *id007
+                - INT.Int
+          - []
+        - - LblMCOPY'Unds'EVM'Unds'TernStackOp{}
+          - action:
+            - 154544
+            - - - *id006
+                - INT.Int
+              - - *id002
+                - INT.Int
+              - - *id005
+                - INT.Int
+              - - *id007
+                - INT.Int
+          - []
+        - - LblRETURNDATACOPY'Unds'EVM'Unds'TernStackOp{}
+          - action:
+            - 154545
+            - - - *id005
+                - INT.Int
+              - - *id002
+                - INT.Int
+              - - *id006
+                - INT.Int
+              - - *id007
+                - INT.Int
+          - []
+        sort: STRING.String
+        occurrence: ['0', '0', '1']
+      - [STRING.String, INT.Int, INT.Int, INT.Int]
+    - - Lbl'UndsUndsUndsUndsUndsUnds'EVM'Unds'InternalOp'Unds'QuadStackOp'Unds'Int'Unds'Int'Unds'Int'Unds'Int{}
+      - default: null
+        specializations:
+        - - LblCREATE2'Unds'EVM'Unds'QuadStackOp{}
+          - action:
+            - 154546
+            - - - &id008 ['1', '0', '1']
+                - INT.Int
+              - - &id011 ['4', '0', '1']
+                - INT.Int
+              - - *id002
+                - INT.Int
+              - - &id010 ['2', '0', '1']
+                - INT.Int
+              - - &id009 ['3', '0', '1']
+                - INT.Int
+          - []
+        - - LblEXTCODECOPY'Unds'EVM'Unds'QuadStackOp{}
+          - action:
+            - 154547
+            - - - *id008
+                - INT.Int
+              - - *id009
+                - INT.Int
+              - - *id002
+                - INT.Int
+              - - *id010
+                - INT.Int
+              - - *id011
+                - INT.Int
+          - []
+        sort: STRING.String
+        occurrence: ['0', '0', '1']
+      - [STRING.String, INT.Int, INT.Int, INT.Int, INT.Int]
+    - - Lbl'UndsUndsUndsUndsUndsUndsUndsUnds'EVM'Unds'InternalOp'Unds'CallSixOp'Unds'Int'Unds'Int'Unds'Int'Unds'Int'Unds'Int'Unds'Int{}
+      - action:
+        - 154548
+        - - - ['0', '0', '1']
+            - STRING.String
+          - - ['1', '0', '1']
+            - INT.Int
+          - - ['2', '0', '1']
+            - INT.Int
+          - - ['3', '0', '1']
+            - INT.Int
+          - - ['4', '0', '1']
+            - INT.Int
+          - - *id002
+            - INT.Int
+          - - ['5', '0', '1']
+            - INT.Int
+          - - ['6', '0', '1']
+            - INT.Int
+      - [STRING.String, INT.Int, INT.Int, INT.Int, INT.Int, INT.Int, INT.Int]
+    - - Lbl'UndsUndsUndsUndsUndsUndsUndsUndsUnds'EVM'Unds'InternalOp'Unds'CallOp'Unds'Int'Unds'Int'Unds'Int'Unds'Int'Unds'Int'Unds'Int'Unds'Int{}
+      - action:
+        - 154549
+        - - - ['0', '0', '1']
+            - STRING.String
+          - - ['1', '0', '1']
+            - INT.Int
+          - - ['2', '0', '1']
+            - INT.Int
+          - - ['3', '0', '1']
+            - INT.Int
+          - - ['4', '0', '1']
+            - INT.Int
+          - - ['5', '0', '1']
+            - INT.Int
+          - - *id002
+            - INT.Int
+          - - ['6', '0', '1']
+            - INT.Int
+          - - ['7', '0', '1']
+            - INT.Int
+      - [STRING.String, INT.Int, INT.Int, INT.Int, INT.Int, INT.Int, INT.Int, INT.Int]
+    sort: STRING.String
+    occurrence: ['0', '1']
+  - [STRING.String]
+sort: STRING.String
+occurrence: *id012

@@ -1,0 +1,109 @@
+default: null
+specializations:
+- - Lblcontract'Unds'lib'Perc'forge-std'Perc'src'Perc'interfaces'Perc'IERC721Enumerable{}
+  - default: null
+    specializations:
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'interfaces'Perc'IERC721Enumerable'Unds'S2Kapprove'Unds'address'Unds'uint256{}
+      - action:
+        - 157676
+        - - - ['0', '2']
+            - INT.Int
+          - - ['1', '2']
+            - INT.Int
+      - [INT.Int, INT.Int]
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'interfaces'Perc'IERC721Enumerable'Unds'S2KbalanceOf'Unds'address{}
+      - action:
+        - 157677
+        - - - ['0', '2']
+            - INT.Int
+      - [INT.Int]
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'interfaces'Perc'IERC721Enumerable'Unds'S2KgetApproved'Unds'uint256{}
+      - action:
+        - 157678
+        - - - ['0', '2']
+            - INT.Int
+      - [INT.Int]
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'interfaces'Perc'IERC721Enumerable'Unds'S2KisApprovedForAll'Unds'address'Unds'address{}
+      - action:
+        - 157679
+        - - - ['0', '2']
+            - INT.Int
+          - - ['1', '2']
+            - INT.Int
+      - [INT.Int, INT.Int]
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'interfaces'Perc'IERC721Enumerable'Unds'S2KownerOf'Unds'uint256{}
+      - action:
+        - 157680
+        - - - ['0', '2']
+            - INT.Int
+      - [INT.Int]
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'interfaces'Perc'IERC721Enumerable'Unds'S2KsafeTransferFrom'Unds'address'Unds'address'Unds'uint256{}
+      - action:
+        - 157681
+        - - - ['0', '2']
+            - INT.Int
+          - - ['1', '2']
+            - INT.Int
+          - - ['2', '2']
+            - INT.Int
+      - [INT.Int, INT.Int, INT.Int]
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'interfaces'Perc'IERC721Enumerable'Unds'S2KsafeTransferFrom'Unds'address'Unds'address'Unds'uint256'Unds'bytes{}
+      - action:
+        - 157682
+        - - - ['0', '2']
+            - INT.Int
+          - - ['1', '2']
+            - INT.Int
+          - - ['2', '2']
+            - INT.Int
+          - - ['3', '2']
+            - BYTES.Bytes
+      - [INT.Int, INT.Int, INT.Int, BYTES.Bytes]
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'interfaces'Perc'IERC721Enumerable'Unds'S2KsetApprovalForAll'Unds'address'Unds'bool{}
+      - action:
+        - 157683
+        - - - ['0', '2']
+            - INT.Int
+          - - ['1', '2']
+            - INT.Int
+      - [INT.Int, INT.Int]
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'interfaces'Perc'IERC721Enumerable'Unds'S2KsupportsInterface'Unds'bytes4{}
+      - action:
+        - 157684
+        - - - ['0', '2']
+            - INT.Int
+      - [INT.Int]
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'interfaces'Perc'IERC721Enumerable'Unds'S2KtokenByIndex'Unds'uint256{}
+      - action:
+        - 157685
+        - - - ['0', '2']
+            - INT.Int
+      - [INT.Int]
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'interfaces'Perc'IERC721Enumerable'Unds'S2KtokenOfOwnerByIndex'Unds'address'Unds'uint256{}
+      - action:
+        - 157686
+        - - - ['0', '2']
+            - INT.Int
+          - - ['1', '2']
+            - INT.Int
+      - [INT.Int, INT.Int]
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'interfaces'Perc'IERC721Enumerable'Unds'S2KtotalSupply'Unds'{}
+      - action:
+        - 157687
+        - []
+      - []
+    - - Lblmethod'Unds'lib'Perc'forge-std'Perc'src'Perc'interfaces'Perc'IERC721Enumerable'Unds'S2KtransferFrom'Unds'address'Unds'address'Unds'uint256{}
+      - action:
+        - 157688
+        - - - ['0', '2']
+            - INT.Int
+          - - ['1', '2']
+            - INT.Int
+          - - ['2', '2']
+            - INT.Int
+      - [INT.Int, INT.Int, INT.Int]
+    sort: STRING.String
+    occurrence: ['2']
+  - []
+sort: STRING.String
+occurrence: ['1']

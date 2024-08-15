@@ -1,0 +1,21 @@
+default: null
+specializations:
+- - '0'
+  - action:
+    - 155240
+    - - - &id001 ['1']
+        - STRING.String
+      - - &id002 ['2']
+        - BYTES.Bytes
+  - []
+- - '1'
+  - action:
+    - 155241
+    - - - *id001
+        - STRING.String
+      - - *id002
+        - BYTES.Bytes
+  - []
+bitwidth: 1
+sort: BOOL.Bool
+occurrence: ['3']

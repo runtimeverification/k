@@ -1,0 +1,10 @@
+default: fail
+specializations:
+- - kseq{}
+  - default: fail
+    specializations: []
+    sort: STRING.String
+    occurrence: ['0', '1']
+  - [STRING.String, STRING.String]
+sort: STRING.String
+occurrence: ['1']

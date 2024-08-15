@@ -1,0 +1,48 @@
+args:
+- - &id001 ['2']
+  - STRING.String
+next:
+  default: null
+  specializations:
+  - - '1'
+    - action:
+      - 155224
+      - - - &id002 ['1']
+          - STRING.String
+        - - &id004 ['3']
+          - STRING.String
+        - - &id003 ['4']
+          - INT.Int
+        - - *id001
+          - STRING.String
+    - []
+  - - '0'
+    - default: fail
+      specializations:
+      - - inj{SortInt{}, SortGas{}}
+        - default: fail
+          specializations:
+          - - inj{SortInt{}, SortGas{}}
+            - action:
+              - 154286
+              - - - *id002
+                  - STRING.String
+                - - ['0', '2']
+                  - INT.Int
+                - - ['0', '3']
+                  - INT.Int
+                - - *id003
+                  - INT.Int
+            - [INT.Int]
+          sort: STRING.String
+          occurrence: *id001
+        - [INT.Int]
+      sort: STRING.String
+      occurrence: *id004
+    - []
+  bitwidth: 1
+  sort: BOOL.Bool
+  occurrence: &id005 [side_condition_155224]
+function: side_condition_155224
+sort: BOOL.Bool
+occurrence: *id005

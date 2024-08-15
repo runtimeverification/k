@@ -1,0 +1,33 @@
+default: &id002
+  action:
+  - 156878
+  - - - &id001 ['1']
+      - STRING.String
+specializations:
+- - Lblabi'Unds'type'Unds'tuple{}
+  - args:
+    - - *id001
+      - STRING.String
+    next:
+      default: null
+      specializations:
+      - - '1'
+        - action:
+          - 156877
+          - - - *id001
+              - STRING.String
+            - - ['0', '1']
+              - STRING.String
+        - []
+      - - '0'
+        - *id002
+        - []
+      bitwidth: 1
+      sort: BOOL.Bool
+      occurrence: &id003 [side_condition_156877]
+    function: side_condition_156877
+    sort: BOOL.Bool
+    occurrence: *id003
+  - [STRING.String]
+sort: STRING.String
+occurrence: *id001

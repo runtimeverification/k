@@ -1,0 +1,17 @@
+default: null
+specializations:
+- - Lbl'Stop'List'LBraQuot'typedArgs'QuotRBra'{}
+  - action:
+    - 156879
+    - []
+  - []
+- - LbltypedArgs{}
+  - action:
+    - 156880
+    - - - ['0', '1']
+        - STRING.String
+      - - ['1', '1']
+        - STRING.String
+  - [STRING.String, STRING.String]
+sort: STRING.String
+occurrence: ['1']

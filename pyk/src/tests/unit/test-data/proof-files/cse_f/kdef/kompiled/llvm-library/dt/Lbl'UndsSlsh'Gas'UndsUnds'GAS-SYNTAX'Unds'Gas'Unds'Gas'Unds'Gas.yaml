@@ -1,0 +1,99 @@
+default: null
+specializations:
+- - LblinfGas{}
+  - default: null
+    specializations:
+    - - LblinfGas{}
+      - args:
+        - - &id001 ['0', '2']
+          - INT.Int
+        next:
+          default: null
+          specializations:
+          - - '1'
+            - action:
+              - 155336
+              - - - ['0', '1']
+                  - INT.Int
+                - - *id001
+                  - INT.Int
+            - []
+          - - '0'
+            - fail
+            - []
+          bitwidth: 1
+          sort: BOOL.Bool
+          occurrence: &id002 [side_condition_155336]
+        function: side_condition_155336
+        sort: BOOL.Bool
+        occurrence: *id002
+      - [INT.Int]
+    - - inj{SortInt{}, SortGas{}}
+      - args:
+        - - *id001
+          - INT.Int
+        next:
+          default: null
+          specializations:
+          - - '1'
+            - action:
+              - 155338
+              - - - ['0', '1']
+                  - INT.Int
+                - - *id001
+                  - INT.Int
+            - []
+          - - '0'
+            - fail
+            - []
+          bitwidth: 1
+          sort: BOOL.Bool
+          occurrence: &id003 [side_condition_155338]
+        function: side_condition_155338
+        sort: BOOL.Bool
+        occurrence: *id003
+      - [INT.Int]
+    sort: STRING.String
+    occurrence: &id006 ['1']
+  - [INT.Int]
+- - inj{SortInt{}, SortGas{}}
+  - default: null
+    specializations:
+    - - LblinfGas{}
+      - args:
+        - - &id004 ['0', '2']
+          - INT.Int
+        next:
+          default: null
+          specializations:
+          - - '1'
+            - action:
+              - 155337
+              - - - ['0', '1']
+                  - INT.Int
+                - - *id004
+                  - INT.Int
+            - []
+          - - '0'
+            - fail
+            - []
+          bitwidth: 1
+          sort: BOOL.Bool
+          occurrence: &id005 [side_condition_155337]
+        function: side_condition_155337
+        sort: BOOL.Bool
+        occurrence: *id005
+      - [INT.Int]
+    - - inj{SortInt{}, SortGas{}}
+      - action:
+        - 155339
+        - - - ['0', '1']
+            - INT.Int
+          - - *id004
+            - INT.Int
+      - [INT.Int]
+    sort: STRING.String
+    occurrence: *id006
+  - [INT.Int]
+sort: STRING.String
+occurrence: ['2']

@@ -1,0 +1,62 @@
+args:
+- - &id001 ['2']
+  - INT.Int
+- - &id002 ['3']
+  - INT.Int
+- - &id003 ['1']
+  - BYTES.Bytes
+next:
+  default: null
+  specializations:
+  - - '1'
+    - action:
+      - 154626
+      - - - *id001
+          - INT.Int
+        - - *id002
+          - INT.Int
+        - - *id003
+          - BYTES.Bytes
+    - []
+  - - '0'
+    - args:
+      - - *id001
+        - INT.Int
+      - - *id002
+        - INT.Int
+      next:
+        default: null
+        specializations:
+        - - '1'
+          - action:
+            - 154627
+            - - - *id003
+                - BYTES.Bytes
+              - - *id001
+                - INT.Int
+              - - *id002
+                - INT.Int
+          - []
+        - - '0'
+          - action:
+            - 154628
+            - - - *id003
+                - BYTES.Bytes
+              - - *id001
+                - INT.Int
+              - - *id002
+                - INT.Int
+          - []
+        bitwidth: 1
+        sort: BOOL.Bool
+        occurrence: &id004 [side_condition_154627]
+      function: side_condition_154627
+      sort: BOOL.Bool
+      occurrence: *id004
+    - []
+  bitwidth: 1
+  sort: BOOL.Bool
+  occurrence: &id005 [side_condition_154626]
+function: side_condition_154626
+sort: BOOL.Bool
+occurrence: *id005

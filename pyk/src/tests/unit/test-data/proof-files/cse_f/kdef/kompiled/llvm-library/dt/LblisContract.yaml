@@ -1,0 +1,138 @@
+default: &id001
+  action:
+  - 156166
+  - - - &id004 ['1']
+      - STRING.String
+specializations:
+- - kseq{}
+  - default: *id001
+    specializations:
+    - - dotk{}
+      - default: *id001
+        specializations:
+        - - inj{SortS2KlibZModforgeZSubstdZModsrcZModsafeconsoleContract{}, SortKItem{}}
+          - &id002
+            action:
+            - 156167
+            - - - &id003 ['0', '1']
+                - STRING.String
+          - [STRING.String]
+        - - inj{SortS2KlibZModforgeZSubstdZModsrcZModstdErrorContract{}, SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortS2KlibZModforgeZSubstdZModsrcZModinterfacesZModIERC721TokenReceiverContract{},
+            SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortS2KlibZModforgeZSubstdZModsrcZModinterfacesZModIERC20Contract{},
+            SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortS2KlibZModforgeZSubstdZModsrcZModinterfacesZModIMulticall3Contract{},
+            SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortS2KlibZModforgeZSubstdZModsrcZModinterfacesZModIERC721Contract{},
+            SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortS2KtestZModAssertTestContract{}, SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortS2KlibZModforgeZSubstdZModsrcZModVmSafeContract{}, SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortS2KlibZModforgeZSubstdZModsrcZModTestContract{}, SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortS2KlibZModforgeZSubstdZModsrcZModinterfacesZModIERC721EnumerableContract{},
+            SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortS2KlibZModforgeZSubstdZModsrcZModStdStyleContract{}, SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortS2KlibZModforgeZSubstdZModsrcZModStdChainsContract{}, SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortS2KlibZModforgeZSubstdZModsrcZModstdMathContract{}, SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortS2KlibZModforgeZSubstdZModsrcZModStdInvariantContract{}, SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortS2KlibZModforgeZSubstdZModsrcZModstdJsonContract{}, SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortS2KlibZModforgeZSubstdZModsrcZModStdCheatsContract{}, SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortS2KsrcZModCseContract{}, SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortS2KlibZModforgeZSubstdZModsrcZModScriptBaseContract{}, SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortS2KtestZModCseTestContract{}, SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortS2KlibZModforgeZSubstdZModsrcZModconsoleContract{}, SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortS2KlibZModforgeZSubstdZModsrcZModstdStorageSafeContract{}, SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortS2KlibZModforgeZSubstdZModsrcZModmocksZModMockERC20Contract{},
+            SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortS2KlibZModforgeZSubstdZModsrcZModCommonBaseContract{}, SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortS2KlibZModforgeZSubstdZModsrcZModStdAssertionsContract{}, SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortS2KlibZModforgeZSubstdZModsrcZModmocksZModMockERC721Contract{},
+            SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortS2KlibZModforgeZSubstdZModsrcZModVmContract{}, SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortS2KlibZModforgeZSubstdZModsrcZModinterfacesZModIERC165Contract{},
+            SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortS2KlibZModforgeZSubstdZModsrcZModinterfacesZModIERC721MetadataContract{},
+            SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortS2KlibZModforgeZSubstdZModsrcZModStdCheatsSafeContract{}, SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortS2KlibZModforgeZSubstdZModsrcZModstdTomlContract{}, SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortFoundryContract{}, SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortS2KlibZModforgeZSubstdZModsrcZModconsole2Contract{}, SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortS2KlibZModforgeZSubstdZModsrcZModTestBaseContract{}, SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortS2KlibZModforgeZSubstdZModsrcZModstdStorageContract{}, SortKItem{}}
+          - *id002
+          - [STRING.String]
+        - - inj{SortS2KlibZModforgeZSubstdZModsrcZModStdUtilsContract{}, SortKItem{}}
+          - *id002
+          - [STRING.String]
+        sort: STRING.String
+        occurrence: *id003
+      - []
+    sort: STRING.String
+    occurrence: ['1', '1']
+  - [STRING.String, STRING.String]
+sort: STRING.String
+occurrence: *id004

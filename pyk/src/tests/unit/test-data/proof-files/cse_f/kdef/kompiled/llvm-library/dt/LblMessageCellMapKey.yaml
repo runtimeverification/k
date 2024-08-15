@@ -1,0 +1,40 @@
+default: null
+specializations:
+- - Lbl'-LT-'message'-GT-'{}
+  - action:
+    - 155286
+    - - - ['1', '1']
+        - STRING.String
+      - - ['2', '1']
+        - STRING.String
+      - - ['11', '1']
+        - STRING.String
+      - - ['12', '1']
+        - STRING.String
+      - - ['13', '1']
+        - STRING.String
+      - - ['14', '1']
+        - STRING.String
+      - - ['3', '1']
+        - STRING.String
+      - - ['4', '1']
+        - STRING.String
+      - - ['5', '1']
+        - STRING.String
+      - - ['6', '1']
+        - STRING.String
+      - - ['7', '1']
+        - STRING.String
+      - - ['8', '1']
+        - STRING.String
+      - - ['9', '1']
+        - STRING.String
+      - - ['10', '1']
+        - STRING.String
+      - - ['0', '1']
+        - STRING.String
+  - [STRING.String, STRING.String, STRING.String, STRING.String, STRING.String, STRING.String,
+    STRING.String, STRING.String, STRING.String, STRING.String, STRING.String, STRING.String,
+    STRING.String, STRING.String, STRING.String]
+sort: STRING.String
+occurrence: ['1']

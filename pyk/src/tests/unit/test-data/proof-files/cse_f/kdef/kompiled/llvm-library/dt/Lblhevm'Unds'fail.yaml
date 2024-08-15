@@ -1,0 +1,38 @@
+args:
+- - &id001 ['2']
+  - INT.Int
+next:
+  default: &id002
+    action:
+    - 155873
+    - - - &id003 ['1']
+        - STRING.String
+      - - *id001
+        - INT.Int
+  specializations:
+  - - '0'
+    - default: *id002
+      specializations:
+      - - inj{SortEndStatusCode{}, SortStatusCode{}}
+        - default: *id002
+          specializations:
+          - - LblEVMC'Unds'SUCCESS'Unds'NETWORK'Unds'EndStatusCode{}
+            - action:
+              - 155874
+              - []
+            - []
+          sort: STRING.String
+          occurrence: ['0', '1']
+        - [STRING.String]
+      - - inj{SortExceptionalStatusCode{}, SortStatusCode{}}
+        - *id002
+        - [STRING.String]
+      sort: STRING.String
+      occurrence: *id003
+    - []
+  bitwidth: 32
+  sort: MINT.MInt 32
+  occurrence: &id004 [size, '2']
+function: hook_INT_size_int
+sort: MINT.MInt 32
+occurrence: *id004

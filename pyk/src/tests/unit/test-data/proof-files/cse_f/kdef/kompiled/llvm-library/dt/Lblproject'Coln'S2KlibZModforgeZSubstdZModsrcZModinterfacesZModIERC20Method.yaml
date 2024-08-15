@@ -1,0 +1,23 @@
+default: fail
+specializations:
+- - kseq{}
+  - default: fail
+    specializations:
+    - - dotk{}
+      - default: fail
+        specializations:
+        - - inj{SortS2KlibZModforgeZSubstdZModsrcZModinterfacesZModIERC20Method{},
+            SortKItem{}}
+          - action:
+            - 158116
+            - - - ['0', '0', '1']
+                - STRING.String
+          - [STRING.String]
+        sort: STRING.String
+        occurrence: ['0', '1']
+      - []
+    sort: STRING.String
+    occurrence: ['1', '1']
+  - [STRING.String, STRING.String]
+sort: STRING.String
+occurrence: ['1']

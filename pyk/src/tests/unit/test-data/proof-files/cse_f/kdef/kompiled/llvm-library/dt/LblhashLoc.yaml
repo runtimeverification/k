@@ -1,0 +1,152 @@
+default: null
+specializations:
+- - LblintList{}
+  - args:
+    - - &id001 ['1', '3']
+      - STRING.String
+    next:
+      default: null
+      specializations:
+      - - '1'
+        - action:
+          - 155865
+          - - - &id003 ['2']
+              - INT.Int
+            - - &id002 ['1']
+              - STRING.String
+            - - &id004 ['0', '3']
+              - INT.Int
+            - - *id001
+              - STRING.String
+        - []
+      - - '0'
+        - default: fail
+          specializations:
+          - - Lbl'Stop'List'LBraQuot'intList'QuotRBra'{}
+            - next:
+                args:
+                - - *id002
+                  - STRING.String
+                - - &id010 [lit, Array, STRING.String]
+                  - STRING.String
+                next:
+                  default: null
+                  specializations:
+                  - - '1'
+                    - default:
+                        args:
+                        - - *id003
+                          - INT.Int
+                        - - *id004
+                          - INT.Int
+                        next:
+                          default: null
+                          specializations:
+                          - - '1'
+                            - action:
+                              - 155867
+                              - - - *id003
+                                  - INT.Int
+                                - - *id004
+                                  - INT.Int
+                            - []
+                          - - '0'
+                            - fail
+                            - []
+                          bitwidth: 1
+                          sort: BOOL.Bool
+                          occurrence: &id005 [side_condition_155867]
+                        function: side_condition_155867
+                        sort: BOOL.Bool
+                        occurrence: *id005
+                      specializations: []
+                      sort: STRING.String
+                      occurrence: *id002
+                    - []
+                  - - '0'
+                    - next:
+                        args:
+                        - - *id002
+                          - STRING.String
+                        - - &id008 [lit, Vyper, STRING.String]
+                          - STRING.String
+                        next:
+                          default: null
+                          specializations:
+                          - - '1'
+                            - default:
+                                args:
+                                - - *id003
+                                  - INT.Int
+                                - - *id004
+                                  - INT.Int
+                                next:
+                                  default: null
+                                  specializations:
+                                  - - '1'
+                                    - action:
+                                      - 155869
+                                      - - - *id003
+                                          - INT.Int
+                                        - - *id004
+                                          - INT.Int
+                                    - []
+                                  - - '0'
+                                    - fail
+                                    - []
+                                  bitwidth: 1
+                                  sort: BOOL.Bool
+                                  occurrence: &id006 [side_condition_155869]
+                                function: side_condition_155869
+                                sort: BOOL.Bool
+                                occurrence: *id006
+                              specializations: []
+                              sort: STRING.String
+                              occurrence: *id002
+                            - []
+                          - - '0'
+                            - default: fail
+                              specializations: []
+                              sort: STRING.String
+                              occurrence: ['1']
+                            - []
+                          bitwidth: 1
+                          sort: BOOL.Bool
+                          occurrence: &id007 [eq, '1', and, lit, Vyper, STRING.String]
+                        function: hook_KEQUAL_eq
+                        sort: BOOL.Bool
+                        occurrence: *id007
+                      pattern: {hook: STRING.String, literal: Vyper}
+                      occurrence: *id008
+                      sort: STRING.String
+                    - []
+                  bitwidth: 1
+                  sort: BOOL.Bool
+                  occurrence: &id009 [eq, '1', and, lit, Array, STRING.String]
+                function: hook_KEQUAL_eq
+                sort: BOOL.Bool
+                occurrence: *id009
+              pattern: {hook: STRING.String, literal: Array}
+              occurrence: *id010
+              sort: STRING.String
+            - []
+          sort: STRING.String
+          occurrence: *id001
+        - []
+      bitwidth: 1
+      sort: BOOL.Bool
+      occurrence: &id011 [side_condition_155865]
+    function: side_condition_155865
+    sort: BOOL.Bool
+    occurrence: *id011
+  - [INT.Int, STRING.String]
+- - Lbl'Stop'List'LBraQuot'intList'QuotRBra'{}
+  - action:
+    - 155866
+    - - - *id002
+        - STRING.String
+      - - *id003
+        - INT.Int
+  - []
+sort: STRING.String
+occurrence: ['3']

@@ -1,0 +1,33 @@
+default: null
+specializations:
+- - Lbl'Stop'MerkleTree'Unds'SERIALIZATION'Unds'MerkleTree{}
+  - action:
+    - 154659
+    - []
+  - []
+- - LblMerkleBranch{}
+  - action:
+    - 154660
+    - - - ['0', '1']
+        - MAP.Map
+      - - ['1', '1']
+        - STRING.String
+  - [MAP.Map, STRING.String]
+- - LblMerkleExtension{}
+  - action:
+    - 154661
+    - - - ['0', '1']
+        - BYTES.Bytes
+      - - ['1', '1']
+        - STRING.String
+  - [BYTES.Bytes, STRING.String]
+- - LblMerkleLeaf{}
+  - action:
+    - 154662
+    - - - ['0', '1']
+        - BYTES.Bytes
+      - - ['1', '1']
+        - STRING.String
+  - [BYTES.Bytes, STRING.String]
+sort: STRING.String
+occurrence: ['1']

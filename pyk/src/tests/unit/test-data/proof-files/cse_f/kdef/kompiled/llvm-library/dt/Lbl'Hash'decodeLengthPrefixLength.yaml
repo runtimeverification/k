@@ -1,0 +1,28 @@
+default: null
+specializations:
+- - Lbl'Hash'list'Unds'SERIALIZATION'Unds'LengthPrefixType{}
+  - action:
+    - 154490
+    - - - &id001 ['1']
+        - STRING.String
+      - - &id002 ['4']
+        - INT.Int
+      - - &id003 ['2']
+        - BYTES.Bytes
+      - - &id004 ['3']
+        - INT.Int
+  - []
+- - Lbl'Hash'str'Unds'SERIALIZATION'Unds'LengthPrefixType{}
+  - action:
+    - 154491
+    - - - *id001
+        - STRING.String
+      - - *id002
+        - INT.Int
+      - - *id003
+        - BYTES.Bytes
+      - - *id004
+        - INT.Int
+  - []
+sort: STRING.String
+occurrence: *id001

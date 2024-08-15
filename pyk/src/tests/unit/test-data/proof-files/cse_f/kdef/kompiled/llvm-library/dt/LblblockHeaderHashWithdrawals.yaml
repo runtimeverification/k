@@ -1,0 +1,36 @@
+action:
+- 155600
+- - - ['7']
+    - BYTES.Bytes
+  - - ['3']
+    - INT.Int
+  - - ['8']
+    - INT.Int
+  - - ['6']
+    - INT.Int
+  - - ['16']
+    - INT.Int
+  - - ['11']
+    - INT.Int
+  - - ['9']
+    - INT.Int
+  - - ['10']
+    - INT.Int
+  - - ['14']
+    - INT.Int
+  - - ['15']
+    - INT.Int
+  - - ['2']
+    - INT.Int
+  - - ['1']
+    - INT.Int
+  - - ['4']
+    - INT.Int
+  - - ['12']
+    - INT.Int
+  - - ['5']
+    - INT.Int
+  - - ['13']
+    - BYTES.Bytes
+  - - ['17']
+    - INT.Int

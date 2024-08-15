@@ -1,0 +1,54 @@
+args:
+- - &id002 ['2']
+  - BYTES.Bytes
+- - &id001 ['5']
+  - BYTES.Bytes
+next:
+  default: null
+  specializations:
+  - - '1'
+    - args:
+      - - *id001
+        - BYTES.Bytes
+      - - ['8']
+        - BYTES.Bytes
+      next:
+        default: null
+        specializations:
+        - - '1'
+          - action:
+            - 154519
+            - - - ['4']
+                - INT.Int
+              - - ['3']
+                - INT.Int
+              - - ['7']
+                - INT.Int
+              - - ['6']
+                - INT.Int
+              - - *id002
+                - BYTES.Bytes
+              - - ['1']
+                - INT.Int
+              - - ['9']
+                - INT.Int
+          - []
+        - - '0'
+          - fail
+          - []
+        bitwidth: 1
+        sort: BOOL.Bool
+        occurrence: [eq, '5', and, '8']
+      function: hook_KEQUAL_eq
+      sort: BOOL.Bool
+      occurrence: [eq, '5', and, '8']
+    - []
+  - - '0'
+    - fail
+    - []
+  bitwidth: 1
+  sort: BOOL.Bool
+  occurrence: [eq, '2', and, '5']
+function: hook_KEQUAL_eq
+sort: BOOL.Bool
+occurrence: [eq, '2', and, '5']

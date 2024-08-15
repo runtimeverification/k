@@ -1,0 +1,16 @@
+default: null
+specializations:
+- - LblinfGas{}
+  - action:
+    - 155745
+    - - - ['0', '1']
+        - INT.Int
+  - [INT.Int]
+- - inj{SortInt{}, SortGas{}}
+  - action:
+    - 155746
+    - - - ['0', '1']
+        - INT.Int
+  - [INT.Int]
+sort: STRING.String
+occurrence: ['1']

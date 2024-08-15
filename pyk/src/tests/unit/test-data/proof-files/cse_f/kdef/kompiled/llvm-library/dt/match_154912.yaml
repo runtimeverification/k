@@ -1,0 +1,975 @@
+default: null
+specializations:
+- - Lbl'-LT-'generatedTop'-GT-'{}
+  - default: null
+    specializations:
+    - - Lbl'-LT-'foundry'-GT-'{}
+      - default: null
+        specializations:
+        - - Lbl'-LT-'kevm'-GT-'{}
+          - default: null
+            specializations:
+            - - Lbl'-LT-'k'-GT-'{}
+              - default: null
+                specializations:
+                - - Lbl'-LT-'ethereum'-GT-'{}
+                  - default: null
+                    specializations:
+                    - - Lbl'-LT-'network'-GT-'{}
+                      - default: null
+                        specializations:
+                        - - Lbl'-LT-'accounts'-GT-'{}
+                          - default: null
+                            specializations:
+                            - - Lbl'-LT-'cheatcodes'-GT-'{}
+                              - default: null
+                                specializations:
+                                - - Lbl'-LT-'mockFunctions'-GT-'{}
+                                  - default: fail
+                                    specializations:
+                                    - - kseq{}
+                                      - default: fail
+                                        specializations:
+                                        - - inj{SortInternalOp{}, SortKItem{}}
+                                          - default: fail
+                                            specializations:
+                                            - - Lbl'Hash'call'UndsUndsUndsUndsUndsUndsUndsUnds'EVM'Unds'InternalOp'Unds'Int'Unds'Int'Unds'Int'Unds'Int'Unds'Int'Unds'Bytes'Unds'Bool{}
+                                              - next:
+                                                  args:
+                                                  - - &id001 ['0', '6', '1', '0',
+                                                      '1']
+                                                    - MAP.Map
+                                                  - - &id002 [size, '0', '6', '1',
+                                                      '0', '1']
+                                                    - STRING.String
+                                                  next:
+                                                    args:
+                                                    - - *id001
+                                                      - MAP.Map
+                                                    - - *id002
+                                                      - STRING.String
+                                                    next:
+                                                      default: null
+                                                      specializations:
+                                                      - - '1'
+                                                        - default: null
+                                                          specializations:
+                                                          - - Lbl'-LT-'mockFunction'-GT-'{}
+                                                            - default: null
+                                                              specializations:
+                                                              - - Lbl'-LT-'mockFunctionValues'-GT-'{}
+                                                                - default: null
+                                                                  specializations:
+                                                                  - - Lbl'-LT-'mockFunctionAddress'-GT-'{}
+                                                                    - default: fail
+                                                                      specializations:
+                                                                      - - inj{SortInt{},
+                                                                          SortAccount{}}
+                                                                        - next:
+                                                                            next:
+                                                                              default: null
+                                                                              specializations:
+                                                                              - - '0'
+                                                                                - fail
+                                                                                - [
+                                                                                  MAP.Map]
+                                                                              - - '1'
+                                                                                - args:
+                                                                                  - - &id003 [
+                                                                                      '0',
+                                                                                      '1',
+                                                                                      'SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                        SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS())))))_val',
+                                                                                      '0',
+                                                                                      '6',
+                                                                                      '1',
+                                                                                      '0',
+                                                                                      '1']
+                                                                                    - MAP.Map
+                                                                                  - - [
+                                                                                      key,
+                                                                                      '0',
+                                                                                      '1',
+                                                                                      'SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                        SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS())))))_val',
+                                                                                      '0',
+                                                                                      '6',
+                                                                                      '1',
+                                                                                      '0',
+                                                                                      '1']
+                                                                                    - STRING.String
+                                                                                  next:
+                                                                                    args:
+                                                                                    - - *id003
+                                                                                      - MAP.Map
+                                                                                    - - [
+                                                                                        key,
+                                                                                        '0',
+                                                                                        '1',
+                                                                                        'SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                          SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS())))))_val',
+                                                                                        '0',
+                                                                                        '6',
+                                                                                        '1',
+                                                                                        '0',
+                                                                                        '1']
+                                                                                      - STRING.String
+                                                                                    next:
+                                                                                      default: fail
+                                                                                      specializations:
+                                                                                      - - inj{SortInt{},
+                                                                                          SortKItem{}}
+                                                                                        - default: fail
+                                                                                          specializations:
+                                                                                          - - inj{SortBytes{},
+                                                                                              SortKItem{}}
+                                                                                            - next:
+                                                                                                args:
+                                                                                                - - &id004 [
+                                                                                                    '0',
+                                                                                                    '1',
+                                                                                                    '1',
+                                                                                                    '5',
+                                                                                                    '0',
+                                                                                                    '0',
+                                                                                                    '1']
+                                                                                                  - MAP.Map
+                                                                                                - - &id005 [
+                                                                                                    size,
+                                                                                                    '0',
+                                                                                                    '1',
+                                                                                                    '1',
+                                                                                                    '5',
+                                                                                                    '0',
+                                                                                                    '0',
+                                                                                                    '1']
+                                                                                                  - STRING.String
+                                                                                                next:
+                                                                                                  args:
+                                                                                                  - - *id004
+                                                                                                    - MAP.Map
+                                                                                                  - - *id005
+                                                                                                    - STRING.String
+                                                                                                  next:
+                                                                                                    default: null
+                                                                                                    specializations:
+                                                                                                    - - '1'
+                                                                                                      - default: null
+                                                                                                        specializations:
+                                                                                                        - - Lbl'-LT-'account'-GT-'{}
+                                                                                                          - default: null
+                                                                                                            specializations:
+                                                                                                            - - Lbl'-LT-'code'-GT-'{}
+                                                                                                              - default: null
+                                                                                                                specializations:
+                                                                                                                - - Lbl'-LT-'acctID'-GT-'{}
+                                                                                                                  - default: null
+                                                                                                                    specializations:
+                                                                                                                    - - inj{SortBytes{},
+                                                                                                                        SortAccountCode{}}
+                                                                                                                      - args:
+                                                                                                                        - - &id007 [
+                                                                                                                            '5',
+                                                                                                                            '0',
+                                                                                                                            '0',
+                                                                                                                            '0',
+                                                                                                                            '0',
+                                                                                                                            '0',
+                                                                                                                            '0',
+                                                                                                                            '1']
+                                                                                                                          - BYTES.Bytes
+                                                                                                                        - - &id008 [
+                                                                                                                            '0',
+                                                                                                                            key,
+                                                                                                                            '0',
+                                                                                                                            '1',
+                                                                                                                            'SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                                                              SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS())))))_val',
+                                                                                                                            '0',
+                                                                                                                            '6',
+                                                                                                                            '1',
+                                                                                                                            '0',
+                                                                                                                            '1']
+                                                                                                                          - BYTES.Bytes
+                                                                                                                        next:
+                                                                                                                          default: null
+                                                                                                                          specializations:
+                                                                                                                          - - '1'
+                                                                                                                            - args:
+                                                                                                                              - - &id006 [
+                                                                                                                                  '2',
+                                                                                                                                  '0',
+                                                                                                                                  '0',
+                                                                                                                                  '0',
+                                                                                                                                  '0',
+                                                                                                                                  '0',
+                                                                                                                                  '0',
+                                                                                                                                  '1']
+                                                                                                                                - INT.Int
+                                                                                                                              - - [
+                                                                                                                                  '0',
+                                                                                                                                  '0',
+                                                                                                                                  '0',
+                                                                                                                                  'SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                                                                    SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS())))))_val',
+                                                                                                                                  '0',
+                                                                                                                                  '6',
+                                                                                                                                  '1',
+                                                                                                                                  '0',
+                                                                                                                                  '1']
+                                                                                                                                - INT.Int
+                                                                                                                              next:
+                                                                                                                                default: null
+                                                                                                                                specializations:
+                                                                                                                                - - '1'
+                                                                                                                                  - args:
+                                                                                                                                    - - &id009 [
+                                                                                                                                        '0',
+                                                                                                                                        val,
+                                                                                                                                        '0',
+                                                                                                                                        '1',
+                                                                                                                                        'SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                                                                          SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS())))))_val',
+                                                                                                                                        '0',
+                                                                                                                                        '6',
+                                                                                                                                        '1',
+                                                                                                                                        '0',
+                                                                                                                                        '1']
+                                                                                                                                      - INT.Int
+                                                                                                                                    - - [
+                                                                                                                                        '0',
+                                                                                                                                        '0',
+                                                                                                                                        'SymbolP(Lbl''-LT-''acctID''-GT-''{},List(VariableP(Some(Num(0,ChoiceValue(Num(0,Num(1,Value(SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                                                                          SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS()))))),Num(0,Num(6,Num(1,Num(0,Num(1,Base()))))))))))),IntS())))_val',
+                                                                                                                                        '0',
+                                                                                                                                        '1',
+                                                                                                                                        '1',
+                                                                                                                                        '5',
+                                                                                                                                        '0',
+                                                                                                                                        '0',
+                                                                                                                                        '1']
+                                                                                                                                      - INT.Int
+                                                                                                                                    next:
+                                                                                                                                      default: null
+                                                                                                                                      specializations:
+                                                                                                                                      - - '1'
+                                                                                                                                        - action:
+                                                                                                                                          - 154912
+                                                                                                                                          - - - [
+                                                                                                                                                '1',
+                                                                                                                                                '1']
+                                                                                                                                              - STRING.String
+                                                                                                                                            - - [
+                                                                                                                                                '2',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - STRING.String
+                                                                                                                                            - - [
+                                                                                                                                                'SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                                                                                  SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS())))))_rem',
+                                                                                                                                                '0',
+                                                                                                                                                '6',
+                                                                                                                                                '1',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - MAP.Map
+                                                                                                                                            - - [
+                                                                                                                                                rem,
+                                                                                                                                                '0',
+                                                                                                                                                '1',
+                                                                                                                                                'SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                                                                                  SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS())))))_val',
+                                                                                                                                                '0',
+                                                                                                                                                '6',
+                                                                                                                                                '1',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - MAP.Map
+                                                                                                                                            - - [
+                                                                                                                                                '1',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - STRING.String
+                                                                                                                                            - - [
+                                                                                                                                                '0',
+                                                                                                                                                '5',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - STRING.String
+                                                                                                                                            - - [
+                                                                                                                                                'SymbolP(Lbl''-LT-''acctID''-GT-''{},List(VariableP(Some(Num(0,ChoiceValue(Num(0,Num(1,Value(SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                                                                                  SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS()))))),Num(0,Num(6,Num(1,Num(0,Num(1,Base()))))))))))),IntS())))_rem',
+                                                                                                                                                '0',
+                                                                                                                                                '1',
+                                                                                                                                                '1',
+                                                                                                                                                '5',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - MAP.Map
+                                                                                                                                            - - [
+                                                                                                                                                '0',
+                                                                                                                                                '1',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - STRING.String
+                                                                                                                                            - - [
+                                                                                                                                                '1',
+                                                                                                                                                '1',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - STRING.String
+                                                                                                                                            - - [
+                                                                                                                                                '6',
+                                                                                                                                                'SymbolP(Lbl''-LT-''acctID''-GT-''{},List(VariableP(Some(Num(0,ChoiceValue(Num(0,Num(1,Value(SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                                                                                  SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS()))))),Num(0,Num(6,Num(1,Num(0,Num(1,Base()))))))))))),IntS())))_val',
+                                                                                                                                                '0',
+                                                                                                                                                '1',
+                                                                                                                                                '1',
+                                                                                                                                                '5',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - STRING.String
+                                                                                                                                            - - [
+                                                                                                                                                '0',
+                                                                                                                                                '1',
+                                                                                                                                                '5',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - STRING.String
+                                                                                                                                            - - [
+                                                                                                                                                '2',
+                                                                                                                                                '1',
+                                                                                                                                                '5',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - STRING.String
+                                                                                                                                            - - [
+                                                                                                                                                '3',
+                                                                                                                                                '1',
+                                                                                                                                                '5',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - STRING.String
+                                                                                                                                            - - [
+                                                                                                                                                '4',
+                                                                                                                                                '1',
+                                                                                                                                                '5',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - STRING.String
+                                                                                                                                            - - [
+                                                                                                                                                '1',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - STRING.String
+                                                                                                                                            - - [
+                                                                                                                                                '2',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - STRING.String
+                                                                                                                                            - - [
+                                                                                                                                                '3',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - STRING.String
+                                                                                                                                            - - [
+                                                                                                                                                '4',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - STRING.String
+                                                                                                                                            - - [
+                                                                                                                                                '2',
+                                                                                                                                                '1',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - STRING.String
+                                                                                                                                            - - [
+                                                                                                                                                '5',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - STRING.String
+                                                                                                                                            - - [
+                                                                                                                                                '1',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - STRING.String
+                                                                                                                                            - - [
+                                                                                                                                                '3',
+                                                                                                                                                '1',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - STRING.String
+                                                                                                                                            - - [
+                                                                                                                                                '4',
+                                                                                                                                                '1',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - STRING.String
+                                                                                                                                            - - [
+                                                                                                                                                '5',
+                                                                                                                                                '1',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - STRING.String
+                                                                                                                                            - - [
+                                                                                                                                                '1',
+                                                                                                                                                'SymbolP(Lbl''-LT-''acctID''-GT-''{},List(VariableP(Some(Num(0,ChoiceValue(Num(0,Num(1,Value(SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                                                                                  SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS()))))),Num(0,Num(6,Num(1,Num(0,Num(1,Base()))))))))))),IntS())))_val',
+                                                                                                                                                '0',
+                                                                                                                                                '1',
+                                                                                                                                                '1',
+                                                                                                                                                '5',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - STRING.String
+                                                                                                                                            - - [
+                                                                                                                                                '3',
+                                                                                                                                                'SymbolP(Lbl''-LT-''acctID''-GT-''{},List(VariableP(Some(Num(0,ChoiceValue(Num(0,Num(1,Value(SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                                                                                  SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS()))))),Num(0,Num(6,Num(1,Num(0,Num(1,Base()))))))))))),IntS())))_val',
+                                                                                                                                                '0',
+                                                                                                                                                '1',
+                                                                                                                                                '1',
+                                                                                                                                                '5',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - STRING.String
+                                                                                                                                            - - [
+                                                                                                                                                '4',
+                                                                                                                                                'SymbolP(Lbl''-LT-''acctID''-GT-''{},List(VariableP(Some(Num(0,ChoiceValue(Num(0,Num(1,Value(SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                                                                                  SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS()))))),Num(0,Num(6,Num(1,Num(0,Num(1,Base()))))))))))),IntS())))_val',
+                                                                                                                                                '0',
+                                                                                                                                                '1',
+                                                                                                                                                '1',
+                                                                                                                                                '5',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - STRING.String
+                                                                                                                                            - - [
+                                                                                                                                                '5',
+                                                                                                                                                'SymbolP(Lbl''-LT-''acctID''-GT-''{},List(VariableP(Some(Num(0,ChoiceValue(Num(0,Num(1,Value(SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                                                                                  SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS()))))),Num(0,Num(6,Num(1,Num(0,Num(1,Base()))))))))))),IntS())))_val',
+                                                                                                                                                '0',
+                                                                                                                                                '1',
+                                                                                                                                                '1',
+                                                                                                                                                '5',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - STRING.String
+                                                                                                                                            - - *id006
+                                                                                                                                              - INT.Int
+                                                                                                                                            - - [
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - INT.Int
+                                                                                                                                            - - [
+                                                                                                                                                '1',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - INT.Int
+                                                                                                                                            - - [
+                                                                                                                                                '4',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - INT.Int
+                                                                                                                                            - - *id007
+                                                                                                                                              - BYTES.Bytes
+                                                                                                                                            - - *id008
+                                                                                                                                              - BYTES.Bytes
+                                                                                                                                            - - [
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '2',
+                                                                                                                                                'SymbolP(Lbl''-LT-''acctID''-GT-''{},List(VariableP(Some(Num(0,ChoiceValue(Num(0,Num(1,Value(SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                                                                                  SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS()))))),Num(0,Num(6,Num(1,Num(0,Num(1,Base()))))))))))),IntS())))_val',
+                                                                                                                                                '0',
+                                                                                                                                                '1',
+                                                                                                                                                '1',
+                                                                                                                                                '5',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - BYTES.Bytes
+                                                                                                                                            - - *id009
+                                                                                                                                              - INT.Int
+                                                                                                                                            - - [
+                                                                                                                                                '6',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - BOOL.Bool
+                                                                                                                                            - - [
+                                                                                                                                                '3',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '0',
+                                                                                                                                                '1']
+                                                                                                                                              - INT.Int
+                                                                                                                                        - []
+                                                                                                                                      - - '0'
+                                                                                                                                        - fail
+                                                                                                                                        - []
+                                                                                                                                      bitwidth: 1
+                                                                                                                                      sort: BOOL.Bool
+                                                                                                                                      occurrence: [
+                                                                                                                                        eq,
+                                                                                                                                        '0',
+                                                                                                                                        val,
+                                                                                                                                        '0',
+                                                                                                                                        '1',
+                                                                                                                                        'SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                                                                          SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS())))))_val',
+                                                                                                                                        '0',
+                                                                                                                                        '6',
+                                                                                                                                        '1',
+                                                                                                                                        '0',
+                                                                                                                                        '1',
+                                                                                                                                        and,
+                                                                                                                                        '0',
+                                                                                                                                        '0',
+                                                                                                                                        'SymbolP(Lbl''-LT-''acctID''-GT-''{},List(VariableP(Some(Num(0,ChoiceValue(Num(0,Num(1,Value(SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                                                                          SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS()))))),Num(0,Num(6,Num(1,Num(0,Num(1,Base()))))))))))),IntS())))_val',
+                                                                                                                                        '0',
+                                                                                                                                        '1',
+                                                                                                                                        '1',
+                                                                                                                                        '5',
+                                                                                                                                        '0',
+                                                                                                                                        '0',
+                                                                                                                                        '1']
+                                                                                                                                    function: hook_INT_eq
+                                                                                                                                    sort: BOOL.Bool
+                                                                                                                                    occurrence: [
+                                                                                                                                      eq,
+                                                                                                                                      '0',
+                                                                                                                                      val,
+                                                                                                                                      '0',
+                                                                                                                                      '1',
+                                                                                                                                      'SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                                                                        SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS())))))_val',
+                                                                                                                                      '0',
+                                                                                                                                      '6',
+                                                                                                                                      '1',
+                                                                                                                                      '0',
+                                                                                                                                      '1',
+                                                                                                                                      and,
+                                                                                                                                      '0',
+                                                                                                                                      '0',
+                                                                                                                                      'SymbolP(Lbl''-LT-''acctID''-GT-''{},List(VariableP(Some(Num(0,ChoiceValue(Num(0,Num(1,Value(SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                                                                        SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS()))))),Num(0,Num(6,Num(1,Num(0,Num(1,Base()))))))))))),IntS())))_val',
+                                                                                                                                      '0',
+                                                                                                                                      '1',
+                                                                                                                                      '1',
+                                                                                                                                      '5',
+                                                                                                                                      '0',
+                                                                                                                                      '0',
+                                                                                                                                      '1']
+                                                                                                                                  - []
+                                                                                                                                - - '0'
+                                                                                                                                  - fail
+                                                                                                                                  - []
+                                                                                                                                bitwidth: 1
+                                                                                                                                sort: BOOL.Bool
+                                                                                                                                occurrence: [
+                                                                                                                                  eq,
+                                                                                                                                  '2',
+                                                                                                                                  '0',
+                                                                                                                                  '0',
+                                                                                                                                  '0',
+                                                                                                                                  '0',
+                                                                                                                                  '0',
+                                                                                                                                  '0',
+                                                                                                                                  '1',
+                                                                                                                                  and,
+                                                                                                                                  '0',
+                                                                                                                                  '0',
+                                                                                                                                  '0',
+                                                                                                                                  'SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                                                                    SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS())))))_val',
+                                                                                                                                  '0',
+                                                                                                                                  '6',
+                                                                                                                                  '1',
+                                                                                                                                  '0',
+                                                                                                                                  '1']
+                                                                                                                              function: hook_INT_eq
+                                                                                                                              sort: BOOL.Bool
+                                                                                                                              occurrence: [
+                                                                                                                                eq,
+                                                                                                                                '2',
+                                                                                                                                '0',
+                                                                                                                                '0',
+                                                                                                                                '0',
+                                                                                                                                '0',
+                                                                                                                                '0',
+                                                                                                                                '0',
+                                                                                                                                '1',
+                                                                                                                                and,
+                                                                                                                                '0',
+                                                                                                                                '0',
+                                                                                                                                '0',
+                                                                                                                                'SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                                                                  SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS())))))_val',
+                                                                                                                                '0',
+                                                                                                                                '6',
+                                                                                                                                '1',
+                                                                                                                                '0',
+                                                                                                                                '1']
+                                                                                                                            - []
+                                                                                                                          - - '0'
+                                                                                                                            - fail
+                                                                                                                            - []
+                                                                                                                          bitwidth: 1
+                                                                                                                          sort: BOOL.Bool
+                                                                                                                          occurrence: &id010 [
+                                                                                                                            side_condition_154912]
+                                                                                                                        function: side_condition_154912
+                                                                                                                        sort: BOOL.Bool
+                                                                                                                        occurrence: *id010
+                                                                                                                      - [
+                                                                                                                        BYTES.Bytes]
+                                                                                                                    sort: STRING.String
+                                                                                                                    occurrence: [
+                                                                                                                      '0',
+                                                                                                                      '2',
+                                                                                                                      'SymbolP(Lbl''-LT-''acctID''-GT-''{},List(VariableP(Some(Num(0,ChoiceValue(Num(0,Num(1,Value(SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                                                        SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS()))))),Num(0,Num(6,Num(1,Num(0,Num(1,Base()))))))))))),IntS())))_val',
+                                                                                                                      '0',
+                                                                                                                      '1',
+                                                                                                                      '1',
+                                                                                                                      '5',
+                                                                                                                      '0',
+                                                                                                                      '0',
+                                                                                                                      '1']
+                                                                                                                  - [
+                                                                                                                    INT.Int]
+                                                                                                                sort: STRING.String
+                                                                                                                occurrence: [
+                                                                                                                  '0',
+                                                                                                                  'SymbolP(Lbl''-LT-''acctID''-GT-''{},List(VariableP(Some(Num(0,ChoiceValue(Num(0,Num(1,Value(SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                                                    SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS()))))),Num(0,Num(6,Num(1,Num(0,Num(1,Base()))))))))))),IntS())))_val',
+                                                                                                                  '0',
+                                                                                                                  '1',
+                                                                                                                  '1',
+                                                                                                                  '5',
+                                                                                                                  '0',
+                                                                                                                  '0',
+                                                                                                                  '1']
+                                                                                                              - [
+                                                                                                                STRING.String]
+                                                                                                            sort: STRING.String
+                                                                                                            occurrence: [
+                                                                                                              '2',
+                                                                                                              'SymbolP(Lbl''-LT-''acctID''-GT-''{},List(VariableP(Some(Num(0,ChoiceValue(Num(0,Num(1,Value(SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                                                SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS()))))),Num(0,Num(6,Num(1,Num(0,Num(1,Base()))))))))))),IntS())))_val',
+                                                                                                              '0',
+                                                                                                              '1',
+                                                                                                              '1',
+                                                                                                              '5',
+                                                                                                              '0',
+                                                                                                              '0',
+                                                                                                              '1']
+                                                                                                          - [
+                                                                                                            STRING.String,
+                                                                                                            STRING.String,
+                                                                                                            STRING.String,
+                                                                                                            STRING.String,
+                                                                                                            STRING.String,
+                                                                                                            STRING.String,
+                                                                                                            STRING.String]
+                                                                                                        sort: STRING.String
+                                                                                                        occurrence: [
+                                                                                                          'SymbolP(Lbl''-LT-''acctID''-GT-''{},List(VariableP(Some(Num(0,ChoiceValue(Num(0,Num(1,Value(SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                                            SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS()))))),Num(0,Num(6,Num(1,Num(0,Num(1,Base()))))))))))),IntS())))_val',
+                                                                                                          '0',
+                                                                                                          '1',
+                                                                                                          '1',
+                                                                                                          '5',
+                                                                                                          '0',
+                                                                                                          '0',
+                                                                                                          '1']
+                                                                                                      - [
+                                                                                                        STRING.String,
+                                                                                                        MAP.Map,
+                                                                                                        MAP.Map]
+                                                                                                    - - '0'
+                                                                                                      - fail
+                                                                                                      - [
+                                                                                                        MAP.Map]
+                                                                                                    isnull: true
+                                                                                                    sort: STRING.String
+                                                                                                    occurrence: [
+                                                                                                      'SymbolP(Lbl''-LT-''acctID''-GT-''{},List(VariableP(Some(Num(0,ChoiceValue(Num(0,Num(1,Value(SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                                        SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS()))))),Num(0,Num(6,Num(1,Num(0,Num(1,Base()))))))))))),IntS())))_val',
+                                                                                                      '0',
+                                                                                                      '1',
+                                                                                                      '1',
+                                                                                                      '5',
+                                                                                                      '0',
+                                                                                                      '0',
+                                                                                                      '1']
+                                                                                                  function: hook_MAP_remove
+                                                                                                  sort: MAP.Map
+                                                                                                  occurrence: [
+                                                                                                    'SymbolP(Lbl''-LT-''acctID''-GT-''{},List(VariableP(Some(Num(0,ChoiceValue(Num(0,Num(1,Value(SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                                      SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS()))))),Num(0,Num(6,Num(1,Num(0,Num(1,Base()))))))))))),IntS())))_rem',
+                                                                                                    '0',
+                                                                                                    '1',
+                                                                                                    '1',
+                                                                                                    '5',
+                                                                                                    '0',
+                                                                                                    '0',
+                                                                                                    '1']
+                                                                                                function: hook_MAP_lookup_null
+                                                                                                sort: STRING.String
+                                                                                                occurrence: [
+                                                                                                  'SymbolP(Lbl''-LT-''acctID''-GT-''{},List(VariableP(Some(Num(0,ChoiceValue(Num(0,Num(1,Value(SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                                    SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS()))))),Num(0,Num(6,Num(1,Num(0,Num(1,Base()))))))))))),IntS())))_val',
+                                                                                                  '0',
+                                                                                                  '1',
+                                                                                                  '1',
+                                                                                                  '5',
+                                                                                                  '0',
+                                                                                                  '0',
+                                                                                                  '1']
+                                                                                              pattern:
+                                                                                                args:
+                                                                                                - hook: INT.Int
+                                                                                                  occurrence: *id009
+                                                                                                constructor: Lbl'-LT-'acctID'-GT-'{}
+                                                                                              occurrence: *id005
+                                                                                              sort: STRING.String
+                                                                                            - [
+                                                                                              BYTES.Bytes]
+                                                                                          sort: STRING.String
+                                                                                          occurrence: [
+                                                                                            key,
+                                                                                            '0',
+                                                                                            '1',
+                                                                                            'SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                              SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS())))))_val',
+                                                                                            '0',
+                                                                                            '6',
+                                                                                            '1',
+                                                                                            '0',
+                                                                                            '1']
+                                                                                        - [
+                                                                                          INT.Int]
+                                                                                      sort: STRING.String
+                                                                                      occurrence: [
+                                                                                        val,
+                                                                                        '0',
+                                                                                        '1',
+                                                                                        'SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                          SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS())))))_val',
+                                                                                        '0',
+                                                                                        '6',
+                                                                                        '1',
+                                                                                        '0',
+                                                                                        '1']
+                                                                                    function: hook_MAP_remove
+                                                                                    sort: MAP.Map
+                                                                                    occurrence: [
+                                                                                      rem,
+                                                                                      '0',
+                                                                                      '1',
+                                                                                      'SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                        SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS())))))_val',
+                                                                                      '0',
+                                                                                      '6',
+                                                                                      '1',
+                                                                                      '0',
+                                                                                      '1']
+                                                                                  function: hook_MAP_lookup
+                                                                                  sort: STRING.String
+                                                                                  occurrence: [
+                                                                                    val,
+                                                                                    '0',
+                                                                                    '1',
+                                                                                    'SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                      SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS())))))_val',
+                                                                                    '0',
+                                                                                    '6',
+                                                                                    '1',
+                                                                                    '0',
+                                                                                    '1']
+                                                                                - [
+                                                                                  STRING.String,
+                                                                                  STRING.String,
+                                                                                  MAP.Map]
+                                                                              isnull: true
+                                                                              sort: STRING.String
+                                                                              occurrence: [
+                                                                                key,
+                                                                                '0',
+                                                                                '1',
+                                                                                'SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                  SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS())))))_val',
+                                                                                '0',
+                                                                                '6',
+                                                                                '1',
+                                                                                '0',
+                                                                                '1']
+                                                                            iterator: &id011 [
+                                                                              '0',
+                                                                              '1',
+                                                                              'SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS())))))_val',
+                                                                              '0',
+                                                                              '6',
+                                                                              '1',
+                                                                              '0',
+                                                                              '1']
+                                                                            function: map_iterator_next
+                                                                            binding: [
+                                                                              key,
+                                                                              '0',
+                                                                              '1',
+                                                                              'SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                                SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS())))))_val',
+                                                                              '0',
+                                                                              '6',
+                                                                              '1',
+                                                                              '0',
+                                                                              '1']
+                                                                            sort: STRING.String
+                                                                          function: map_iterator
+                                                                          collection: *id011
+                                                                          sort: MAP.Map
+                                                                        - [INT.Int]
+                                                                      sort: STRING.String
+                                                                      occurrence: [
+                                                                        '0', '0',
+                                                                        'SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                          SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS())))))_val',
+                                                                        '0', '6',
+                                                                        '1', '0',
+                                                                        '1']
+                                                                    - [STRING.String]
+                                                                  sort: STRING.String
+                                                                  occurrence: ['0',
+                                                                    'SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                      SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS())))))_val',
+                                                                    '0', '6', '1',
+                                                                    '0', '1']
+                                                                - [MAP.Map]
+                                                              sort: STRING.String
+                                                              occurrence: ['1', 'SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                                  SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS())))))_val',
+                                                                '0', '6', '1', '0',
+                                                                '1']
+                                                            - [STRING.String, STRING.String]
+                                                          sort: STRING.String
+                                                          occurrence: ['SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                              SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS())))))_val',
+                                                            '0', '6', '1', '0', '1']
+                                                        - [STRING.String, MAP.Map,
+                                                          MAP.Map]
+                                                      - - '0'
+                                                        - fail
+                                                        - [MAP.Map]
+                                                      isnull: true
+                                                      sort: STRING.String
+                                                      occurrence: ['SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                          SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS())))))_val',
+                                                        '0', '6', '1', '0', '1']
+                                                    function: hook_MAP_remove
+                                                    sort: MAP.Map
+                                                    occurrence: ['SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                        SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS())))))_rem',
+                                                      '0', '6', '1', '0', '1']
+                                                  function: hook_MAP_lookup_null
+                                                  sort: STRING.String
+                                                  occurrence: ['SymbolP(Lbl''-LT-''mockFunctionAddress''-GT-''{},List(SymbolP(inj{SortInt{},
+                                                      SortAccount{}},List(VariableP(Some(Num(2,Num(0,Num(0,Num(0,Num(0,Num(0,Num(0,Num(1,Base()))))))))),IntS())))))_val',
+                                                    '0', '6', '1', '0', '1']
+                                                pattern:
+                                                  args:
+                                                  - args:
+                                                    - hook: INT.Int
+                                                      occurrence: ['2', '0', '0',
+                                                        '0', '0', '0', '0', '1']
+                                                    constructor: inj{SortInt{}, SortAccount{}}
+                                                  constructor: Lbl'-LT-'mockFunctionAddress'-GT-'{}
+                                                occurrence: *id002
+                                                sort: STRING.String
+                                              - [INT.Int, INT.Int, INT.Int, INT.Int,
+                                                INT.Int, BYTES.Bytes, BOOL.Bool]
+                                            sort: STRING.String
+                                            occurrence: ['0', '0', '0', '0', '0',
+                                              '0', '1']
+                                          - [STRING.String]
+                                        sort: STRING.String
+                                        occurrence: ['0', '0', '0', '0', '0', '1']
+                                      - [STRING.String, STRING.String]
+                                    sort: STRING.String
+                                    occurrence: ['0', '0', '0', '0', '1']
+                                  - [MAP.Map]
+                                sort: STRING.String
+                                occurrence: ['6', '1', '0', '1']
+                              - [STRING.String, STRING.String, STRING.String, STRING.String,
+                                STRING.String, STRING.String, STRING.String]
+                            sort: STRING.String
+                            occurrence: ['1', '0', '1']
+                          - [MAP.Map]
+                        sort: STRING.String
+                        occurrence: ['1', '1', '5', '0', '0', '1']
+                      - [STRING.String, STRING.String, STRING.String, STRING.String,
+                        STRING.String]
+                    sort: STRING.String
+                    occurrence: ['1', '5', '0', '0', '1']
+                  - [STRING.String, STRING.String]
+                sort: STRING.String
+                occurrence: ['5', '0', '0', '1']
+              - [STRING.String]
+            sort: STRING.String
+            occurrence: ['0', '0', '0', '1']
+          - [STRING.String, STRING.String, STRING.String, STRING.String, STRING.String,
+            STRING.String]
+        sort: STRING.String
+        occurrence: ['0', '0', '1']
+      - [STRING.String, STRING.String, STRING.String]
+    sort: STRING.String
+    occurrence: ['0', '1']
+  - [STRING.String, STRING.String]
+sort: STRING.String
+occurrence: ['1']

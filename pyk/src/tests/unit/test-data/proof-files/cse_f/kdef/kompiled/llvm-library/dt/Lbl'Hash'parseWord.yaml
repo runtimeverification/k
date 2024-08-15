@@ -1,0 +1,57 @@
+args:
+- - &id001 ['1']
+  - STRING.String
+next:
+  default: null
+  specializations:
+  - - '1'
+    - action:
+      - 154593
+      - - - *id001
+          - STRING.String
+    - []
+  - - '0'
+    - next:
+        args:
+        - - *id001
+          - STRING.String
+        - - &id003 [lit, '', STRING.String]
+          - STRING.String
+        next:
+          default: null
+          specializations:
+          - - '1'
+            - default:
+                action:
+                - 154595
+                - []
+              specializations: []
+              sort: STRING.String
+              occurrence: *id001
+            - []
+          - - '0'
+            - default:
+                action:
+                - 154594
+                - - - *id001
+                    - STRING.String
+              specializations: []
+              sort: STRING.String
+              occurrence: *id001
+            - []
+          bitwidth: 1
+          sort: BOOL.Bool
+          occurrence: &id002 [eq, '1', and, lit, '', STRING.String]
+        function: hook_KEQUAL_eq
+        sort: BOOL.Bool
+        occurrence: *id002
+      pattern: {hook: STRING.String, literal: ''}
+      occurrence: *id003
+      sort: STRING.String
+    - []
+  bitwidth: 1
+  sort: BOOL.Bool
+  occurrence: &id004 [side_condition_154593]
+function: side_condition_154593
+sort: BOOL.Bool
+occurrence: *id004

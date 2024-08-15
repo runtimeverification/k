@@ -1,0 +1,387 @@
+default: null
+specializations:
+- - Lbl'-LT-'generatedTop'-GT-'{}
+  - default: null
+    specializations:
+    - - Lbl'-LT-'foundry'-GT-'{}
+      - default: null
+        specializations:
+        - - Lbl'-LT-'kevm'-GT-'{}
+          - default: null
+            specializations:
+            - - Lbl'-LT-'k'-GT-'{}
+              - default: null
+                specializations:
+                - - Lbl'-LT-'ethereum'-GT-'{}
+                  - default: null
+                    specializations:
+                    - - Lbl'-LT-'network'-GT-'{}
+                      - default: null
+                        specializations:
+                        - - Lbl'-LT-'accounts'-GT-'{}
+                          - default: fail
+                            specializations:
+                            - - kseq{}
+                              - default: fail
+                                specializations:
+                                - - Lblfoundry'Unds'markAsFailed{}
+                                  - next:
+                                      args:
+                                      - - &id001 ['0', '1', '1', '5', '0', '0', '1']
+                                        - MAP.Map
+                                      - - &id002 [size, '0', '1', '1', '5', '0', '0',
+                                          '1']
+                                        - STRING.String
+                                      next:
+                                        args:
+                                        - - *id001
+                                          - MAP.Map
+                                        - - *id002
+                                          - STRING.String
+                                        next:
+                                          default: null
+                                          specializations:
+                                          - - '1'
+                                            - default: null
+                                              specializations:
+                                              - - Lbl'-LT-'account'-GT-'{}
+                                                - default: null
+                                                  specializations:
+                                                  - - Lbl'-LT-'storage'-GT-'{}
+                                                    - default: null
+                                                      specializations:
+                                                      - - Lbl'-LT-'acctID'-GT-'{}
+                                                        - args:
+                                                          - - &id003 ['0', '0', 'SymbolP(Lbl''-LT-''acctID''-GT-''{},List(LiteralP(645326474426547203313410069153905908525362434349,IntS())))_val',
+                                                              '0', '1', '1', '5',
+                                                              '0', '0', '1']
+                                                            - INT.Int
+                                                          next:
+                                                            default: fail
+                                                            specializations:
+                                                            - - '3'
+                                                              - args:
+                                                                - - *id003
+                                                                  - INT.Int
+                                                                - - [lit, '0', MINT.MInt
+                                                                      64]
+                                                                  - MINT.MInt 64
+                                                                next:
+                                                                  default: fail
+                                                                  specializations:
+                                                                  - - '-7104157385326997203'
+                                                                    - args:
+                                                                      - - *id003
+                                                                        - INT.Int
+                                                                      - - [lit, '1',
+                                                                          MINT.MInt
+                                                                            64]
+                                                                        - MINT.MInt
+                                                                          64
+                                                                      next:
+                                                                        default: fail
+                                                                        specializations:
+                                                                        - - '-3483223698084727912'
+                                                                          - args:
+                                                                            - - *id003
+                                                                              - INT.Int
+                                                                            - - [
+                                                                                lit,
+                                                                                '2',
+                                                                                MINT.MInt
+                                                                                  64]
+                                                                              - MINT.MInt
+                                                                                64
+                                                                            next:
+                                                                              default: fail
+                                                                              specializations:
+                                                                              - - '1896444062'
+                                                                                - action:
+                                                                                  - 154860
+                                                                                  - - - [
+                                                                                        '1',
+                                                                                        '1']
+                                                                                      - STRING.String
+                                                                                    - - [
+                                                                                        '1',
+                                                                                        '0',
+                                                                                        '0',
+                                                                                        '0',
+                                                                                        '0',
+                                                                                        '1']
+                                                                                      - STRING.String
+                                                                                    - - [
+                                                                                        '0',
+                                                                                        '5',
+                                                                                        '0',
+                                                                                        '0',
+                                                                                        '1']
+                                                                                      - STRING.String
+                                                                                    - - [
+                                                                                        'SymbolP(Lbl''-LT-''acctID''-GT-''{},List(LiteralP(645326474426547203313410069153905908525362434349,IntS())))_rem',
+                                                                                        '0',
+                                                                                        '1',
+                                                                                        '1',
+                                                                                        '5',
+                                                                                        '0',
+                                                                                        '0',
+                                                                                        '1']
+                                                                                      - MAP.Map
+                                                                                    - - [
+                                                                                        '1',
+                                                                                        'SymbolP(Lbl''-LT-''acctID''-GT-''{},List(LiteralP(645326474426547203313410069153905908525362434349,IntS())))_val',
+                                                                                        '0',
+                                                                                        '1',
+                                                                                        '1',
+                                                                                        '5',
+                                                                                        '0',
+                                                                                        '0',
+                                                                                        '1']
+                                                                                      - STRING.String
+                                                                                    - - [
+                                                                                        '2',
+                                                                                        'SymbolP(Lbl''-LT-''acctID''-GT-''{},List(LiteralP(645326474426547203313410069153905908525362434349,IntS())))_val',
+                                                                                        '0',
+                                                                                        '1',
+                                                                                        '1',
+                                                                                        '5',
+                                                                                        '0',
+                                                                                        '0',
+                                                                                        '1']
+                                                                                      - STRING.String
+                                                                                    - - [
+                                                                                        '2',
+                                                                                        '0',
+                                                                                        '0',
+                                                                                        '1']
+                                                                                      - STRING.String
+                                                                                    - - [
+                                                                                        '3',
+                                                                                        '0',
+                                                                                        '0',
+                                                                                        '1']
+                                                                                      - STRING.String
+                                                                                    - - [
+                                                                                        '4',
+                                                                                        '0',
+                                                                                        '0',
+                                                                                        '1']
+                                                                                      - STRING.String
+                                                                                    - - [
+                                                                                        '1',
+                                                                                        '0',
+                                                                                        '1']
+                                                                                      - STRING.String
+                                                                                    - - [
+                                                                                        '2',
+                                                                                        '0',
+                                                                                        '1']
+                                                                                      - STRING.String
+                                                                                    - - [
+                                                                                        '4',
+                                                                                        'SymbolP(Lbl''-LT-''acctID''-GT-''{},List(LiteralP(645326474426547203313410069153905908525362434349,IntS())))_val',
+                                                                                        '0',
+                                                                                        '1',
+                                                                                        '1',
+                                                                                        '5',
+                                                                                        '0',
+                                                                                        '0',
+                                                                                        '1']
+                                                                                      - STRING.String
+                                                                                    - - [
+                                                                                        '5',
+                                                                                        'SymbolP(Lbl''-LT-''acctID''-GT-''{},List(LiteralP(645326474426547203313410069153905908525362434349,IntS())))_val',
+                                                                                        '0',
+                                                                                        '1',
+                                                                                        '1',
+                                                                                        '5',
+                                                                                        '0',
+                                                                                        '0',
+                                                                                        '1']
+                                                                                      - STRING.String
+                                                                                    - - [
+                                                                                        '6',
+                                                                                        'SymbolP(Lbl''-LT-''acctID''-GT-''{},List(LiteralP(645326474426547203313410069153905908525362434349,IntS())))_val',
+                                                                                        '0',
+                                                                                        '1',
+                                                                                        '1',
+                                                                                        '5',
+                                                                                        '0',
+                                                                                        '0',
+                                                                                        '1']
+                                                                                      - STRING.String
+                                                                                    - - [
+                                                                                        '0',
+                                                                                        '1',
+                                                                                        '5',
+                                                                                        '0',
+                                                                                        '0',
+                                                                                        '1']
+                                                                                      - STRING.String
+                                                                                    - - [
+                                                                                        '2',
+                                                                                        '1',
+                                                                                        '5',
+                                                                                        '0',
+                                                                                        '0',
+                                                                                        '1']
+                                                                                      - STRING.String
+                                                                                    - - [
+                                                                                        '3',
+                                                                                        '1',
+                                                                                        '5',
+                                                                                        '0',
+                                                                                        '0',
+                                                                                        '1']
+                                                                                      - STRING.String
+                                                                                    - - [
+                                                                                        '4',
+                                                                                        '1',
+                                                                                        '5',
+                                                                                        '0',
+                                                                                        '0',
+                                                                                        '1']
+                                                                                      - STRING.String
+                                                                                    - - [
+                                                                                        '1',
+                                                                                        '0',
+                                                                                        '0',
+                                                                                        '1']
+                                                                                      - STRING.String
+                                                                                    - - [
+                                                                                        '0',
+                                                                                        '3',
+                                                                                        'SymbolP(Lbl''-LT-''acctID''-GT-''{},List(LiteralP(645326474426547203313410069153905908525362434349,IntS())))_val',
+                                                                                        '0',
+                                                                                        '1',
+                                                                                        '1',
+                                                                                        '5',
+                                                                                        '0',
+                                                                                        '0',
+                                                                                        '1']
+                                                                                      - MAP.Map
+                                                                                - []
+                                                                              bitwidth: 64
+                                                                              sort: MINT.MInt
+                                                                                64
+                                                                              occurrence: &id004 [
+                                                                                '2',
+                                                                                '0',
+                                                                                '0',
+                                                                                'SymbolP(Lbl''-LT-''acctID''-GT-''{},List(LiteralP(645326474426547203313410069153905908525362434349,IntS())))_val',
+                                                                                '0',
+                                                                                '1',
+                                                                                '1',
+                                                                                '5',
+                                                                                '0',
+                                                                                '0',
+                                                                                '1']
+                                                                            function: hook_INT_limb
+                                                                            sort: MINT.MInt
+                                                                              64
+                                                                            occurrence: *id004
+                                                                          - []
+                                                                        bitwidth: 64
+                                                                        sort: MINT.MInt
+                                                                          64
+                                                                        occurrence: &id005 [
+                                                                          '1', '0',
+                                                                          '0', 'SymbolP(Lbl''-LT-''acctID''-GT-''{},List(LiteralP(645326474426547203313410069153905908525362434349,IntS())))_val',
+                                                                          '0', '1',
+                                                                          '1', '5',
+                                                                          '0', '0',
+                                                                          '1']
+                                                                      function: hook_INT_limb
+                                                                      sort: MINT.MInt
+                                                                        64
+                                                                      occurrence: *id005
+                                                                    - []
+                                                                  bitwidth: 64
+                                                                  sort: MINT.MInt
+                                                                    64
+                                                                  occurrence: &id006 [
+                                                                    '0', '0', '0',
+                                                                    'SymbolP(Lbl''-LT-''acctID''-GT-''{},List(LiteralP(645326474426547203313410069153905908525362434349,IntS())))_val',
+                                                                    '0', '1', '1',
+                                                                    '5', '0', '0',
+                                                                    '1']
+                                                                function: hook_INT_limb
+                                                                sort: MINT.MInt 64
+                                                                occurrence: *id006
+                                                              - []
+                                                            bitwidth: 32
+                                                            sort: MINT.MInt 32
+                                                            occurrence: &id007 [size,
+                                                              '0', '0', 'SymbolP(Lbl''-LT-''acctID''-GT-''{},List(LiteralP(645326474426547203313410069153905908525362434349,IntS())))_val',
+                                                              '0', '1', '1', '5',
+                                                              '0', '0', '1']
+                                                          function: hook_INT_size_int
+                                                          sort: MINT.MInt 32
+                                                          occurrence: *id007
+                                                        - [INT.Int]
+                                                      sort: STRING.String
+                                                      occurrence: ['0', 'SymbolP(Lbl''-LT-''acctID''-GT-''{},List(LiteralP(645326474426547203313410069153905908525362434349,IntS())))_val',
+                                                        '0', '1', '1', '5', '0', '0',
+                                                        '1']
+                                                    - [MAP.Map]
+                                                  sort: STRING.String
+                                                  occurrence: ['3', 'SymbolP(Lbl''-LT-''acctID''-GT-''{},List(LiteralP(645326474426547203313410069153905908525362434349,IntS())))_val',
+                                                    '0', '1', '1', '5', '0', '0',
+                                                    '1']
+                                                - [STRING.String, STRING.String, STRING.String,
+                                                  STRING.String, STRING.String, STRING.String,
+                                                  STRING.String]
+                                              sort: STRING.String
+                                              occurrence: ['SymbolP(Lbl''-LT-''acctID''-GT-''{},List(LiteralP(645326474426547203313410069153905908525362434349,IntS())))_val',
+                                                '0', '1', '1', '5', '0', '0', '1']
+                                            - [STRING.String, MAP.Map, MAP.Map]
+                                          - - '0'
+                                            - fail
+                                            - [MAP.Map]
+                                          isnull: true
+                                          sort: STRING.String
+                                          occurrence: ['SymbolP(Lbl''-LT-''acctID''-GT-''{},List(LiteralP(645326474426547203313410069153905908525362434349,IntS())))_val',
+                                            '0', '1', '1', '5', '0', '0', '1']
+                                        function: hook_MAP_remove
+                                        sort: MAP.Map
+                                        occurrence: ['SymbolP(Lbl''-LT-''acctID''-GT-''{},List(LiteralP(645326474426547203313410069153905908525362434349,IntS())))_rem',
+                                          '0', '1', '1', '5', '0', '0', '1']
+                                      function: hook_MAP_lookup_null
+                                      sort: STRING.String
+                                      occurrence: ['SymbolP(Lbl''-LT-''acctID''-GT-''{},List(LiteralP(645326474426547203313410069153905908525362434349,IntS())))_val',
+                                        '0', '1', '1', '5', '0', '0', '1']
+                                    pattern:
+                                      args:
+                                      - {hook: INT.Int, literal: '645326474426547203313410069153905908525362434349'}
+                                      constructor: Lbl'-LT-'acctID'-GT-'{}
+                                    occurrence: *id002
+                                    sort: STRING.String
+                                  - []
+                                sort: STRING.String
+                                occurrence: ['0', '0', '0', '0', '0', '1']
+                              - [STRING.String, STRING.String]
+                            sort: STRING.String
+                            occurrence: ['0', '0', '0', '0', '1']
+                          - [MAP.Map]
+                        sort: STRING.String
+                        occurrence: ['1', '1', '5', '0', '0', '1']
+                      - [STRING.String, STRING.String, STRING.String, STRING.String,
+                        STRING.String]
+                    sort: STRING.String
+                    occurrence: ['1', '5', '0', '0', '1']
+                  - [STRING.String, STRING.String]
+                sort: STRING.String
+                occurrence: ['5', '0', '0', '1']
+              - [STRING.String]
+            sort: STRING.String
+            occurrence: ['0', '0', '0', '1']
+          - [STRING.String, STRING.String, STRING.String, STRING.String, STRING.String,
+            STRING.String]
+        sort: STRING.String
+        occurrence: ['0', '0', '1']
+      - [STRING.String, STRING.String, STRING.String]
+    sort: STRING.String
+    occurrence: ['0', '1']
+  - [STRING.String, STRING.String]
+sort: STRING.String
+occurrence: ['1']

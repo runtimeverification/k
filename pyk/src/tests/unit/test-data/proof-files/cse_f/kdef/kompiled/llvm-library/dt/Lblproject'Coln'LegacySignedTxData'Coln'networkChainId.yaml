@@ -1,0 +1,22 @@
+default: fail
+specializations:
+- - LblLegacySignedTxData{}
+  - action:
+    - 157984
+    - - - ['0', '1']
+        - INT.Int
+      - - ['1', '1']
+        - INT.Int
+      - - ['2', '1']
+        - INT.Int
+      - - ['3', '1']
+        - STRING.String
+      - - ['4', '1']
+        - INT.Int
+      - - ['5', '1']
+        - BYTES.Bytes
+      - - ['6', '1']
+        - INT.Int
+  - [INT.Int, INT.Int, INT.Int, STRING.String, INT.Int, BYTES.Bytes, INT.Int]
+sort: STRING.String
+occurrence: ['1']
