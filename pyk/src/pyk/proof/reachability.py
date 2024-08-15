@@ -173,7 +173,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
 
             predecessor_edges = self.kcfg.edges(target_id=node.id)
             predecessor_node_id: NodeIdLike | None = (
-                single(predecessor_edges).source.id if predecessor_edges is not None else None
+                single(predecessor_edges).source.id if predecessor_edges != [] else None
             )
 
             steps.append(
