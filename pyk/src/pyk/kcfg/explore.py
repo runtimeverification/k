@@ -240,7 +240,7 @@ class KCFGExplore:
 
         # Basic block
         if depth > 0:
-            extend_results.append((Step(cterm, depth, next_node_logs, self._extract_rule_labels(next_node_logs))))
+            extend_results.append(Step(cterm, depth, next_node_logs, self._extract_rule_labels(next_node_logs)))
 
         # Stuck or vacuous
         if not next_states:
