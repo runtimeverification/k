@@ -196,7 +196,11 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
     def commit(self, result: APRProofResult) -> None:
         self.prior_loops_cache[result.node_id] = result.prior_loops_cache_update
         if isinstance(result, APRProofExtendResult):
-            self.kcfg.extend(result.extend_result, self.kcfg.node(result.node_id), logs=self.logs)
+            self.kcfg.extend(
+                result.extend_result,
+                node=self.kcfg.node(result.node_id),
+                logs=self.logs,
+            )
         elif isinstance(result, APRProofSubsumeResult):
             self.kcfg.create_cover(result.node_id, self.target, csubst=result.csubst)
         elif isinstance(result, APRProofTerminalResult):
@@ -815,14 +819,15 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
             )
 
         assert len(extend_results) == 1 or len(extend_results) == 2
-        extend_result = extend_results[0]
         if len(extend_results) == 2:
             assert step.node.id not in self.next_steps
             self.next_steps[step.node.id] = extend_results[1]
 
         return [
             APRProofExtendResult(
-                node_id=step.node.id, extend_result=extend_result, prior_loops_cache_update=prior_loops
+                node_id=step.node.id,
+                extend_result=extend_results[0],
+                prior_loops_cache_update=prior_loops,
             )
         ]
 

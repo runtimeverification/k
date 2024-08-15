@@ -19,6 +19,9 @@ class KCFGSemantics(ABC):
     def same_loop(self, c1: CTerm, c2: CTerm) -> bool: ...
 
     @abstractmethod
+    def can_make_custom_step(self, c: CTerm) -> bool: ...
+
+    @abstractmethod
     def custom_step(self, c: CTerm) -> KCFGExtendResult | None: ...
 
 
@@ -30,6 +33,9 @@ class DefaultSemantics(KCFGSemantics):
         return c
 
     def same_loop(self, c1: CTerm, c2: CTerm) -> bool:
+        return False
+
+    def can_make_custom_step(self, c: CTerm) -> bool:
         return False
 
     def custom_step(self, c: CTerm) -> KCFGExtendResult | None:
