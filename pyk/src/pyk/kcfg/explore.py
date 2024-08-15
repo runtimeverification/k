@@ -218,19 +218,20 @@ class KCFGExplore:
         cut_point_rules: Iterable[str] = (),
         terminal_rules: Iterable[str] = (),
         module_name: str | None = None,
-    ) -> KCFGExtendResult:
+    ) -> list[KCFGExtendResult]:
+
         def log(message: str, *, warning: bool = False) -> None:
             _LOGGER.log(logging.WARNING if warning else logging.INFO, f'Extend result for {self.id}: {message}')
 
         custom_step_result = self.kcfg_semantics.custom_step(_cterm)
         if custom_step_result is not None:
             log(f'custom step node: {node_id}')
-            return custom_step_result
+            return [custom_step_result]
 
         abstract_cterm = self.kcfg_semantics.abstract_node(_cterm)
         if _cterm != abstract_cterm:
             log(f'abstraction node: {node_id}')
-            return Abstract(abstract_cterm)
+            return [Abstract(abstract_cterm)]
 
         cterm, next_states, depth, vacuous, next_node_logs = self.cterm_symbolic.execute(
             _cterm,
@@ -240,33 +241,35 @@ class KCFGExplore:
             module_name=module_name,
         )
 
+        extend_results: list[KCFGExtendResult] = []
+
         # Basic block
         if depth > 0:
             log(f'basic block at depth {depth}: {node_id}')
-            return Step(cterm, depth, next_node_logs, self._extract_rule_labels(next_node_logs))
+            extend_results.append(Step(cterm, depth, next_node_logs, self._extract_rule_labels(next_node_logs)))
 
         # Stuck or vacuous
         if not next_states:
             if vacuous:
                 log(f'vacuous node: {node_id}', warning=True)
-                return Vacuous()
-            log(f'stuck node: {node_id}')
-            return Stuck()
-
+                extend_results.append(Vacuous())
+            else:
+                log(f'stuck node: {node_id}')
+                extend_results.append(Stuck())
         # Cut rule
-        if len(next_states) == 1:
+        elif len(next_states) == 1:
             log(f'cut-rule basic block at depth {depth}: {node_id}')
-            return Step(
-                next_states[0].state,
-                1,
-                next_node_logs,
-                self._extract_rule_labels(next_node_logs),
-                cut=True,
+            extend_results.append(
+                Step(
+                    next_states[0].state,
+                    1,
+                    next_node_logs,
+                    self._extract_rule_labels(next_node_logs),
+                    cut=True,
+                )
             )
-
         # Branch
-        assert len(next_states) > 1
-        if all(branch_constraint for _, branch_constraint in next_states):
+        elif all(branch_constraint for _, branch_constraint in next_states):
             branch_preds = [flatten_label('#And', not_none(rule_predicate)) for _, rule_predicate in next_states]
             common_preds = list(
                 unique(
@@ -283,9 +286,11 @@ class KCFGExplore:
                 )
             constraint_strs = [self.pretty_print(ml_pred_to_bool(bc)) for bc in branches]
             log(f'{len(branches)} branches: {node_id} -> {constraint_strs}')
-            return Branch(branches)
+            extend_results.append(Branch(branches))
         else:
             # NDBranch
             log(f'{len(next_states)} non-deterministic branches: {node_id}')
             next_cterms = [cterm for cterm, _ in next_states]
-            return NDBranch(next_cterms, next_node_logs, self._extract_rule_labels(next_node_logs))
+            extend_results.append(NDBranch(next_cterms, next_node_logs, self._extract_rule_labels(next_node_logs)))
+
+        return extend_results

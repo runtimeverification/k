@@ -188,14 +188,14 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
 
     def commit(self, result: APRProofResult) -> None:
         self.prior_loops_cache[result.node_id] = result.prior_loops_cache_update
-        if isinstance(result, APRProofExtendResult):
-            self.kcfg.extend(result.extend_result, self.kcfg.node(result.node_id), logs=self.logs)
-        elif isinstance(result, APRProofSubsumeResult):
-            self.kcfg.create_cover(result.node_id, self.target, csubst=result.csubst)
+        if isinstance(result, APRProofBoundedResult):
+            self.add_bounded(result.node_id)
         elif isinstance(result, APRProofTerminalResult):
             self.add_terminal(result.node_id)
-        elif isinstance(result, APRProofBoundedResult):
-            self.add_bounded(result.node_id)
+        elif isinstance(result, APRProofSubsumeResult):
+            self.kcfg.create_cover(result.node_id, self.target, csubst=result.csubst)
+        elif isinstance(result, APRProofExtendResult):
+            self.kcfg.extend(result.extend_result, self.kcfg.node(result.node_id), logs=self.logs)
         else:
             raise ValueError(f'Incorrect result type, expected APRProofResult: {result}')
 
@@ -674,6 +674,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
     direct_subproof_rules: bool
     assume_defined: bool
     kcfg_explore: KCFGExplore
+    next_steps: dict[NodeIdLike, KCFGExtendResult]
 
     def __init__(
         self,
@@ -698,6 +699,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         self.fast_check_subsumption = fast_check_subsumption
         self.direct_subproof_rules = direct_subproof_rules
         self.assume_defined = assume_defined
+        self.next_steps = {}
 
     def close(self) -> None:
         self.kcfg_explore.cterm_symbolic._kore_client.close()
@@ -793,14 +795,24 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         if step.circularity and not step.nonzero_depth and (execute_depth is None or execute_depth > 1):
             execute_depth = 1
 
-        extend_result = self.kcfg_explore.extend_cterm(
-            step.node.cterm,
-            execute_depth=execute_depth,
-            cut_point_rules=cut_rules,
-            terminal_rules=self.terminal_rules,
-            module_name=step.module_name,
-            node_id=step.node.id,
-        )
+        if step.node.id in self.next_steps:
+            extend_results = [self.next_steps.pop(step.node.id)]
+        else:
+            extend_results = self.kcfg_explore.extend_cterm(
+                step.node.cterm,
+                execute_depth=execute_depth,
+                cut_point_rules=cut_rules,
+                terminal_rules=self.terminal_rules,
+                module_name=step.module_name,
+                node_id=step.node.id,
+            )
+
+        assert len(extend_results) == 1 or len(extend_results) == 2
+        extend_result = extend_results[0]
+        if len(extend_results) == 2:
+            assert step.node.id not in self.next_steps
+            self.next_steps[step.node.id] = extend_results[1]
+
         return [
             APRProofExtendResult(
                 node_id=step.node.id, extend_result=extend_result, prior_loops_cache_update=prior_loops
