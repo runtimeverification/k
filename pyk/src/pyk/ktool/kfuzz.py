@@ -20,13 +20,32 @@ if TYPE_CHECKING:
     from ..kore.syntax import Pattern
 
 
+class KFuzzTestPrinter:
+    def print_test_prologue(self) -> None:
+        pass
+
+    def print_test_case(self, args: Mapping[EVar, Pattern]) -> None:
+        pass
+
+    def print_failure_case(self, args: Mapping[EVar, Pattern]) -> None:
+        pass
+
+    def print_test_epilogue(self) -> None:
+        pass
+
+
+_DEFAULT_PRINTER = KFuzzTestPrinter()
+
+
 class KFuzz:
     """Interface for fuzzing over property tests in K."""
 
     definition_dir: Path
+    printer: KFuzzTestPrinter
 
-    def __init__(self, definition_dir: Path) -> None:
+    def __init__(self, definition_dir: Path, printer: KFuzzTestPrinter = _DEFAULT_PRINTER) -> None:
         self.definition_dir = definition_dir
+        self.printer = printer
 
     def fuzz_with_check(
         self,
@@ -39,7 +58,14 @@ class KFuzz:
 
         See :any:`fuzz` for info on the parameters.
         """
-        fuzz(self.definition_dir, template, subst_strategy, check_func=check_func, **hypothesis_args)
+        fuzz(
+            self.definition_dir,
+            template,
+            subst_strategy,
+            check_func=check_func,
+            printer=self.printer,
+            **hypothesis_args,
+        )
 
     def fuzz_with_exit_code(
         self,
@@ -51,7 +77,9 @@ class KFuzz:
 
         See :any:`fuzz` for info on the parameters.
         """
-        fuzz(self.definition_dir, template, subst_strategy, check_exit_code=True, **hypothesis_args)
+        fuzz(
+            self.definition_dir, template, subst_strategy, check_exit_code=True, printer=self.printer, **hypothesis_args
+        )
 
 
 def kintegers(
@@ -86,6 +114,7 @@ def fuzz(
     subst_strategy: dict[EVar, SearchStrategy[Pattern]],
     check_func: Callable[[Pattern], Any] | None = None,
     check_exit_code: bool = False,
+    printer: KFuzzTestPrinter = _DEFAULT_PRINTER,
     **hypothesis_args: Any,
 ) -> None:
     """Fuzz a property test with concrete execution over a K term.
@@ -120,15 +149,20 @@ def fuzz(
             else:
                 return p
 
+        printer.print_test_case(subst_case)
         test_pattern = template.top_down(sub)
-        res = llvm_interpret_raw(definition_dir, test_pattern.text)
+        res = llvm_interpret_raw(definition_dir, test_pattern.text, check=False)
 
-        if check_exit_code:
-            assert res.returncode == 0
-        else:
-            assert check_func
-            res_pattern = KoreParser(res.stdout).pattern()
-            check_func(res_pattern)
+        try:
+            if check_exit_code:
+                assert res.returncode == 0
+            else:
+                assert check_func
+                res_pattern = KoreParser(res.stdout).pattern()
+                check_func(res_pattern)
+        except AssertionError:
+            printer.print_failure_case(subst_case)
+            raise
 
     strat: SearchStrategy = fixed_dictionaries(subst_strategy)
 
@@ -136,4 +170,6 @@ def fuzz(
     hypothesis_args.setdefault('deadline', 5000)
     hypothesis_args.setdefault('phases', (Phase.explicit, Phase.reuse, Phase.generate))
 
+    printer.print_test_prologue()
     given(strat)(settings(**hypothesis_args)(test))()
+    printer.print_test_epilogue()
