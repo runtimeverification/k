@@ -793,7 +793,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         to_cache: bool = False
         use_cache: NodeIdLike | None = None
 
-        print(f'{step.node.id}'-{step.circularity}-{step.nonzero_depth})
+        print(f'{step.node.id}' - {step.circularity} - {step.nonzero_depth})
 
         prior_loops: tuple[int, ...] = ()
         if step.bmc_depth is not None:
