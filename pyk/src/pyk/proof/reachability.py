@@ -833,6 +833,8 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         if step.circularity and not step.nonzero_depth:
             execute_depth = 1
 
+        use_cache: NodeIdLike | None = None
+
         # If the step has already been cached, do not invoke the backend and only send a signal back to the proof to use the cache
         if step.cached:
             _LOGGER.info(f'Using cached step for edge {step.predecessor_node_id} --> {step.node.id}')
@@ -848,6 +850,8 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
                 module_name=step.module_name,
                 node_id=step.node.id,
             )
+
+        to_cache: bool = False
 
         # We can obtain two results at most
         assert len(extend_results) <= 2
