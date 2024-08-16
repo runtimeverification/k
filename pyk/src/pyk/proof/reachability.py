@@ -793,6 +793,8 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         to_cache: bool = False
         use_cache: NodeIdLike | None = None
 
+        print(f'{step.node.id}'-{step.circularity}-{step.nonzero_depth})
+
         prior_loops: tuple[int, ...] = ()
         if step.bmc_depth is not None:
             for node in step.shortest_path_to_node:
@@ -855,7 +857,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         assert len(extend_results) <= 2
         if len(extend_results) == 2:
             # Do not cache if we have not made a step yet, to avoid circularity issues
-            if not step.nonzero_depth:
+            if step.nonzero_depth:
                 _LOGGER.info(f'Caching next step for edge starting from {step.node.id}')
                 to_cache = True
             else:
