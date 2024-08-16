@@ -46,6 +46,7 @@ class APRProofResult:
 class APRProofExtendResult(APRProofResult):
     extend_results: list[KCFGExtendResult]
     to_cache: bool = field(default=False)
+    use_cache: NodeIdLike | None = field(default=None)
 
 
 @dataclass
@@ -202,9 +203,10 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         self.prior_loops_cache[result.node_id] = result.prior_loops_cache_update
         if isinstance(result, APRProofExtendResult):
             # Result has been cached, use the cache
-            if len(result.extend_results) == 0:
-                assert result.node_id in self._next_steps
-                extend_result = self._next_steps.pop(result.node_id)
+            if result.use_cache is not None:
+                assert len(result.extend_results) == 0
+                assert result.use_cache in self._next_steps
+                extend_result = self._next_steps.pop(result.use_cache)
             # Result contains two steps, first to be applied, second to be cached
             elif result.to_cache:
                 assert result.node_id not in self._next_steps
@@ -778,6 +780,9 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         return csubst
 
     def step_proof(self, step: APRProofStep) -> list[APRProofResult]:
+        to_cache: bool = False
+        use_cache: NodeIdLike | None = None
+
         prior_loops: tuple[int, ...] = ()
         if step.bmc_depth is not None:
             for node in step.shortest_path_to_node:
@@ -826,6 +831,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         if step.cached:
             _LOGGER.info(f'Using cached step for edge {step.predecessor_node_id} --> {step.node.id}')
             extend_results = []
+            use_cache = step.predecessor_node_id
         else:
             extend_results = self.kcfg_explore.extend_cterm(
                 step.node.cterm,
@@ -835,8 +841,6 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
                 module_name=step.module_name,
                 node_id=step.node.id,
             )
-
-        to_cache: bool = False
 
         assert len(extend_results) <= 2
         if len(extend_results) == 2:
@@ -849,6 +853,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
                 extend_results=extend_results,
                 prior_loops_cache_update=prior_loops,
                 to_cache=to_cache,
+                use_cache=use_cache,
             )
         ]
 
