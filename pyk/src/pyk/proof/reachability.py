@@ -838,7 +838,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         if step.circularity and not step.nonzero_depth and (execute_depth is None or execute_depth > 1):
             execute_depth = 1
 
-        if step.cached and not (step.circularity and not step.nonzero_depth):
+        if step.cached:
             _LOGGER.info(f'Using cached step for edge {step.predecessor_node_id} --> {step.node.id}')
             extend_results = []
             use_cache = step.predecessor_node_id
@@ -854,8 +854,12 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
 
         assert len(extend_results) <= 2
         if len(extend_results) == 2:
-            _LOGGER.info(f'Caching next step for edge starting from {step.node.id}')
-            to_cache = True
+            # Do not cache if we are proving a circularity and have not made a step yet
+            if not (step.circularity and not step.nonzero_depth):
+                _LOGGER.info(f'Caching next step for edge starting from {step.node.id}')
+                to_cache = True
+            else:
+                extend_results = [extend_results[0]]
 
         return [
             APRProofExtendResult(
