@@ -822,6 +822,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         assert len(extend_results) == 1 or len(extend_results) == 2
         if len(extend_results) == 2:
             assert step.node.id not in self.next_steps
+            _LOGGER.info(f'Caching next step for edge starting from {step.node.id}')
             self.next_steps[step.node.id] = extend_results[1]
 
         return [
