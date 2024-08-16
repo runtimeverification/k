@@ -856,10 +856,11 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
 
         assert len(extend_results) <= 2
         if len(extend_results) == 2:
-            # Do not cache if we have not made a step yet, to avoid circularity issues
+            # Cache only if the step is non-zero depth
             if step.nonzero_depth:
                 _LOGGER.info(f'Caching next step for edge starting from {step.node.id}')
                 to_cache = True
+            # Otherwise, discard the second result
             else:
                 extend_results = [extend_results[0]]
 
