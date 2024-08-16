@@ -39,7 +39,7 @@ class KFuzz:
 
         See :any:`fuzz` for info on the parameters.
         """
-        fuzz(self.definition_dir, template, subst_strategy, check_func=check_func)
+        fuzz(self.definition_dir, template, subst_strategy, check_func=check_func, **hypothesis_args)
 
     def fuzz_with_exit_code(
         self,
@@ -51,7 +51,7 @@ class KFuzz:
 
         See :any:`fuzz` for info on the parameters.
         """
-        fuzz(self.definition_dir, template, subst_strategy, check_exit_code=True)
+        fuzz(self.definition_dir, template, subst_strategy, check_exit_code=True, **hypothesis_args)
 
 
 def kintegers(
