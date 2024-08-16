@@ -711,7 +711,6 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
     cut_point_rules: Iterable[str]
     terminal_rules: Iterable[str]
     counterexample_info: bool
-    always_check_subsumption: bool
     fast_check_subsumption: bool
     direct_subproof_rules: bool
     assume_defined: bool
@@ -724,7 +723,6 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         cut_point_rules: Iterable[str] = (),
         terminal_rules: Iterable[str] = (),
         counterexample_info: bool = False,
-        always_check_subsumption: bool = True,
         fast_check_subsumption: bool = False,
         direct_subproof_rules: bool = False,
         assume_defined: bool = False,
@@ -736,7 +734,6 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         self.cut_point_rules = cut_point_rules
         self.terminal_rules = terminal_rules
         self.counterexample_info = counterexample_info
-        self.always_check_subsumption = always_check_subsumption
         self.fast_check_subsumption = fast_check_subsumption
         self.direct_subproof_rules = direct_subproof_rules
         self.assume_defined = assume_defined
@@ -790,9 +787,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         return csubst
 
     def step_proof(self, step: APRProofStep) -> list[APRProofResult]:
-        to_cache: bool = False
-        use_cache: NodeIdLike | None = None
-
+        # Check if the current node should be bounded
         prior_loops: tuple[int, ...] = ()
         if step.bmc_depth is not None:
             for node in step.shortest_path_to_node:
@@ -806,7 +801,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
                 _LOGGER.warning(f'Bounded node {step.proof_id}: {step.node.id} at bmc depth {step.bmc_depth}')
                 return [APRProofBoundedResult(node_id=step.node.id, prior_loops_cache_update=prior_loops)]
 
-        # Terminal checks for current node and target node
+        # Check if the current node and target ar terminal
         is_terminal = self.kcfg_explore.kcfg_semantics.is_terminal(step.node.cterm)
         target_is_terminal = self.kcfg_explore.kcfg_semantics.is_terminal(step.target.cterm)
 
@@ -814,7 +809,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
             [APRProofTerminalResult(node_id=step.node.id, prior_loops_cache_update=prior_loops)] if is_terminal else []
         )
 
-        # Subsumption should be checked if and only if the target node
+        # Subsumption is checked if and only if the target node
         # and the current node are either both terminal or both not terminal
         if is_terminal == target_is_terminal:
             csubst = self._check_subsume(step.node, step.target, proof_id=step.proof_id)
@@ -835,13 +830,15 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
 
         # Ensure that we record progress ASAP for circularities, so the circularity rule will be included for execution as soon as possible
         execute_depth = self.execute_depth
-        if step.circularity and not step.nonzero_depth and (execute_depth is None or execute_depth > 1):
+        if step.circularity and not step.nonzero_depth:
             execute_depth = 1
 
+        # If the step has already been cached, do not invoke the backend and only send a signal back to the proof to use the cache
         if step.cached:
             _LOGGER.info(f'Using cached step for edge {step.predecessor_node_id} --> {step.node.id}')
             extend_results = []
             use_cache = step.predecessor_node_id
+        # Invoke the backend to obtain the next KCFG extension
         else:
             extend_results = self.kcfg_explore.extend_cterm(
                 step.node.cterm,
@@ -852,9 +849,11 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
                 node_id=step.node.id,
             )
 
+        # We can obtain two results at most
         assert len(extend_results) <= 2
+        # We have obtained two results: first is to be applied, second to be cached potentially
         if len(extend_results) == 2:
-            # Cache only if the step is non-zero depth
+            # Cache only if the current node is at non-zero depth
             if step.nonzero_depth:
                 _LOGGER.info(f'Caching next step for edge starting from {step.node.id}')
                 to_cache = True
