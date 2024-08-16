@@ -44,6 +44,16 @@ class APRProofResult:
 
 @dataclass
 class APRProofExtendResult(APRProofResult):
+    """Holds the description of how an APRProof should be extended.
+
+    Fields:
+        extend_results: Holds the KCFG extension to be applied.
+        to_cache: Holds an indicator of whether or not the provided extension
+                  should be cached instead of being applied.
+        use_cache: If not None, holds the identifier of the node whose cached extension
+                   should be applied instead of the provided extension.
+    """
+
     extend_results: list[KCFGExtendResult]
     to_cache: bool = field(default=False)
     use_cache: NodeIdLike | None = field(default=None)
@@ -828,7 +838,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         if step.circularity and not step.nonzero_depth and (execute_depth is None or execute_depth > 1):
             execute_depth = 1
 
-        if step.cached:
+        if step.cached and not (step.circularity and not step.nonzero_depth):
             _LOGGER.info(f'Using cached step for edge {step.predecessor_node_id} --> {step.node.id}')
             extend_results = []
             use_cache = step.predecessor_node_id
