@@ -250,7 +250,7 @@ class KCFGExplore:
                 extend_results.append(Stuck())
         # Cut rule
         elif len(next_states) == 1:
-            if not self.kcfg_semantics.can_make_custom_step(next_states[0].state):
+            if not self.kcfg_semantics.can_make_custom_step(cterm):
                 (next_node_logs, rules) = (
                     ((), []) if extend_results else (next_node_logs, self._extract_rule_labels(next_node_logs))
                 )
