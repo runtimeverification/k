@@ -509,30 +509,45 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         node: KCFG.Node,
         logs: dict[int, tuple[LogEntry, ...]],
     ) -> None:
+
+        def log(message: str, *, warning: bool = False) -> None:
+            result_info = extend_result.info if type(extend_result) is Step or type(extend_result) is Branch else ''
+            result_info_message = f': {result_info}' if result_info else ''
+            _LOGGER.log(
+                logging.WARNING if warning else logging.INFO,
+                f'Extending current KCFG with the following: {message}{result_info_message}',
+            )
+
         match extend_result:
             case Vacuous():
                 self.add_vacuous(node.id)
+                log(f'vacuous node: {node.id}', warning=True)
 
             case Stuck():
                 self.add_stuck(node.id)
+                log(f'stuck node: {node.id}')
 
             case Abstract(cterm):
                 new_node = self.create_node(cterm)
                 self.create_cover(node.id, new_node.id)
+                log(f'abstraction node: {node.id}')
 
             case Step(cterm, depth, next_node_logs, rule_labels, _):
                 next_node = self.create_node(cterm)
                 logs[next_node.id] = next_node_logs
                 self.create_edge(node.id, next_node.id, depth, rules=rule_labels)
+                log(f'basic block at depth {depth}: {node.id} --> {next_node.id}')
 
-            case Branch(constraints, _):
-                self.split_on_constraints(node.id, constraints)
+            case Branch(branches, _):
+                branch_node_ids = self.split_on_constraints(node.id, branches)
+                log(f'{len(branches)} branches: {node.id} --> {branch_node_ids}')
 
             case NDBranch(cterms, next_node_logs, rule_labels):
                 next_ids = [self.create_node(cterm).id for cterm in cterms]
                 for i in next_ids:
                     logs[i] = next_node_logs
                 self.create_ndbranch(node.id, next_ids, rules=rule_labels)
+                log(f'{len(cterms)} non-deterministic branches: {node.id} --> {next_ids}')
 
             case _:
                 raise AssertionError()
@@ -1333,6 +1348,7 @@ class Step(KCFGExtendResult):
     logs: tuple[LogEntry, ...]
     rule_labels: list[str]
     cut: bool = field(default=False)
+    info: str = field(default='')
 
 
 @final
@@ -1340,10 +1356,12 @@ class Step(KCFGExtendResult):
 class Branch(KCFGExtendResult):
     constraints: tuple[KInner, ...]
     heuristic: bool
+    info: str = field(default='')
 
-    def __init__(self, constraints: Iterable[KInner], *, heuristic: bool = False):
+    def __init__(self, constraints: Iterable[KInner], *, heuristic: bool = False, info: str = ''):
         object.__setattr__(self, 'constraints', tuple(constraints))
         object.__setattr__(self, 'heuristic', heuristic)
+        object.__setattr__(self, 'info', info)
 
 
 @final
