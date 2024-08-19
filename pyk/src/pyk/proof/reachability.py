@@ -800,7 +800,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
                 _LOGGER.warning(f'Bounded node {step.proof_id}: {step.node.id} at bmc depth {step.bmc_depth}')
                 return [APRProofBoundedResult(node_id=step.node.id, prior_loops_cache_update=prior_loops)]
 
-        # Check if the current node and target ar terminal
+        # Check if the current node and target are terminal
         is_terminal = self.kcfg_explore.kcfg_semantics.is_terminal(step.node.cterm)
         target_is_terminal = self.kcfg_explore.kcfg_semantics.is_terminal(step.target.cterm)
 
