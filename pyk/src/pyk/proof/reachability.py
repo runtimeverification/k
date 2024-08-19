@@ -44,19 +44,23 @@ class APRProofResult:
 
 @dataclass
 class APRProofExtendResult(APRProofResult):
-    """Holds the description of how an APRProof should be extended.
+    """Proof extension to be applied."""
 
-    Attributes:
-        extend_results: Holds the KCFG extension to be applied.
-        to_cache: Holds an indicator of whether or not the provided extension
-                  should be cached instead of being applied.
-        use_cache: If not None, holds the identifier of the node whose cached extension
-                   should be applied instead of the provided extension.
-    """
+    extension_to_apply: KCFGExtendResult
 
-    extend_results: list[KCFGExtendResult]
-    to_cache: bool = field(default=False)
-    use_cache: NodeIdLike | None = field(default=None)
+
+@dataclass
+class APRProofExtendAndCacheResult(APRProofExtendResult):
+    """Proof extension to be cached."""
+
+    extension_to_cache: KCFGExtendResult
+
+
+@dataclass
+class APRProofUseCacheResult(APRProofResult):
+    """Proof extension to be applied using the extension cache."""
+
+    cached_node_id: NodeIdLike
 
 
 @dataclass
@@ -78,10 +82,9 @@ class APRProofStep:
     target: KCFG.Node
     proof_id: str
     bmc_depth: int | None
-    cached: bool
+    use_cache: NodeIdLike | None
     module_name: str
     shortest_path_to_node: tuple[KCFG.Node, ...]
-    predecessor_node_id: NodeIdLike | None
     prior_loops_cache: FrozenDict[int, tuple[int, ...]] = field(compare=False)
     circularity: bool
     nonzero_depth: bool
@@ -196,8 +199,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
                     bmc_depth=self.bmc_depth,
                     module_name=module_name,
                     node=node,
-                    predecessor_node_id=predecessor_node_id,
-                    cached=predecessor_node_id in self._next_steps,
+                    use_cache=predecessor_node_id if predecessor_node_id in self._next_steps else None,
                     proof_id=self.id,
                     target=self.kcfg.node(self.target),
                     shortest_path_to_node=tuple(shortest_path),
@@ -211,24 +213,21 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
 
     def commit(self, result: APRProofResult) -> None:
         self.prior_loops_cache[result.node_id] = result.prior_loops_cache_update
-        if isinstance(result, APRProofExtendResult):
-            # Result has been cached, use the cache
-            if result.use_cache is not None:
-                assert len(result.extend_results) == 0
-                assert result.use_cache in self._next_steps
-                extend_result = self._next_steps.pop(result.use_cache)
-            # Result contains two steps, first to be applied, second to be cached
-            elif result.to_cache:
-                assert result.node_id not in self._next_steps
-                assert result.extend_results is not None and len(result.extend_results) == 2
-                self._next_steps[result.node_id] = result.extend_results[1]
-                extend_result = result.extend_results[0]
-            # Result contains one step, which is to be applied
-            else:
-                assert result.extend_results is not None and len(result.extend_results) == 1
-                extend_result = result.extend_results[0]
+        # Result has been cached, use the cache
+        if isinstance(result, APRProofUseCacheResult):
+            assert result.cached_node_id in self._next_steps
             self.kcfg.extend(
-                extend_result=extend_result,
+                extend_result=self._next_steps.pop(result.cached_node_id),
+                node=self.kcfg.node(result.node_id),
+                logs=self.logs,
+            )
+        elif isinstance(result, APRProofExtendResult):
+            # Result contains two steps, one to be applied, one to be cached
+            if isinstance(result, APRProofExtendAndCacheResult):
+                assert result.node_id not in self._next_steps
+                self._next_steps[result.node_id] = result.extension_to_cache
+            self.kcfg.extend(
+                extend_result=result.extension_to_apply,
                 node=self.kcfg.node(result.node_id),
                 logs=self.logs,
             )
@@ -833,13 +832,16 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         if step.circularity and not step.nonzero_depth:
             execute_depth = 1
 
-        use_cache: NodeIdLike | None = None
-
         # If the step has already been cached, do not invoke the backend and only send a signal back to the proof to use the cache
-        if step.cached:
-            _LOGGER.info(f'Using cached step for edge {step.predecessor_node_id} --> {step.node.id}')
-            extend_results = []
-            use_cache = step.predecessor_node_id
+        if step.use_cache is not None:
+            _LOGGER.info(f'Using cached step for edge {step.use_cache} --> {step.node.id}')
+            return [
+                APRProofUseCacheResult(
+                    node_id=step.node.id,
+                    cached_node_id=step.use_cache,
+                    prior_loops_cache_update=prior_loops,
+                )
+            ]
         # Invoke the backend to obtain the next KCFG extension
         else:
             extend_results = self.kcfg_explore.extend_cterm(
@@ -851,8 +853,6 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
                 node_id=step.node.id,
             )
 
-        to_cache: bool = False
-
         # We can obtain two results at most
         assert len(extend_results) <= 2
         # We have obtained two results: first is to be applied, second to be cached potentially
@@ -860,18 +860,21 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
             # Cache only if the current node is at non-zero depth
             if step.nonzero_depth:
                 _LOGGER.info(f'Caching next step for edge starting from {step.node.id}')
-                to_cache = True
-            # Otherwise, discard the second result
-            else:
-                extend_results = [extend_results[0]]
+                return [
+                    APRProofExtendAndCacheResult(
+                        node_id=step.node.id,
+                        extension_to_apply=extend_results[0],
+                        extension_to_cache=extend_results[1],
+                        prior_loops_cache_update=prior_loops,
+                    )
+                ]
 
+        # Otherwise, discard the second result
         return [
             APRProofExtendResult(
                 node_id=step.node.id,
-                extend_results=extend_results,
+                extension_to_apply=extend_results[0],
                 prior_loops_cache_update=prior_loops,
-                to_cache=to_cache,
-                use_cache=use_cache,
             )
         ]
 
