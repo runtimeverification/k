@@ -12,17 +12,27 @@ class KCFGSemantics(ABC):
     @abstractmethod
     def is_terminal(self, c: CTerm) -> bool: ...
 
+    """Checks whether or not a given CTerm is terminal."""
+
     @abstractmethod
     def abstract_node(self, c: CTerm) -> CTerm: ...
+
+    """Implements an abstraction mechanism."""
 
     @abstractmethod
     def same_loop(self, c1: CTerm, c2: CTerm) -> bool: ...
 
+    """Checks whether or not the two given CTerms represent the same loop head."""
+
     @abstractmethod
     def can_make_custom_step(self, c: CTerm) -> bool: ...
 
+    """Checks whether or not the semantics can make a custom step from a given CTerm."""
+
     @abstractmethod
     def custom_step(self, c: CTerm) -> KCFGExtendResult | None: ...
+
+    """Implements a custom semantic step."""
 
 
 class DefaultSemantics(KCFGSemantics):

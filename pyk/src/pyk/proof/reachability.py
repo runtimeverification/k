@@ -46,7 +46,7 @@ class APRProofResult:
 class APRProofExtendResult(APRProofResult):
     """Holds the description of how an APRProof should be extended.
 
-    Fields:
+    Attributes:
         extend_results: Holds the KCFG extension to be applied.
         to_cache: Holds an indicator of whether or not the provided extension
                   should be cached instead of being applied.

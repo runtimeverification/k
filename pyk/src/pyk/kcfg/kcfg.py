@@ -1321,8 +1321,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         return KCFG.Node.from_dict(store.read_node_data(node_id))
 
 
-class KCFGExtendResult(ABC):
-    info: str = field(default='')
+class KCFGExtendResult(ABC): ...
 
 
 @final
