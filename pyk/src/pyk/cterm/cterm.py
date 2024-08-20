@@ -163,13 +163,14 @@ class CTerm:
     def match_with_constraint(self, cterm: CTerm) -> CSubst | None:
         """Find `CSubst` instantiating this `CTerm` to the other, return `None` if no such `CSubst` exists."""
         subst = self.config.match(cterm.config)
-
+        
         if subst is None:
             return None
-
-        constraint = self._ml_impl(cterm.constraints, map(subst, self.constraints))
-
-        return CSubst(subst=subst, constraints=[constraint])
+        
+        source_constraints = [subst(c) for c in self.constraints]
+        constraints = [c for c in cterm.constraints if c not in source_constraints]
+        
+        return CSubst(subst, constraints)
 
     @staticmethod
     def _ml_impl(antecedents: Iterable[KInner], consequents: Iterable[KInner]) -> KInner:

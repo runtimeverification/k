@@ -13,7 +13,6 @@ from pyk.prelude.k import GENERATED_TOP_CELL, K
 from pyk.prelude.kbool import TRUE
 from pyk.prelude.kint import INT, intToken
 from pyk.prelude.ml import mlAnd, mlEquals, mlEqualsTrue, mlTop
-
 from .utils import a, b, c, f, g, ge_ml, h, k, lt_ml, x, y, z
 
 if TYPE_CHECKING:
@@ -73,6 +72,28 @@ def test_no_cterm_match(term: KInner, pattern: KInner) -> None:
 
     # Then
     assert subst is None
+
+
+MATCH_WITH_CONSTRAINT_TEST_DATA: Final = (
+    (CTerm(generated_top(x)), CTerm(generated_top(x))),
+    (CTerm(generated_top(x)), CTerm(generated_top(y))),
+    (CTerm(generated_top(x)), CTerm(generated_top(y), (mlEqualsTrue(geInt(y, intToken(0))),))),
+    (
+        CTerm(generated_top(x), (mlEqualsTrue(geInt(y, intToken(0))),)),
+        CTerm(generated_top(y), (mlEqualsTrue(geInt(y, intToken(5))),)),
+    ),
+)
+
+
+@pytest.mark.parametrize('t1, t2', MATCH_WITH_CONSTRAINT_TEST_DATA, ids=count())
+def test_cterm_match_with_constraint(t1: CTerm, t2: CTerm) -> None:
+    # When
+    c_subst1 = t1.match_with_constraint(t2)
+    c_subst2 = t2.match_with_constraint(t1)
+
+    # Then
+    assert c_subst1 is not None and c_subst1.apply(t1) == t2
+    assert c_subst2 is not None and c_subst2.apply(t2) == t1
 
 
 BUILD_RULE_TEST_DATA: Final = (
