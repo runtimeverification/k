@@ -166,16 +166,14 @@ class CTerm:
         if subst is None:
             return None
 
-        constraint = self._ml_impl(cterm.constraints, map(subst, self.constraints))
-
-        return CSubst(subst=subst, constraints=[constraint])
+        return CSubst(subst=subst, constraints=cterm.constraints)
 
     @staticmethod
     def _ml_impl(antecedents: Iterable[KInner], consequents: Iterable[KInner]) -> KInner:
         antecedent = mlAnd(unique(antecedents), GENERATED_TOP_CELL)
         consequent = mlAnd(unique(term for term in consequents if term not in set(antecedents)), GENERATED_TOP_CELL)
 
-        if mlTop(GENERATED_TOP_CELL) in {antecedent, consequent}:
+        if mlTop(GENERATED_TOP_CELL) in [antecedent, consequent]:
             return consequent
 
         return mlImplies(antecedent, consequent, GENERATED_TOP_CELL)
@@ -333,7 +331,7 @@ class CSubst:
 
     def apply(self, cterm: CTerm) -> CTerm:
         """Apply this `CSubst` to the given `CTerm` (instantiating the free variables, and adding the constraints)."""
-        _kast = self.subst(cterm.kast)
+        _kast = self.subst(cterm.config)
         return CTerm(_kast, [self.constraint])
 
 
