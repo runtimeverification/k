@@ -214,7 +214,7 @@ public class ResolveFun {
     List<KVariable> result = new ArrayList<>();
     new GatherVarsVisitor(true, errors, vars, false).apply(k);
     new ComputeUnboundVariables(true, true, errors, vars, result::add).apply(k);
-    return result;
+    return result.stream().distinct().collect(Collectors.toList());
   }
 
   private Production funProd(KLabel fun, K k, Sort arg, boolean total) {

@@ -63,18 +63,24 @@ class CustomStepSemanticsWithoutStep(KCFGSemantics):
     def same_loop(self, c1: CTerm, c2: CTerm) -> bool:
         return False
 
+    def can_make_custom_step(self, c: CTerm) -> bool:
+        return False
+
     def custom_step(self, c: CTerm) -> KCFGExtendResult | None:
         return None
 
 
 class CustomStepSemanticsWithStep(CustomStepSemanticsWithoutStep):
-    def custom_step(self, c: CTerm) -> KCFGExtendResult | None:
+    def can_make_custom_step(self, c: CTerm) -> bool:
         k_cell = c.cell('K_CELL')
-        if (
+        return (
             type(k_cell) is KSequence
             and type(k_cell[0]) is KApply
             and k_cell[0].label.name == 'c_CUSTOM-STEP-SYNTAX_Step'
-        ):
+        )
+
+    def custom_step(self, c: CTerm) -> KCFGExtendResult | None:
+        if self.can_make_custom_step(c):
             new_cterm = CTerm.from_kast(set_cell(c.kast, 'K_CELL', KSequence(KApply('d_CUSTOM-STEP-SYNTAX_Step'))))
             return Step(new_cterm, 1, (), ['CUSTOM-STEP.c.d'], cut=True)
         return None

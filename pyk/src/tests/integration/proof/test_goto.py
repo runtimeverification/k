@@ -44,6 +44,9 @@ class GotoSemantics(KCFGSemantics):
             return k_cell[0].label.name == 'jumpi'
         return False
 
+    def can_make_custom_step(self, c: CTerm) -> bool:
+        return False
+
     def custom_step(self, c: CTerm) -> KCFGExtendResult | None:
         return None
 
