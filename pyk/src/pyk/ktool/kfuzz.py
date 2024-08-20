@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 from hypothesis import Phase, given, settings
@@ -20,21 +21,23 @@ if TYPE_CHECKING:
     from ..kore.syntax import Pattern
 
 
-class KFuzzTestPrinter:
-    def print_test_prologue(self) -> None:
-        pass
+class KFuzzTestPrinter(ABC):
+    @abstractmethod
+    def print_test_case(self, args: Mapping[EVar, Pattern]) -> None: ...
 
+    @abstractmethod
+    def print_failure_case(self, args: Mapping[EVar, Pattern]) -> None: ...
+
+
+class _KFuzzDefaultTestPrinter(KFuzzTestPrinter):
     def print_test_case(self, args: Mapping[EVar, Pattern]) -> None:
         pass
 
     def print_failure_case(self, args: Mapping[EVar, Pattern]) -> None:
         pass
 
-    def print_test_epilogue(self) -> None:
-        pass
 
-
-_DEFAULT_PRINTER = KFuzzTestPrinter()
+_DEFAULT_PRINTER = _KFuzzDefaultTestPrinter()
 
 
 class KFuzz:
@@ -170,6 +173,4 @@ def fuzz(
     hypothesis_args.setdefault('deadline', 5000)
     hypothesis_args.setdefault('phases', (Phase.explicit, Phase.reuse, Phase.generate))
 
-    printer.print_test_prologue()
     given(strat)(settings(**hypothesis_args)(test))()
-    printer.print_test_epilogue()
