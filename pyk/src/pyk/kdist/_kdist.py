@@ -3,6 +3,7 @@ from __future__ import annotations
 import concurrent.futures
 import json
 import logging
+import multiprocessing
 import os
 import shutil
 from concurrent.futures import ProcessPoolExecutor
@@ -99,7 +100,7 @@ class KDist:
         deps_fqns = [target_id.full_name for target_id in dep_ids]
         _LOGGER.info(f"Building targets: {', '.join(deps_fqns)}")
 
-        with ProcessPoolExecutor(max_workers=jobs) as pool:
+        with ProcessPoolExecutor(max_workers=jobs, mp_context=multiprocessing.get_context('spawn')) as pool:
             pending: dict[Future[Path], TargetId] = {}
 
             def submit(target_id: TargetId) -> None:
