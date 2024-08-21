@@ -247,6 +247,38 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
 
     @final
     @dataclass(frozen=True)
+    class MergedEdge(EdgeLike):
+        """Merged edge is a collection of edges that have been merged into a single edge."""
+
+        source: KCFG.Node
+        target: KCFG.Node
+        edges: tuple[KCFG.Edge, ...]
+
+        def to_dict(self) -> dict[str, Any]:
+            return {
+                'source': self.source.id,
+                'target': self.target.id,
+                'edges': [edge.to_dict() for edge in self.edges],
+            }
+
+        @staticmethod
+        def from_dict(dct: dict[str, Any], nodes: Mapping[int, KCFG.Node]) -> KCFG.Successor:
+            return KCFG.MergedEdge(
+                nodes[dct['source']],
+                nodes[dct['target']],
+                tuple(KCFG.Edge.from_dict(edge, nodes) for edge in dct['edges']),
+            )
+
+        def replace_source(self, node: KCFG.Node) -> KCFG.Successor:
+            assert node.id == self.source.id
+            return KCFG.MergedEdge(node, self.target, self.edges)
+
+        def replace_target(self, node: KCFG.Node) -> KCFG.Successor:
+            assert node.id == self.target.id
+            return KCFG.MergedEdge(self.source, node, self.edges)
+
+    @final
+    @dataclass(frozen=True)
     class Cover(EdgeLike):
         source: KCFG.Node
         target: KCFG.Node
