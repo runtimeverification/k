@@ -9,6 +9,7 @@ from pyk.cli.args import KCLIArgs
 from pyk.cli.utils import loglevel
 
 from ..kdist import kdist, target_ids
+from .utils import LOG_FORMAT
 
 if TYPE_CHECKING:
     from argparse import Namespace
@@ -16,13 +17,12 @@ if TYPE_CHECKING:
 
 
 _LOGGER: Final = logging.getLogger(__name__)
-_LOG_FORMAT: Final = '%(levelname)s %(asctime)s %(name)s - %(message)s'
 
 
 def main() -> None:
     args = _parse_arguments()
 
-    logging.basicConfig(level=loglevel(args), format=_LOG_FORMAT)
+    logging.basicConfig(level=loglevel(args), format=LOG_FORMAT)
 
     if args.command == 'build':
         _exec_build(**vars(args))
