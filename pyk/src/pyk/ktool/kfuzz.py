@@ -21,34 +21,34 @@ if TYPE_CHECKING:
     from ..kore.syntax import Pattern
 
 
-class KFuzzTestPrinter(ABC):
+class KFuzzTestCaseHandler(ABC):
     @abstractmethod
-    def print_test_case(self, args: Mapping[EVar, Pattern]) -> None: ...
+    def handle_test_case(self, args: Mapping[EVar, Pattern]) -> None: ...
 
     @abstractmethod
-    def print_failure_case(self, args: Mapping[EVar, Pattern]) -> None: ...
+    def handle_failure_case(self, args: Mapping[EVar, Pattern]) -> None: ...
 
 
-class _KFuzzDefaultTestPrinter(KFuzzTestPrinter):
-    def print_test_case(self, args: Mapping[EVar, Pattern]) -> None:
+class _KFuzzDefaultTestCaseHandler(KFuzzTestCaseHandler):
+    def handle_test_case(self, args: Mapping[EVar, Pattern]) -> None:
         pass
 
-    def print_failure_case(self, args: Mapping[EVar, Pattern]) -> None:
+    def handle_failure_case(self, args: Mapping[EVar, Pattern]) -> None:
         pass
 
 
-_DEFAULT_PRINTER = _KFuzzDefaultTestPrinter()
+_DEFAULT_HANDLER = _KFuzzDefaultTestCaseHandler()
 
 
 class KFuzz:
     """Interface for fuzzing over property tests in K."""
 
     definition_dir: Path
-    printer: KFuzzTestPrinter
+    test_case_handler: KFuzzTestCaseHandler
 
-    def __init__(self, definition_dir: Path, printer: KFuzzTestPrinter = _DEFAULT_PRINTER) -> None:
+    def __init__(self, definition_dir: Path, test_case_handler: KFuzzTestCaseHandler = _DEFAULT_HANDLER) -> None:
         self.definition_dir = definition_dir
-        self.printer = printer
+        self.test_case_handler = test_case_handler
 
     def fuzz_with_check(
         self,
@@ -66,7 +66,7 @@ class KFuzz:
             template,
             subst_strategy,
             check_func=check_func,
-            printer=self.printer,
+            test_case_handler=self.test_case_handler,
             **hypothesis_args,
         )
 
@@ -81,7 +81,12 @@ class KFuzz:
         See :any:`fuzz` for info on the parameters.
         """
         fuzz(
-            self.definition_dir, template, subst_strategy, check_exit_code=True, printer=self.printer, **hypothesis_args
+            self.definition_dir,
+            template,
+            subst_strategy,
+            check_exit_code=True,
+            test_case_handler=self.test_case_handler,
+            **hypothesis_args,
         )
 
 
@@ -117,7 +122,7 @@ def fuzz(
     subst_strategy: dict[EVar, SearchStrategy[Pattern]],
     check_func: Callable[[Pattern], Any] | None = None,
     check_exit_code: bool = False,
-    printer: KFuzzTestPrinter = _DEFAULT_PRINTER,
+    test_case_handler: KFuzzTestCaseHandler = _DEFAULT_HANDLER,
     **hypothesis_args: Any,
 ) -> None:
     """Fuzz a property test with concrete execution over a K term.
@@ -152,7 +157,7 @@ def fuzz(
             else:
                 return p
 
-        printer.print_test_case(subst_case)
+        test_case_handler.handle_test_case(subst_case)
         test_pattern = template.top_down(sub)
         res = llvm_interpret_raw(definition_dir, test_pattern.text, check=False)
 
@@ -164,7 +169,7 @@ def fuzz(
                 res_pattern = KoreParser(res.stdout).pattern()
                 check_func(res_pattern)
         except AssertionError:
-            printer.print_failure_case(subst_case)
+            test_case_handler.handle_failure_case(subst_case)
             raise
 
     strat: SearchStrategy = fixed_dictionaries(subst_strategy)
