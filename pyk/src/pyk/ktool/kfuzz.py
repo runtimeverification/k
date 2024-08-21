@@ -120,6 +120,7 @@ def fuzz(
     definition_dir: str | Path,
     template: Pattern,
     subst_strategy: dict[EVar, SearchStrategy[Pattern]],
+    *,
     check_func: Callable[[Pattern], Any] | None = None,
     check_exit_code: bool = False,
     test_case_handler: KFuzzTestCaseHandler = _DEFAULT_HANDLER,
