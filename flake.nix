@@ -3,7 +3,7 @@
   inputs = {
     llvm-backend.url = "github:runtimeverification/llvm-backend/v0.1.82";
     haskell-backend = {
-      url = "github:runtimeverification/haskell-backend/v0.1.67";
+      url = "github:runtimeverification/haskell-backend/v0.1.76";
       inputs.rv-utils.follows = "llvm-backend/rv-utils";
       inputs.nixpkgs.follows = "llvm-backend/nixpkgs";
     };
