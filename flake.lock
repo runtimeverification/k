@@ -65,16 +65,16 @@
         "z3": "z3"
       },
       "locked": {
-        "lastModified": 1720572621,
-        "narHash": "sha256-/j0swzk75vBmtYE62t044W7tCRULxwYfygb+C01Ar9A=",
+        "lastModified": 1723630441,
+        "narHash": "sha256-BbJwGKi2kwbSIegUZTuZvzOoA9g/NRn7mwsgOhKpFvg=",
         "owner": "runtimeverification",
         "repo": "haskell-backend",
-        "rev": "3ecef6a3bf991a95ac3dba2900a721bbcd5f5ce7",
+        "rev": "8d4aafc4bc2cb6ab9d992030c6482b712309608f",
         "type": "github"
       },
       "original": {
         "owner": "runtimeverification",
-        "ref": "v0.1.32",
+        "ref": "v0.1.67",
         "repo": "haskell-backend",
         "type": "github"
       }
@@ -112,16 +112,16 @@
         "utils": "utils"
       },
       "locked": {
-        "lastModified": 1720605767,
-        "narHash": "sha256-f2+y13P306W0Ws7gfjVkG4jytHqfSY0qAd4KeF/qZno=",
+        "lastModified": 1724179030,
+        "narHash": "sha256-bi3/G8BojOQOa9ZI8wVoc4girv8GNYgP/zlY4u/wrwo=",
         "owner": "runtimeverification",
         "repo": "llvm-backend",
-        "rev": "bd12ae4ace1f288b3b6236cc42f7004fe38e9965",
+        "rev": "b9dc4ff8d3510f8ffb09cad2e1c80e2a0e9bb132",
         "type": "github"
       },
       "original": {
         "owner": "runtimeverification",
-        "ref": "v0.1.56",
+        "ref": "v0.1.81",
         "repo": "llvm-backend",
         "type": "github"
       }
@@ -361,16 +361,16 @@
     "z3": {
       "flake": false,
       "locked": {
-        "lastModified": 1674011426,
-        "narHash": "sha256-7cuUf29TMpX62PwO1ab3ZuzmzlcrRjTKB1CyXnYgYus=",
+        "lastModified": 1709835916,
+        "narHash": "sha256-MIbP3QgKIGF/qUMTupaO7xD46LbmH69kF/394Sajhkg=",
         "owner": "Z3Prover",
         "repo": "z3",
-        "rev": "3012293c35eadbfd73e5b94adbe50b0cc44ffb83",
+        "rev": "3049f578a8f98a0b0992eca193afe57a73b30ca3",
         "type": "github"
       },
       "original": {
         "owner": "Z3Prover",
-        "ref": "z3-4.12.1",
+        "ref": "z3-4.13.0",
         "repo": "z3",
         "type": "github"
       }

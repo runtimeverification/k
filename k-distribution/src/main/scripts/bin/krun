@@ -37,7 +37,7 @@ filterSubst=
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
   LLDB_FILE="$(dirname "$0")/../lib/kllvm/lldb/k_lldb_path"
-  if [ -f "$LLDB_FILE" ]; then
+  if [[ -f "$LLDB_FILE" && -f "$(cat "$LLDB_FILE")" ]]; then
     DBG_EXE="$(cat "$LLDB_FILE")"
   else
     DBG_EXE="lldb"

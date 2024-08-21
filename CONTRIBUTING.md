@@ -53,14 +53,14 @@ is important that your commits are based on the K `develop` branch.
 
 Next, please request a review from a K maintainer on your PR. The last person to
 modify the files you are changing is a good start, or if you're not sure,
-tag [@baltoli][bruce] as a fallback.
+tag [@tothtamas28][tamas] as a fallback.
 
-Once your code has been reviewed by a K maintainer, we will open a new PR that
-includes your commits with [proper attribution][authors]. Doing so allows us to
-run our internal CI processes once we are happy with your code. If the tests
-pass, we will merge the PR and close your original PR. If changes need to be
-made subsequently to get tests to pass, they will need to be pushed to your
-original fork branch.
+Once your code has been initially reviewed by a K maintainer, we will approve it
+to run against our CI test suite. If the tests pass, we will merge the PR and
+close your original PR. If changes need to be made subsequently to get tests to
+pass, they will need to be pushed to your original fork branch. For trivial
+changes, it can be useful if you permit modifications to be pushed to your
+branch by maintainers.
 
 ### Licensing
 
@@ -68,47 +68,9 @@ K is licensed under the [BSD 3-Clause License][license]. If you make changes to
 K via a pull request, your changes will automatically be licensed under the same
 license following [Github's terms of service][tos].
 
-### For RV Maintainers
-
-If you are an RV-internal K developer, please take ownership of any community
-pull requests you review, and make sure that they end up getting merged promptly
-following these instructions.
-
-First, review the code in the original PR as you would normally. If you are
-happy with the changes made, then create a new branch of your local K repo
-referencing the external PR number:
-```console
-$ git checkout -b adopt-pr-$NUMBER
-```
-
-Then, add the external user's fork to your local repo as a remote:
-```console
-$ git remote add temp-k-fork https://github.com/$USER/k.git
-$ git fetch temp-k-fork
-```
-
-You can now cherry-pick the commit range in the user's PR onto your local
-branch:
-```console
-$ git cherry-pick $START..$END
-```
-
-Finally, push your branch to `runtimeverification/k` and open a PR as usual. CI
-should run as expected, and you can request a secondary RV-internal code review
-as you would for one of your own PRs. Double-check that the external user is
-credited as the commit author in the Github UI.
-
-If further changes need to be made by the external user, you can cherry-pick
-their changes over to your branch as before.
-
-Once your duplicated PR is merged, you can close (not merge) the user's original
-PR and remove your remote pointing to their fork.
-```console
-$ git remote rm temp-k-fork
-```
 
 [authors]: https://docs.github.com/en/pull-requests/committing-changes-to-your-project/creating-and-editing-commits/creating-a-commit-with-multiple-authors
-[bruce]: https://github.com/baltoli
+[tamas]: https://github.com/tothtamas28
 [discord]: https://discord.com/invite/CurfmXNtbN
 [fork]: https://docs.github.com/en/get-started/quickstart/fork-a-repo
 [integration]: https://github.com/runtimeverification/k/tree/master/k-distribution/tests/regression-new

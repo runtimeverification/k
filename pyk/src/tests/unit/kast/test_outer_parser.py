@@ -114,6 +114,26 @@ SENTENCE_TEST_DATA: Final = (
         SyntaxDefn(SortDecl('Foo'), (PriorityBlock((Production((Terminal('foo'),)),)),)),
     ),
     (
+        'syntax Foo ::= "foo" [symbol]',
+        SyntaxDefn(SortDecl('Foo'), (PriorityBlock((Production((Terminal('foo'),), att=Att((('symbol', ''),))),)),)),
+    ),
+    (
+        'syntax Foo ::= "foo" [symbol()]',
+        SyntaxDefn(SortDecl('Foo'), (PriorityBlock((Production((Terminal('foo'),), att=Att((('symbol', ''),))),)),)),
+    ),
+    (
+        'syntax Foo ::= "foo" [symbol("")]',
+        SyntaxDefn(SortDecl('Foo'), (PriorityBlock((Production((Terminal('foo'),), att=Att((('symbol', ''),))),)),)),
+    ),
+    (
+        'syntax Foo ::= "foo" [symbol(foo)]',
+        SyntaxDefn(SortDecl('Foo'), (PriorityBlock((Production((Terminal('foo'),), att=Att((('symbol', 'foo'),))),)),)),
+    ),
+    (
+        'syntax Foo ::= "foo" [symbol("foo")]',
+        SyntaxDefn(SortDecl('Foo'), (PriorityBlock((Production((Terminal('foo'),), att=Att((('symbol', 'foo'),))),)),)),
+    ),
+    (
         'syntax Foo ::= Bar',
         SyntaxDefn(SortDecl('Foo'), (PriorityBlock((Production((NonTerminal(Sort('Bar')),)),)),)),
     ),

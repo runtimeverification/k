@@ -151,3 +151,43 @@ def test_multiary(test_id: str, text: str, expected: list[Pattern]) -> None:
     # Then
     assert parser.eof
     assert actual == expected
+
+
+STRING_TEST_DATA: Final = (
+    ('', ''),
+    (' ', ' '),
+    ('foo', 'foo'),
+    (r'\t', '\t'),
+    (r'\n', '\n'),
+    (r'\f', '\f'),
+    (r'\r', '\r'),
+    (r'\\', '\\'),
+    (r'\"', '"'),
+    (r'\x80', '\x80'),
+    (r'\x0f', '\x0f'),
+    (r'\x0F', '\x0f'),
+    (r'\u03b1', '\u03b1'),
+    (r'\u03B1', '\u03b1'),
+    (r'\U0001f642', '\U0001f642'),
+    (r'\U0001F642', '\U0001f642'),
+    (r'\x80\x80', '\x80\x80'),
+    (r'a\u03b1\x80\U0001f642b', 'a\u03b1\x80\U0001f642b'),
+)
+
+
+@pytest.mark.parametrize(
+    'text,expected',
+    STRING_TEST_DATA,
+    ids=[text for text, _ in STRING_TEST_DATA],
+)
+def test_string(text: str, expected: str) -> None:
+    # Given
+    pattern = f'"{text}"'
+    parser = KoreParser(pattern)
+
+    # When
+    actual = parser.string()
+
+    # Then
+    assert parser.eof
+    assert actual.value == expected

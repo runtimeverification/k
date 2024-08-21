@@ -48,6 +48,7 @@ def _exec_build(
     force: bool,
     verbose: bool,
     debug: bool,
+    clean: bool,
 ) -> None:
     kdist.build(
         target_ids=_process_targets(targets),
@@ -55,6 +56,7 @@ def _exec_build(
         jobs=jobs,
         force=force,
         verbose=verbose or debug,
+        clean=clean,
     )
 
 
@@ -130,6 +132,9 @@ def _parse_arguments() -> Namespace:
     )
     build_parser.add_argument('-f', '--force', action='store_true', default=False, help='force build')
     build_parser.add_argument('-j', '--jobs', metavar='N', type=int, default=1, help='maximal number of build jobs')
+    build_parser.add_argument(
+        '--no-clean', dest='clean', action='store_false', default=True, help="Don't clean before building"
+    )
 
     clean_parser = command_parser.add_parser('clean', help='clean targets')
     add_target_arg(clean_parser, 'target to clean')

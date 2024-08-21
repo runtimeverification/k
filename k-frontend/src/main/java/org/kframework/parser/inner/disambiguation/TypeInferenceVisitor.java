@@ -230,7 +230,7 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException
           return typeError(pr, expectedSort, inferred);
         }
         // well typed, so add a cast and return
-        return wrapTermWithCast((Constant) pr, inferred);
+        return wrapTermWithCast(pr, inferred);
       }
       // compute the instantiated production with its sort parameters
       Production substituted = pr.production().substitute(inferencer.getArgs(pr));
@@ -275,12 +275,26 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException
             j++;
           }
         }
+        if (pr.production().params().nonEmpty() && hasParametricSort(pr.production())) {
+          return wrapTermWithCast(tc, substituted.sort());
+        }
         return Right.apply(tc);
       }
       return Right.apply(pr);
     }
 
-    private Either<Set<KEMException>, Term> wrapTermWithCast(Constant c, Sort declared) {
+    private boolean hasParametricSort(Production prod) {
+      if (prod.sort().head().params() != 0) {
+        return true;
+      }
+      if (stream(prod.nonterminals()).anyMatch(nt -> nt.sort().head().params() != 0)) {
+        return true;
+      }
+      return false;
+    }
+
+    private Either<Set<KEMException>, Term> wrapTermWithCast(
+        ProductionReference pr, Sort declared) {
       if (castContext != CastContext.SEMANTIC) {
         // There isn't an existing :Sort, so add one
         Production cast =
@@ -289,9 +303,10 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException
                 .productionsFor()
                 .apply(KLabel("#SemanticCastTo" + declared.toString()))
                 .head();
-        return Right.apply(TermCons.apply(ConsPStack.singleton(c), cast, c.location(), c.source()));
+        return Right.apply(
+            TermCons.apply(ConsPStack.singleton(pr), cast, pr.location(), pr.source()));
       }
-      return Right.apply(c);
+      return Right.apply(pr);
     }
   }
 }

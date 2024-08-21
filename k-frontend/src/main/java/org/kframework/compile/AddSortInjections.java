@@ -488,7 +488,12 @@ public class AddSortInjections {
     }
 
     Set<Sort> nonParametric =
-        filteredEntries.stream().filter(s -> s.params().isEmpty()).collect(Collectors.toSet());
+        filteredEntries.stream()
+            .filter(
+                s ->
+                    s.params().isEmpty()
+                        || stream(s.params()).allMatch(p -> mod.allSorts().contains(p)))
+            .collect(Collectors.toSet());
     Set<Sort> bounds = mod.subsorts().upperBounds(nonParametric);
     // Anything less than KBott or greater than K is a syntactic sort from kast.md which should not
     // be considered
@@ -496,7 +501,9 @@ public class AddSortInjections {
         s ->
             mod.subsorts().lessThanEq(s, Sorts.KBott())
                 || mod.subsorts().greaterThan(s, Sorts.K()));
-    if (expectedSort != null && !expectedSort.name().equals(SORTPARAM_NAME)) {
+    if (expectedSort != null
+        && expectedSort.head().params() == 0
+        && !expectedSort.name().equals(SORTPARAM_NAME)) {
       bounds.removeIf(s -> !mod.subsorts().lessThanEq(s, expectedSort));
     }
 

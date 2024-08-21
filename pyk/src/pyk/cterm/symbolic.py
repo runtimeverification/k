@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, NamedTuple, final
 from pyk.utils import not_none
 
 from ..cterm import CSubst, CTerm
-from ..kast.inner import KApply, KLabel, KRewrite, KVariable, Subst
+from ..kast.inner import KApply, KLabel, KRewrite, KToken, KVariable, Subst
 from ..kast.manip import flatten_label, is_spurious_constraint, sort_ac_collections
 from ..kast.pretty import PrettyPrinter
 from ..konvert import kast_to_kore, kore_to_kast
@@ -25,7 +25,7 @@ from ..kore.rpc import (
     kore_server,
 )
 from ..prelude.k import GENERATED_TOP_CELL, K_ITEM
-from ..prelude.ml import is_top, mlAnd, mlEquals
+from ..prelude.ml import is_top, mlEquals
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
@@ -73,46 +73,27 @@ class CTermSMTError(Exception):
 class CTermSymbolic:
     _kore_client: KoreClient
     _definition: KDefinition
-    _trace_rewrites: bool
+    _log_succ_rewrites: bool
+    _log_fail_rewrites: bool
 
     def __init__(
         self,
         kore_client: KoreClient,
         definition: KDefinition,
         *,
-        trace_rewrites: bool = False,
+        log_succ_rewrites: bool = True,
+        log_fail_rewrites: bool = False,
     ):
         self._kore_client = kore_client
         self._definition = definition
-        self._trace_rewrites = trace_rewrites
+        self._log_succ_rewrites = log_succ_rewrites
+        self._log_fail_rewrites = log_fail_rewrites
 
     def kast_to_kore(self, kinner: KInner) -> Pattern:
         return kast_to_kore(self._definition, kinner, sort=GENERATED_TOP_CELL)
 
     def kore_to_kast(self, pattern: Pattern) -> KInner:
         return kore_to_kast(self._definition, pattern)
-
-    def minimize_constraints(self, constraints: tuple[KInner, ...], path_condition: KInner) -> tuple[KInner, ...]:
-        """Minimize given branching constraints with respect to a given path condition."""
-        # By construction, this function is to be called with at least two sets of constraints
-        assert len(constraints) >= 2
-        # Determine intersection between all returned sets of branching constraints
-        flattened_default = [flatten_label('#And', c) for c in constraints]
-        intersection = set.intersection(*(set(cs) for cs in flattened_default))
-        # If intersection is empty, there is nothing to be done
-        if not intersection:
-            return constraints
-        # Check if non-empty intersection is entailed by the path condition
-        dummy_config = self._definition.empty_config(sort=GENERATED_TOP_CELL)
-        path_condition_cterm = CTerm(dummy_config, constraints=[path_condition])
-        intersection_cterm = CTerm(dummy_config, constraints=intersection)
-        implication_check = self.implies(path_condition_cterm, intersection_cterm, bind_universally=True)
-        # The intersection is not entailed, there is nothing to be done
-        if implication_check.csubst is None:
-            return constraints
-        # The intersection is entailed and can be filtered out of the branching constraints
-        else:
-            return tuple(mlAnd(c for c in cs if c not in intersection) for cs in flattened_default)
 
     def execute(
         self,
@@ -132,8 +113,8 @@ class CTermSymbolic:
                 cut_point_rules=cut_point_rules,
                 terminal_rules=terminal_rules,
                 module_name=module_name,
-                log_successful_rewrites=True,
-                log_failed_rewrites=self._trace_rewrites,
+                log_successful_rewrites=self._log_succ_rewrites,
+                log_failed_rewrites=self._log_succ_rewrites and self._log_fail_rewrites,
             )
         except SmtSolverError as err:
             raise self._smt_solver_error(err) from err
@@ -148,11 +129,6 @@ class CTermSymbolic:
             self.kore_to_kast(not_none(s.rule_predicate)) if s.rule_predicate is not None else None
             for s in resp_next_states
         )
-        # Branch constraint minimization makes sense only if there is a proper branching
-        if len(branching_constraints) >= 2 and all(bc is not None for bc in branching_constraints):
-            branching_constraints = self.minimize_constraints(
-                tuple(not_none(bc) for bc in branching_constraints), path_condition=mlAnd(cterm.constraints)
-            )
         next_states = tuple(
             NextState(CTerm.from_kast(self.kore_to_kast(ns.kore)), c)
             for ns, c in zip(resp_next_states, branching_constraints, strict=True)
@@ -219,6 +195,7 @@ class CTermSymbolic:
         bind_universally: bool = False,
         failure_reason: bool = False,
         module_name: str | None = None,
+        assume_defined: bool = False,
     ) -> CTermImplies:
         _LOGGER.debug(f'Checking implication: {antecedent} #Implies {consequent}')
         _consequent = consequent.kast
@@ -235,7 +212,9 @@ class CTermSymbolic:
         antecedent_kore = self.kast_to_kore(antecedent.kast)
         consequent_kore = self.kast_to_kore(_consequent)
         try:
-            result = self._kore_client.implies(antecedent_kore, consequent_kore, module_name=module_name)
+            result = self._kore_client.implies(
+                antecedent_kore, consequent_kore, module_name=module_name, assume_defined=assume_defined
+            )
         except SmtSolverError as err:
             raise self._smt_solver_error(err) from err
 
@@ -253,20 +232,25 @@ class CTermSymbolic:
                     bind_universally=bind_universally,
                     failure_reason=False,
                     module_name=module_name,
+                    assume_defined=assume_defined,
                 )
                 config_match = _config_match.csubst
                 if config_match is None:
                     curr_cell_match = Subst({})
                     for cell in antecedent.cells:
                         antecedent_cell = sort_ac_collections(antecedent.cell(cell))
-                        consequent_cell = sort_ac_collections(consequent.cell(cell))
-                        cell_match = consequent_cell.match(antecedent_cell)
-                        if cell_match is not None:
-                            _curr_cell_match = curr_cell_match.union(cell_match)
-                            if _curr_cell_match is not None:
-                                curr_cell_match = _curr_cell_match
-                                continue
-                        failing_cells.append((cell, KRewrite(antecedent_cell, consequent_cell)))
+
+                        if cell not in consequent.cells:
+                            failing_cells.append((cell, KRewrite(antecedent_cell, KToken('.K', sort='KItem'))))
+                        else:
+                            consequent_cell = sort_ac_collections(consequent.cell(cell))
+                            cell_match = consequent_cell.match(antecedent_cell)
+                            if cell_match is not None:
+                                _curr_cell_match = curr_cell_match.union(cell_match)
+                                if _curr_cell_match is not None:
+                                    curr_cell_match = _curr_cell_match
+                                    continue
+                            failing_cells.append((cell, KRewrite(antecedent_cell, consequent_cell)))
                 else:
                     consequent_constraints = list(
                         filter(
@@ -328,7 +312,8 @@ def cterm_symbolic(
     haskell_log_format: KoreExecLogFormat = KoreExecLogFormat.ONELINE,
     haskell_log_entries: Iterable[str] = (),
     log_axioms_file: Path | None = None,
-    trace_rewrites: bool = False,
+    log_succ_rewrites: bool = True,
+    log_fail_rewrites: bool = False,
     start_server: bool = True,
     maude_port: int | None = None,
     fallback_on: Iterable[FallbackReason] | None = None,
@@ -355,7 +340,9 @@ def cterm_symbolic(
             no_post_exec_simplify=no_post_exec_simplify,
         ) as server:
             with KoreClient('localhost', server.port, bug_report=bug_report, bug_report_id=id) as client:
-                yield CTermSymbolic(client, definition, trace_rewrites=trace_rewrites)
+                yield CTermSymbolic(
+                    client, definition, log_succ_rewrites=log_succ_rewrites, log_fail_rewrites=log_fail_rewrites
+                )
     else:
         if port is None:
             raise ValueError('Missing port with start_server=False')
@@ -371,4 +358,6 @@ def cterm_symbolic(
                 ],
             }
         with KoreClient('localhost', port, bug_report=bug_report, bug_report_id=id, dispatch=dispatch) as client:
-            yield CTermSymbolic(client, definition, trace_rewrites=trace_rewrites)
+            yield CTermSymbolic(
+                client, definition, log_succ_rewrites=log_succ_rewrites, log_fail_rewrites=log_fail_rewrites
+            )

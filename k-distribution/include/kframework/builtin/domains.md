@@ -1432,7 +1432,7 @@ module INT
     ((I1 %Int absInt(I2)) +Int absInt(I2)) %Int absInt(I2)
   requires I2 =/=Int 0    [concrete, simplification]
 
-  rule minInt(I1:Int, I2:Int) => I1 requires I1 <=Int I2
+  rule minInt(I1:Int, I2:Int) => I1 requires I1 <Int  I2
   rule minInt(I1:Int, I2:Int) => I2 requires I1 >=Int I2
 
   rule I1:Int =/=Int I2:Int => notBool (I1 ==Int I2)
@@ -2210,14 +2210,16 @@ module BYTES
   imports BYTES-KORE
   imports private INT
 
+  rule Int2Bytes(I::Int, _::Endianness, _)        => .Bytes
+    requires I ==Int 0
   rule Int2Bytes(I::Int, E::Endianness, Unsigned) => Int2Bytes((log2Int(I) +Int 8) /Int 8, I, E)
     requires I >Int 0 [preserves-definedness]
-  rule Int2Bytes(0, _::Endianness, _) => .Bytes
-  rule Int2Bytes(I::Int, E::Endianness, Signed) => Int2Bytes((log2Int(I) +Int 9) /Int 8, I, E)
+  rule Int2Bytes(I::Int, E::Endianness, Signed  ) => Int2Bytes((log2Int(I) +Int 9) /Int 8, I, E)
     requires I >Int 0 [preserves-definedness]
-  rule Int2Bytes(I::Int, E::Endianness, Signed) => Int2Bytes((log2Int(~Int I) +Int 9) /Int 8, I, E)
+  rule Int2Bytes(I::Int, E::Endianness, Signed  ) => Int2Bytes((log2Int(~Int I) +Int 9) /Int 8, I, E)
     requires I <Int -1 [preserves-definedness]
-  rule Int2Bytes(-1, E::Endianness, Signed) => Int2Bytes(1, -1, E)
+  rule Int2Bytes(I::Int, E::Endianness, Signed  ) => Int2Bytes(1, -1, E)
+    requires I ==Int -1 [preserves-definedness]
 endmodule
 ```
 
@@ -3013,6 +3015,7 @@ than the input.
 
 ```k
   syntax {Width1, Width2} MInt{Width1} ::= roundMInt(MInt{Width2}) [function, total, hook(MINT.round)]
+  syntax {Width1, Width2} MInt{Width1} ::= signExtendMInt(MInt{Width2}) [function, total, hook(MINT.sext)]
 ```
 
 ```k
