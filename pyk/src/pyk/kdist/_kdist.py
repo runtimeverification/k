@@ -21,6 +21,7 @@ from ..utils import hash_str
 from . import utils
 from ._cache import target_cache
 from .api import TargetId
+from .utils import LOG_FORMAT
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator, Mapping
@@ -85,6 +86,7 @@ class KDist:
         *,
         args: Mapping[str, str] | None = None,
         jobs: int = 1,
+        log_level: int = logging.WARNING,
         force: bool = False,
         verbose: bool = False,
         clean: bool = True,
@@ -108,6 +110,7 @@ class KDist:
                     self._build_target,
                     target_id=target_id,
                     args=args,
+                    log_level=log_level,
                     force=force,
                     verbose=verbose,
                     clean=clean,
@@ -135,10 +138,13 @@ class KDist:
         target_id: TargetId,
         args: dict[str, Any],
         *,
+        log_level: int,
         force: bool,
         verbose: bool,
         clean: bool,
     ) -> Path:
+        logging.basicConfig(level=log_level, format=LOG_FORMAT)
+
         target = target_cache().resolve(target_id)
         output_dir = self._target_dir(target_id)
         manifest_file = self._manifest_file(target_id)

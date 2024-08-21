@@ -21,11 +21,12 @@ _LOGGER: Final = logging.getLogger(__name__)
 
 def main() -> None:
     args = _parse_arguments()
+    log_level = loglevel(args)
 
-    logging.basicConfig(level=loglevel(args), format=LOG_FORMAT)
+    logging.basicConfig(level=log_level, format=LOG_FORMAT)
 
     if args.command == 'build':
-        _exec_build(**vars(args))
+        _exec_build(log_level=log_level, **vars(args))
 
     elif args.command == 'clean':
         _exec_clean(args.target)
@@ -45,6 +46,7 @@ def _exec_build(
     targets: list[str],
     args: list[str],
     jobs: int,
+    log_level: int,
     force: bool,
     verbose: bool,
     debug: bool,
@@ -54,6 +56,7 @@ def _exec_build(
         target_ids=_process_targets(targets),
         args=_process_args(args),
         jobs=jobs,
+        log_level=log_level,
         force=force,
         verbose=verbose or debug,
         clean=clean,
