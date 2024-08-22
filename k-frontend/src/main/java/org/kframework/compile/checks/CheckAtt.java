@@ -60,6 +60,7 @@ public class CheckAtt {
     checkNonExecutable(rule);
     checkSimplification(rule);
     checkSymbolic(rule);
+    checkSyntactic(rule);
   }
 
   private void checkProduction(Production prod) {
@@ -148,6 +149,14 @@ public class CheckAtt {
       errors.add(
           KEMException.compilerError(
               "anywhere attribute is not supported on symbolic rules.", rule));
+    }
+  }
+
+  private void checkSyntactic(Rule rule) {
+    if (rule.att().contains(Att.SYNTACTIC()) && !rule.att().contains(Att.SIMPLIFICATION())) {
+      errors.add(
+          KEMException.compilerError(
+              "syntactic attribute is only supported on simplification rules."));
     }
   }
 
