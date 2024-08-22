@@ -416,6 +416,8 @@ object Att {
       onlyon3[Module, Production, Rule],
       KeyRange.WholePipeline
     )
+  final val SYNTACTIC =
+    Key.builtin("syntactic", KeyParameter.Required, onlyon[Rule], KeyRange.WholePipeline)
   final val TOKEN = Key.builtin(
     "token",
     KeyParameter.Forbidden,
