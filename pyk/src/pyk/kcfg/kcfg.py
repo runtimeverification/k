@@ -73,23 +73,18 @@ class KCFGStore:
         return self.kcfg_node_dir / f'{node_id}.json'
 
     def write_cfg_data(
-        self, dct: dict[str, Any], deleted_nodes: Iterable[int] = (), created_nodes: Iterable[int] = ()
+        self, kcfg: KCFG, dct: dict[str, Any], deleted_nodes: Iterable[int] = (), created_nodes: Iterable[int] = ()
     ) -> None:
-        node_dict = {node_dct['id']: node_dct for node_dct in dct['nodes']}
         vacuous_nodes = [
-            node_id for node_id in node_dict.keys() if KCFGNodeAttr.VACUOUS.value in node_dict[node_id]['attrs']
+            node_id for node_id in kcfg._nodes.keys() if KCFGNodeAttr.VACUOUS in kcfg._nodes[node_id].attrs
         ]
-        stuck_nodes = [
-            node_id for node_id in node_dict.keys() if KCFGNodeAttr.STUCK.value in node_dict[node_id]['attrs']
-        ]
+        stuck_nodes = [node_id for node_id in kcfg._nodes.keys() if KCFGNodeAttr.STUCK in kcfg._nodes[node_id].attrs]
         dct['vacuous'] = vacuous_nodes
         dct['stuck'] = stuck_nodes
         for node_id in deleted_nodes:
             self.kcfg_node_path(node_id).unlink(missing_ok=True)
         for node_id in created_nodes:
-            del node_dict[node_id]['attrs']
-            self.kcfg_node_path(node_id).write_text(json.dumps(node_dict[node_id]))
-        dct['nodes'] = list(node_dict.keys())
+            self.kcfg_node_path(node_id).write_text(json.dumps(kcfg._nodes[node_id].to_dict()))
         self.kcfg_json_path.write_text(json.dumps(dct))
 
     def read_cfg_data(self) -> dict[str, Any]:
@@ -514,33 +509,68 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         node: KCFG.Node,
         logs: dict[int, tuple[LogEntry, ...]],
     ) -> None:
+
+        def log(message: str, *, warning: bool = False) -> None:
+            result_info = extend_result.info if type(extend_result) is Step or type(extend_result) is Branch else ''
+            result_info_message = f': {result_info}' if result_info else ''
+            _LOGGER.log(
+                logging.WARNING if warning else logging.INFO,
+                f'Extending current KCFG with the following: {message}{result_info_message}',
+            )
+
         match extend_result:
             case Vacuous():
                 self.add_vacuous(node.id)
+                log(f'vacuous node: {node.id}', warning=True)
 
             case Stuck():
                 self.add_stuck(node.id)
+                log(f'stuck node: {node.id}')
 
             case Abstract(cterm):
                 new_node = self.create_node(cterm)
                 self.create_cover(node.id, new_node.id)
+                log(f'abstraction node: {node.id}')
 
             case Step(cterm, depth, next_node_logs, rule_labels, _):
                 next_node = self.create_node(cterm)
                 logs[next_node.id] = next_node_logs
                 self.create_edge(node.id, next_node.id, depth, rules=rule_labels)
+                log(f'basic block at depth {depth}: {node.id} --> {next_node.id}')
 
-            case Branch(constraints, _):
-                self.split_on_constraints(node.id, constraints)
+            case Branch(branches, _):
+                branch_node_ids = self.split_on_constraints(node.id, branches)
+                log(f'{len(branches)} branches: {node.id} --> {branch_node_ids}')
 
             case NDBranch(cterms, next_node_logs, rule_labels):
                 next_ids = [self.create_node(cterm).id for cterm in cterms]
                 for i in next_ids:
                     logs[i] = next_node_logs
                 self.create_ndbranch(node.id, next_ids, rules=rule_labels)
+                log(f'{len(cterms)} non-deterministic branches: {node.id} --> {next_ids}')
 
             case _:
                 raise AssertionError()
+
+    def to_dict_no_nodes(self) -> dict[str, Any]:
+        nodes = list(self._nodes.keys())
+        edges = [edge.to_dict() for edge in self.edges()]
+        covers = [cover.to_dict() for cover in self.covers()]
+        splits = [split.to_dict() for split in self.splits()]
+        ndbranches = [ndbranch.to_dict() for ndbranch in self.ndbranches()]
+
+        aliases = dict(sorted(self._aliases.items()))
+
+        res = {
+            'next': self._node_id,
+            'nodes': nodes,
+            'edges': edges,
+            'covers': covers,
+            'splits': splits,
+            'ndbranches': ndbranches,
+            'aliases': aliases,
+        }
+        return {k: v for k, v in res.items() if v}
 
     def to_dict(self) -> dict[str, Any]:
         nodes = [node.to_dict() for node in self.nodes]
@@ -1173,7 +1203,19 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         return distance
 
     def zero_depth_between(self, node_1_id: NodeIdLike, node_2_id: NodeIdLike) -> bool:
-        shortest_distance = self.shortest_distance_between(node_1_id, node_2_id)
+        _node_1_id = self._resolve(node_1_id)
+        _node_2_id = self._resolve(node_2_id)
+        if _node_1_id == _node_2_id:
+            return True
+        # Short-circuit and don't run pathing algorithm if there is no 0 length path on the first step.
+        path_lengths = [
+            self.path_length([successor]) for successor in self.successors(_node_1_id) + self.successors(_node_2_id)
+        ]
+        if 0 not in path_lengths:
+            return False
+
+        shortest_distance = self.shortest_distance_between(_node_1_id, _node_2_id)
+
         return shortest_distance is not None and shortest_distance == 0
 
     def paths_between(self, source_id: NodeIdLike, target_id: NodeIdLike) -> list[tuple[Successor, ...]]:
@@ -1261,7 +1303,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
     def write_cfg_data(self) -> None:
         assert self._kcfg_store is not None
         self._kcfg_store.write_cfg_data(
-            self.to_dict(), deleted_nodes=self._deleted_nodes, created_nodes=self._created_nodes
+            self, self.to_dict_no_nodes(), deleted_nodes=self._deleted_nodes, created_nodes=self._created_nodes
         )
         self._deleted_nodes.clear()
         self._created_nodes.clear()
@@ -1306,6 +1348,7 @@ class Step(KCFGExtendResult):
     logs: tuple[LogEntry, ...]
     rule_labels: list[str]
     cut: bool = field(default=False)
+    info: str = field(default='')
 
 
 @final
@@ -1313,10 +1356,12 @@ class Step(KCFGExtendResult):
 class Branch(KCFGExtendResult):
     constraints: tuple[KInner, ...]
     heuristic: bool
+    info: str = field(default='')
 
-    def __init__(self, constraints: Iterable[KInner], *, heuristic: bool = False):
+    def __init__(self, constraints: Iterable[KInner], *, heuristic: bool = False, info: str = ''):
         object.__setattr__(self, 'constraints', tuple(constraints))
         object.__setattr__(self, 'heuristic', heuristic)
+        object.__setattr__(self, 'info', info)
 
 
 @final

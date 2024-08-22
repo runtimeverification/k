@@ -44,7 +44,23 @@ class APRProofResult:
 
 @dataclass
 class APRProofExtendResult(APRProofResult):
-    extend_result: KCFGExtendResult
+    """Proof extension to be applied."""
+
+    extension_to_apply: KCFGExtendResult
+
+
+@dataclass
+class APRProofExtendAndCacheResult(APRProofExtendResult):
+    """Proof extension to be cached."""
+
+    extension_to_cache: KCFGExtendResult
+
+
+@dataclass
+class APRProofUseCacheResult(APRProofResult):
+    """Proof extension to be applied using the extension cache."""
+
+    cached_node_id: NodeIdLike
 
 
 @dataclass
@@ -66,6 +82,7 @@ class APRProofStep:
     target: KCFG.Node
     proof_id: str
     bmc_depth: int | None
+    use_cache: NodeIdLike | None
     module_name: str
     shortest_path_to_node: tuple[KCFG.Node, ...]
     prior_loops_cache: FrozenDict[int, tuple[int, ...]] = field(compare=False)
@@ -100,6 +117,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
     variable_names_mapping: dict[str, str] | None
 
     _checked_for_bounded: set[int]
+    _next_steps: dict[NodeIdLike, KCFGExtendResult]
 
     def __init__(
         self,
@@ -139,6 +157,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         self.variable_names_mapping = variable_names_mapping
 
         self._checked_for_bounded = set()
+        self._next_steps = {}
 
         if self.proof_dir is not None and self.proof_subdir is not None:
             ensure_dir_path(self.proof_dir)
@@ -170,19 +189,26 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
                     else:
                         shortest_path.append(succ.source)
 
-            module_name = self.circularities_module_name if self.nonzero_depth(node) else self.dependencies_module_name
+            nonzero_depth = self.nonzero_depth(node)
+            module_name = self.circularities_module_name if nonzero_depth else self.dependencies_module_name
+
+            predecessor_edges = self.kcfg.edges(target_id=node.id)
+            predecessor_node_id: NodeIdLike | None = (
+                single(predecessor_edges).source.id if predecessor_edges != [] else None
+            )
 
             steps.append(
                 APRProofStep(
                     bmc_depth=self.bmc_depth,
                     module_name=module_name,
                     node=node,
+                    use_cache=predecessor_node_id if predecessor_node_id in self._next_steps else None,
                     proof_id=self.id,
                     target=self.kcfg.node(self.target),
                     shortest_path_to_node=tuple(shortest_path),
                     prior_loops_cache=FrozenDict(self.prior_loops_cache),
                     circularity=self.circularity,
-                    nonzero_depth=self.nonzero_depth(node),
+                    nonzero_depth=nonzero_depth,
                     circularity_rule_id=f'{self.rule_id}-{self.init}-TO-{self.target}',
                 )
             )
@@ -190,8 +216,24 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
 
     def commit(self, result: APRProofResult) -> None:
         self.prior_loops_cache[result.node_id] = result.prior_loops_cache_update
-        if isinstance(result, APRProofExtendResult):
-            self.kcfg.extend(result.extend_result, self.kcfg.node(result.node_id), logs=self.logs)
+        # Result has been cached, use the cache
+        if isinstance(result, APRProofUseCacheResult):
+            assert result.cached_node_id in self._next_steps
+            self.kcfg.extend(
+                extend_result=self._next_steps.pop(result.cached_node_id),
+                node=self.kcfg.node(result.node_id),
+                logs=self.logs,
+            )
+        elif isinstance(result, APRProofExtendResult):
+            # Result contains two steps, one to be applied, one to be cached
+            if isinstance(result, APRProofExtendAndCacheResult):
+                assert result.node_id not in self._next_steps
+                self._next_steps[result.node_id] = result.extension_to_cache
+            self.kcfg.extend(
+                extend_result=result.extension_to_apply,
+                node=self.kcfg.node(result.node_id),
+                logs=self.logs,
+            )
         elif isinstance(result, APRProofSubsumeResult):
             self.kcfg.create_cover(result.node_id, self.target, csubst=result.csubst)
         elif isinstance(result, APRProofTerminalResult):
@@ -510,14 +552,17 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         nodes = len(self.kcfg.nodes)
         pending = len(self.pending)
         failing = len(self.failing)
-        branches = len(self.kcfg.ndbranches()) + len(self.kcfg.splits())
+        branches = 0
+        for branch in self.kcfg.ndbranches() + self.kcfg.splits():
+            branches += len(branch.targets)
         vacuous = len(self.kcfg.vacuous)
         terminal = len(self.terminal)
         stuck = len(self.kcfg.stuck)
         passed = len([cover for cover in self.kcfg.covers() if cover.target.id == self.target])
+        refuted = len(self.node_refutations)
         return (
             super().one_line_summary
-            + f'|{nodes} nodes|{pending} pending|{passed} passed|{failing} failing|{branches} branches|{vacuous} vacuous|{terminal} terminal|{stuck} stuck'
+            + f' --- {nodes} nodes|{branches} branches|{terminal} terminal --- {pending} pending|{passed} passed|{failing} failing|{vacuous} vacuous|{refuted} refuted|{stuck} stuck'
         )
 
     def get_refutation_id(self, node_id: int) -> str:
@@ -672,9 +717,9 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
     cut_point_rules: Iterable[str]
     terminal_rules: Iterable[str]
     counterexample_info: bool
-    always_check_subsumption: bool
     fast_check_subsumption: bool
     direct_subproof_rules: bool
+    assume_defined: bool
     kcfg_explore: KCFGExplore
 
     def __init__(
@@ -684,9 +729,9 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         cut_point_rules: Iterable[str] = (),
         terminal_rules: Iterable[str] = (),
         counterexample_info: bool = False,
-        always_check_subsumption: bool = True,
         fast_check_subsumption: bool = False,
         direct_subproof_rules: bool = False,
+        assume_defined: bool = False,
     ) -> None:
 
         self.kcfg_explore = kcfg_explore
@@ -695,9 +740,9 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         self.cut_point_rules = cut_point_rules
         self.terminal_rules = terminal_rules
         self.counterexample_info = counterexample_info
-        self.always_check_subsumption = always_check_subsumption
         self.fast_check_subsumption = fast_check_subsumption
         self.direct_subproof_rules = direct_subproof_rules
+        self.assume_defined = assume_defined
 
     def close(self) -> None:
         self.kcfg_explore.cterm_symbolic._kore_client.close()
@@ -741,13 +786,14 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         if self.fast_check_subsumption and not self._may_subsume(node, target_node):
             _LOGGER.info(f'Skipping full subsumption check because of fast may subsume check {proof_id}: {node.id}')
             return None
-        _csubst = self.kcfg_explore.cterm_symbolic.implies(node.cterm, target_cterm)
+        _csubst = self.kcfg_explore.cterm_symbolic.implies(node.cterm, target_cterm, assume_defined=self.assume_defined)
         csubst = _csubst.csubst
         if csubst is not None:
             _LOGGER.info(f'Subsumed into target node {proof_id}: {shorten_hashes((node.id, target_node.id))}')
         return csubst
 
     def step_proof(self, step: APRProofStep) -> list[APRProofResult]:
+        # Check if the current node should be bounded
         prior_loops: tuple[int, ...] = ()
         if step.bmc_depth is not None:
             for node in step.shortest_path_to_node:
@@ -761,7 +807,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
                 _LOGGER.warning(f'Bounded node {step.proof_id}: {step.node.id} at bmc depth {step.bmc_depth}')
                 return [APRProofBoundedResult(node_id=step.node.id, prior_loops_cache_update=prior_loops)]
 
-        # Terminal checks for current node and target node
+        # Check if the current node and target are terminal
         is_terminal = self.kcfg_explore.kcfg_semantics.is_terminal(step.node.cterm)
         target_is_terminal = self.kcfg_explore.kcfg_semantics.is_terminal(step.target.cterm)
 
@@ -769,7 +815,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
             [APRProofTerminalResult(node_id=step.node.id, prior_loops_cache_update=prior_loops)] if is_terminal else []
         )
 
-        # Subsumption should be checked if and only if the target node
+        # Subsumption is checked if and only if the target node
         # and the current node are either both terminal or both not terminal
         if is_terminal == target_is_terminal:
             csubst = self._check_subsume(step.node, step.target, proof_id=step.proof_id)
@@ -790,25 +836,59 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
 
         # Ensure that we record progress ASAP for circularities, so the circularity rule will be included for execution as soon as possible
         execute_depth = self.execute_depth
-        if step.circularity and not step.nonzero_depth and (execute_depth is None or execute_depth > 1):
+        if step.circularity and not step.nonzero_depth:
             execute_depth = 1
 
-        extend_result = self.kcfg_explore.extend_cterm(
-            step.node.cterm,
-            execute_depth=execute_depth,
-            cut_point_rules=cut_rules,
-            terminal_rules=self.terminal_rules,
-            module_name=step.module_name,
-            node_id=step.node.id,
-        )
+        # If the step has already been cached, do not invoke the backend and only send a signal back to the proof to use the cache
+        if step.use_cache is not None:
+            _LOGGER.info(f'Using cached step for edge {step.use_cache} --> {step.node.id}')
+            return [
+                APRProofUseCacheResult(
+                    node_id=step.node.id,
+                    cached_node_id=step.use_cache,
+                    prior_loops_cache_update=prior_loops,
+                )
+            ]
+        # Invoke the backend to obtain the next KCFG extension
+        else:
+            extend_results = self.kcfg_explore.extend_cterm(
+                step.node.cterm,
+                execute_depth=execute_depth,
+                cut_point_rules=cut_rules,
+                terminal_rules=self.terminal_rules,
+                module_name=step.module_name,
+                node_id=step.node.id,
+            )
+
+        # We can obtain two results at most
+        assert len(extend_results) <= 2
+        # We have obtained two results: first is to be applied, second to be cached potentially
+        if len(extend_results) == 2:
+            # Cache only if the current node is at non-zero depth
+            if step.nonzero_depth:
+                _LOGGER.info(f'Caching next step for edge starting from {step.node.id}')
+                return [
+                    APRProofExtendAndCacheResult(
+                        node_id=step.node.id,
+                        extension_to_apply=extend_results[0],
+                        extension_to_cache=extend_results[1],
+                        prior_loops_cache_update=prior_loops,
+                    )
+                ]
+
+        # Otherwise, discard the second result
         return [
             APRProofExtendResult(
-                node_id=step.node.id, extend_result=extend_result, prior_loops_cache_update=prior_loops
+                node_id=step.node.id,
+                extension_to_apply=extend_results[0],
+                prior_loops_cache_update=prior_loops,
             )
         ]
 
     def failure_info(self, proof: APRProof) -> FailureInfo:
-        return APRFailureInfo.from_proof(proof, self.kcfg_explore, counterexample_info=self.counterexample_info)
+        return APRFailureInfo.from_proof(
+            proof, self.kcfg_explore, counterexample_info=self.counterexample_info, assume_defined=self.assume_defined
+        )
 
 
 @dataclass(frozen=True)
@@ -876,9 +956,7 @@ class APRFailureInfo(FailureInfo):
 
     @staticmethod
     def from_proof(
-        proof: APRProof,
-        kcfg_explore: KCFGExplore,
-        counterexample_info: bool = False,
+        proof: APRProof, kcfg_explore: KCFGExplore, counterexample_info: bool = False, assume_defined: bool = False
     ) -> APRFailureInfo:
         target = proof.kcfg.node(proof.target)
         pending_nodes = {node.id for node in proof.pending}
@@ -889,7 +967,7 @@ class APRFailureInfo(FailureInfo):
         for node in proof.failing:
             node_cterm, _ = kcfg_explore.cterm_symbolic.simplify(node.cterm)
             target_cterm, _ = kcfg_explore.cterm_symbolic.simplify(target.cterm)
-            _, reason = kcfg_explore.implication_failure_reason(node_cterm, target_cterm)
+            _, reason = kcfg_explore.implication_failure_reason(node_cterm, target_cterm, assume_defined=assume_defined)
             path_condition = kcfg_explore.pretty_print(proof.path_constraints(node.id))
             failure_reasons[node.id] = reason
             path_conditions[node.id] = path_condition

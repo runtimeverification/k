@@ -1027,12 +1027,14 @@ class KoreClient(ContextManager['KoreClient']):
         consequent: Pattern,
         *,
         module_name: str | None = None,
+        assume_defined: bool = False,
     ) -> ImpliesResult:
         params = filter_none(
             {
                 'antecedent': self._state(antecedent),
                 'consequent': self._state(consequent),
                 'module': module_name,
+                'assume-defined': assume_defined,
             }
         )
 
@@ -1225,10 +1227,14 @@ class KoreServer(ContextManager['KoreServer']):
             if n is not None and n <= 0:
                 raise ValueError(f'Expected positive integer for: {param_name}, got: {n}')
 
+        def _check_none_or_nonnegative(n: int | None, param_name: str) -> None:
+            if n is not None and n < 0:
+                raise ValueError(f'Expected non-negative integer for: {param_name}, got: {n}')
+
         check_dir_path(self._kompiled_dir)
         check_file_path(self._definition_file)
         _check_none_or_positive(self._smt_timeout, 'smt_timeout')
-        _check_none_or_positive(self._smt_retry_limit, 'smt_retry_limit')
+        _check_none_or_nonnegative(self._smt_retry_limit, 'smt_retry_limit')
         _check_none_or_positive(self._smt_reset_interval, 'smt_reset_interval')
 
     def _cli_args(self) -> list[str]:
@@ -1242,16 +1248,16 @@ class KoreServer(ContextManager['KoreServer']):
     def _extra_args(self) -> list[str]:
         """Command line arguments that are intended to be included in the bug report."""
         smt_server_args = []
-        if self._smt_timeout:
+        if self._smt_timeout is not None:
             smt_server_args += ['--smt-timeout', str(self._smt_timeout)]
-        if self._smt_retry_limit:
+        if self._smt_retry_limit is not None:
             smt_server_args += ['--smt-retry-limit', str(self._smt_retry_limit)]
-        if self._smt_reset_interval:
+        if self._smt_reset_interval is not None:
             smt_server_args += ['--smt-reset-interval', str(self._smt_reset_interval)]
-        if self._smt_tactic:
+        if self._smt_tactic is not None:
             smt_server_args += ['--smt-tactic', self._smt_tactic]
 
-        if self._log_axioms_file:
+        if self._log_axioms_file is not None:
             haskell_log_args = [
                 '--log',
                 str(self._log_axioms_file),
@@ -1357,6 +1363,7 @@ class BoosterServer(KoreServer):
 
         if self._interim_simplification and self._interim_simplification < 0:
             raise ValueError(f"'interim_simplification' must not be negative, got: {self._interim_simplification}")
+        super()._validate()
 
     def _extra_args(self) -> list[str]:
         res = super()._extra_args()
