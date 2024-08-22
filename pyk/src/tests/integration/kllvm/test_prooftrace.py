@@ -97,7 +97,7 @@ class TestProofTrace(ProofTraceTest):
     def test_streaming_parser_iter(self, header: prooftrace.KoreHeader, hints_file: Path) -> None:
         # read the hints file and get the iterator for the proof trace
         it = prooftrace.LLVMRewriteTraceIterator.from_file(hints_file, header)
-        assert it.version == 11
+        assert it.version == 12
 
         # Test that the __iter__ is working
         list_of_events = list(it)
@@ -126,7 +126,7 @@ class TestProofTrace(ProofTraceTest):
 
         # read the hints file and get the iterator for the proof trace
         it = prooftrace.LLVMRewriteTraceIterator.from_file(hints_file, header)
-        assert it.version == 11
+        assert it.version == 12
 
         # skip pre-trace events
         while True:
@@ -810,7 +810,7 @@ class TestPeano(ProofTraceTest):
         assert len(pt.pre_trace) == 11
 
         # 404 post-initial-configuration events
-        assert len(pt.trace) == 404
+        assert len(pt.trace) == 419
 
 
 class TestIMP5(ProofTraceTest):
