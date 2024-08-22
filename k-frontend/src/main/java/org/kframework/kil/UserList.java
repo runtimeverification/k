@@ -18,13 +18,13 @@ public class UserList extends ProductionItem {
 
   public UserList(Sort sort, String separator) {
     this.sort = sort;
-    this.separator = separator.trim();
+    this.separator = separator;
     this.listType = ZERO_OR_MORE;
   }
 
   public UserList(Sort sort, String separator, String listType) {
     this.sort = sort;
-    this.separator = separator.trim();
+    this.separator = separator;
     this.listType = listType;
   }
 
@@ -58,7 +58,7 @@ public class UserList extends ProductionItem {
   }
 
   public void setSeparator(String separator) {
-    this.separator = separator.trim();
+    this.separator = separator;
   }
 
   @Override
