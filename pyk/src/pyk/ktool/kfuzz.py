@@ -22,11 +22,20 @@ if TYPE_CHECKING:
 
 
 class KFuzzHandler(ABC):
-    @abstractmethod
-    def handle_test(self, args: Mapping[EVar, Pattern]) -> None: ...
+    """Allows custom behavior (ie. printing) during fuzzing for each test case and on a test failure.
+
+    Can be passed to the `KFuzz` constructor or to :any:`fuzz` with the `handler` keyword argument.
+    """
 
     @abstractmethod
-    def handle_failure(self, args: Mapping[EVar, Pattern]) -> None: ...
+    def handle_test(self, args: Mapping[EVar, Pattern]) -> None:
+        """Handle each test case with the variable substitutions that are being used."""
+        ...
+
+    @abstractmethod
+    def handle_failure(self, args: Mapping[EVar, Pattern]) -> None:
+        """Handle a test case failure, before the `AssertionError` is raised."""
+        ...
 
 
 class _KFuzzNullHandler(KFuzzHandler):
@@ -138,6 +147,7 @@ def fuzz(
         check_exit_code: Check the exit code of the interpreter for a test failure instead of using check_func.
           An exit code of 0 indicates a passing test.
           A RuntimeError will be thrown if this is True and check_func is also passed as an argument.
+        handler: An instance of a `KFuzzHandler` implementing custom behavior while fuzzing.
         hypothesis_args: Keyword arguments that will be passed as settings for the hypothesis test. Defaults:
 
           deadline: 5000
