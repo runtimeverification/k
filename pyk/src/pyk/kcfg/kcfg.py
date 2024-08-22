@@ -277,6 +277,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             assert node.id == self.target.id
             return KCFG.MergedEdge(self.source, node, self.edges)
 
+        def to_rule(self, label: str, claim: bool = False, priority: int | None = None) -> KRuleLike:
+            return KCFG.Edge(self.source, self.target, 1, ()).to_rule(label, claim, priority)
+
     @final
     @dataclass(frozen=True)
     class Cover(EdgeLike):
