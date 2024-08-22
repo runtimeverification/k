@@ -444,12 +444,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
             or (self.admitted and not self.kcfg.predecessors(self.target))
         ):
             return [self.as_rule(priority=priority)]
-        _rules = []
-        for _edge in self.kcfg.edges():
-            _rule = _edge.to_rule(self.rule_id, priority=priority)
-            assert type(_rule) is KRule
-            _rules.append(_rule)
-        return _rules
+        return [rule for rule in self.kcfg.to_rules(self.rule_id, priority=priority) if isinstance(rule, KRule)]
 
     def as_rule(self, priority: int = 20) -> KRule:
         _edge = KCFG.Edge(self.kcfg.node(self.init), self.kcfg.node(self.target), depth=0, rules=())

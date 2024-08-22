@@ -683,9 +683,11 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
     def from_json(s: str, optimize_memory: bool = True) -> KCFG:
         return KCFG.from_dict(json.loads(s), optimize_memory=optimize_memory)
 
-    def to_rules(self, priority: int = 20, id: str | None = None) -> list[KRuleLike]:
-        id = '' if id is None else f'{id}-'
-        return [e.to_rule(f'{id}BASIC-BLOCK', priority=priority) for e in self.edges()]
+    def to_rules(self, _id: str | None = None, priority: int = 20) -> list[KRuleLike]:
+        _id = 'BASIC-BLOCK' if _id is None else _id
+        return [e.to_rule(_id, priority=priority) for e in self.edges()] + [
+            m.to_rule(_id, priority=priority) for m in self.merged_edges()
+        ]
 
     def to_module(
         self,
