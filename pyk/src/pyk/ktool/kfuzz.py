@@ -21,34 +21,34 @@ if TYPE_CHECKING:
     from ..kore.syntax import Pattern
 
 
-class KFuzzTestCaseHandler(ABC):
+class KFuzzHandler(ABC):
     @abstractmethod
-    def handle_test_case(self, args: Mapping[EVar, Pattern]) -> None: ...
+    def handle_test(self, args: Mapping[EVar, Pattern]) -> None: ...
 
     @abstractmethod
-    def handle_failure_case(self, args: Mapping[EVar, Pattern]) -> None: ...
+    def handle_failure(self, args: Mapping[EVar, Pattern]) -> None: ...
 
 
-class _KFuzzDefaultTestCaseHandler(KFuzzTestCaseHandler):
-    def handle_test_case(self, args: Mapping[EVar, Pattern]) -> None:
+class _KFuzzNullHandler(KFuzzHandler):
+    def handle_test(self, args: Mapping[EVar, Pattern]) -> None:
         pass
 
-    def handle_failure_case(self, args: Mapping[EVar, Pattern]) -> None:
+    def handle_failure(self, args: Mapping[EVar, Pattern]) -> None:
         pass
 
 
-_DEFAULT_HANDLER = _KFuzzDefaultTestCaseHandler()
+_DEFAULT_HANDLER = _KFuzzNullHandler()
 
 
 class KFuzz:
     """Interface for fuzzing over property tests in K."""
 
     definition_dir: Path
-    test_case_handler: KFuzzTestCaseHandler
+    handler: KFuzzHandler
 
-    def __init__(self, definition_dir: Path, test_case_handler: KFuzzTestCaseHandler = _DEFAULT_HANDLER) -> None:
+    def __init__(self, definition_dir: Path, handler: KFuzzHandler = _DEFAULT_HANDLER) -> None:
         self.definition_dir = definition_dir
-        self.test_case_handler = test_case_handler
+        self.handler = handler
 
     def fuzz_with_check(
         self,
@@ -66,7 +66,7 @@ class KFuzz:
             template,
             subst_strategy,
             check_func=check_func,
-            test_case_handler=self.test_case_handler,
+            handler=self.handler,
             **hypothesis_args,
         )
 
@@ -85,7 +85,7 @@ class KFuzz:
             template,
             subst_strategy,
             check_exit_code=True,
-            test_case_handler=self.test_case_handler,
+            handler=self.handler,
             **hypothesis_args,
         )
 
@@ -123,7 +123,7 @@ def fuzz(
     *,
     check_func: Callable[[Pattern], Any] | None = None,
     check_exit_code: bool = False,
-    test_case_handler: KFuzzTestCaseHandler = _DEFAULT_HANDLER,
+    handler: KFuzzHandler = _DEFAULT_HANDLER,
     **hypothesis_args: Any,
 ) -> None:
     """Fuzz a property test with concrete execution over a K term.
@@ -158,7 +158,7 @@ def fuzz(
             else:
                 return p
 
-        test_case_handler.handle_test_case(subst_case)
+        handler.handle_test(subst_case)
         test_pattern = template.top_down(sub)
         res = llvm_interpret_raw(definition_dir, test_pattern.text, check=False)
 
@@ -170,7 +170,7 @@ def fuzz(
                 res_pattern = KoreParser(res.stdout).pattern()
                 check_func(res_pattern)
         except AssertionError:
-            test_case_handler.handle_failure_case(subst_case)
+            handler.handle_failure(subst_case)
             raise
 
     strat: SearchStrategy = fixed_dictionaries(subst_strategy)
