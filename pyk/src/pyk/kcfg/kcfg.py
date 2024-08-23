@@ -542,7 +542,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         elif type(_path[0]) is KCFG.Edge:
             return _path[0].depth + KCFG.path_length(_path[1:])
         elif type(_path[0]) is KCFG.MergedEdge:
-            return sum(edge.depth for edge in _path[0].edges) + KCFG.path_length(_path[1:])  # todo: check this
+            return min(edge.depth for edge in _path[0].edges) + KCFG.path_length(_path[1:])  # todo: check this
         raise ValueError(f'Cannot handle Successor type: {type(_path[0])}')
 
     def extend(
