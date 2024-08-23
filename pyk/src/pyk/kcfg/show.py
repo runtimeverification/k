@@ -138,8 +138,8 @@ class KCFGShow:
         def _print_merged_edge(merged_edge: KCFG.MergedEdge) -> list[str]:
             res = '('
             for edge in merged_edge.edges:
-                res += f'{edge.depth}| '
-            res = res[:-2] + ' steps)'
+                res += f'{edge.depth}|'
+            res = res[:-1] + ' steps)'
             return [res] if len(res) < 78 else ['(merged edge)']
 
         def _print_cover(cover: KCFG.Cover) -> Iterable[str]:
