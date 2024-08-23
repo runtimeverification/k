@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     from pathlib import Path
     from typing import Any, Final, TypeVar
 
-    from ..kast.outer import KClaim, KDefinition, KFlatModuleList
+    from ..kast.outer import KClaim, KDefinition, KFlatModuleList, KRuleLike
     from ..kcfg import KCFGExplore
     from ..kcfg.explore import KCFGExtendResult
     from ..kcfg.kcfg import CSubst, NodeIdLike
@@ -444,7 +444,12 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
             or (self.admitted and not self.kcfg.predecessors(self.target))
         ):
             return [self.as_rule(priority=priority)]
-        return [rule for rule in self.kcfg.to_rules(self.rule_id, priority=priority) if isinstance(rule, KRule)]
+
+        def _return_rule(r: KRuleLike) -> KRule:
+            assert isinstance(r, KRule)
+            return r
+
+        return [_return_rule(rule) for rule in self.kcfg.to_rules(self.rule_id, priority=priority)]
 
     def as_rule(self, priority: int = 20) -> KRule:
         _edge = KCFG.Edge(self.kcfg.node(self.init), self.kcfg.node(self.target), depth=0, rules=())
