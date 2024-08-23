@@ -10,7 +10,10 @@ from pyk.utils import check_dir_path
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
-    from typing import Any
+    from typing import Any, Final
+
+
+LOG_FORMAT: Final = '%(levelname)s %(asctime)s %(name)s - %(message)s'
 
 
 def package_path(obj: Any) -> Path:
