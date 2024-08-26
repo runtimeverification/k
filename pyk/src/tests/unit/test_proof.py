@@ -13,7 +13,8 @@ from pyk.proof.implies import EqualitySummary
 from pyk.proof.proof import CompositeSummary, Proof, ProofStatus
 from pyk.proof.reachability import APRFailureInfo, APRProof, APRSummary
 
-from .test_kcfg import minimization_test_kcfg, node, node_dicts, term
+from .kcfg.test_minimize import minimization_test_kcfg
+from .test_kcfg import node, node_dicts, term
 
 if TYPE_CHECKING:
     from pathlib import Path
