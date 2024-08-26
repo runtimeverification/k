@@ -19,6 +19,7 @@ RUN    apt-get update                                                           
 
 COPY pyk /pyk
 RUN pipx install poetry       \
+    && pipx ensurepath        \
     && cd /pyk                \
     && make build             \
     && pip install dist/*.whl \
