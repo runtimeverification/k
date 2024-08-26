@@ -131,7 +131,7 @@ class KCFGMinimizer:
             and len(split_from_b.target_vars.difference(split_from_b.source_vars)) == 0
         )
         # Get the substitution for `B`, at the same time removing 'B' from the targets of `A`.
-        csubst_b = splits_from_a.pop(self.kcfg._resolve(b_id))
+        csubst_b = splits_from_a.pop(self.kcfg.node(b_id).id)
         # Generate substitutions for additional targets `C_I`, which all exist by construction;
         # the constraints are cumulative, resulting in `cond_B #And cond_I`
         additional_csubsts = [
