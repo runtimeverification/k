@@ -11,7 +11,6 @@ from pyk.kast.inner import KApply, KRewrite, KSequence, KToken, KVariable
 from pyk.kast.manip import free_vars
 from pyk.kast.outer import KClaim
 from pyk.kcfg import KCFG
-from pyk.kcfg.minimize import KCFGMinimizer
 from pyk.kcfg.semantics import KCFGSemantics
 from pyk.prelude.kint import gtInt, intToken, leInt
 from pyk.prelude.ml import is_top, mlEqualsTrue
