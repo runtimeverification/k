@@ -11,6 +11,7 @@ from pyk.kast.inner import KApply, KRewrite, KSequence, KToken, KVariable
 from pyk.kast.manip import free_vars
 from pyk.kast.outer import KClaim
 from pyk.kcfg import KCFG
+from pyk.kcfg.minimize import KCFGMinimizer
 from pyk.kcfg.semantics import KCFGSemantics
 from pyk.prelude.kint import gtInt, intToken, leInt
 from pyk.prelude.ml import is_top, mlEqualsTrue
@@ -372,7 +373,7 @@ class TestAPRProof(KCFGExploreTest, KProveTest):
         prover.advance_proof(proof, max_iterations=4)
         # After the minimization, nodes 7-10 created by the advancement of the proof
         # will have multiple constraints in their immediately preceding splits
-        proof.kcfg.minimize()
+        KCFGMinimizer(proof.kcfg).minimize()
 
         # Then
         for i in [7, 8, 9, 10]:
