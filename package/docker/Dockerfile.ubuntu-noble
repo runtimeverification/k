@@ -1,4 +1,4 @@
-FROM runtimeverificationinc/z3:ubuntu-noble-4.12.1
+FROM runtimeverificationinc/z3:ubuntu-noble-4.13.0
 
 ENV TZ=America/Chicago
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
