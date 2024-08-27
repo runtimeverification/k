@@ -191,7 +191,25 @@ class KCFGMinimizer:
         )
 
     def merge_nodes(self) -> bool:
-        ...
+        """Merge targets of Split for cutting down the number of branches, using heuristics KCFGSemantics.is_mergeable.
+
+        Side Effect: The KCFG is rewritten by the following rewrite pattern,
+            - Match: A -|Split|-> A_i -|Edge|-> B_i
+            - Rewrite:
+                - if `B_x, B_y, ..., B_z are not mergeable` then unchanged
+                - if `B_x, B_y, ..., B_z are mergeable`, then
+                    - A -|Split|-> A_x or A_y or ... or A_z
+                    - A_x or A_y or ... or A_z -|Edge|-> B_x or B_y or ... or B_z
+                    - B_x or B_y or ... or B_z -|Split|-> B_x, B_y, ..., B_z
+
+        Specifically, when `B_merge = B_x or B_y or ... or B_z`
+        - `or`: fresh variables in places where the configurations differ
+        - `Edge` in A_merged -|Edge|-> B_merge: list of merged edges is from A_i -|Edge|-> B_i
+        - `Split` in B_merge -|Split|-> B_x, B_y, ..., B_z: subst for it is from A -|Split|-> A_1, A_2, ..., A_n
+        :param semantics: provides the is_mergeable heuristic
+        :return: whether or not any merge was performed
+        """
+        return False  # TODO: Implement merge_nodes
 
     def minimize(self) -> None:
         """Minimize KCFG by repeatedly performing the lifting transformations.
