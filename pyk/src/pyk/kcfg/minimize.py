@@ -3,13 +3,13 @@ from __future__ import annotations
 from functools import reduce
 from typing import TYPE_CHECKING
 
-from pyk.cterm import CTerm
-from pyk.utils import not_none, single
+from ..cterm import CTerm
+from ..utils import not_none, single
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from pyk.kcfg.kcfg import KCFG, NodeIdLike
+    from .kcfg import KCFG, NodeIdLike
 
 
 class KCFGMinimizer:
