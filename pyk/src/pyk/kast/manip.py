@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from ..prelude.k import DOTS, GENERATED_TOP_CELL
 from ..prelude.kbool import FALSE, TRUE, andBool, impliesBool, notBool, orBool
-from ..prelude.ml import is_top, mlAnd, mlBottom, mlEqualsTrue, mlImplies, mlOr, mlTop
+from ..prelude.ml import is_top, mlAnd, mlBottom, mlEquals, mlEqualsTrue, mlImplies, mlOr, mlTop
 from ..utils import find_common_items, hash_str, unique
 from .att import EMPTY_ATT, Atts, KAtt, WithKAtt
 from .inner import (
@@ -854,3 +854,30 @@ def no_cell_rewrite_to_dots(term: KInner) -> KInner:
     subst = Subst({cell_name: _no_cell_rewrite_to_dots(cell_contents) for cell_name, cell_contents in _subst.items()})
 
     return subst(config)
+
+
+def defunctionalize(defn: KDefinition, kinner: KInner) -> tuple[KInner, list[KInner]]:
+    """Turn non-constructor arguments into side-conditions so that a term is only constructor-like.
+
+    Args:
+        defn: The definition to pull function label information from.
+        kinner: The term to defunctionalize.
+
+    Returns:
+        A tuple of the defunctionalized term and the list of constraints generated.
+    """
+    function_symbols = [prod.klabel for prod in defn.functions if prod.klabel is not None]
+    constraints: list[KInner] = []
+
+    def _defunctionalize(_kinner: KInner) -> KInner:
+        if type(_kinner) is KApply and _kinner.label in function_symbols:
+            sort = defn.sort(_kinner)
+            assert type(sort) is KSort
+            new_var = abstract_term_safely(_kinner, base_name='F', sort=sort)
+            var_constraint = mlEquals(new_var, _kinner, arg_sort=sort)
+            constraints.append(var_constraint)
+            return new_var
+        return _kinner
+
+    new_kinner = top_down(_defunctionalize, kinner)
+    return (new_kinner, constraints)
