@@ -224,6 +224,10 @@ class NodeView(Widget):
             element_str = f'node({shorten_hashes(self._element.id)})'
         elif type(self._element) is KCFG.Edge:
             element_str = f'edge({shorten_hashes(self._element.source.id)},{shorten_hashes(self._element.target.id)})'
+        elif type(self._element) is KCFG.MergedEdge:
+            element_str = (
+                f'merged_edge({shorten_hashes(self._element.source.id)},{shorten_hashes(self._element.target.id)})'
+            )
         elif type(self._element) is KCFG.Cover:
             element_str = f'cover({shorten_hashes(self._element.source.id)},{shorten_hashes(self._element.target.id)})'
         return f'{element_str} selected. {minimize_str} Minimize Output. {term_str} Term View. {constraint_str} Constraint View. {status_str} Status View. {custom_str}'
@@ -289,6 +293,14 @@ class NodeView(Widget):
                 term_str, constraint_str = _cterm_text(self._element.cterm)
 
             elif type(self._element) is KCFG.Edge:
+                config_source, *constraints_source = self._element.source.cterm
+                config_target, *constraints_target = self._element.target.cterm
+                constraints_new = [c for c in constraints_target if c not in constraints_source]
+                config = push_down_rewrites(KRewrite(config_source, config_target))
+                crewrite = CTerm(config, constraints_new)
+                term_str, constraint_str = _cterm_text(crewrite)
+
+            elif type(self._element) is KCFG.MergedEdge:
                 config_source, *constraints_source = self._element.source.cterm
                 config_target, *constraints_target = self._element.target.cterm
                 constraints_new = [c for c in constraints_target if c not in constraints_source]
@@ -420,6 +432,14 @@ class KCFGViewer(App):
             target_id = int(node_target)
             edge = single(self._kcfg.edges(source_id=source_id, target_id=target_id))
             self.query_one('#node-view', NodeView).update(edge)
+
+        elif message.chunk_id.startswith('merged_edge_'):
+            self._selected_chunk = None
+            node_source, node_target, *_ = message.chunk_id[12:].split('_')
+            source_id = int(node_source)
+            target_id = int(node_target)
+            merged_edge = single(self._kcfg.merged_edges(source_id=source_id, target_id=target_id))
+            self.query_one('#node-view', NodeView).update(merged_edge)
 
         elif message.chunk_id.startswith('cover_'):
             self._selected_chunk = None
