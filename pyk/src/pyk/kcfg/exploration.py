@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from pyk.kcfg.kcfg import KCFG, NodeAttr
+from pyk.kcfg.minimize import KCFGMinimizer
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
@@ -109,4 +110,4 @@ class KCFGExploration:
 
     # Minimizing the KCFG
     def minimize_kcfg(self) -> None:
-        self.kcfg.minimize()
+        KCFGMinimizer(self.kcfg).minimize()

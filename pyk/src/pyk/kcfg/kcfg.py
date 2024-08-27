@@ -24,7 +24,6 @@ from ..kast.manip import (
 from ..kast.outer import KFlatModule
 from ..prelude.kbool import andBool
 from ..utils import ensure_dir_path, not_none
-from .minimize import KCFGMinimizer
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping, MutableMapping
@@ -1233,9 +1232,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         )
         self._deleted_nodes.clear()
         self._created_nodes.clear()
-
-    def minimize(self) -> None:
-        KCFGMinimizer(self).minimize()
 
     @staticmethod
     def read_cfg_data(cfg_dir: Path) -> KCFG:
