@@ -756,6 +756,7 @@ def build_rule(
     final_constraints: Iterable[KInner] = (),
     priority: int | None = None,
     keep_vars: Iterable[str] = (),
+    definition: KDefinition | None = None,
 ) -> tuple[KRule, Subst]:
     """Return a `KRule` between the supplied initial and final states.
 
@@ -765,7 +766,9 @@ def build_rule(
         final_config: State to put on RHS of the rule.
         init_constraints: Constraints to use as `requires` clause.
         final_constraints: Constraints to use as `ensures` clause.
+        priority: Priority index to assign to generated rules.
         keep_vars: Variables to leave in the side-conditions even if not bound in the configuration.
+        defn: KDefinition for filtering out function symbols on LHS of rules.
 
     Returns:
         A tuple ``(rule, var_map)`` where
@@ -778,6 +781,10 @@ def build_rule(
     init_constraints = [normalize_ml_pred(c) for c in init_constraints]
     final_constraints = [normalize_ml_pred(c) for c in final_constraints]
     final_constraints = [c for c in final_constraints if c not in init_constraints]
+    new_constraints: list[KInner] = []
+    if definition is not None:
+        init_config, new_constraints = defunctionalize(definition, init_config)
+        init_constraints = init_constraints + new_constraints
     init_term = mlAnd([init_config] + init_constraints)
     final_term = mlAnd([final_config] + final_constraints)
 

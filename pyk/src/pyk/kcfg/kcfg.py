@@ -217,7 +217,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         def from_dict(dct: dict[str, Any], nodes: Mapping[int, KCFG.Node]) -> KCFG.Edge:
             return KCFG.Edge(nodes[dct['source']], nodes[dct['target']], dct['depth'], tuple(dct['rules']))
 
-        def to_rule(self, label: str, claim: bool = False, priority: int | None = None) -> KRuleLike:
+        def to_rule(
+            self, label: str, claim: bool = False, priority: int | None = None, definition: KDefinition | None = None
+        ) -> KRuleLike:
             def is_ceil_condition(kast: KInner) -> bool:
                 return type(kast) is KApply and kast.label.name == '#Ceil'
 
@@ -233,7 +235,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             if claim:
                 rule, _ = cterm_build_claim(sentence_id, init_cterm, target_cterm)
             else:
-                rule, _ = cterm_build_rule(sentence_id, init_cterm, target_cterm, priority=priority)
+                rule, _ = cterm_build_rule(
+                    sentence_id, init_cterm, target_cterm, priority=priority, definition=definition
+                )
             return rule
 
         def replace_source(self, node: KCFG.Node) -> KCFG.Edge:
