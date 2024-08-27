@@ -10,10 +10,12 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
     from .kcfg import KCFG, NodeIdLike
+    from .semantics import KCFGSemantics
 
 
 class KCFGMinimizer:
     kcfg: KCFG
+    heuristics: KCFGSemantics
 
     def __init__(self, kcfg: KCFG) -> None:
         self.kcfg = kcfg
@@ -188,6 +190,9 @@ class KCFGMinimizer:
             _fold_lift, [(self.kcfg.edges, self.lift_split_edge), (self.kcfg.splits, self.lift_split_split)], False
         )
 
+    def merge_nodes(self) -> bool:
+        ...
+
     def minimize(self) -> None:
         """Minimize KCFG by repeatedly performing the lifting transformations.
 
@@ -198,3 +203,7 @@ class KCFGMinimizer:
         while repeat:
             repeat = self.lift_edges()
             repeat = self.lift_splits() or repeat
+
+        repeat = True
+        while repeat:
+            repeat = self.merge_nodes()
