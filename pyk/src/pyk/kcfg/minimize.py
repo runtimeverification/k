@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from ..cterm import CTerm
 from ..utils import not_none, single
+from .semantics import DefaultSemantics
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -17,8 +18,9 @@ class KCFGMinimizer:
     kcfg: KCFG
     heuristics: KCFGSemantics
 
-    def __init__(self, kcfg: KCFG) -> None:
+    def __init__(self, kcfg: KCFG, heuristics: KCFGSemantics = DefaultSemantics()) -> None:
         self.kcfg = kcfg
+        self.heuristics = heuristics
 
     def lift_edge(self, b_id: NodeIdLike) -> None:
         """Lift an edge up another edge directly preceding it.
