@@ -781,7 +781,6 @@ def build_rule(
     init_constraints = [normalize_ml_pred(c) for c in init_constraints]
     final_constraints = [normalize_ml_pred(c) for c in final_constraints]
     final_constraints = [c for c in final_constraints if c not in init_constraints]
-    new_constraints: list[KInner] = []
     if defunc_with is not None:
         init_config, new_constraints = defunctionalize(defunc_with, init_config)
         init_constraints = init_constraints + new_constraints
