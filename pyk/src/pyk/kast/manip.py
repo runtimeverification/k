@@ -879,7 +879,7 @@ def defunctionalize(defn: KDefinition, kinner: KInner) -> tuple[KInner, list[KIn
     def _defunctionalize(_kinner: KInner) -> KInner:
         if type(_kinner) is KApply and _kinner.label in function_symbols:
             sort = defn.sort(_kinner)
-            assert type(sort) is KSort
+            assert sort is not None
             new_var = abstract_term_safely(_kinner, base_name='F', sort=sort)
             var_constraint = mlEquals(new_var, _kinner, arg_sort=sort)
             constraints.append(var_constraint)
