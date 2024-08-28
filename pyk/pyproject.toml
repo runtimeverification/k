@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "kframework"
-version = "7.1.122"
+version = "7.1.123"
 description = ""
 authors = [
     "Runtime Verification, Inc. <contact@runtimeverification.com>",
