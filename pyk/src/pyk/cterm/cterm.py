@@ -367,7 +367,7 @@ def cterm_build_rule(
     final_cterm: CTerm,
     priority: int | None = None,
     keep_vars: Iterable[str] = (),
-    definition: KDefinition | None = None,
+    defunc_with: KDefinition | None = None,
 ) -> tuple[KRule, Subst]:
     """Return a `KRule` between the supplied initial and final states.
 
@@ -377,7 +377,7 @@ def cterm_build_rule(
         final_cterm: State to put on RHS of the rule (constraints interpreted as `ensures` clause).
         keep_vars: Variables to leave in the side-conditions even if not bound in the configuration.
         priority: Priority index to use for generated rules.
-        defn: KDefinition to be able to defunctionalize LHS appropriately.
+        defunc_with: KDefinition to be able to defunctionalize LHS appropriately.
 
     Returns:
         A tuple ``(rule, var_map)`` where
@@ -397,5 +397,5 @@ def cterm_build_rule(
         final_constraints,
         priority,
         keep_vars,
-        definition=definition,
+        defunc_with=defunc_with,
     )

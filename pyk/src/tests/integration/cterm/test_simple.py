@@ -152,7 +152,7 @@ class TestSimpleProof(CTermSymbolicTest, KPrintTest):
         # When
         config_lhs = self.config(kprint, *lhs)
         config_rhs = self.config(kprint, *rhs)
-        rule, _ = cterm_build_rule(test_id, config_lhs, config_rhs, definition=kprint.definition)
+        rule, _ = cterm_build_rule(test_id, config_lhs, config_rhs, defunc_with=kprint.definition)
         rule_body_cterm = CTerm.from_kast(rule.body)
         rule_k = kprint.pretty_print(rule_body_cterm.cell('K_CELL'))
         rule_state = kprint.pretty_print(rule_body_cterm.cell('STATE_CELL'))

@@ -223,7 +223,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             label: str,
             claim: bool = False,
             priority: int | None = None,
-            definition: KDefinition | None = None,
+            defunc_with: KDefinition | None = None,
             minimize: bool = False,
         ) -> KRuleLike:
             def is_ceil_condition(kast: KInner) -> bool:
@@ -242,7 +242,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
                 rule, _ = cterm_build_claim(sentence_id, init_cterm, target_cterm)
             else:
                 rule, _ = cterm_build_rule(
-                    sentence_id, init_cterm, target_cterm, priority=priority, definition=definition
+                    sentence_id, init_cterm, target_cterm, priority=priority, defunc_with=defunc_with
                 )
             if minimize:
                 rule = minimize_rule_like(rule)
