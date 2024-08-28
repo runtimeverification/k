@@ -224,12 +224,26 @@ class KCFGMinimizer:
                 a2ai_list.append(split)
                 ai2bi_list.append(edges)
 
-        # Step 3. Apply the heuristic & Drop non-mergeable cases
-        tmp_a2ai_list: list[KCFG.Split] = []
-        tmp_ai2bi_list: list[list[KCFG.Edge]] = []
+        # Step 3. Apply the heuristic & Obtain the merge-able KCFG sub-graphs
+        to_merge: dict[KCFG.Split, list[list[KCFG.Edge]]] = {}  # Split |-> Merge-able Edges
         while a2ai_list:
             a2ai = a2ai_list.pop()
             ai2bi = ai2bi_list.pop()
+            while ai2bi:
+                mergeable_edges = [ai2bi.pop()]
+                idx = 0
+                while idx < len(ai2bi):
+                    if self.heuristics.is_mergeable(mergeable_edges[0].target.cterm, ai2bi[idx].target.cterm):
+                        for mergable_edge in mergeable_edges[1:]:
+                            if not self.heuristics.is_mergeable(mergable_edge.target.cterm, ai2bi[idx].target.cterm):
+                                raise ValueError(
+                                    'Mergeable edges are not partitioned, you should provide a better heuristic'
+                                )
+                        mergeable_edges.append(ai2bi.pop(idx))
+                    else:
+                        idx += 1
+                if len(mergeable_edges) > 1:
+                    to_merge[a2ai] = to_merge.get(a2ai, []) + [mergeable_edges]
 
         # ---- Rewrite ----
         return is_merged  # TODO: Implement merge_nodes
