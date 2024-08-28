@@ -9,7 +9,7 @@ from ..kast.inner import KApply, KRewrite, top_down
 from ..kast.manip import (
     flatten_label,
     inline_cell_maps,
-    minimize_rule,
+    minimize_rule_like,
     minimize_term,
     ml_pred_to_bool,
     push_down_rewrites,
@@ -316,7 +316,7 @@ class KCFGShow:
                 sent = sent.let(body=KCFGShow.hide_cells(sent.body, omit_cells))
                 if parseable_output:
                     sent = sent.let(body=remove_generated_cells(sent.body))
-                    sent = minimize_rule(sent)
+                    sent = minimize_rule_like(sent)
             return sent
 
         module = cfg.to_module(module_name)

@@ -18,13 +18,13 @@ from ..kast.manip import (
     extract_rhs,
     flatten_label,
     inline_cell_maps,
+    minimize_rule_like,
     rename_generated_vars,
     sort_ac_collections,
 )
 from ..kast.outer import KFlatModule
 from ..prelude.kbool import andBool
 from ..utils import ensure_dir_path, not_none
-from .minimize import KCFGMinimizer
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping, MutableMapping
@@ -218,7 +218,14 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         def from_dict(dct: dict[str, Any], nodes: Mapping[int, KCFG.Node]) -> KCFG.Edge:
             return KCFG.Edge(nodes[dct['source']], nodes[dct['target']], dct['depth'], tuple(dct['rules']))
 
-        def to_rule(self, label: str, claim: bool = False, priority: int | None = None) -> KRuleLike:
+        def to_rule(
+            self,
+            label: str,
+            claim: bool = False,
+            priority: int | None = None,
+            defunc_with: KDefinition | None = None,
+            minimize: bool = False,
+        ) -> KRuleLike:
             def is_ceil_condition(kast: KInner) -> bool:
                 return type(kast) is KApply and kast.label.name == '#Ceil'
 
@@ -234,7 +241,11 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             if claim:
                 rule, _ = cterm_build_claim(sentence_id, init_cterm, target_cterm)
             else:
-                rule, _ = cterm_build_rule(sentence_id, init_cterm, target_cterm, priority=priority)
+                rule, _ = cterm_build_rule(
+                    sentence_id, init_cterm, target_cterm, priority=priority, defunc_with=defunc_with
+                )
+            if minimize:
+                rule = minimize_rule_like(rule)
             return rule
 
         def replace_source(self, node: KCFG.Node) -> KCFG.Edge:
@@ -1233,9 +1244,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         )
         self._deleted_nodes.clear()
         self._created_nodes.clear()
-
-    def minimize(self) -> None:
-        KCFGMinimizer(self).minimize()
 
     @staticmethod
     def read_cfg_data(cfg_dir: Path) -> KCFG:
