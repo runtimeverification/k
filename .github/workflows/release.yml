@@ -76,7 +76,7 @@ jobs:
           name: k-framework-binary
 
       - name: 'Publish K to k-framework-binary cache'
-        uses: workflow/nix-shell-action@v3.3.0
+        uses: workflow/nix-shell-action@v3.3.2
         env:
           CACHIX_AUTH_TOKEN: '${{ secrets.CACHIX_PRIVATE_KFB_TOKEN }}'
           GC_DONT_GC: '1'
