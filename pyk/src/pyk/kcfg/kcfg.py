@@ -18,6 +18,7 @@ from ..kast.manip import (
     extract_rhs,
     flatten_label,
     inline_cell_maps,
+    minimize_rule_like,
     rename_generated_vars,
     sort_ac_collections,
 )

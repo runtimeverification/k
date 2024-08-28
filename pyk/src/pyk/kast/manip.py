@@ -543,7 +543,7 @@ def minimize_term(
     return term
 
 
-def minimize_rule(rule: RL, keep_vars: Iterable[str] = ()) -> RL:
+def minimize_rule_like(rule: RL, keep_vars: Iterable[str] = ()) -> RL:
     """Minimize a K rule or claim for pretty-printing.
 
     - Variables only used once will be removed.
