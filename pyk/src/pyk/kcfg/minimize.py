@@ -87,8 +87,8 @@ class KCFGMinimizer:
         ci, csubsts = list(split_from_b.splits.keys()), list(split_from_b.splits.values())
         # Ensure split can be lifted soundly (i.e., that it does not introduce fresh variables)
         assert (
-            len(split_from_b.source_vars.difference(a.free_vars)) == 0
-            and len(split_from_b.target_vars.difference(split_from_b.source_vars)) == 0
+                len(split_from_b.source_vars.difference(a.free_vars)) == 0
+                and len(split_from_b.target_vars.difference(split_from_b.source_vars)) == 0
         )
         # Create CTerms and CSubsts corresponding to the new targets of the split
         new_cterms_with_constraints = [
@@ -131,8 +131,8 @@ class KCFGMinimizer:
         ci = list(splits_from_b.keys())
         # Ensure split can be lifted soundly (i.e., that it does not introduce fresh variables)
         assert (
-            len(split_from_b.source_vars.difference(a.free_vars)) == 0
-            and len(split_from_b.target_vars.difference(split_from_b.source_vars)) == 0
+                len(split_from_b.source_vars.difference(a.free_vars)) == 0
+                and len(split_from_b.target_vars.difference(split_from_b.source_vars)) == 0
         )
         # Get the substitution for `B`, at the same time removing 'B' from the targets of `A`.
         csubst_b = splits_from_a.pop(self.kcfg.node(b_id).id)
@@ -171,11 +171,11 @@ class KCFGMinimizer:
                         node.id
                         for node in self.kcfg.nodes
                         if (splits := self.kcfg.splits(source_id=node.id)) != []
-                        and (sources := finder(target_id=node.id)) != []
-                        and (source := single(sources).source)
-                        and (split := single(splits))
-                        and len(split.source_vars.difference(source.free_vars)) == 0
-                        and len(split.target_vars.difference(split.source_vars)) == 0
+                           and (sources := finder(target_id=node.id)) != []
+                           and (source := single(sources).source)
+                           and (split := single(splits))
+                           and len(split.source_vars.difference(source.free_vars)) == 0
+                           and len(split.target_vars.difference(split.source_vars)) == 0
                     ]
                 )
                 for id in splits_to_lift:
@@ -211,8 +211,6 @@ class KCFGMinimizer:
         :param semantics: provides the is_mergeable heuristic
         :return: whether any merge was performed
         """
-        is_merged = False
-
         # ---- Match ----
 
         # Step 1. Find all possible mergeable KCFG sub-graphs: A -|Split|> Ai -|Edge|> Bi
@@ -244,11 +242,43 @@ class KCFGMinimizer:
                         idx += 1
                 if len(mergeable_edges) > 1:
                     to_merge[a2ai] = to_merge.get(a2ai, []) + [mergeable_edges]
+        if not to_merge:
+            return False
 
         # ---- Rewrite ----
-        return is_merged  # TODO: Implement merge_nodes
 
-    def minimize(self, merge: bool = False) -> None:
+        for a2ai, ai2bis_group in to_merge.items():
+            # Step 1. Remove the original split
+            a_splits = a2ai.splits
+            for ai2bis in ai2bis_group:
+                for edge in ai2bis:
+                    a_splits.pop(edge.source.id)
+                    self.kcfg.remove_node(edge.source.id)
+
+            # Step 2. Create Merged Edges and Splits from merged_bi to bi
+            merged_edges: list[KCFG.MergedEdge] = []
+            for ai2bis in ai2bis_group:
+                ai_cterms = [ai2bi.source.cterm for ai2bi in ai2bis]
+                bi_cterms = [ai2bi.target.cterm for ai2bi in ai2bis]
+                merged_ai_cterm = reduce(cterm_anti_unify, ai_cterms)
+                merged_bi_cterm = reduce(cterm_anti_unify, bi_cterms)
+                merged_ai = self.kcfg.create_node(merged_ai_cterm)
+                merged_bi = self.kcfg.create_node(merged_bi_cterm)
+                merged_edge = self.kcfg.create_merged_edge(merged_ai.id, merged_bi.id, ai2bis)
+                merged_edges.append(merged_edge)
+                b_splits: dict[int, CSubst] = {ai2bi.target.id: cterm_match(merged_bi_cterm, ai2bi.target.cterm) for ai2bi in ai2bis}
+                self.kcfg.create_split(merged_bi.id, b_splits.items())
+
+            # Step 3. Create a new split from a to merged_ai
+            a_splits = a_splits | {merged_edge.source.id: cterm_match(a2ai.source.cterm, merged_edge.source.cterm) for merged_edge in merged_edges}
+            if len(a_splits) == 1 and len(merged_edges) == 1:
+                self.kcfg.create_merged_edge(a2ai.source.id, merged_edges[0].target.id, merged_edges[0].edges)
+            else:
+                self.kcfg.create_split(a2ai.source.id, a_splits.items())
+
+        return True
+
+    def minimize(self) -> None:
         """Minimize KCFG by repeatedly performing the lifting transformations.
 
         The KCFG is transformed to an equivalent in which no further lifting transformations are possible.
@@ -259,7 +289,6 @@ class KCFGMinimizer:
             repeat = self.lift_edges()
             repeat = self.lift_splits() or repeat
 
-        if merge:
-            repeat = True
-            while repeat:
-                repeat = self.merge_nodes()
+        repeat = True
+        while repeat:
+            repeat = self.merge_nodes()

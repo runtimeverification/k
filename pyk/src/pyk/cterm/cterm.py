@@ -297,6 +297,16 @@ def anti_unify(state1: KInner, state2: KInner, kdef: KDefinition | None = None) 
     return (abstracted_state, subst1, subst2)
 
 
+def cterm_anti_unify(t0: CTerm, t1: CTerm) -> CTerm:
+    # todo
+    return t0.anti_unify(t1)[0]
+
+
+def cterm_match(t0: CTerm, t1: CTerm) -> CSubst:
+    # todo
+    return t0.match_with_constraint(t1)
+
+
 @dataclass(frozen=True, order=True)
 class CSubst:
     """Store information about instantiation of a symbolic state (`CTerm`) to a more specific one.
