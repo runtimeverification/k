@@ -886,4 +886,4 @@ def defunctionalize(defn: KDefinition, kinner: KInner) -> tuple[KInner, list[KIn
         return _kinner
 
     new_kinner = top_down(_defunctionalize, kinner)
-    return (new_kinner, constraints)
+    return (new_kinner, list(unique(constraints)))
