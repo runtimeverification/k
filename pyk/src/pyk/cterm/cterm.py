@@ -377,7 +377,7 @@ def cterm_build_rule(
         final_cterm: State to put on RHS of the rule (constraints interpreted as `ensures` clause).
         keep_vars: Variables to leave in the side-conditions even if not bound in the configuration.
         priority: Priority index to use for generated rules.
-        defunc_with: KDefinition to be able to defunctionalize LHS appropriately.
+        defunc_with (optional): KDefinition to be able to defunctionalize LHS appropriately.
 
     Returns:
         A tuple ``(rule, var_map)`` where
