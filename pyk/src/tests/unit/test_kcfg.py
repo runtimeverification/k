@@ -75,6 +75,10 @@ def edge(i: int, j: int) -> KCFG.Edge:
     return KCFG.Edge(node(i), node(j), 1, ())
 
 
+def merged_edge(i: int, j: int, edges: Iterable[KCFG.Edge]) -> KCFG.MergedEdge:
+    return KCFG.MergedEdge(node(i), node(j), tuple(edges))
+
+
 def cover(i: int, j: int) -> KCFG.Cover:
     csubst = term(j).match_with_constraint(term(i))
     assert csubst is not None
@@ -103,6 +107,14 @@ def edge_dicts(*edges: Iterable) -> list[dict[str, Any]]:
         return {'source': i, 'target': j, 'depth': depth, 'rules': list(rules)}
 
     return [_make_edge_dict(*edge) for edge in edges]
+
+
+def merged_edge_dicts(*merged_edges: Iterable) -> list[dict[str, Any]]:
+
+    def _make_merged_edge_dict(s: int, t: int, *edges: Iterable) -> dict[str, Any]:
+        return {'source': s, 'target': t, 'edges': edge_dicts(*edges)}
+
+    return [_make_merged_edge_dict(*merged_edge) for merged_edge in merged_edges]
 
 
 def cover_dicts(*edges: tuple[int, int]) -> list[dict[str, Any]]:
@@ -308,6 +320,7 @@ def test_get_successors() -> None:
         'next': 19,
         'nodes': node_dicts(18),
         'edges': edge_dicts((11, 12)),
+        'merged_edges': merged_edge_dicts((17, 18, (14, 15))),
         'splits': split_dicts((12, [(13, mlTop()), (14, mlTop())])),
         'covers': cover_dicts((14, 11)),
         'ndbranches': ndbranch_dicts((13, [(16, False), (17, False)])),
@@ -316,12 +329,14 @@ def test_get_successors() -> None:
 
     # When
     edges = set(cfg.edges(source_id=11))
+    merged_edges = set(cfg.merged_edges(source_id=17))
     covers = set(cfg.covers(source_id=14))
     splits = sorted(cfg.splits(source_id=12))
     ndbranches = set(cfg.ndbranches(source_id=13))
 
     # Then
     assert edges == {edge(11, 12)}
+    assert merged_edges == {merged_edge(17, 18, [edge(14, 15)])}
     assert covers == {cover(14, 11)}
     assert splits == [split(12, [13, 14])]
     assert ndbranches == {ndbranch(13, [16, 17])}
@@ -342,8 +357,9 @@ def test_get_predecessors() -> None:
 def test_reachable_nodes() -> None:
     # Given
     d = {
-        'nodes': node_dicts(20),
+        'nodes': node_dicts(21),
         'edges': edge_dicts((13, 15), (14, 15), (15, 12)),
+        'merged_edges': merged_edge_dicts((20, 21, (12, 13))),
         'covers': cover_dicts((12, 13)),
         'splits': split_dicts(
             (16, [(12, mlTop()), (13, mlTop()), (17, mlTop())]), (17, [(12, mlTop()), (18, mlTop())])
@@ -360,7 +376,7 @@ def test_reachable_nodes() -> None:
 
     # Then
     assert nodes_2 == {node(12), node(13), node(15)}
-    assert nodes_3 == {node(16), node(12), node(13), node(17), node(18), node(15), node(19), node(20)}
+    assert nodes_3 == {node(16), node(12), node(13), node(17), node(18), node(15), node(19), node(20), node(21)}
     assert nodes_4 == {node(13), node(16), node(12), node(15), node(17), node(14)}
     assert nodes_5 == {node(19), node(18), node(17), node(16)}
 
@@ -368,8 +384,9 @@ def test_reachable_nodes() -> None:
 def test_paths_between() -> None:
     # Given
     d = {
-        'nodes': node_dicts(20),
+        'nodes': node_dicts(21),
         'edges': edge_dicts((13, 15), (14, 15), (15, 12)),
+        'merged_edges': merged_edge_dicts((20, 21, (12, 13))),
         'covers': cover_dicts((12, 13)),
         'splits': split_dicts(
             (16, [(12, mlTop()), (13, mlTop()), (17, mlTop())]), (17, [(12, mlTop()), (18, mlTop())])
@@ -389,11 +406,11 @@ def test_paths_between() -> None:
     ]
 
     # When
-    paths = sorted(cfg.paths_between(17, 20))
+    paths = sorted(cfg.paths_between(17, 21))
 
     # Then
     assert paths == [
-        (split(17, [18]), ndbranch(18, [20])),
+        (split(17, [18]), ndbranch(18, [20]), merged_edge(20, 21, [edge(12, 13)])),
     ]
 
 
@@ -536,7 +553,8 @@ def test_pretty_print() -> None:
     d = {
         'nodes': nodes,
         'aliases': {'foo': 14, 'bar': 14},
-        'edges': edge_dicts((21, 12), (12, 13, 5), (13, 14), (15, 16), (16, 13), (18, 17), (22, 19)),
+        'edges': edge_dicts((12, 13, 5), (13, 14), (15, 16), (16, 13), (18, 17), (22, 19)),
+        'merged_edges': merged_edge_dicts((21, 12, (21, 12), (21, 13))),
         'covers': cover_dicts((19, 22)),
         'splits': split_dicts(
             (
@@ -562,7 +580,7 @@ def test_pretty_print() -> None:
         '\n'
         '┌─ 21 (root)\n'
         '│\n'
-        '│  (1 step)\n'
+        '│  (1|1 steps)\n'
         '├─ 12\n'
         '│\n'
         '│  (5 steps)\n'
@@ -648,7 +666,7 @@ def test_pretty_print() -> None:
         '│       V21\n'
         '│     </top>\n'
         '│\n'
-        '│  (1 step)\n'
+        '│  (1|1 steps)\n'
         '├─ 12\n'
         '│     <top>\n'
         '│       V12\n'
