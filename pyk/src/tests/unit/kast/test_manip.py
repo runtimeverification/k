@@ -564,7 +564,7 @@ def production(klabel: KLabel, sort: KSort, items: Iterable[KSort | str], functi
     return KProduction(sort=sort, items=_items, klabel=klabel, att=att)
 
 
-def var_equals(var: str, sort: KSort | None, term: KInner) -> KInner:
+def var_equals(var: str, term: KInner) -> KInner:
     return KApply(
         KLabel(
             '#Equals',
@@ -573,7 +573,7 @@ def var_equals(var: str, sort: KSort | None, term: KInner) -> KInner:
                 GENERATED_TOP_CELL,
             ),
         ),
-        [KVariable(var, sort=sort), term],
+        [KVariable(var, sort=INT), term],
     )
 
 
@@ -605,29 +605,29 @@ TEST_DATA: tuple[tuple[KInner, KInner, list[KInner]], ...] = (
     (
         add(token(1), token(2)),
         KVariable('F_eefa6e95', sort=INT),
-        [var_equals('F_eefa6e95', INT, add(token(1), token(2)))],
+        [var_equals('F_eefa6e95', add(token(1), token(2)))],
     ),
     (to_s(token(1)), to_s(token(1)), []),
     (
         to_s(to_int(to_s(add(token(1), token(2))))),
         to_s(KVariable('F_a8146589', sort=INT)),
-        [var_equals('F_a8146589', INT, to_int(to_s(add(token(1), token(2)))))],
+        [var_equals('F_a8146589', to_int(to_s(add(token(1), token(2)))))],
     ),
     (
         to_s_2(add(token(1), token(2)), init_s()),
         to_s_2(KVariable('F_eefa6e95', sort=INT), init_s()),
-        [var_equals('F_eefa6e95', INT, add(token(1), token(2)))],
+        [var_equals('F_eefa6e95', add(token(1), token(2)))],
     ),
     (to_s_2(token(1), init_s()), to_s_2(token(1), init_s()), []),
     (
         to_s_2(add(token(1), token(2)), to_s(add(token(1), token(2)))),
         to_s_2(KVariable('F_eefa6e95', INT), to_s(KVariable('F_eefa6e95', INT))),
-        [var_equals('F_eefa6e95', INT, add(token(1), token(2)))],
+        [var_equals('F_eefa6e95', add(token(1), token(2)))],
     ),
     (
         to_s_2(add(token(1), token(2)), to_s(to_int(init_s()))),
         to_s_2(KVariable('F_eefa6e95', INT), to_s(KVariable('F_3294e1be', INT))),
-        [var_equals('F_eefa6e95', INT, add(token(1), token(2))), var_equals('F_3294e1be', INT, to_int(init_s()))],
+        [var_equals('F_eefa6e95', add(token(1), token(2))), var_equals('F_3294e1be', to_int(init_s()))],
     ),
 )
 
