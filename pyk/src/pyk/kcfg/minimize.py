@@ -207,9 +207,30 @@ class KCFGMinimizer:
         - `Edge` in A_merged -|Edge|-> B_merge: list of merged edges is from A_i -|Edge|-> B_i
         - `Split` in B_merge -|Split|-> B_x, B_y, ..., B_z: subst for it is from A -|Split|-> A_1, A_2, ..., A_n
         :param semantics: provides the is_mergeable heuristic
-        :return: whether or not any merge was performed
+        :return: whether any merge was performed
         """
-        return False  # TODO: Implement merge_nodes
+        is_merged = False
+
+        # ---- Match ----
+
+        # Step 1. Find all possible mergeable KCFG sub-graphs: A -|Split|> Ai -|Edge|> Bi
+        a2ai_list: list[KCFG.Split] = []  # A -|Split|> Ai
+        ai2bi_list: list[list[KCFG.Edge]] = []  # Ai -|Edge|> Bi
+        for split in self.kcfg.splits():
+            edges = [single(self.kcfg.edges(source_id=ai)) for ai in split.target_ids if self.kcfg.edges(source_id=ai)]
+            if len(edges) > 2:
+                a2ai_list.append(split)
+                ai2bi_list.append(edges)
+
+        # Step 3. Apply the heuristic & Drop non-mergeable cases
+        tmp_a2ai_list: list[KCFG.Split] = []
+        tmp_ai2bi_list: list[list[KCFG.Edge]] = []
+        while a2ai_list:
+            a2ai = a2ai_list.pop()
+            ai2bi = ai2bi_list.pop()
+
+        # ---- Rewrite ----
+        return is_merged  # TODO: Implement merge_nodes
 
     def minimize(self) -> None:
         """Minimize KCFG by repeatedly performing the lifting transformations.
