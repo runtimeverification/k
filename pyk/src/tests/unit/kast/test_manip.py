@@ -5,10 +5,13 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from pyk.kast import EMPTY_ATT, KAtt
+from pyk.kast.att import Atts
 from pyk.kast.inner import KApply, KLabel, KRewrite, KSequence, KSort, KToken, KVariable, Subst
 from pyk.kast.manip import (
     bool_to_ml_pred,
     collapse_dots,
+    defunctionalize,
     indexed_rewrite,
     is_term_like,
     minimize_term,
@@ -20,14 +23,17 @@ from pyk.kast.manip import (
     simplify_bool,
     split_config_from,
 )
+from pyk.kast.outer import KDefinition, KFlatModule, KNonTerminal, KProduction, KTerminal
 from pyk.prelude.k import DOTS, GENERATED_TOP_CELL
 from pyk.prelude.kbool import BOOL, FALSE, TRUE, andBool, notBool
 from pyk.prelude.kint import INT, intToken
 from pyk.prelude.ml import mlAnd, mlBottom, mlEqualsFalse, mlEqualsTrue, mlNot, mlTop
+from pyk.prelude.utils import token
 
 from ..utils import a, b, c, f, k, x
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
     from typing import Final
 
     from pyk.kast import KInner
@@ -543,3 +549,94 @@ INDEXED_REWRITE_TEST_DATA = [
 )
 def test_indexed_rewrite(test_id: str, kast: KInner, rewrites: list[KRewrite], expected: KInner) -> None:
     assert indexed_rewrite(kast, rewrites) == expected
+
+
+add: Final = KLabel('_+_')
+init_s: Final = KLabel('init_s')
+to_s: Final = KLabel('to_s')
+to_s_2: Final = KLabel('to_s_2')
+to_int: Final = KLabel('to_int')
+
+
+def production(klabel: KLabel, sort: KSort, items: Iterable[KSort | str], function: bool) -> KProduction:
+    _items = tuple(KNonTerminal(item) if isinstance(item, KSort) else KTerminal(item) for item in items)
+    att = EMPTY_ATT if not function else KAtt((Atts.FUNCTION(None),))
+    return KProduction(sort=sort, items=_items, klabel=klabel, att=att)
+
+
+def var_equals(var: str, term: KInner) -> KInner:
+    return KApply(
+        KLabel(
+            '#Equals',
+            params=(
+                INT,
+                GENERATED_TOP_CELL,
+            ),
+        ),
+        [KVariable(var, sort=INT), term],
+    )
+
+
+S: Final = KSort('S')
+DEFINITION: Final = KDefinition(
+    main_module_name='TEST',
+    all_modules=(
+        KFlatModule(
+            name='TEST',
+            sentences=(
+                production(add, INT, (INT, '+', INT), True),
+                production(init_s, S, (), False),
+                production(to_s, S, (INT,), False),
+                production(
+                    to_s_2,
+                    S,
+                    (
+                        INT,
+                        S,
+                    ),
+                    False,
+                ),
+                production(to_int, INT, (S,), True),
+            ),
+        ),
+    ),
+)
+TEST_DATA: tuple[tuple[KInner, KInner, list[KInner]], ...] = (
+    (
+        add(token(1), token(2)),
+        KVariable('F_eefa6e95', sort=INT),
+        [var_equals('F_eefa6e95', add(token(1), token(2)))],
+    ),
+    (to_s(token(1)), to_s(token(1)), []),
+    (
+        to_s(to_int(to_s(add(token(1), token(2))))),
+        to_s(KVariable('F_a8146589', sort=INT)),
+        [var_equals('F_a8146589', to_int(to_s(add(token(1), token(2)))))],
+    ),
+    (
+        to_s_2(add(token(1), token(2)), init_s()),
+        to_s_2(KVariable('F_eefa6e95', sort=INT), init_s()),
+        [var_equals('F_eefa6e95', add(token(1), token(2)))],
+    ),
+    (to_s_2(token(1), init_s()), to_s_2(token(1), init_s()), []),
+    (
+        to_s_2(add(token(1), token(2)), to_s(add(token(1), token(2)))),
+        to_s_2(KVariable('F_eefa6e95', INT), to_s(KVariable('F_eefa6e95', INT))),
+        [var_equals('F_eefa6e95', add(token(1), token(2)))],
+    ),
+    (
+        to_s_2(add(token(1), token(2)), to_s(to_int(init_s()))),
+        to_s_2(KVariable('F_eefa6e95', INT), to_s(KVariable('F_3294e1be', INT))),
+        [var_equals('F_eefa6e95', add(token(1), token(2))), var_equals('F_3294e1be', to_int(init_s()))],
+    ),
+)
+
+
+@pytest.mark.parametrize('input,expected_output,expected_constraints', TEST_DATA, ids=count())
+def test_defunctionalize(input: KInner, expected_output: KInner, expected_constraints: list[KInner]) -> None:
+    # When
+    actual_output, actual_constraints = defunctionalize(DEFINITION, input)
+
+    # Then
+    assert actual_output == expected_output
+    assert actual_constraints == expected_constraints

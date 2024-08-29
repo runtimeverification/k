@@ -22,7 +22,7 @@ from .kast.att import KAtt
 from .kast.inner import KInner
 from .kast.manip import (
     flatten_label,
-    minimize_rule,
+    minimize_rule_like,
     minimize_term,
     propagate_up_constraints,
     remove_source_map,
@@ -394,7 +394,7 @@ def exec_coverage(options: CoverageOptions) -> None:
     definition = remove_source_map(read_kast_definition(kompiled_dir / 'compiled.json'))
     pretty_printer = PrettyPrinter(definition)
     for rid in options.coverage_file:
-        rule = minimize_rule(strip_coverage_logger(get_rule_by_id(definition, rid.strip())))
+        rule = minimize_rule_like(strip_coverage_logger(get_rule_by_id(definition, rid.strip())))
         options.output_file.write('\n\n')
         options.output_file.write('Rule: ' + rid.strip())
         options.output_file.write('\nUnparsed:\n')

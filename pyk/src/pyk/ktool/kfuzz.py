@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 from hypothesis import Phase, given, settings
@@ -20,13 +21,43 @@ if TYPE_CHECKING:
     from ..kore.syntax import Pattern
 
 
+class KFuzzHandler(ABC):
+    """Allows custom behavior (ie. printing) during fuzzing for each test case and on a test failure.
+
+    Can be passed to the `KFuzz` constructor or to :any:`fuzz` with the `handler` keyword argument.
+    """
+
+    @abstractmethod
+    def handle_test(self, args: Mapping[EVar, Pattern]) -> None:
+        """Handle each test case with the variable substitutions that are being used."""
+        ...
+
+    @abstractmethod
+    def handle_failure(self, args: Mapping[EVar, Pattern]) -> None:
+        """Handle a test case failure, before the `AssertionError` is raised."""
+        ...
+
+
+class _KFuzzNullHandler(KFuzzHandler):
+    def handle_test(self, args: Mapping[EVar, Pattern]) -> None:
+        pass
+
+    def handle_failure(self, args: Mapping[EVar, Pattern]) -> None:
+        pass
+
+
+_DEFAULT_HANDLER = _KFuzzNullHandler()
+
+
 class KFuzz:
     """Interface for fuzzing over property tests in K."""
 
     definition_dir: Path
+    handler: KFuzzHandler
 
-    def __init__(self, definition_dir: Path) -> None:
+    def __init__(self, definition_dir: Path, handler: KFuzzHandler = _DEFAULT_HANDLER) -> None:
         self.definition_dir = definition_dir
+        self.handler = handler
 
     def fuzz_with_check(
         self,
@@ -39,7 +70,14 @@ class KFuzz:
 
         See :any:`fuzz` for info on the parameters.
         """
-        fuzz(self.definition_dir, template, subst_strategy, check_func=check_func)
+        fuzz(
+            self.definition_dir,
+            template,
+            subst_strategy,
+            check_func=check_func,
+            handler=self.handler,
+            **hypothesis_args,
+        )
 
     def fuzz_with_exit_code(
         self,
@@ -51,7 +89,14 @@ class KFuzz:
 
         See :any:`fuzz` for info on the parameters.
         """
-        fuzz(self.definition_dir, template, subst_strategy, check_exit_code=True)
+        fuzz(
+            self.definition_dir,
+            template,
+            subst_strategy,
+            check_exit_code=True,
+            handler=self.handler,
+            **hypothesis_args,
+        )
 
 
 def kintegers(
@@ -84,8 +129,10 @@ def fuzz(
     definition_dir: str | Path,
     template: Pattern,
     subst_strategy: dict[EVar, SearchStrategy[Pattern]],
+    *,
     check_func: Callable[[Pattern], Any] | None = None,
     check_exit_code: bool = False,
+    handler: KFuzzHandler = _DEFAULT_HANDLER,
     **hypothesis_args: Any,
 ) -> None:
     """Fuzz a property test with concrete execution over a K term.
@@ -100,6 +147,7 @@ def fuzz(
         check_exit_code: Check the exit code of the interpreter for a test failure instead of using check_func.
           An exit code of 0 indicates a passing test.
           A RuntimeError will be thrown if this is True and check_func is also passed as an argument.
+        handler: An instance of a `KFuzzHandler` implementing custom behavior while fuzzing.
         hypothesis_args: Keyword arguments that will be passed as settings for the hypothesis test. Defaults:
 
           deadline: 5000
@@ -120,15 +168,20 @@ def fuzz(
             else:
                 return p
 
+        handler.handle_test(subst_case)
         test_pattern = template.top_down(sub)
-        res = llvm_interpret_raw(definition_dir, test_pattern.text)
+        res = llvm_interpret_raw(definition_dir, test_pattern.text, check=False)
 
-        if check_exit_code:
-            assert res.returncode == 0
-        else:
-            assert check_func
-            res_pattern = KoreParser(res.stdout).pattern()
-            check_func(res_pattern)
+        try:
+            if check_exit_code:
+                assert res.returncode == 0
+            else:
+                assert check_func
+                res_pattern = KoreParser(res.stdout).pattern()
+                check_func(res_pattern)
+        except AssertionError:
+            handler.handle_failure(subst_case)
+            raise
 
     strat: SearchStrategy = fixed_dictionaries(subst_strategy)
 
