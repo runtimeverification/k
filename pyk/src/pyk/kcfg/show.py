@@ -9,7 +9,7 @@ from ..kast.inner import KApply, KRewrite, top_down
 from ..kast.manip import (
     flatten_label,
     inline_cell_maps,
-    minimize_rule,
+    minimize_rule_like,
     minimize_term,
     ml_pred_to_bool,
     push_down_rewrites,
@@ -135,6 +135,13 @@ class KCFGShow:
             else:
                 return ['(' + str(edge.depth) + ' steps)']
 
+        def _print_merged_edge(merged_edge: KCFG.MergedEdge) -> list[str]:
+            res = '('
+            for edge in merged_edge.edges:
+                res += f'{edge.depth}|'
+            res = res[:-1] + ' steps)'
+            return [res] if len(res) < 78 else ['(merged edge)']
+
         def _print_cover(cover: KCFG.Cover) -> Iterable[str]:
             subst_strs = [f'{k} <- {self.kprint.pretty_print(v)}' for k, v in cover.csubst.subst.items()]
             subst_str = ''
@@ -249,6 +256,11 @@ class KCFGShow:
                     ret_edge_lines.extend(add_indent(indent + '│  ', _print_edge(successor)))
                     ret_lines.append((f'edge_{successor.source.id}_{successor.target.id}', ret_edge_lines))
 
+                elif type(successor) is KCFG.MergedEdge:
+                    ret_edge_lines = []
+                    ret_edge_lines.extend(add_indent(indent + '│  ', _print_merged_edge(successor)))
+                    ret_lines.append((f'merged_edge_{successor.source.id}_{successor.target.id}', ret_edge_lines))
+
                 elif type(successor) is KCFG.Cover:
                     ret_edge_lines = []
                     ret_edge_lines.extend(add_indent(indent + '┊  ', _print_cover(successor)))
@@ -304,7 +316,7 @@ class KCFGShow:
                 sent = sent.let(body=KCFGShow.hide_cells(sent.body, omit_cells))
                 if parseable_output:
                     sent = sent.let(body=remove_generated_cells(sent.body))
-                    sent = minimize_rule(sent)
+                    sent = minimize_rule_like(sent)
             return sent
 
         module = cfg.to_module(module_name)
