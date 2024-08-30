@@ -27,7 +27,6 @@ version_sub() {
     sed --in-place 's/^version = ".*"$/version = "'${version}'"/'                                                     pyk/pyproject.toml
     sed --in-place "s/^version = '.*'$/version = '${version}'/"                                                       pyk/docs/conf.py
     sed --in-place "s/^release = '.*'$/release = '${version}'/"                                                       pyk/docs/conf.py
-    sed --in-place "s/^__version__: Final = '.*'/__version__: Final = '${version}'/"                                  pyk/src/pyk/__init__.py
 }
 
 version_command="$1" ; shift
