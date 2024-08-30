@@ -304,7 +304,8 @@ def cterm_anti_unify(t0: CTerm, t1: CTerm) -> CTerm:
 
 def cterm_match(t0: CTerm, t1: CTerm) -> CSubst:
     # todo
-    return t0.match_with_constraint(t1)
+    x = t0.match_with_constraint(t1)
+    return x if x else CSubst()
 
 
 @dataclass(frozen=True, order=True)
