@@ -272,6 +272,7 @@ class KCFGMinimizer:
             # Step 3. Create a new split from a to merged_ai
             a_splits = a_splits | {merged_edge.source.id: cterm_match(a2ai.source.cterm, merged_edge.source.cterm) for merged_edge in merged_edges}
             if len(a_splits) == 1 and len(merged_edges) == 1:
+                self.kcfg.remove_node(merged_edges[0].source.id)
                 self.kcfg.create_merged_edge(a2ai.source.id, merged_edges[0].target.id, merged_edges[0].edges)
             else:
                 self.kcfg.create_split(a2ai.source.id, a_splits.items())
