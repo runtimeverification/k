@@ -4,7 +4,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from pyk.kast.inner import KApply, KSequence
-from pyk.kcfg.semantics import KCFGSemantics
+from pyk.kcfg.semantics import DefaultSemantics
 from pyk.proof import APRProof, APRProver
 from pyk.testing import KCFGExploreTest, KProveTest
 from pyk.utils import single
@@ -18,12 +18,13 @@ if TYPE_CHECKING:
     from pyk.kast.outer import KDefinition
     from pyk.kcfg import KCFGExplore
     from pyk.kcfg.kcfg import KCFGExtendResult
+    from pyk.kcfg.semantics import KCFGSemantics
     from pyk.ktool.kprove import KProve
 
 _LOGGER: Final = logging.getLogger(__name__)
 
 
-class SimpleSemantics(KCFGSemantics):
+class SimpleSemantics(DefaultSemantics):
     def is_terminal(self, c: CTerm) -> bool:
         k_cell = c.cell('K_CELL')
         if type(k_cell) is KSequence and type(k_cell[0]) is KApply and k_cell[0].label.name == 'f_SIMPLE-PROOFS_Step':
