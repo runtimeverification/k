@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from functools import reduce
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
-from ..cterm import CTerm
-from ..utils import not_none, single
+from pyk.cterm import CTerm
+from pyk.cterm.cterm import CSubst, cterm_anti_unify, cterm_match
+from pyk.utils import not_none, single
+
 from .semantics import DefaultSemantics
 
 if TYPE_CHECKING:
@@ -18,7 +20,9 @@ class KCFGMinimizer:
     kcfg: KCFG
     heuristics: KCFGSemantics
 
-    def __init__(self, kcfg: KCFG, heuristics: KCFGSemantics = DefaultSemantics()) -> None:
+    def __init__(self, kcfg: KCFG, heuristics: Optional[KCFGSemantics] = None) -> None:
+        if heuristics is None:
+            heuristics = DefaultSemantics()
         self.kcfg = kcfg
         self.heuristics = heuristics
 
@@ -87,8 +91,8 @@ class KCFGMinimizer:
         ci, csubsts = list(split_from_b.splits.keys()), list(split_from_b.splits.values())
         # Ensure split can be lifted soundly (i.e., that it does not introduce fresh variables)
         assert (
-                len(split_from_b.source_vars.difference(a.free_vars)) == 0
-                and len(split_from_b.target_vars.difference(split_from_b.source_vars)) == 0
+            len(split_from_b.source_vars.difference(a.free_vars)) == 0
+            and len(split_from_b.target_vars.difference(split_from_b.source_vars)) == 0
         )
         # Create CTerms and CSubsts corresponding to the new targets of the split
         new_cterms_with_constraints = [
@@ -131,8 +135,8 @@ class KCFGMinimizer:
         ci = list(splits_from_b.keys())
         # Ensure split can be lifted soundly (i.e., that it does not introduce fresh variables)
         assert (
-                len(split_from_b.source_vars.difference(a.free_vars)) == 0
-                and len(split_from_b.target_vars.difference(split_from_b.source_vars)) == 0
+            len(split_from_b.source_vars.difference(a.free_vars)) == 0
+            and len(split_from_b.target_vars.difference(split_from_b.source_vars)) == 0
         )
         # Get the substitution for `B`, at the same time removing 'B' from the targets of `A`.
         csubst_b = splits_from_a.pop(self.kcfg.node(b_id).id)
@@ -171,11 +175,11 @@ class KCFGMinimizer:
                         node.id
                         for node in self.kcfg.nodes
                         if (splits := self.kcfg.splits(source_id=node.id)) != []
-                           and (sources := finder(target_id=node.id)) != []
-                           and (source := single(sources).source)
-                           and (split := single(splits))
-                           and len(split.source_vars.difference(source.free_vars)) == 0
-                           and len(split.target_vars.difference(split.source_vars)) == 0
+                        and (sources := finder(target_id=node.id)) != []
+                        and (source := single(sources).source)
+                        and (split := single(splits))
+                        and len(split.source_vars.difference(source.free_vars)) == 0
+                        and len(split.target_vars.difference(split.source_vars)) == 0
                     ]
                 )
                 for id in splits_to_lift:
@@ -266,11 +270,16 @@ class KCFGMinimizer:
                 merged_bi = self.kcfg.create_node(merged_bi_cterm)
                 merged_edge = self.kcfg.create_merged_edge(merged_ai.id, merged_bi.id, ai2bis)
                 merged_edges.append(merged_edge)
-                b_splits: dict[int, CSubst] = {ai2bi.target.id: cterm_match(merged_bi_cterm, ai2bi.target.cterm) for ai2bi in ai2bis}
+                b_splits: dict[int, CSubst] = {
+                    ai2bi.target.id: cterm_match(merged_bi_cterm, ai2bi.target.cterm) for ai2bi in ai2bis
+                }
                 self.kcfg.create_split(merged_bi.id, b_splits.items())
 
             # Step 3. Create a new split from a to merged_ai
-            a_splits = a_splits | {merged_edge.source.id: cterm_match(a2ai.source.cterm, merged_edge.source.cterm) for merged_edge in merged_edges}
+            a_splits = a_splits | {
+                merged_edge.source.id: cterm_match(a2ai.source.cterm, merged_edge.source.cterm)
+                for merged_edge in merged_edges
+            }
             if len(a_splits) == 1 and len(merged_edges) == 1:
                 self.kcfg.remove_node(merged_edges[0].source.id)
                 self.kcfg.create_merged_edge(a2ai.source.id, merged_edges[0].target.id, merged_edges[0].edges)
