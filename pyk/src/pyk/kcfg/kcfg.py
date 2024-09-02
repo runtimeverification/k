@@ -1040,6 +1040,15 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         self.add_successor(split)
         return split
 
+    def create_split_by_nodes(self, source_id: NodeIdLike, target_ids: Iterable[NodeIdLike]) -> KCFG.Split | None:
+        source = self.node(source_id)
+        targets = [self.node(nid) for nid in list(target_ids)]
+        substs = [source.cterm.config.match(target.cterm.config) for target in targets]
+        if None in substs:
+            return None
+        csubsts = [CSubst(subst, target.cterm.constraints) for subst, target in zip(substs, targets, strict=True)]
+        return self.create_split(source.id, zip(target_ids, csubsts, strict=True))
+
     def ndbranches(self, *, source_id: NodeIdLike | None = None, target_id: NodeIdLike | None = None) -> list[NDBranch]:
         source_id = self._resolve(source_id) if source_id is not None else None
         target_id = self._resolve(target_id) if target_id is not None else None
