@@ -9,8 +9,7 @@
     };
 
     poetry2nix = {
-      url =
-        "github:nix-community/poetry2nix/2024.9.219347";
+      url = "github:nix-community/poetry2nix/2024.9.219347";
       inputs.nixpkgs.follows = "llvm-backend/nixpkgs";
     };
 
@@ -94,9 +93,8 @@
                   "org.checkerframework:checker-qual:3.33.0"
                   "com.google.errorprone:error_prone_annotations:2.18.0"
                 ];
-                manualMvnSourceArtifacts = [
-                  "org.scala-sbt:compiler-bridge_2.13:1.8.0"
-                ];
+                manualMvnSourceArtifacts =
+                  [ "org.scala-sbt:compiler-bridge_2.13:1.8.0" ];
                 inherit (final) maven;
                 inherit (prev) llvm-backend;
                 clang = prev."clang_${toString final.llvm-version}";
@@ -210,10 +208,11 @@
             };
         };
         defaultPackage = packages.k;
-        devShells.kore-integration-tests = pkgs.kore-tests (pkgs.mk-k-framework {
-          inherit (pkgs) haskell-backend-bins;
-          llvm-kompile-libs = { };
-        });
+        devShells.kore-integration-tests = pkgs.kore-tests
+          (pkgs.mk-k-framework {
+            inherit (pkgs) haskell-backend-bins;
+            llvm-kompile-libs = { };
+          });
       }) // {
         overlays.llvm-backend = llvm-backend.overlays.default;
         overlays.z3 = haskell-backend.overlays.z3;
