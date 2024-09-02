@@ -911,5 +911,5 @@ def test_create_split_by_nodes(kcfg: KCFG, source_id: int, target_ids: Iterable[
     assert new_split
     assert new_split.source == kcfg.node(source_id)
     assert new_split.targets == tuple(kcfg.node(target_id) for target_id in target_ids)
-    # for target_id, csubst in new_split.splits.items():
-    #     assert csubst.apply(kcfg.node(source_id).cterm) == kcfg.node(target_id).cterm
+    for target_id, csubst in new_split.splits.items():
+        assert csubst.apply(kcfg.node(source_id).cterm) == kcfg.node(target_id).cterm
