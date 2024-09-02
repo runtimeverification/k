@@ -1041,8 +1041,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         return split
 
     def create_split_by_nodes(self, source_id: NodeIdLike, target_ids: Iterable[NodeIdLike]) -> KCFG.Split | None:
+        """Create a split without crafting a CSubst."""
         source = self.node(source_id)
-        targets = [self.node(nid) for nid in list(target_ids)]
+        targets = [self.node(nid) for nid in target_ids]
         substs = [source.cterm.config.match(target.cterm.config) for target in targets]
         if None in substs:
             return None

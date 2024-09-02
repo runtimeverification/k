@@ -10,7 +10,8 @@ from pyk.kast.manip import no_cell_rewrite_to_dots
 from pyk.kcfg import KCFG, KCFGShow
 from pyk.kcfg.kcfg import KCFGNodeAttr
 from pyk.kcfg.show import NodePrinter
-from pyk.prelude.ml import mlEquals, mlTop
+from pyk.prelude.kint import geInt, intToken, ltInt
+from pyk.prelude.ml import mlEquals, mlEqualsTrue, mlTop
 from pyk.prelude.utils import token
 from pyk.utils import not_none, single
 
@@ -22,6 +23,22 @@ if TYPE_CHECKING:
     from typing import Any
 
     from pyk.kast import KInner
+
+
+def lt(var: str, n: int) -> KApply:
+    return mlEqualsTrue(ltInt(KVariable(var), intToken(n)))
+
+
+def ge(var: str, n: int) -> KApply:
+    return mlEqualsTrue(geInt(KVariable(var), intToken(n)))
+
+
+def config(var: str) -> KApply:
+    return KApply('<top>', KVariable(var))
+
+
+def config_int(n: int) -> KApply:
+    return KApply('<top>', intToken(n))
 
 
 def to_csubst_cterm(term_1: CTerm, term_2: CTerm, constraints: Iterable[KInner]) -> CSubst:
@@ -849,3 +866,50 @@ def test_no_cell_rewrite_to_dots() -> None:
 
     result = no_cell_rewrite_to_dots(term)
     assert result == term
+
+
+def split_kcfg0() -> KCFG:
+    kcfg = KCFG()
+    kcfg.create_node(CTerm(config('X'), (ge('X', 0),)))
+    kcfg.create_node(CTerm(config('X'), (ge('X', 0), lt('X', 3))))
+    kcfg.create_node(CTerm(config('Y'), (ge('Y', 3), lt('Y', 5))))
+    kcfg.create_node(CTerm(config('Z'), (ge('Z', 5),)))
+    return kcfg
+
+
+def split_kcfg1() -> KCFG:
+    """KCFG for split with uncovered constraints."""
+    kcfg = KCFG()
+    kcfg.create_node(CTerm(config('X'), (ge('X', 0),)))
+    kcfg.create_node(CTerm(config('Y'), (ge('Y', 3), lt('Y', 5))))
+    kcfg.create_node(CTerm(config('Z'), (ge('Z', 5),)))
+    return kcfg
+
+
+def split_kcfg2() -> KCFG:
+    """KCFG for split with conflicting constraints."""
+    kcfg = KCFG()
+    kcfg.create_node(CTerm(config('X'), (ge('X', 0),)))
+    kcfg.create_node(CTerm(config('Y'), (lt('X', 3),)))
+    kcfg.create_node(CTerm(config('Z'), (ge('Z', 5),)))
+    return kcfg
+
+
+SPLIT_TEST_CASES = [
+    (split_kcfg0(), 1, [2, 3, 4]),
+    (split_kcfg1(), 1, [2, 3]),
+    (split_kcfg2(), 1, [2, 3]),
+]
+
+
+@pytest.mark.parametrize('kcfg, source_id, target_ids', SPLIT_TEST_CASES)
+def test_create_split_by_nodes(kcfg: KCFG, source_id: int, target_ids: Iterable[int]) -> None:
+    # When
+    new_split = kcfg.create_split_by_nodes(source_id, target_ids)
+
+    # Then
+    assert new_split
+    assert new_split.source == kcfg.node(source_id)
+    assert new_split.targets == tuple(kcfg.node(target_id) for target_id in target_ids)
+    # for target_id, csubst in new_split.splits.items():
+    #     assert csubst.apply(kcfg.node(source_id).cterm) == kcfg.node(target_id).cterm
