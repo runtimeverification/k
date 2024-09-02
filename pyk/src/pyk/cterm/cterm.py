@@ -334,7 +334,8 @@ class CSubst:
     def apply(self, cterm: CTerm) -> CTerm:
         """Apply this `CSubst` to the given `CTerm` (instantiating the free variables, and adding the constraints)."""
         config = self.subst(cterm.config)
-        return CTerm(config, [self.constraint])
+        constraints = [self.subst(constraint) for constraint in cterm.constraints] + list(self.constraints)
+        return CTerm(config, constraints)
 
 
 def cterm_build_claim(
