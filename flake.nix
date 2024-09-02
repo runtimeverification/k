@@ -10,7 +10,7 @@
 
     poetry2nix = {
       url =
-        "github:nix-community/poetry2nix/626111646fe236cb1ddc8191a48c75e072a82b7c";
+        "github:nix-community/poetry2nix/2024.9.219347";
       inputs.nixpkgs.follows = "llvm-backend/nixpkgs";
     };
 
@@ -217,6 +217,10 @@
       }) // {
         overlays.llvm-backend = llvm-backend.overlays.default;
         overlays.z3 = haskell-backend.overlays.z3;
+        overlays.pyk = (import ./nix/pyk-overlay.nix {
+          inherit poetry2nix;
+          projectDir = ./pyk;
+        });
 
         overlay = nixpkgs.lib.composeManyExtensions allOverlays;
       };
