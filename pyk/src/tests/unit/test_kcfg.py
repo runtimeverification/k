@@ -872,8 +872,8 @@ def split_kcfg0() -> KCFG:
     kcfg = KCFG()
     kcfg.create_node(CTerm(config('X'), (ge('X', 0),)))
     kcfg.create_node(CTerm(config('X'), (ge('X', 0), lt('X', 3))))
-    kcfg.create_node(CTerm(config('Y'), (ge('Y', 3), lt('Y', 5))))
-    kcfg.create_node(CTerm(config('Z'), (ge('Z', 5),)))
+    kcfg.create_node(CTerm(config('Y'), (ge('X', 0), ge('Y', 3), lt('Y', 5))))
+    kcfg.create_node(CTerm(config('Z'), (ge('X', 0), ge('Z', 5),)))
     return kcfg
 
 
@@ -881,8 +881,8 @@ def split_kcfg1() -> KCFG:
     """KCFG for split with uncovered constraints."""
     kcfg = KCFG()
     kcfg.create_node(CTerm(config('X'), (ge('X', 0),)))
-    kcfg.create_node(CTerm(config('Y'), (ge('Y', 3), lt('Y', 5))))
-    kcfg.create_node(CTerm(config('Z'), (ge('Z', 5),)))
+    kcfg.create_node(CTerm(config('Y'), (ge('X', 0), ge('Y', 3), lt('Y', 5))))
+    kcfg.create_node(CTerm(config('Z'), (ge('X', 0), ge('Z', 5),)))
     return kcfg
 
 
@@ -890,8 +890,8 @@ def split_kcfg2() -> KCFG:
     """KCFG for split with conflicting constraints."""
     kcfg = KCFG()
     kcfg.create_node(CTerm(config('X'), (ge('X', 0),)))
-    kcfg.create_node(CTerm(config('Y'), (lt('X', 3),)))
-    kcfg.create_node(CTerm(config('Z'), (ge('Z', 5),)))
+    kcfg.create_node(CTerm(config('Y'), (ge('X', 0), lt('X', 3),)))
+    kcfg.create_node(CTerm(config('Z'), (ge('X', 0), ge('Z', 5),)))
     return kcfg
 
 
