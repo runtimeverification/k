@@ -6,14 +6,16 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk.cterm import CTerm, cterm_build_claim, cterm_build_rule
+from pyk.cterm.cterm import merge_cterms
 from pyk.kast import Atts, KAtt
 from pyk.kast.inner import KApply, KLabel, KRewrite, KSequence, KSort, KVariable
 from pyk.kast.outer import KClaim
 from pyk.prelude.k import GENERATED_TOP_CELL
+from pyk.prelude.kbool import TRUE
 from pyk.prelude.kint import INT, intToken
-from pyk.prelude.ml import mlAnd, mlEqualsTrue
+from pyk.prelude.ml import mlAnd, mlEquals, mlEqualsTrue, mlImplies
 
-from .utils import a, b, c, f, g, h, k, x, y, z
+from .utils import a, b, c, config, config_int, f, g, ge, h, k, lt, x, y, z
 
 if TYPE_CHECKING:
     from typing import Final
@@ -186,3 +188,104 @@ def test_from_kast(test_id: str, kast: KInner, expected: CTerm) -> None:
 
     # Then
     assert cterm == expected
+
+
+MERGE_TEST_DATA: Final = (
+    (CTerm.top(), CTerm.top(), CTerm.top()),
+    (CTerm.bottom(), CTerm.top(), None),
+    (CTerm(config_int(1)), CTerm(config_int(1)), CTerm(config_int(1))),
+    (
+        CTerm(config('X')),
+        CTerm(config('X')),
+        CTerm(config('TOP_CELL'), [mlImplies(mlEquals(KVariable('TOP_CELL'), KVariable('X')), TRUE)]),
+    ),
+    (
+        CTerm(config('X')),
+        CTerm(config('Y')),
+        CTerm(
+            config('TOP_CELL'),
+            [
+                mlImplies(mlEquals(KVariable('TOP_CELL'), KVariable('X')), TRUE),
+                mlImplies(mlEquals(KVariable('TOP_CELL'), KVariable('Y')), TRUE),
+            ],
+        ),
+    ),
+    (
+        CTerm(config_int(1)),
+        CTerm(config_int(2)),
+        CTerm(
+            config('TOP_CELL'),
+            [
+                mlImplies(mlEquals(KVariable('TOP_CELL'), intToken(1)), TRUE),
+                mlImplies(mlEquals(KVariable('TOP_CELL'), intToken(2)), TRUE),
+            ],
+        ),
+    ),
+    (
+        CTerm(
+            config('X'),
+            [ge('X', 0)],
+        ),
+        CTerm(
+            config('X'),
+            [ge('X', 0)],
+        ),
+        CTerm(
+            config('TOP_CELL'),
+            [
+                mlImplies(mlEquals(KVariable('TOP_CELL'), KVariable('X')), ge('X', 0)),
+            ],
+        ),
+    ),
+    (
+        CTerm(
+            config('X'),
+            [ge('X', 0), lt('X', 3)],
+        ),
+        CTerm(
+            config('X'),
+            [ge('X', 0), lt('X', 5)],
+        ),
+        CTerm(
+            config('TOP_CELL'),
+            [
+                mlImplies(mlEquals(KVariable('TOP_CELL'), KVariable('X')), mlAnd([lt('X', 3), ge('X', 0)])),
+                mlImplies(
+                    mlEquals(KVariable('TOP_CELL'), KVariable('X')),
+                    mlAnd(
+                        [
+                            lt('X', 5),
+                            ge('X', 0),
+                        ]
+                    ),
+                ),
+            ],
+        ),
+    ),
+    (
+        CTerm(
+            config('X'),
+            [ge('X', 0), lt('X', 3)],
+        ),
+        CTerm(
+            config('Y'),
+            [ge('Y', 0), lt('Y', 5)],
+        ),
+        CTerm(
+            config('TOP_CELL'),
+            [
+                mlImplies(mlEquals(KVariable('TOP_CELL'), KVariable('X')), mlAnd([lt('X', 3), ge('X', 0)])),
+                mlImplies(mlEquals(KVariable('TOP_CELL'), KVariable('Y')), mlAnd([lt('Y', 5), ge('Y', 0)])),
+            ],
+        ),
+    ),
+)
+
+
+@pytest.mark.parametrize('t1,t2,expected', MERGE_TEST_DATA, ids=count())
+def test_cterm_merge(t1: CTerm, t2: CTerm, expected: CTerm) -> None:
+    # When
+    merged = merge_cterms(t1, t2)
+
+    # Then
+    assert merged == expected

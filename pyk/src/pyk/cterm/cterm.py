@@ -6,7 +6,7 @@ from itertools import chain
 from typing import TYPE_CHECKING
 
 from ..kast import KInner
-from ..kast.inner import KApply, KRewrite, KToken, Subst, bottom_up
+from ..kast.inner import KApply, KRewrite, KToken, KVariable, Subst, bottom_up, var_occurrences
 from ..kast.manip import (
     abstract_term_safely,
     build_claim,
@@ -21,8 +21,8 @@ from ..kast.manip import (
     split_config_from,
 )
 from ..prelude.k import GENERATED_TOP_CELL
-from ..prelude.kbool import andBool, orBool
-from ..prelude.ml import is_bottom, is_top, mlAnd, mlBottom, mlEqualsTrue, mlImplies, mlTop
+from ..prelude.kbool import TRUE, andBool, orBool
+from ..prelude.ml import is_bottom, is_top, mlAnd, mlBottom, mlEquals, mlEqualsTrue, mlImplies, mlTop
 from ..utils import unique
 
 if TYPE_CHECKING:
@@ -251,6 +251,48 @@ class CTerm:
         initial_vars = free_vars(self.config) | set(keep_vars)
         new_constraints = remove_useless_constraints(self.constraints, initial_vars)
         return CTerm(self.config, new_constraints)
+
+
+def merge_cterms(t1: CTerm, t2: CTerm) -> CTerm | None:
+    """Return a `CTerm` which is the merge of the two input `CTerm` instances.
+
+    Args:
+        t1: First `CTerm` to merge.
+        t2: Second `CTerm` to merge.
+
+    Returns:
+        A `CTerm` which is the merge of the two input `CTerm` instances.
+    """
+    # check all cells in t1 and t1, if they are the same, keep them, otherwise, create a new free variable for them
+    t1_config, t1_subst = split_config_from(t1.config)
+    t2_config, t2_subst = split_config_from(t2.config)
+
+    if t1_config != t2_config:
+        # cannot merge two configurations with different structure
+        return None
+
+    new_subst: Subst = Subst({})
+    new_t1_subst = Subst({})
+    new_t2_subst = Subst({})
+
+    for cell in t1_subst:
+        if t1_subst[cell] == t2_subst[cell] and not var_occurrences(t1_subst[cell]):
+            # keep the cell if it is the same & exists no free variables
+            new_subst = new_subst * Subst({cell: t1_subst[cell]})
+        else:
+            # create a new free variable for the cell
+            new_t1_subst = new_t1_subst * Subst({cell: t1_subst[cell]})
+            new_t2_subst = new_t2_subst * Subst({cell: t2_subst[cell]})
+    new_config = new_subst(t1_config)
+
+    new_constraints: list[KInner] = []
+    for new_subst, t in [(new_t1_subst, t1), (new_t2_subst, t2)]:
+        if new_subst:
+            antecedent = mlAnd([mlEquals(KVariable(cell), new_subst[cell]) for cell in new_subst])
+            consequent = mlAnd(t.constraints) if t.constraints else TRUE
+            new_constraints.append(mlImplies(antecedent, consequent))
+
+    return CTerm(new_config, new_constraints)
 
 
 def anti_unify(state1: KInner, state2: KInner, kdef: KDefinition | None = None) -> tuple[KInner, Subst, Subst]:
