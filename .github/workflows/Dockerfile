@@ -63,7 +63,6 @@ RUN    apt-get update              \
         pkg-config                 \
         python3                    \
         python3-dev                \
-        python3-distutils          \
         python3-pip                \
         xxd                        \
         zlib1g-dev

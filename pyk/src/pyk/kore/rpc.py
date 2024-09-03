@@ -57,44 +57,15 @@ class JsonRpcError(Exception):
 
 
 class Transport(ContextManager['Transport'], ABC):
-    _bug_report: BugReport | None
-    _bug_report_id: str | None
-
-    def __init__(self, bug_report_id: str | None = None, bug_report: BugReport | None = None) -> None:
-        if (bug_report_id is None and bug_report is not None) or (bug_report_id is not None and bug_report is None):
-            raise ValueError('bug_report and bug_report_id must be passed together.')
-        self._bug_report_id = bug_report_id
-        self._bug_report = bug_report
 
     def request(self, req: str, request_id: str, method_name: str) -> str:
-        base_name = self._bug_report_id if self._bug_report_id is not None else 'kore_rpc'
-        req_name = f'{base_name}/{id(self)}/{request_id}'
-        if self._bug_report:
-            bug_report_request = f'{req_name}_request.json'
-            self._bug_report.add_file_contents(req, Path(bug_report_request))
-            self._bug_report.add_request(f'{req_name}_request.json')
-
         server_addr = self._description()
         _LOGGER.info(f'Sending request to {server_addr}: {request_id} - {method_name}')
         _LOGGER.debug(f'Sending request to {server_addr}: {req}')
         resp = self._request(req)
         _LOGGER.info(f'Received response from {server_addr}: {request_id} - {method_name}')
         _LOGGER.debug(f'Received response from {server_addr}: {resp}')
-
-        if self._bug_report:
-            bug_report_response = f'{req_name}_response.json'
-            self._bug_report.add_file_contents(resp, Path(bug_report_response))
-            self._bug_report.add_request(f'{req_name}_response.json')
         return resp
-
-    @abstractmethod
-    def _command(self, req_name: str, bug_report_request: str) -> list[str]: ...
-
-    @abstractmethod
-    def _request(self, req: str) -> str: ...
-
-    @abstractmethod
-    def _description(self) -> str: ...
 
     def __enter__(self) -> Transport:
         return self
@@ -104,6 +75,12 @@ class Transport(ContextManager['Transport'], ABC):
 
     @abstractmethod
     def close(self) -> None: ...
+
+    @abstractmethod
+    def _request(self, req: str) -> str: ...
+
+    @abstractmethod
+    def _description(self) -> str: ...
 
 
 class TransportType(Enum):
@@ -124,10 +101,7 @@ class SingleSocketTransport(Transport):
         port: int,
         *,
         timeout: int | None = None,
-        bug_report_id: str | None = None,
-        bug_report: BugReport | None = None,
     ):
-        super().__init__(bug_report_id, bug_report)
         self._host = host
         self._port = port
         self._sock = self._create_connection(host, port, timeout)
@@ -157,19 +131,6 @@ class SingleSocketTransport(Transport):
         self._file.close()
         self._sock.close()
 
-    def _command(self, req_name: str, bug_report_request: str) -> list[str]:
-        return [
-            'cat',
-            bug_report_request,
-            '|',
-            'nc',
-            '-Nv',
-            self._host,
-            str(self._port),
-            '>',
-            f'{req_name}_actual.json',
-        ]
-
     def _request(self, req: str) -> str:
         self._sock.sendall(req.encode())
         server_addr = self._description()
@@ -192,30 +153,13 @@ class HttpTransport(Transport):
         port: int,
         *,
         timeout: int | None = None,
-        bug_report_id: str | None = None,
-        bug_report: BugReport | None = None,
     ):
-        super().__init__(bug_report_id, bug_report)
         self._host = host
         self._port = port
         self._timeout = timeout
 
     def close(self) -> None:
         pass
-
-    def _command(self, req_name: str, bug_report_request: str) -> list[str]:
-        return [
-            'curl',
-            '-X',
-            'POST',
-            '-H',
-            'Content-Type: application/json',
-            '-d',
-            '@' + bug_report_request,
-            'http://' + self._host + ':' + str(self._port),
-            '>',
-            f'{req_name}_actual.json',
-        ]
 
     def _request(self, req: str) -> str:
         connection = http.client.HTTPConnection(self._host, self._port, timeout=self._timeout)
@@ -308,6 +252,9 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
     _transport: Transport
     _req_id: int
 
+    _bug_report: BugReport | None
+    _bug_report_id: str | None
+
     def __init__(
         self,
         host: str,
@@ -318,17 +265,23 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         bug_report_id: str | None = None,
         transport: TransportType = TransportType.SINGLE_SOCKET,
     ):
-        if transport is TransportType.SINGLE_SOCKET:
-            self._transport = SingleSocketTransport(
-                host, port, timeout=timeout, bug_report=bug_report, bug_report_id=bug_report_id
-            )
-        elif transport is TransportType.HTTP:
-            self._transport = HttpTransport(
-                host, port, timeout=timeout, bug_report=bug_report, bug_report_id=bug_report_id
-            )
-        else:
-            raise AssertionError()
+        if (bug_report is None) != (bug_report_id is None):
+            raise ValueError('bug_report and bug_report_id must be passed together.')
+
+        self._transport = self._create_transport(transport, host=host, port=port, timeout=timeout)
         self._req_id = 1
+        self._bug_report_id = bug_report_id
+        self._bug_report = bug_report
+
+    @staticmethod
+    def _create_transport(transport: TransportType, *, host: str, port: int, timeout: int | None) -> Transport:
+        match transport:
+            case TransportType.SINGLE_SOCKET:
+                return SingleSocketTransport(host, port, timeout=timeout)
+            case TransportType.HTTP:
+                return HttpTransport(host, port, timeout=timeout)
+            case _:
+                raise AssertionError()
 
     def __enter__(self) -> JsonRpcClient:
         return self
@@ -351,9 +304,22 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         }
 
         req = json.dumps(payload)
+
+        base_name = self._bug_report_id if self._bug_report_id is not None else 'kore_rpc'
+        req_name = f'{base_name}/{id(self)}/{req_id}'
+        if self._bug_report:
+            bug_report_request = f'{req_name}_request.json'
+            self._bug_report.add_file_contents(req, Path(bug_report_request))
+            self._bug_report.add_request(f'{req_name}_request.json')
+
         resp = self._transport.request(req, req_id, method)
         if not resp:
             raise RuntimeError('Empty response received')
+
+        if self._bug_report:
+            bug_report_response = f'{req_name}_response.json'
+            self._bug_report.add_file_contents(resp, Path(bug_report_response))
+            self._bug_report.add_request(f'{req_name}_response.json')
 
         data = json.loads(resp)
         self._check(data)

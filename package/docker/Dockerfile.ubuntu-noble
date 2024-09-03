@@ -1,4 +1,4 @@
-FROM runtimeverificationinc/z3:ubuntu-jammy-4.12.1
+FROM runtimeverificationinc/z3:ubuntu-noble-4.13.0
 
 ENV TZ=America/Chicago
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
@@ -12,18 +12,18 @@ RUN    apt-get update                   \
                         python3-pip     \
                         pipx
 
-COPY kframework_amd64_ubuntu_jammy.deb /kframework_amd64_ubuntu_jammy.deb
+COPY kframework_amd64_ubuntu_noble.deb /kframework_amd64_ubuntu_noble.deb
 RUN    apt-get update                                                                   \
     && apt-get upgrade --yes                                                            \
-    && apt-get install --yes --no-install-recommends /kframework_amd64_ubuntu_jammy.deb
+    && apt-get install --yes --no-install-recommends /kframework_amd64_ubuntu_noble.deb
 
 COPY pyk /pyk
-RUN pipx install poetry       \
-    && pipx ensurepath        \
-    && . /root/.profile       \
-    && cd /pyk                \
-    && make build             \
-    && pip install dist/*.whl \
+RUN pipx install poetry                               \
+    && pipx ensurepath                                \
+    && . /root/.profile                               \
+    && cd /pyk                                        \
+    && make build                                     \
+    && pip install dist/*.whl --break-system-packages \
     && rm -rf /pyk
 
-RUN rm -rf /kframework_amd64_ubuntu_jammy.deb
+RUN rm -rf /kframework_amd64_ubuntu_noble.deb
