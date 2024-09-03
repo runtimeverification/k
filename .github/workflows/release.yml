@@ -362,6 +362,8 @@ jobs:
           # test suite, so the PL-tutorial is disabled for now.
           #   - https://github.com/runtimeverification/k/issues/3705
           cd homebrew-k-old
+          # brew tap expects a git repository, so we initialise the current folder as a dummy repo
+          git init
           brew tap runtimeverification/k "file:///$(pwd)"
           brew install ${{ needs.macos-build.outputs.bottle_path }} -v
           # cp -R /usr/local/share/kframework/pl-tutorial ~
