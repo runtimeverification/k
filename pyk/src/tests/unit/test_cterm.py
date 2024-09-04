@@ -11,9 +11,8 @@ from pyk.kast import Atts, KAtt
 from pyk.kast.inner import KApply, KLabel, KRewrite, KSequence, KSort, KVariable
 from pyk.kast.outer import KClaim
 from pyk.prelude.k import GENERATED_TOP_CELL
-from pyk.prelude.kbool import TRUE
 from pyk.prelude.kint import INT, intToken
-from pyk.prelude.ml import mlAnd, mlEquals, mlEqualsTrue, mlImplies
+from pyk.prelude.ml import mlAnd, mlEquals, mlEqualsTrue, mlImplies, mlTop
 
 from .utils import a, b, c, config, config_int, f, g, ge, h, k, lt, x, y, z
 
@@ -197,7 +196,7 @@ MERGE_TEST_DATA: Final = (
     (
         CTerm(config('X')),
         CTerm(config('X')),
-        CTerm(config('TOP_CELL'), [mlImplies(mlEquals(KVariable('TOP_CELL'), KVariable('X')), TRUE)]),
+        CTerm(config('TOP_CELL'), [mlImplies(mlEquals(KVariable('TOP_CELL'), KVariable('X')), mlTop())]),
     ),
     (
         CTerm(config('X')),
@@ -205,8 +204,8 @@ MERGE_TEST_DATA: Final = (
         CTerm(
             config('TOP_CELL'),
             [
-                mlImplies(mlEquals(KVariable('TOP_CELL'), KVariable('X')), TRUE),
-                mlImplies(mlEquals(KVariable('TOP_CELL'), KVariable('Y')), TRUE),
+                mlImplies(mlEquals(KVariable('TOP_CELL'), KVariable('X')), mlTop()),
+                mlImplies(mlEquals(KVariable('TOP_CELL'), KVariable('Y')), mlTop()),
             ],
         ),
     ),
@@ -216,8 +215,8 @@ MERGE_TEST_DATA: Final = (
         CTerm(
             config('TOP_CELL'),
             [
-                mlImplies(mlEquals(KVariable('TOP_CELL'), intToken(1)), TRUE),
-                mlImplies(mlEquals(KVariable('TOP_CELL'), intToken(2)), TRUE),
+                mlImplies(mlEquals(KVariable('TOP_CELL'), intToken(1)), mlTop()),
+                mlImplies(mlEquals(KVariable('TOP_CELL'), intToken(2)), mlTop()),
             ],
         ),
     ),

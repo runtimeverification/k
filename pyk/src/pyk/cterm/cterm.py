@@ -21,7 +21,7 @@ from ..kast.manip import (
     split_config_from,
 )
 from ..prelude.k import GENERATED_TOP_CELL
-from ..prelude.kbool import TRUE, andBool, orBool
+from ..prelude.kbool import andBool, orBool
 from ..prelude.ml import is_bottom, is_top, mlAnd, mlBottom, mlEquals, mlEqualsTrue, mlImplies, mlTop
 from ..utils import unique
 
@@ -101,6 +101,11 @@ class CTerm:
     def is_bottom(self) -> bool:
         """Check if a given `CTerm` is trivially empty."""
         return is_bottom(self.config, weak=True) or any(is_bottom(cterm, weak=True) for cterm in self.constraints)
+
+    @property
+    def constraint(self) -> KInner:
+        """Return the set of constraints as a single flattened constraint using `mlAnd`."""
+        return mlAnd(self.constraints)
 
     @staticmethod
     def _constraint_sort_key(term: KInner) -> tuple[int, str]:
@@ -289,7 +294,7 @@ def merge_cterms(t1: CTerm, t2: CTerm) -> CTerm | None:
     for new_subst, t in [(new_t1_subst, t1), (new_t2_subst, t2)]:
         if new_subst:
             antecedent = mlAnd([mlEquals(KVariable(cell), new_subst[cell]) for cell in new_subst])
-            consequent = mlAnd(t.constraints) if t.constraints else TRUE
+            consequent = t.constraint
             new_constraints.append(mlImplies(antecedent, consequent))
 
     return CTerm(new_config, new_constraints)
