@@ -271,7 +271,7 @@ def merge_cterms(t1: CTerm, t2: CTerm) -> CTerm | None:
         # cannot merge two configurations with different structure
         return None
 
-    new_subst: Subst = Subst({})
+    new_subst = Subst({})
     new_t1_subst = Subst({})
     new_t2_subst = Subst({})
 
