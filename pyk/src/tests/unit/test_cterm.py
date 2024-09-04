@@ -1,13 +1,14 @@
 from __future__ import annotations
 
+from .utils import config, config_int, lt, ge
 from itertools import count
 from typing import TYPE_CHECKING
 
 import pytest
 
-from pyk.cterm import CTerm, cterm_build_claim, cterm_build_rule
+from pyk.cterm import CTerm, cterm_build_claim, cterm_build_rule, CSubst
 from pyk.kast import Atts, KAtt
-from pyk.kast.inner import KApply, KLabel, KRewrite, KSequence, KSort, KVariable
+from pyk.kast.inner import KApply, KLabel, KRewrite, KSequence, KSort, KVariable, Subst
 from pyk.kast.outer import KClaim
 from pyk.prelude.k import GENERATED_TOP_CELL
 from pyk.prelude.kint import INT, intToken
@@ -186,3 +187,38 @@ def test_from_kast(test_id: str, kast: KInner, expected: CTerm) -> None:
 
     # Then
     assert cterm == expected
+
+
+APPLY_TEST_DATA: Final = (
+    (CTerm.top(), CSubst(), CTerm.top()),
+    (CTerm.bottom(), CSubst(), CTerm.bottom()),
+    (
+        CTerm(config('X')),
+        CSubst(),
+        CTerm(config('X')),
+    ),
+    (
+        CTerm(config('X')),
+        CSubst(Subst({'X': intToken(5)})),
+        CTerm(config_int(5)),
+    ),
+    (
+        CTerm(config('X')),
+        CSubst(Subst({'X': KVariable('Y')})),
+        CTerm(config('Y')),
+    ),
+    (
+        CTerm(config('X'), [lt('X', 5)]),
+        CSubst(Subst({'X': KVariable('Y')}), [ge('Y', 0)]),
+        CTerm(config('Y'), [ge('Y', 0), lt('Y', 5)]),
+    )
+)
+
+
+@pytest.mark.parametrize('term,subst,expected', APPLY_TEST_DATA,)
+def test_csubst_apply(term: CTerm, subst: CSubst, expected: CTerm) -> None:
+    # When
+    actual = subst(term)
+
+    # Then
+    assert actual == expected

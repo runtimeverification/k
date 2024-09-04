@@ -38,7 +38,7 @@ class CTerm:
 
     Contains the data:
     - `config`: the _configuration_ (structural component of the state, potentially containing free variabls)
-    - `constraints`: conditiions which limit/constraint the free variables from the `config`
+    - `constraints`: conditions which limit/constraint the free variables from the `config`
     """
 
     config: KInner  # TODO Optional?
@@ -336,6 +336,10 @@ class CSubst:
         config = self.subst(cterm.config)
         constraints = [self.subst(constraint) for constraint in cterm.constraints] + list(self.constraints)
         return CTerm(config, constraints)
+
+    def __call__(self, cterm: CTerm):
+        """Overload for `CSubst.apply`."""
+        return self.apply(cterm)
 
 
 def cterm_build_claim(
