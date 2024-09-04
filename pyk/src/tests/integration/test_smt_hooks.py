@@ -17,32 +17,32 @@ if TYPE_CHECKING:
 
 T_DIVISION_TEST_DATA: Final = (
     # Op   ,  a,  b, a Op b, OpKore
-    ('/Int', +8, +3, +2, 'Lbl\'UndsSlsh\'Int\'Unds\''),
-    ('/Int', +8, -3, -2, 'Lbl\'UndsSlsh\'Int\'Unds\''),
-    ('/Int', -8, +3, -2, 'Lbl\'UndsSlsh\'Int\'Unds\''),
-    ('/Int', -8, -3, +2, 'Lbl\'UndsSlsh\'Int\'Unds\''),
-    ('%Int', +8, +3, +2, 'Lbl\'UndsPerc\'Int\'Unds\''),
-    ('%Int', +8, -3, +2, 'Lbl\'UndsPerc\'Int\'Unds\''),
-    ('%Int', -8, +3, -2, 'Lbl\'UndsPerc\'Int\'Unds\''),
-    ('%Int', -8, -3, -2, 'Lbl\'UndsPerc\'Int\'Unds\''),
+    ('/Int', +8, +3, +2, "Lbl'UndsSlsh'Int'Unds'"),
+    ('/Int', +8, -3, -2, "Lbl'UndsSlsh'Int'Unds'"),
+    ('/Int', -8, +3, -2, "Lbl'UndsSlsh'Int'Unds'"),
+    ('/Int', -8, -3, +2, "Lbl'UndsSlsh'Int'Unds'"),
+    ('%Int', +8, +3, +2, "Lbl'UndsPerc'Int'Unds'"),
+    ('%Int', +8, -3, +2, "Lbl'UndsPerc'Int'Unds'"),
+    ('%Int', -8, +3, -2, "Lbl'UndsPerc'Int'Unds'"),
+    ('%Int', -8, -3, -2, "Lbl'UndsPerc'Int'Unds'"),
     ########################
-    ('/Int', +1, +2, 0, 'Lbl\'UndsSlsh\'Int\'Unds\''),
-    ('/Int', +1, -2, 0, 'Lbl\'UndsSlsh\'Int\'Unds\''),
-    ('/Int', -1, +2, 0, 'Lbl\'UndsSlsh\'Int\'Unds\''),
-    ('/Int', -1, -2, 0, 'Lbl\'UndsSlsh\'Int\'Unds\''),
-    ('%Int', +1, +2, +1, 'Lbl\'UndsPerc\'Int\'Unds\''),
-    ('%Int', +1, -2, +1, 'Lbl\'UndsPerc\'Int\'Unds\''),
-    ('%Int', -1, +2, -1, 'Lbl\'UndsPerc\'Int\'Unds\''),
-    ('%Int', -1, -2, -1, 'Lbl\'UndsPerc\'Int\'Unds\''),
+    ('/Int', +1, +2, 0, "Lbl'UndsSlsh'Int'Unds'"),
+    ('/Int', +1, -2, 0, "Lbl'UndsSlsh'Int'Unds'"),
+    ('/Int', -1, +2, 0, "Lbl'UndsSlsh'Int'Unds'"),
+    ('/Int', -1, -2, 0, "Lbl'UndsSlsh'Int'Unds'"),
+    ('%Int', +1, +2, +1, "Lbl'UndsPerc'Int'Unds'"),
+    ('%Int', +1, -2, +1, "Lbl'UndsPerc'Int'Unds'"),
+    ('%Int', -1, +2, -1, "Lbl'UndsPerc'Int'Unds'"),
+    ('%Int', -1, -2, -1, "Lbl'UndsPerc'Int'Unds'"),
     ########################
-    ('/Int', +4, +2, +2, 'Lbl\'UndsSlsh\'Int\'Unds\''),
-    ('/Int', +4, -2, -2, 'Lbl\'UndsSlsh\'Int\'Unds\''),
-    ('/Int', -4, +2, -2, 'Lbl\'UndsSlsh\'Int\'Unds\''),
-    ('/Int', -4, -2, +2, 'Lbl\'UndsSlsh\'Int\'Unds\''),
-    ('%Int', +4, +2, 0, 'Lbl\'UndsPerc\'Int\'Unds\''),
-    ('%Int', +4, -2, 0, 'Lbl\'UndsPerc\'Int\'Unds\''),
-    ('%Int', -4, +2, 0, 'Lbl\'UndsPerc\'Int\'Unds\''),
-    ('%Int', -4, -2, 0, 'Lbl\'UndsPerc\'Int\'Unds\''),
+    ('/Int', +4, +2, +2, "Lbl'UndsSlsh'Int'Unds'"),
+    ('/Int', +4, -2, -2, "Lbl'UndsSlsh'Int'Unds'"),
+    ('/Int', -4, +2, -2, "Lbl'UndsSlsh'Int'Unds'"),
+    ('/Int', -4, -2, +2, "Lbl'UndsSlsh'Int'Unds'"),
+    ('%Int', +4, +2, 0, "Lbl'UndsPerc'Int'Unds'"),
+    ('%Int', +4, -2, 0, "Lbl'UndsPerc'Int'Unds'"),
+    ('%Int', -4, +2, 0, "Lbl'UndsPerc'Int'Unds'"),
+    ('%Int', -4, -2, 0, "Lbl'UndsPerc'Int'Unds'"),
 )
 
 
@@ -59,9 +59,9 @@ class TestSMTHooks(KoreClientTest):
     @pytest.mark.parametrize(
         'rel, a, b, c, rel_kore',
         T_DIVISION_TEST_DATA,
-        ids=[f"{a} {r} {b} == {c}" for r, a, b, c, _ in T_DIVISION_TEST_DATA],
+        ids=[f'{a} {r} {b} == {c}' for r, a, b, c, _ in T_DIVISION_TEST_DATA],
     )
-    def test_smt_t_division(self, kore_client: KoreClient, rel, rel_kore: str, a, b, c: int) -> None:
+    def test_smt_t_division(self, kore_client: KoreClient, rel: str, rel_kore: str, a: int, b: int, c: int) -> None:
 
         # checks whether the SMT solver returns X = c for X = a rel b
         pattern = Equals(
