@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 
 import pytest
+from unit.utils import config, ge, lt
 
 from pyk.cterm import CSubst, CTerm
 from pyk.kast.inner import KApply, KRewrite, KToken, KVariable, Subst
@@ -880,3 +881,69 @@ def test_no_cell_rewrite_to_dots() -> None:
 
     result = no_cell_rewrite_to_dots(term)
     assert result == term
+
+
+CREATE_SPLIT_BY_NODES_TEST_DATA: Final = (
+    (CTerm.bottom(), [CTerm.top(), CTerm.bottom()], None),
+    (CTerm.top(), [CTerm.top(), CTerm.bottom()], None),
+    (
+        CTerm.top(),
+        [CTerm(config('X')), CTerm(config('Y'))],
+        None,  # todo: support split from top, because top means anything can be matched
+    ),
+    (
+        CTerm.top(),
+        [CTerm.top(), CTerm.top()],
+        KCFG.Split(
+            KCFG.Node(1, CTerm.top()), [(KCFG.Node(2, CTerm.top()), CSubst()), (KCFG.Node(3, CTerm.top()), CSubst())]
+        ),
+    ),
+    (
+        CTerm(config('X')),
+        [CTerm(config('X')), CTerm(config('Y')), CTerm(config('Z'))],
+        KCFG.Split(
+            KCFG.Node(1, CTerm(config('X'))),
+            [
+                (KCFG.Node(2, CTerm(config('X'))), CSubst(Subst({'X': KVariable('X')}))),
+                (KCFG.Node(3, CTerm(config('Y'))), CSubst(Subst({'X': KVariable('Y')}))),
+                (KCFG.Node(4, CTerm(config('Z'))), CSubst(Subst({'X': KVariable('Z')}))),
+            ],
+        ),
+    ),
+    (CTerm(config('X')), [CTerm(config('Y')), CTerm(KApply('<bot>', [KVariable('Z')]))], None),
+    (
+        CTerm(config('X'), [ge('X', 0), lt('X', 10)]),
+        [CTerm(config('Y'), [ge('Y', 0)]), CTerm(config('Z'), [ge('Z', 5)])],
+        KCFG.Split(
+            KCFG.Node(1, CTerm(config('X'), [ge('X', 0), lt('X', 10)])),
+            [
+                (KCFG.Node(2, CTerm(config('Y'), [ge('Y', 0)])), CSubst(Subst({'X': KVariable('Y')}), [lt('Y', 10)])),
+                (
+                    KCFG.Node(3, CTerm(config('Z'), [ge('Z', 5)])),
+                    CSubst(
+                        Subst({'X': KVariable('Z')}),
+                        [
+                            ge('Z', 5),
+                            lt('Z', 10),
+                            ge('Z', 0),
+                        ],
+                    ),
+                ),
+            ],
+        ),
+    ),
+)
+
+
+@pytest.mark.parametrize('source,targets,expected', CREATE_SPLIT_BY_NODES_TEST_DATA)
+def test_create_split_by_nodes(source: CTerm, targets: Iterable[CTerm], expected: KCFG.Split | None) -> None:
+    # Given
+    cfg = KCFG()
+    source_node = cfg.create_node(source)
+    target_nodes = [cfg.create_node(target) for target in targets]
+
+    # When
+    actual = cfg.create_split_by_nodes(source_node.id, [n.id for n in target_nodes])
+
+    # Then
+    assert actual == expected

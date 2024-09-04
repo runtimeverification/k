@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-from .utils import config, config_int, lt, ge
 from itertools import count
 from typing import TYPE_CHECKING
 
 import pytest
 
-from pyk.cterm import CTerm, cterm_build_claim, cterm_build_rule, CSubst
+from pyk.cterm import CSubst, CTerm, cterm_build_claim, cterm_build_rule
 from pyk.kast import Atts, KAtt
 from pyk.kast.inner import KApply, KLabel, KRewrite, KSequence, KSort, KVariable, Subst
 from pyk.kast.outer import KClaim
@@ -14,7 +13,7 @@ from pyk.prelude.k import GENERATED_TOP_CELL
 from pyk.prelude.kint import INT, intToken
 from pyk.prelude.ml import mlAnd, mlEqualsTrue
 
-from .utils import a, b, c, f, g, h, k, x, y, z
+from .utils import a, b, c, config, config_int, f, g, ge, h, k, lt, x, y, z
 
 if TYPE_CHECKING:
     from typing import Final
@@ -211,11 +210,14 @@ APPLY_TEST_DATA: Final = (
         CTerm(config('X'), [lt('X', 5)]),
         CSubst(Subst({'X': KVariable('Y')}), [ge('Y', 0)]),
         CTerm(config('Y'), [ge('Y', 0), lt('Y', 5)]),
-    )
+    ),
 )
 
 
-@pytest.mark.parametrize('term,subst,expected', APPLY_TEST_DATA,)
+@pytest.mark.parametrize(
+    'term,subst,expected',
+    APPLY_TEST_DATA,
+)
 def test_csubst_apply(term: CTerm, subst: CSubst, expected: CTerm) -> None:
     # When
     actual = subst(term)

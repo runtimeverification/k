@@ -337,7 +337,7 @@ class CSubst:
         constraints = [self.subst(constraint) for constraint in cterm.constraints] + list(self.constraints)
         return CTerm(config, constraints)
 
-    def __call__(self, cterm: CTerm):
+    def __call__(self, cterm: CTerm) -> CTerm:
         """Overload for `CSubst.apply`."""
         return self.apply(cterm)
 

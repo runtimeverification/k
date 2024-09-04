@@ -1050,7 +1050,10 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             subst = source.cterm.config.match(target.cterm.config)
             if subst is None:
                 return None
-            constraints = [c for c in target.cterm.constraints if c not in source.cterm.constraints]
+            source_constraints = [subst(c) for c in source.cterm.constraints]
+            constraints = [c for c in target.cterm.constraints if c not in source_constraints] + [
+                c for c in source_constraints if c not in target.cterm.constraints
+            ]
             csubsts.append(CSubst(subst, constraints))
 
         return self.create_split(source.id, zip(target_ids, csubsts, strict=True))
