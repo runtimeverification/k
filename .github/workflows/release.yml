@@ -84,8 +84,69 @@ jobs:
           packages: jq
           script: |
             export PATH="$(nix build github:runtimeverification/kup --no-link --json | jq -r '.[].outputs | to_entries[].value')/bin:$PATH"
-            kup publish k-framework-binary .#k --keep-days 180
-            kup publish k-framework-binary .#k.openssl.procps.secp256k1 --keep-days 180
+            kup publish --verbose k-framework-binary .#k --keep-days 180
+            kup publish --verbose k-framework-binary .#k.openssl.procps.secp256k1 --keep-days 180
+      
+  ubuntu-noble:
+    name: 'K Ubuntu Noble Package'
+    runs-on: [self-hosted, linux, normal]
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: 'Build and Test Package'
+        uses: ./.github/actions/test-package
+        with:
+          os: ubuntu
+          distro: noble
+          llvm: 16
+          jdk: 21
+          pkg-name: kframework_amd64_ubuntu_noble.deb
+          build-package: package/debian/build-package noble kframework
+          test-package: package/debian/test-package
+      - name: 'Upload the package built to the Summary Page'
+        uses: actions/upload-artifact@v4
+        with:
+          name: kframework_amd64_ubuntu_noble.deb
+          path: kframework_amd64_ubuntu_noble.deb
+          if-no-files-found: error
+          retention-days: 1
+      - name: 'Upload Package to Release'
+        env:
+          GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
+        run: |
+          set -x
+          version=$(cat package/version)
+          cp kframework_amd64_ubuntu_noble.deb "kframework_${version}_amd64_ubuntu_noble.deb"
+          gh release upload --repo runtimeverification/k --clobber "v${version}" "kframework_${version}_amd64_ubuntu_noble.deb"
+      - name: 'Build, Test, and Push Dockerhub Image'
+        shell: bash {0}
+        env:
+          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+          DOCKERHUB_REPO: runtimeverificationinc/kframework-k
+        run: |
+          set -euxo pipefail
+          version=$(cat package/version)
+          version_tag=ubuntu-noble-${version}
+          docker login --username rvdockerhub --password "${DOCKERHUB_PASSWORD}"
+          docker image build . --file package/docker/Dockerfile.ubuntu-noble --tag "${DOCKERHUB_REPO}:${version_tag}"
+          docker run --name "k-package-docker-test-noble-${GITHUB_SHA}" --rm -it --detach "${DOCKERHUB_REPO}:${version_tag}"
+          docker exec -t "k-package-docker-test-noble-${GITHUB_SHA}" bash -c 'cd ~ && echo "module TEST imports BOOL endmodule" > test.k'
+          docker exec -t "k-package-docker-test-noble-${GITHUB_SHA}" bash -c 'cd ~ && kompile test.k --backend llvm'
+          docker exec -t "k-package-docker-test-noble-${GITHUB_SHA}" bash -c 'cd ~ && kompile test.k --backend haskell'
+          docker exec -t "k-package-docker-test-noble-${GITHUB_SHA}" bash -c 'cd ~ && pyk kompile test.k --backend llvm'
+          docker exec -t "k-package-docker-test-noble-${GITHUB_SHA}" bash -c 'cd ~ && pyk kompile test.k --backend haskell'
+          docker image push "${DOCKERHUB_REPO}:${version_tag}"
+      - name: 'Clean up Docker Container'
+        if: always()
+        run: |
+          docker stop --time=0 "k-package-docker-test-noble-${GITHUB_SHA}"
+      - name: On Failure, Upload the kore-exec.tar.gz file to the Summary Page
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kore-exec.tar.gz
+          path: |
+            **/kore-exec.tar.gz
 
   ubuntu-jammy:
     name: 'K Ubuntu Jammy Package'
@@ -301,6 +362,8 @@ jobs:
           # test suite, so the PL-tutorial is disabled for now.
           #   - https://github.com/runtimeverification/k/issues/3705
           cd homebrew-k-old
+          # brew tap expects a git repository, so we initialise the current folder as a dummy repo
+          git init
           brew tap runtimeverification/k "file:///$(pwd)"
           brew install ${{ needs.macos-build.outputs.bottle_path }} -v
           # cp -R /usr/local/share/kframework/pl-tutorial ~
@@ -357,7 +420,7 @@ jobs:
     name: 'Publish Release'
     runs-on: [self-hosted, linux, normal]
     environment: production
-    needs: [cachix-release, macos-test, source-tarball, ubuntu-jammy, set-release-id]
+    needs: [cachix-release, macos-test, source-tarball, ubuntu-jammy, ubuntu-noble, set-release-id]
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v4
