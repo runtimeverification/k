@@ -943,7 +943,10 @@ CREATE_SPLIT_BY_NODES_TEST_DATA: Final = (
     ),
     (
         CTerm(k(KVariable('X')), [ge_ml('X', 0), lt_ml('X', 10)]),
-        [CTerm(k(KVariable('Y')), [ge_ml('Y', 0), lt_ml('Y', 5)]), CTerm(k(KVariable('Z')), [ge_ml('Z', 5), lt_ml('Z', 10)])],
+        [
+            CTerm(k(KVariable('Y')), [ge_ml('Y', 0), lt_ml('Y', 5)]),
+            CTerm(k(KVariable('Z')), [ge_ml('Z', 5), lt_ml('Z', 10)]),
+        ],
         KCFG.Split(
             KCFG.Node(1, CTerm(k(KVariable('X')), [ge_ml('X', 0), lt_ml('X', 10)])),
             [
