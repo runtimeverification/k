@@ -6,7 +6,7 @@ from itertools import chain
 from typing import TYPE_CHECKING
 
 from ..kast import KInner
-from ..kast.inner import KApply, KRewrite, KToken, Subst, bottom_up
+from ..kast.inner import KApply, KRewrite, KSort, KToken, KVariable, Subst, bottom_up
 from ..kast.manip import (
     abstract_term_safely,
     build_claim,
@@ -23,7 +23,7 @@ from ..kast.manip import (
 )
 from ..prelude.k import GENERATED_TOP_CELL
 from ..prelude.kbool import andBool, orBool
-from ..prelude.ml import is_bottom, is_top, mlAnd, mlBottom, mlEqualsTrue, mlImplies, mlTop
+from ..prelude.ml import is_bottom, is_top, mlAnd, mlBottom, mlEquals, mlEqualsTrue, mlImplies, mlTop
 from ..utils import unique
 
 if TYPE_CHECKING:
@@ -318,6 +318,20 @@ class CSubst:
         """Extract from a boolean predicate a CSubst."""
         subst, pred = extract_subst(pred)
         return CSubst(subst=subst, constraints=flatten_label('#And', pred))
+
+    def pred(self, sort_with: KDefinition | None = None, subst: bool = True, constraints: bool = True) -> KInner:
+        """Return an ML predicate representing this substitution."""
+        _preds: list[KInner] = []
+        if subst:
+            for k, v in self.subst.items():
+                sort = KSort('K')
+                if sort_with is not None:
+                    _sort = sort_with.sort(v)
+                    sort = _sort if _sort is not None else sort
+                _preds.append(mlEquals(KVariable(k, sort=sort), v, arg_sort=sort))
+        if constraints:
+            _preds.extend(self.constraints)
+        return mlAnd(_preds)
 
     @property
     def constraint(self) -> KInner:
