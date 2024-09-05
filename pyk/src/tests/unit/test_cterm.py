@@ -5,13 +5,14 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from pyk.cterm import CTerm, cterm_build_claim, cterm_build_rule
+from pyk.cterm import CSubst, CTerm, cterm_build_claim, cterm_build_rule
 from pyk.kast import Atts, KAtt
-from pyk.kast.inner import KApply, KLabel, KRewrite, KSequence, KSort, KVariable
+from pyk.kast.inner import KApply, KLabel, KRewrite, KSequence, KSort, KVariable, Subst
 from pyk.kast.outer import KClaim
-from pyk.prelude.k import GENERATED_TOP_CELL
+from pyk.prelude.k import GENERATED_TOP_CELL, K
+from pyk.prelude.kbool import TRUE
 from pyk.prelude.kint import INT, intToken
-from pyk.prelude.ml import mlAnd, mlEqualsTrue
+from pyk.prelude.ml import mlAnd, mlEquals, mlEqualsTrue, mlTop
 
 from .utils import a, b, c, f, g, h, k, x, y, z
 
@@ -186,3 +187,24 @@ def test_from_kast(test_id: str, kast: KInner, expected: CTerm) -> None:
 
     # Then
     assert cterm == expected
+
+
+ML_PRED_TEST_DATA: Final = (
+    ('empty', CSubst(Subst({})), mlTop()),
+    ('singleton', CSubst(Subst({'X': TRUE})), mlEquals(KVariable('X', sort=K), TRUE, arg_sort=K)),
+    (
+        'double',
+        CSubst(Subst({'X': TRUE, 'Y': intToken(4)})),
+        mlAnd(
+            [
+                mlEquals(KVariable('X', sort=K), TRUE, arg_sort=K),
+                mlEquals(KVariable('Y', sort=K), intToken(4), arg_sort=K),
+            ]
+        ),
+    ),
+)
+
+
+@pytest.mark.parametrize('test_id,csubst,pred', ML_PRED_TEST_DATA, ids=[test_id for test_id, *_ in ML_PRED_TEST_DATA])
+def test_ml_pred(test_id: str, csubst: CSubst, pred: KInner) -> None:
+    assert csubst.pred() == pred

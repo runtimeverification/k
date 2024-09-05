@@ -7,7 +7,6 @@ import pytest
 
 from pyk.kast.inner import KApply, KLabel, KVariable, Subst
 from pyk.kast.manip import extract_subst
-from pyk.prelude.kbool import TRUE
 from pyk.prelude.kint import INT, intToken
 from pyk.prelude.ml import mlAnd, mlEquals, mlEqualsTrue, mlOr, mlTop
 
@@ -106,25 +105,6 @@ def test_unapply(term: KInner, subst: dict[str, KInner], expected: KInner) -> No
 
     # Then
     assert actual == expected
-
-
-ML_PRED_TEST_DATA: Final = (
-    ('empty', Subst({}), KApply('#Top')),
-    ('singleton', Subst({'X': TRUE}), KApply('#Equals', [KVariable('X'), TRUE])),
-    (
-        'double',
-        Subst({'X': TRUE, 'Y': intToken(4)}),
-        KApply(
-            '#And',
-            [KApply('#Equals', [KVariable('X'), TRUE]), KApply('#Equals', [KVariable('Y'), intToken(4)])],
-        ),
-    ),
-)
-
-
-@pytest.mark.parametrize('test_id,subst,pred', ML_PRED_TEST_DATA, ids=[test_id for test_id, *_ in ML_PRED_TEST_DATA])
-def test_ml_pred(test_id: str, subst: Subst, pred: KInner) -> None:
-    assert subst.ml_pred == pred
 
 
 _0 = intToken(0)
