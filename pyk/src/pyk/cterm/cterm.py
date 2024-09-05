@@ -6,7 +6,7 @@ from itertools import chain
 from typing import TYPE_CHECKING
 
 from ..kast import KInner
-from ..kast.inner import KApply, KRewrite, KSort, KToken, KVariable, Subst, bottom_up
+from ..kast.inner import KApply, KRewrite, KToken, KVariable, Subst, bottom_up
 from ..kast.manip import (
     abstract_term_safely,
     build_claim,
@@ -21,7 +21,7 @@ from ..kast.manip import (
     split_config_and_constraints,
     split_config_from,
 )
-from ..prelude.k import GENERATED_TOP_CELL
+from ..prelude.k import GENERATED_TOP_CELL, K
 from ..prelude.kbool import andBool, orBool
 from ..prelude.ml import is_bottom, is_top, mlAnd, mlBottom, mlEquals, mlEqualsTrue, mlImplies, mlTop
 from ..utils import unique
@@ -324,7 +324,7 @@ class CSubst:
         _preds: list[KInner] = []
         if subst:
             for k, v in self.subst.items():
-                sort = KSort('K')
+                sort = K
                 if sort_with is not None:
                     _sort = sort_with.sort(v)
                     sort = _sort if _sort is not None else sort
