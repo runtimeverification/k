@@ -13,7 +13,7 @@ from pyk.prelude.k import GENERATED_TOP_CELL
 from pyk.prelude.kint import INT, intToken
 from pyk.prelude.ml import mlAnd, mlEqualsTrue
 
-from .utils import a, b, c, config, config_int, f, g, ge, h, k, lt, x, y, z
+from .utils import a, b, c, f, g, ge_ml, h, k, lt_ml, x, y, z
 
 if TYPE_CHECKING:
     from typing import Final
@@ -192,24 +192,24 @@ APPLY_TEST_DATA: Final = (
     (CTerm.top(), CSubst(), CTerm.top()),
     (CTerm.bottom(), CSubst(), CTerm.bottom()),
     (
-        CTerm(config('X')),
+        CTerm(k(KVariable('X'))),
         CSubst(),
-        CTerm(config('X')),
+        CTerm(k(KVariable('X'))),
     ),
     (
-        CTerm(config('X')),
+        CTerm(k(KVariable('X'))),
         CSubst(Subst({'X': intToken(5)})),
-        CTerm(config_int(5)),
+        CTerm(k(intToken(5))),
     ),
     (
-        CTerm(config('X')),
+        CTerm(k(KVariable('X'))),
         CSubst(Subst({'X': KVariable('Y')})),
-        CTerm(config('Y')),
+        CTerm(k(KVariable('Y'))),
     ),
     (
-        CTerm(config('X'), [lt('X', 5)]),
-        CSubst(Subst({'X': KVariable('Y')}), [ge('Y', 0)]),
-        CTerm(config('Y'), [ge('Y', 0), lt('Y', 5)]),
+        CTerm(k(KVariable('X')), [lt_ml('X', 5)]),
+        CSubst(Subst({'X': KVariable('Y')}), [ge_ml('Y', 0)]),
+        CTerm(k(KVariable('Y')), [ge_ml('Y', 0), lt_ml('Y', 5)]),
     ),
 )
 

@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Final
 
 import pytest
-from unit.utils import config, ge, lt
+from unit.utils import ge_ml, k, lt_ml
 
 from pyk.cterm import CSubst, CTerm
 from pyk.kast.inner import KApply, KRewrite, KToken, KVariable, Subst
@@ -888,7 +888,7 @@ CREATE_SPLIT_BY_NODES_TEST_DATA: Final = (
     (CTerm.top(), [CTerm.top(), CTerm.bottom()], None),
     (
         CTerm.top(),
-        [CTerm(config('X')), CTerm(config('Y'))],
+        [CTerm(k(KVariable('X'))), CTerm(k(KVariable('Y')))],
         None,  # todo: support split from top, because top means anything can be matched
     ),
     (
@@ -899,33 +899,36 @@ CREATE_SPLIT_BY_NODES_TEST_DATA: Final = (
         ),
     ),
     (
-        CTerm(config('X')),
-        [CTerm(config('X')), CTerm(config('Y')), CTerm(config('Z'))],
+        CTerm(k(KVariable('X'))),
+        [CTerm(k(KVariable('X'))), CTerm(k(KVariable('Y'))), CTerm(k(KVariable('Z')))],
         KCFG.Split(
-            KCFG.Node(1, CTerm(config('X'))),
+            KCFG.Node(1, CTerm(k(KVariable('X')))),
             [
-                (KCFG.Node(2, CTerm(config('X'))), CSubst(Subst({'X': KVariable('X')}))),
-                (KCFG.Node(3, CTerm(config('Y'))), CSubst(Subst({'X': KVariable('Y')}))),
-                (KCFG.Node(4, CTerm(config('Z'))), CSubst(Subst({'X': KVariable('Z')}))),
+                (KCFG.Node(2, CTerm(k(KVariable('X')))), CSubst(Subst({'X': KVariable('X')}))),
+                (KCFG.Node(3, CTerm(k(KVariable('Y')))), CSubst(Subst({'X': KVariable('Y')}))),
+                (KCFG.Node(4, CTerm(k(KVariable('Z')))), CSubst(Subst({'X': KVariable('Z')}))),
             ],
         ),
     ),
-    (CTerm(config('X')), [CTerm(config('Y')), CTerm(KApply('<bot>', [KVariable('Z')]))], None),
+    (CTerm(k(KVariable('X'))), [CTerm(k(KVariable('Y'))), CTerm(KApply('<bot>', [KVariable('Z')]))], None),
     (
-        CTerm(config('X'), [ge('X', 0), lt('X', 10)]),
-        [CTerm(config('Y'), [ge('Y', 0)]), CTerm(config('Z'), [ge('Z', 5)])],
+        CTerm(k(KVariable('X')), [ge_ml('X', 0), lt_ml('X', 10)]),
+        [CTerm(k(KVariable('Y')), [ge_ml('Y', 0)]), CTerm(k(KVariable('Z')), [ge_ml('Z', 5)])],
         KCFG.Split(
-            KCFG.Node(1, CTerm(config('X'), [ge('X', 0), lt('X', 10)])),
+            KCFG.Node(1, CTerm(k(KVariable('X')), [ge_ml('X', 0), lt_ml('X', 10)])),
             [
-                (KCFG.Node(2, CTerm(config('Y'), [ge('Y', 0)])), CSubst(Subst({'X': KVariable('Y')}), [lt('Y', 10)])),
                 (
-                    KCFG.Node(3, CTerm(config('Z'), [ge('Z', 5)])),
+                    KCFG.Node(2, CTerm(k(KVariable('Y')), [ge_ml('Y', 0)])),
+                    CSubst(Subst({'X': KVariable('Y')}), [lt_ml('Y', 10)]),
+                ),
+                (
+                    KCFG.Node(3, CTerm(k(KVariable('Z')), [ge_ml('Z', 5)])),
                     CSubst(
                         Subst({'X': KVariable('Z')}),
                         [
-                            ge('Z', 5),
-                            lt('Z', 10),
-                            ge('Z', 0),
+                            ge_ml('Z', 5),
+                            lt_ml('Z', 10),
+                            ge_ml('Z', 0),
                         ],
                     ),
                 ),
