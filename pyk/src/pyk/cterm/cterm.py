@@ -281,8 +281,8 @@ def merge_cterms(t1: CTerm, t2: CTerm) -> CTerm | None:
     new_t2_subst = Subst({})
 
     for cell in t1_subst:
-        if t1_subst[cell] == t2_subst[cell] and not var_occurrences(t1_subst[cell]):
-            # keep the cell if it is the same & exists no free variables
+        if t1_subst[cell] == t2_subst[cell]:
+            # keep the cell if it is the same
             new_subst = new_subst * Subst({cell: t1_subst[cell]})
         else:
             # create a new free variable for the cell
