@@ -6,11 +6,12 @@ from itertools import chain
 from typing import TYPE_CHECKING
 
 from ..kast import KInner
-from ..kast.inner import KApply, KRewrite, KToken, KVariable, Subst, bottom_up
+from ..kast.inner import KApply, KRewrite, KToken, Subst, bottom_up
 from ..kast.manip import (
     abstract_term_safely,
     build_claim,
     build_rule,
+    extract_subst,
     flatten_label,
     free_vars,
     ml_pred_to_bool,
@@ -325,19 +326,8 @@ class CSubst:
     @staticmethod
     def from_pred(pred: KInner) -> CSubst:
         """Extract from a boolean predicate a CSubst."""
-        _subst: dict[str, KInner] = {}
-        _constraints: list[KInner] = []
-        for clause in flatten_label('#And', pred):
-            if (
-                type(clause) is KApply
-                and clause.label.name == '#Equals'
-                and type(clause.args[0]) is KVariable
-                and clause.args[0].name not in _subst
-            ):
-                _subst[clause.args[0].name] = clause.args[1]
-            else:
-                _constraints.append(clause)
-        return CSubst(subst=Subst(_subst), constraints=_constraints)
+        subst, pred = extract_subst(pred)
+        return CSubst(subst=subst, constraints=flatten_label('#And', pred))
 
     @property
     def constraint(self) -> KInner:
