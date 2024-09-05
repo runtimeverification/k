@@ -60,7 +60,7 @@ class TestDivisionHooksHs(KoreClientTest):
     @pytest.mark.parametrize(
         'op, a, b, c',
         T_DIVISION_TEST_DATA,
-        ids=[f'{a} {op} {b} == {c}' for op, a, b, c in T_DIVISION_TEST_DATA],
+        ids=[f'get-model: {a} {op} {b} == {c}' for op, a, b, c in T_DIVISION_TEST_DATA],
     )
     def test_smt_t_division(self, kore_client: KoreClient, op: str, a: int, b: int, c: int) -> None:
         """checks whether the SMT solver returns ``X = c`` for ``X = a op b``."""
@@ -78,5 +78,24 @@ class TestDivisionHooksHs(KoreClientTest):
 
         # Then
         expected = SatResult(Equals(INT, INT, EVar('X', INT), int_dv(c)))
+
+        assert actual == expected
+
+    @pytest.mark.parametrize(
+        'op, a, b, c',
+        T_DIVISION_TEST_DATA,
+        ids=[f'simplify: {a} {op} {b} == {c}' for op, a, b, c in T_DIVISION_TEST_DATA],
+    )
+    def test_llvm_t_division(self, kore_client: KoreClient, op: str, a: int, b: int, c: int) -> None:
+        """checks whether kore-rpc (HS hook) and booster (LLVM library) both return ``c`` for ``a op b``."""
+
+        # Given
+        pattern = App(kore_for[op], (), (int_dv(a), int_dv(b)))
+
+        # When
+        actual = kore_client.simplify(pattern)
+
+        # Then
+        expected = (int_dv(c), ())
 
         assert actual == expected
