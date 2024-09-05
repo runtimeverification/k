@@ -6,14 +6,13 @@ from itertools import chain
 from typing import TYPE_CHECKING
 
 from ..kast import KInner
-from ..kast.inner import KApply, KRewrite, KToken, Subst, bottom_up
+from ..kast.inner import KApply, KRewrite, Subst, bottom_up
 from ..kast.manip import (
     abstract_term_safely,
     build_claim,
     build_rule,
     flatten_label,
     free_vars,
-    ml_pred_to_bool,
     normalize_constraints,
     push_down_rewrites,
     remove_useless_constraints,
@@ -21,8 +20,7 @@ from ..kast.manip import (
     split_config_from,
 )
 from ..prelude.k import GENERATED_TOP_CELL
-from ..prelude.kbool import andBool, orBool
-from ..prelude.ml import is_bottom, is_top, mlAnd, mlBottom, mlEqualsTrue, mlImplies, mlTop
+from ..prelude.ml import is_bottom, is_top, mlAnd, mlBottom, mlImplies, mlTop
 from ..utils import unique
 
 if TYPE_CHECKING:
@@ -184,9 +182,7 @@ class CTerm:
         """Return a new `CTerm` with the additional constraints."""
         return CTerm(self.config, [new_constraint] + list(self.constraints))
 
-    def anti_unify(
-        self, other: CTerm, keep_values: bool = False, kdef: KDefinition | None = None
-    ) -> tuple[CTerm, CSubst, CSubst]:
+    def anti_unify(self, other: CTerm, kdef: KDefinition | None = None) -> tuple[CTerm, CSubst, CSubst]:
         """Given two `CTerm` instances, find a more general `CTerm` which can instantiate to both.
 
         Args:
@@ -203,20 +199,7 @@ class CTerm:
         """
         new_config, self_subst, other_subst = anti_unify(self.config, other.config, kdef=kdef)
         common_constraints = [constraint for constraint in self.constraints if constraint in other.constraints]
-
         new_cterm = CTerm(config=new_config, constraints=())
-        if keep_values:
-            self_unique_constraints = [
-                ml_pred_to_bool(constraint) for constraint in self.constraints if constraint not in other.constraints
-            ]
-            other_unique_constraints = [
-                ml_pred_to_bool(constraint) for constraint in other.constraints if constraint not in self.constraints
-            ]
-            disjunct_lhs = andBool([self_subst.pred] + self_unique_constraints)
-            disjunct_rhs = andBool([other_subst.pred] + other_unique_constraints)
-            if KToken('true', 'Bool') not in [disjunct_lhs, disjunct_rhs]:
-                new_cterm = new_cterm.add_constraint(mlEqualsTrue(orBool([disjunct_lhs, disjunct_rhs])))
-
         new_constraints = []
         fvs = new_cterm.free_vars
         len_fvs = 0
