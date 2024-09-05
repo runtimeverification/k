@@ -293,9 +293,7 @@ def merge_cterms(t1: CTerm, t2: CTerm) -> CTerm | None:
     new_constraints: list[KInner] = []
     for new_subst, t in [(new_t1_subst, t1), (new_t2_subst, t2)]:
         if new_subst:
-            antecedent = mlAnd([mlEquals(KVariable(cell), new_subst[cell]) for cell in new_subst])
-            consequent = t.constraint
-            new_constraints.append(mlImplies(antecedent, consequent))
+            new_constraints.append(mlImplies(new_subst.ml_pred, t.constraint))
 
     return CTerm(new_config, new_constraints)
 
