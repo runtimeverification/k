@@ -24,7 +24,7 @@ from ..kast.manip import (
 from ..prelude.k import GENERATED_TOP_CELL, K
 from ..prelude.kbool import andBool, orBool
 from ..prelude.ml import is_bottom, is_top, mlAnd, mlBottom, mlEquals, mlEqualsTrue, mlImplies, mlTop
-from ..utils import unique
+from ..utils import not_none, unique
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
@@ -324,10 +324,7 @@ class CSubst:
         _preds: list[KInner] = []
         if subst:
             for k, v in self.subst.items():
-                sort = K
-                if sort_with is not None:
-                    _sort = sort_with.sort(v)
-                    sort = _sort if _sort is not None else sort
+                sort = K if not (sort_with and sort_with.sort(v)) else not_none(sort_with.sort(v))
                 _preds.append(mlEquals(KVariable(k, sort=sort), v, arg_sort=sort))
         if constraints:
             _preds.extend(self.constraints)
