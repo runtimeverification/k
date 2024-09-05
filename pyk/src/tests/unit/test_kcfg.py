@@ -891,6 +891,7 @@ CREATE_SPLIT_BY_NODES_TEST_DATA: Final = (
         [CTerm(k(KVariable('X'))), CTerm(k(KVariable('Y')))],
         None,  # todo: support split from top, because top means anything can be matched
     ),
+    # not mutually exclusive
     (
         CTerm.top(),
         [CTerm.top(), CTerm.top()],
@@ -898,6 +899,7 @@ CREATE_SPLIT_BY_NODES_TEST_DATA: Final = (
             KCFG.Node(1, CTerm.top()), [(KCFG.Node(2, CTerm.top()), CSubst()), (KCFG.Node(3, CTerm.top()), CSubst())]
         ),
     ),
+    # not mutually exclusive
     (
         CTerm(k(KVariable('X'))),
         [CTerm(k(KVariable('X'))), CTerm(k(KVariable('Y'))), CTerm(k(KVariable('Z')))],
@@ -911,6 +913,10 @@ CREATE_SPLIT_BY_NODES_TEST_DATA: Final = (
         ),
     ),
     (CTerm(k(KVariable('X'))), [CTerm(k(KVariable('Y'))), CTerm(KApply('<bot>', [KVariable('Z')]))], None),
+    # not mutually exclusive
+    # this target doesn't meet the implication relationship with source.
+    # So the CTerm of target and CSubst.apply(target) are not logically equal.
+    # But source -> CSubst.apply(target) can always be true.
     (
         CTerm(k(KVariable('X')), [ge_ml('X', 0), lt_ml('X', 10)]),
         [CTerm(k(KVariable('Y')), [ge_ml('Y', 0)]), CTerm(k(KVariable('Z')), [ge_ml('Z', 5)])],
@@ -928,6 +934,29 @@ CREATE_SPLIT_BY_NODES_TEST_DATA: Final = (
                         [
                             ge_ml('Z', 5),
                             lt_ml('Z', 10),
+                            ge_ml('Z', 0),
+                        ],
+                    ),
+                ),
+            ],
+        ),
+    ),
+    (
+        CTerm(k(KVariable('X')), [ge_ml('X', 0), lt_ml('X', 10)]),
+        [CTerm(k(KVariable('Y')), [ge_ml('Y', 0), lt_ml('Y', 5)]), CTerm(k(KVariable('Z')), [ge_ml('Z', 5), lt_ml('Z', 10)])],
+        KCFG.Split(
+            KCFG.Node(1, CTerm(k(KVariable('X')), [ge_ml('X', 0), lt_ml('X', 10)])),
+            [
+                (
+                    KCFG.Node(2, CTerm(k(KVariable('Y')), [ge_ml('Y', 0), lt_ml('Y', 5)])),
+                    CSubst(Subst({'X': KVariable('Y')}), [lt_ml('Y', 5), lt_ml('Y', 10)]),
+                ),
+                (
+                    KCFG.Node(3, CTerm(k(KVariable('Z')), [ge_ml('Z', 5), lt_ml('Z', 10)])),
+                    CSubst(
+                        Subst({'X': KVariable('Z')}),
+                        [
+                            ge_ml('Z', 5),
                             ge_ml('Z', 0),
                         ],
                     ),
