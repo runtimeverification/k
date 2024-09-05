@@ -764,19 +764,6 @@ class Subst(Mapping[str, KInner]):
         return ml_term
 
     @property
-    def pred(self) -> KInner:
-        """Turn this `Subst` into a boolean predicate using `_==K_` operator."""
-        conjuncts = [
-            KApply('_==K_', KVariable(name), val)
-            for name, val in self.items()
-            if type(val) is not KVariable or val.name != name
-        ]
-        if not conjuncts:
-            return KToken('true', 'Bool')
-
-        return reduce(KLabel('_andBool_'), conjuncts)
-
-    @property
     def is_identity(self) -> bool:
         return len(self.minimize()) == 0
 
