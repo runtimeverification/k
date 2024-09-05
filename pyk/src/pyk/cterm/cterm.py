@@ -6,7 +6,7 @@ from itertools import chain
 from typing import TYPE_CHECKING
 
 from ..kast import KInner
-from ..kast.inner import KApply, KRewrite, KToken, KVariable, Subst, bottom_up, var_occurrences
+from ..kast.inner import KApply, KRewrite, KToken, Subst, bottom_up
 from ..kast.manip import (
     abstract_term_safely,
     build_claim,
@@ -22,7 +22,7 @@ from ..kast.manip import (
 )
 from ..prelude.k import GENERATED_TOP_CELL
 from ..prelude.kbool import andBool, orBool
-from ..prelude.ml import is_bottom, is_top, mlAnd, mlBottom, mlEquals, mlEqualsTrue, mlImplies, mlTop
+from ..prelude.ml import is_bottom, is_top, mlAnd, mlBottom, mlEqualsTrue, mlImplies, mlTop
 from ..utils import unique
 
 if TYPE_CHECKING:
