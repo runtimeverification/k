@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from pyk.utils import single
 
 from ..kast.inner import KApply, KLabel, build_assoc, flatten_label
-from .k import GENERATED_TOP_CELL, K_ITEM
+from .k import GENERATED_TOP_CELL, K_ITEM, K
 from .kbool import BOOL, FALSE, TRUE
 
 if TYPE_CHECKING:
@@ -55,7 +55,7 @@ def is_bottom(term: KInner, *, weak: bool = False) -> bool:
 def mlEquals(  # noqa: N802
     term1: KInner,
     term2: KInner,
-    arg_sort: str | KSort,
+    arg_sort: str | KSort = K,
     sort: str | KSort = GENERATED_TOP_CELL,
 ) -> KApply:
     return KLabel('#Equals', arg_sort, sort)(term1, term2)
