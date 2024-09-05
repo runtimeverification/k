@@ -203,15 +203,15 @@ class CTerm:
         """
         new_config, self_subst, other_subst = anti_unify(self.config, other.config, kdef=kdef)
         common_constraints = [constraint for constraint in self.constraints if constraint in other.constraints]
-        self_unique_constraints = [
-            ml_pred_to_bool(constraint) for constraint in self.constraints if constraint not in other.constraints
-        ]
-        other_unique_constraints = [
-            ml_pred_to_bool(constraint) for constraint in other.constraints if constraint not in self.constraints
-        ]
 
         new_cterm = CTerm(config=new_config, constraints=())
         if keep_values:
+            self_unique_constraints = [
+                ml_pred_to_bool(constraint) for constraint in self.constraints if constraint not in other.constraints
+            ]
+            other_unique_constraints = [
+                ml_pred_to_bool(constraint) for constraint in other.constraints if constraint not in self.constraints
+            ]
             disjunct_lhs = andBool([self_subst.pred] + self_unique_constraints)
             disjunct_rhs = andBool([other_subst.pred] + other_unique_constraints)
             if KToken('true', 'Bool') not in [disjunct_lhs, disjunct_rhs]:
