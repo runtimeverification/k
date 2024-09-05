@@ -218,17 +218,7 @@ class CTerm:
             if KToken('true', 'Bool') not in [disjunct_lhs, disjunct_rhs]:
                 new_cterm = new_cterm.add_constraint(mlEqualsTrue(orBool([disjunct_lhs, disjunct_rhs])))
 
-        new_constraints = []
-        fvs = new_cterm.free_vars
-        len_fvs = 0
-        while len_fvs < len(fvs):
-            len_fvs = len(fvs)
-            for constraint in common_constraints:
-                if constraint not in new_constraints:
-                    constraint_fvs = free_vars(constraint)
-                    if any(fv in fvs for fv in constraint_fvs):
-                        new_constraints.append(constraint)
-                        fvs = fvs | constraint_fvs
+        new_constraints = remove_useless_constraints(common_constraints, new_cterm.free_vars)
 
         for constraint in new_constraints:
             new_cterm = new_cterm.add_constraint(constraint)
