@@ -10,6 +10,7 @@ from pyk.kast.manip import no_cell_rewrite_to_dots
 from pyk.kcfg import KCFG, KCFGShow
 from pyk.kcfg.kcfg import KCFGNodeAttr
 from pyk.kcfg.show import NodePrinter
+from pyk.prelude.kint import INT
 from pyk.prelude.ml import mlEquals, mlTop
 from pyk.prelude.utils import token
 from pyk.utils import not_none, single
@@ -41,7 +42,7 @@ def to_csubst_id(source_id: int, target_id: int, constraints: Iterable[KInner]) 
 
 
 def x_equals(i: int) -> KInner:
-    return mlEquals(KVariable('X'), token(i))
+    return mlEquals(KVariable('X'), token(i), arg_sort=INT)
 
 
 def x_config() -> KInner:

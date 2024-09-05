@@ -55,7 +55,7 @@ def is_bottom(term: KInner, *, weak: bool = False) -> bool:
 def mlEquals(  # noqa: N802
     term1: KInner,
     term2: KInner,
-    arg_sort: str | KSort = GENERATED_TOP_CELL,
+    arg_sort: str | KSort,
     sort: str | KSort = GENERATED_TOP_CELL,
 ) -> KApply:
     return KLabel('#Equals', arg_sort, sort)(term1, term2)
