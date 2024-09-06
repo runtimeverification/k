@@ -158,11 +158,11 @@ Subproofs: 0
    │     </generatedTop>
    │     #And { N:Int #Equals 0 }
    │
-   ┊  constraint: true
+   ┊  constraint:
+   ┊      S:Int ==Int S:Int +Int N:Int *Int COUNTER_CELL_af8c44a5:Int +Int N:Int +Int -1 *Int N:Int /Int 2
    ┊  subst:
    ┊      C <- COUNTER_CELL_af8c44a5:Int
    ┊      GENERATEDCOUNTER_CELL_5e3e01ba <- GENERATEDCOUNTER_CELL_949ec677:Int
-   ┊      S <- S:Int +Int N:Int *Int COUNTER_CELL_af8c44a5:Int +Int N:Int +Int -1 *Int N:Int /Int 2
    └─ 2 (leaf, target)
          <generatedTop>
            <k>
