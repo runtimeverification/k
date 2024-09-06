@@ -17,7 +17,7 @@ from pyk.kore.prelude import (
     k,
     kseq,
 )
-from pyk.kore.rpc import SatResult
+from pyk.kore.rpc import SatResult, State, StuckResult
 from pyk.kore.syntax import App, Equals, EVar
 from pyk.ktool.krun import llvm_interpret
 from pyk.testing import KompiledTest, KoreClientTest
@@ -141,6 +141,22 @@ class TestDivisionHooksHs(KoreClientTest):
 
         # When
         actual = kore_client.simplify(pattern)
+
+        # Then
+        assert actual == expected
+
+    @pytest.mark.parametrize('op, a, b, c', T_DIVISION_TEST_DATA, ids=IDS)
+    def test_execute(self, kore_client: KoreClient, op: str, a: int, b: int, c: int) -> None:
+        # Given
+        pattern = config(div_pattern(op, a, b))
+        expected = StuckResult(
+            state=State(config(int_dv(c))),
+            depth=0,
+            logs=(),
+        )
+
+        # When
+        actual = kore_client.execute(pattern)
 
         # Then
         assert actual == expected
