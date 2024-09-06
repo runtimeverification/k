@@ -1046,10 +1046,10 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         """Create a split without crafting a CSubst."""
         source = self.node(source_id)
         targets = [self.node(nid) for nid in target_ids]
-        csubsts = [cterm_match(source.cterm, target.cterm) for target in targets]
-        if any(csubst is None for csubst in csubsts):
+        try:
+            csubsts = [not_none(cterm_match(source.cterm, target.cterm)) for target in targets]
+        except ValueError:
             return None
-
         return self.create_split(source.id, zip(target_ids, csubsts, strict=True))
 
     def ndbranches(self, *, source_id: NodeIdLike | None = None, target_id: NodeIdLike | None = None) -> list[NDBranch]:
