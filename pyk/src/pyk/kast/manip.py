@@ -220,15 +220,15 @@ def extract_subst(term: KInner) -> tuple[Subst, KInner]:
 
     def _extract_subst(_term1: KInner, _term2: KInner) -> tuple[str, KInner] | None:
         if (
-            type(_term1) is KVariable
-            and _term1.name not in _subst
+            (type(_term1) is KVariable and _term1.name not in _subst)
             and not (type(_term2) is KVariable and _term2.name in _subst)
+            and _term1.name not in free_vars(_term2)
         ):
             return (_term1.name, _term2)
         if (
-            type(_term2) is KVariable
-            and _term2.name not in _subst
+            (type(_term2) is KVariable and _term2.name not in _subst)
             and not (type(_term1) is KVariable and _term1.name in _subst)
+            and _term2.name not in free_vars(_term1)
         ):
             return (_term2.name, _term1)
         if _term1 == TRUE and type(_term2) is KApply and _term2.label.name in {'_==K_', '_==Int_'}:

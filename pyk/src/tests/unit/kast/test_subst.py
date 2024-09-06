@@ -135,6 +135,7 @@ EXTRACT_SUBST_TEST_DATA: Final[tuple[tuple[KInner, dict[str, KInner], KInner], .
     (mlEquals(x, a), {'x': a}, mlTop()),
     (mlEquals(x, _0), {'x': _0}, mlTop()),
     (mlEquals(x, y), {'x': y}, mlTop()),
+    (mlEquals(x, f(x)), {}, mlEquals(x, f(x))),
     (mlAnd([mlEquals(x, y), mlEquals(x, b)]), {'x': y}, mlEquals(x, b)),
     (mlAnd([mlEquals(x, b), mlEquals(x, y)]), {'x': b}, mlEquals(x, y)),
     (mlAnd([mlEquals(a, b), mlEquals(x, a)]), {'x': a}, mlEquals(a, b)),
