@@ -59,39 +59,44 @@ T_DIVISION_TEST_DATA: Final = (
     ('%Int', -4, +2, 0),
     ('%Int', -4, -2, 0),
 )
+IDS: Final = tuple(f'{a} {op} {b} == {c}' for op, a, b, c in T_DIVISION_TEST_DATA)
+DEFINITION = """
+    module SMT
+        imports INT
+    endmodule
+"""
 
-kore_for = {'/Int': "Lbl'UndsSlsh'Int'Unds'", '%Int': "Lbl'UndsPerc'Int'Unds'"}
+
+def div_pattern(op: str, a: int, b: int) -> App:
+    kore_for = {
+        '/Int': "Lbl'UndsSlsh'Int'Unds'",
+        '%Int': "Lbl'UndsPerc'Int'Unds'",
+    }
+    return App(kore_for[op], (), (int_dv(a), int_dv(b)))
+
+
+def config(pgm: Pattern) -> App:
+    return generated_top(
+        (
+            k(
+                kseq(
+                    (inj(INT, SORT_K_ITEM, pgm),),
+                )
+            ),
+            generated_counter(int_dv(0)),
+        ),
+    )
 
 
 class TestDivisionHooksLlvm(KompiledTest):
-    KOMPILE_DEFINITION = """
-        module SMT
-            imports INT
-        endmodule
-    """
+    KOMPILE_DEFINITION = DEFINITION
     KOMPILE_MAIN_MODULE = 'SMT'
     KOMPILE_ARGS = {'syntax_module': 'SMT'}
 
-    @pytest.mark.parametrize(
-        'op, a, b, c',
-        T_DIVISION_TEST_DATA,
-        ids=[f'{a} {op} {b} == {c}' for op, a, b, c in T_DIVISION_TEST_DATA],
-    )
+    @pytest.mark.parametrize('op, a, b, c', T_DIVISION_TEST_DATA, ids=IDS)
     def test(self, definition_dir: Path, op: str, a: int, b: int, c: int) -> None:
         # Given
-        def config(pgm: Pattern) -> Pattern:
-            return generated_top(
-                (
-                    k(
-                        kseq(
-                            (inj(INT, SORT_K_ITEM, pgm),),
-                        )
-                    ),
-                    generated_counter(int_dv(0)),
-                ),
-            )
-
-        pattern = config(App(kore_for[op], (), (int_dv(a), int_dv(b))))
+        pattern = config(div_pattern(op, a, b))
         expected = config(int_dv(c))
 
         # When
@@ -102,20 +107,12 @@ class TestDivisionHooksLlvm(KompiledTest):
 
 
 class TestDivisionHooksHs(KoreClientTest):
-    KOMPILE_DEFINITION = """
-        module SMT
-            imports INT
-        endmodule
-    """
+    KOMPILE_DEFINITION = DEFINITION
     KOMPILE_MAIN_MODULE = 'SMT'
     KOMPILE_ARGS = {'syntax_module': 'SMT'}
     LLVM_ARGS = {'syntax_module': 'SMT'}
 
-    @pytest.mark.parametrize(
-        'op, a, b, c',
-        T_DIVISION_TEST_DATA,
-        ids=[f'{a} {op} {b} == {c}' for op, a, b, c in T_DIVISION_TEST_DATA],
-    )
+    @pytest.mark.parametrize('op, a, b, c', T_DIVISION_TEST_DATA, ids=IDS)
     def test_get_model(self, kore_client: KoreClient, op: str, a: int, b: int, c: int) -> None:
         """Check whether the SMT solver returns ``X = c`` for ``X = a op b``."""
 
@@ -124,7 +121,7 @@ class TestDivisionHooksHs(KoreClientTest):
             BOOL,
             INT,
             TRUE,
-            eq_int(App(kore_for[op], (), (int_dv(a), int_dv(b))), EVar('X', INT)),
+            eq_int(div_pattern(op, a, b), EVar('X', INT)),
         )
         expected = SatResult(Equals(INT, INT, EVar('X', INT), int_dv(c)))
 
@@ -134,16 +131,12 @@ class TestDivisionHooksHs(KoreClientTest):
         # Then
         assert actual == expected
 
-    @pytest.mark.parametrize(
-        'op, a, b, c',
-        T_DIVISION_TEST_DATA,
-        ids=[f'{a} {op} {b} == {c}' for op, a, b, c in T_DIVISION_TEST_DATA],
-    )
+    @pytest.mark.parametrize('op, a, b, c', T_DIVISION_TEST_DATA, ids=IDS)
     def test_simplify(self, kore_client: KoreClient, op: str, a: int, b: int, c: int) -> None:
         """Check whether kore-rpc (HS hook) and booster (LLVM library) both return ``c`` for ``a op b``."""
 
         # Given
-        pattern = App(kore_for[op], (), (int_dv(a), int_dv(b)))
+        pattern = div_pattern(op, a, b)
         expected = (int_dv(c), ())
 
         # When
