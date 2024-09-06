@@ -2,16 +2,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from unit.kcfg.prelude import config, lt, ge, config_int
-from unit.kcfg.test_minimize import propagate_split_constraints
+from unit.kcfg.prelude import config, config_int, ge, lt
 
-from pyk.kast.inner import KVariable, KApply
 from pyk.kcfg import KCFG
 from pyk.kcfg.semantics import DefaultSemantics
-from pyk.prelude.kint import geInt, intToken, ltInt
-from pyk.prelude.ml import mlEqualsTrue
-
-from ..test_kcfg import edge_dicts, node_dicts, split_dicts, x_config, x_subst
 
 if TYPE_CHECKING:
     from pyk.cterm import CTerm
@@ -107,4 +101,3 @@ def merge_node_test_kcfg() -> KCFG:
 class AlwaysTrue(DefaultSemantics):
     def is_mergeable(self, c1: CTerm, c2: CTerm) -> bool:
         return True
-

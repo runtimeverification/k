@@ -4,7 +4,7 @@ from functools import reduce
 from typing import TYPE_CHECKING, Optional
 
 from pyk.cterm import CTerm
-from pyk.cterm.cterm import CSubst, cterm_anti_unify, cterm_match
+from pyk.cterm.cterm import CSubst, cterm_match
 from pyk.utils import not_none, single
 
 from .semantics import DefaultSemantics
@@ -281,7 +281,7 @@ class KCFGMinimizer:
 
             # Step 3. Create a new split from a to merged_ai
             a_splits = a_splits | {
-                merged_edge.source.id: cterm_match(a2ai.source.cterm, merged_edge.source.cterm)
+                merged_edge.source.id: not_none(cterm_match(a2ai.source.cterm, merged_edge.source.cterm))
                 for merged_edge in merged_edges
             }
             if len(a_splits) == 0 and len(merged_edges) == 1:
