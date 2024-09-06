@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Optional
 
 from pyk.cterm import CTerm
 from pyk.cterm.cterm import cterm_match
+from pyk.kast.outer import KDefinition
 from pyk.utils import not_none, single
 
 from .semantics import DefaultSemantics
@@ -19,12 +20,14 @@ if TYPE_CHECKING:
 class KCFGMinimizer:
     kcfg: KCFG
     heuristics: KCFGSemantics
+    kdef: KDefinition | None
 
-    def __init__(self, kcfg: KCFG, heuristics: Optional[KCFGSemantics] = None) -> None:
+    def __init__(self, kcfg: KCFG, heuristics: Optional[KCFGSemantics] = None, kdef: Optional[KDefinition] = None) -> None:
         if heuristics is None:
             heuristics = DefaultSemantics()
         self.kcfg = kcfg
         self.heuristics = heuristics
+        self.kdef = kdef
 
     def lift_edge(self, b_id: NodeIdLike) -> None:
         """Lift an edge up another edge directly preceding it.
@@ -262,7 +265,7 @@ class KCFGMinimizer:
             # Step 2. Create Merged Edges and Splits from merged_bi to bi
 
             def cterm_anti_unify(c1: CTerm, c2: CTerm) -> CTerm:
-                return c1.anti_unify(c2)[0]
+                return c1.anti_unify(c2, True, self.kdef)[0]
 
             merged_edges: list[KCFG.MergedEdge] = []
             for ai2bis in ai2bis_group:
