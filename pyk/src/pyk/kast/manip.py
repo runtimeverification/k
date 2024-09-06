@@ -220,25 +220,25 @@ def extract_subst(term: KInner) -> tuple[Subst, KInner]:
 
     def _extract_subst(term: KInner, term2: KInner) -> tuple[str, KInner] | None:
         if (
-            (type(term) is KVariable and term.name not in subst)
-            and not (type(term2) is KVariable and term2.name in subst)
+            (isinstance(term, KVariable) and term.name not in subst)
+            and not (isinstance(term2, KVariable) and term2.name in subst)
             and term.name not in free_vars(term2)
         ):
             return (term.name, term2)
         if (
-            (type(term2) is KVariable and term2.name not in subst)
-            and not (type(term) is KVariable and term.name in subst)
+            (isinstance(term2, KVariable) and term2.name not in subst)
+            and not (isinstance(term, KVariable) and term.name in subst)
             and term2.name not in free_vars(term)
         ):
             return (term2.name, term)
-        if term == TRUE and type(term2) is KApply and term2.label.name in {'_==K_', '_==Int_'}:
+        if term == TRUE and isinstance(term2, KApply) and term2.label.name in {'_==K_', '_==Int_'}:
             return _extract_subst(term2.args[0], term2.args[1])
-        if term2 == TRUE and type(term) is KApply and term.label.name in {'_==K_', '_==Int_'}:
+        if term2 == TRUE and isinstance(term, KApply) and term.label.name in {'_==K_', '_==Int_'}:
             return _extract_subst(term.args[0], term.args[1])
         return None
 
     for conjunct in flatten_label('#And', term):
-        if type(conjunct) is KApply and conjunct.label.name == '#Equals':
+        if isinstance(conjunct, KApply) and conjunct.label.name == '#Equals':
             if _conjunct_subst := _extract_subst(conjunct.args[0], conjunct.args[1]):
                 name, value = _conjunct_subst
                 subst[name] = value
