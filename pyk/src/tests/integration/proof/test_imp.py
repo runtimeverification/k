@@ -12,7 +12,7 @@ from pyk.kast.inner import KApply, KSequence, KSort, KToken, KVariable, Subst
 from pyk.kast.manip import minimize_term, sort_ac_collections
 from pyk.kcfg.semantics import KCFGSemantics
 from pyk.kcfg.show import KCFGShow
-from pyk.prelude.kbool import FALSE, andBool, orBool
+from pyk.prelude.kbool import BOOL, FALSE, andBool, orBool
 from pyk.prelude.kint import intToken
 from pyk.prelude.ml import mlAnd, mlBottom, mlEquals, mlEqualsFalse, mlEqualsTrue, mlTop
 from pyk.proof import APRProver, ProofStatus
@@ -700,7 +700,7 @@ FAILURE_INFO_TEST_DATA: Iterable[tuple[str, Path, str, str, int, int, tuple[KInn
         'failing-if',
         0,
         1,
-        (mlEquals(KVariable('_B', 'Bool'), FALSE),),
+        (mlEquals(KVariable('_B', 'Bool'), FALSE, arg_sort=BOOL),),
         False,
     ),
     (
