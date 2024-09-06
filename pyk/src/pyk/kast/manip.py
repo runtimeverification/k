@@ -219,9 +219,17 @@ def extract_subst(term: KInner) -> tuple[Subst, KInner]:
     rem_conjuncts: list[KInner] = []
 
     def _extract_subst(_term1: KInner, _term2: KInner) -> tuple[str, KInner] | None:
-        if type(_term1) is KVariable and _term1.name not in _subst:
+        if (
+            type(_term1) is KVariable
+            and _term1.name not in _subst
+            and not (type(_term2) is KVariable and _term2.name in _subst)
+        ):
             return (_term1.name, _term2)
-        if type(_term2) is KVariable and _term2.name not in _subst:
+        if (
+            type(_term2) is KVariable
+            and _term2.name not in _subst
+            and not (type(_term1) is KVariable and _term1.name in _subst)
+        ):
             return (_term2.name, _term1)
         if _term1 == TRUE and type(_term2) is KApply and _term2.label.name in {'_==K_', '_==Int_'}:
             return _extract_subst(_term2.args[0], _term2.args[1])
