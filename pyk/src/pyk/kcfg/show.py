@@ -146,7 +146,7 @@ class KCFGShow:
             csubst: CSubst, subst_first: bool = False, indent: int = 4, max_width: int | None = None
         ) -> list[str]:
             _constraint_strs = [
-                self.kprint.pretty_print(ml_pred_to_bool(constraint)) for constraint in csubst.constraints
+                self.kprint.pretty_print(ml_pred_to_bool(constraint, unsafe=True)) for constraint in csubst.constraints
             ]
             constraint_strs = _multi_line_print('constraint', _constraint_strs, 'true', max_width=max_width)
             _subst_strs = [f'{k} <- {self.kprint.pretty_print(v)}' for k, v in csubst.subst.minimize().items()]
