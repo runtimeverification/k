@@ -260,6 +260,10 @@ class KCFGMinimizer:
                     self.kcfg.remove_node(edge.source.id)
 
             # Step 2. Create Merged Edges and Splits from merged_bi to bi
+
+            def cterm_anti_unify(c1: CTerm, c2: CTerm) -> CTerm:
+                return c1.anti_unify(c2)[0]
+
             merged_edges: list[KCFG.MergedEdge] = []
             for ai2bis in ai2bis_group:
                 ai_cterms = [ai2bi.source.cterm for ai2bi in ai2bis]
@@ -280,7 +284,7 @@ class KCFGMinimizer:
                 merged_edge.source.id: cterm_match(a2ai.source.cterm, merged_edge.source.cterm)
                 for merged_edge in merged_edges
             }
-            if len(a_splits) == 1 and len(merged_edges) == 1:
+            if len(a_splits) == 0 and len(merged_edges) == 1:
                 self.kcfg.remove_node(merged_edges[0].source.id)
                 self.kcfg.create_merged_edge(a2ai.source.id, merged_edges[0].target.id, merged_edges[0].edges)
             else:
