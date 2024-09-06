@@ -215,39 +215,39 @@ def extract_rhs(term: KInner) -> KInner:
 
 
 def extract_subst(term: KInner) -> tuple[Subst, KInner]:
-    _subst = {}
+    subst = {}
     rem_conjuncts: list[KInner] = []
 
-    def _extract_subst(_term1: KInner, _term2: KInner) -> tuple[str, KInner] | None:
+    def _extract_subst(term: KInner, term2: KInner) -> tuple[str, KInner] | None:
         if (
-            (type(_term1) is KVariable and _term1.name not in _subst)
-            and not (type(_term2) is KVariable and _term2.name in _subst)
-            and _term1.name not in free_vars(_term2)
+            (type(term) is KVariable and term.name not in subst)
+            and not (type(term2) is KVariable and term2.name in subst)
+            and term.name not in free_vars(term2)
         ):
-            return (_term1.name, _term2)
+            return (term.name, term2)
         if (
-            (type(_term2) is KVariable and _term2.name not in _subst)
-            and not (type(_term1) is KVariable and _term1.name in _subst)
-            and _term2.name not in free_vars(_term1)
+            (type(term2) is KVariable and term2.name not in subst)
+            and not (type(term) is KVariable and term.name in subst)
+            and term2.name not in free_vars(term)
         ):
-            return (_term2.name, _term1)
-        if _term1 == TRUE and type(_term2) is KApply and _term2.label.name in {'_==K_', '_==Int_'}:
-            return _extract_subst(_term2.args[0], _term2.args[1])
-        if _term2 == TRUE and type(_term1) is KApply and _term1.label.name in {'_==K_', '_==Int_'}:
-            return _extract_subst(_term1.args[0], _term1.args[1])
+            return (term2.name, term)
+        if term == TRUE and type(term2) is KApply and term2.label.name in {'_==K_', '_==Int_'}:
+            return _extract_subst(term2.args[0], term2.args[1])
+        if term2 == TRUE and type(term) is KApply and term.label.name in {'_==K_', '_==Int_'}:
+            return _extract_subst(term.args[0], term.args[1])
         return None
 
     for conjunct in flatten_label('#And', term):
         if type(conjunct) is KApply and conjunct.label.name == '#Equals':
             if _conjunct_subst := _extract_subst(conjunct.args[0], conjunct.args[1]):
                 name, value = _conjunct_subst
-                _subst[name] = value
+                subst[name] = value
             else:
                 rem_conjuncts.append(conjunct)
         else:
             rem_conjuncts.append(conjunct)
 
-    return Subst(_subst), mlAnd(rem_conjuncts)
+    return Subst(subst), mlAnd(rem_conjuncts)
 
 
 def count_vars(term: KInner) -> Counter[str]:
