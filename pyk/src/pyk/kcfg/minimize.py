@@ -4,7 +4,7 @@ from functools import reduce
 from typing import TYPE_CHECKING, Optional
 
 from pyk.cterm import CTerm
-from pyk.cterm.cterm import CSubst, cterm_match
+from pyk.cterm.cterm import cterm_match
 from pyk.utils import not_none, single
 
 from .semantics import DefaultSemantics
@@ -274,10 +274,7 @@ class KCFGMinimizer:
                 merged_bi = self.kcfg.create_node(merged_bi_cterm)
                 merged_edge = self.kcfg.create_merged_edge(merged_ai.id, merged_bi.id, ai2bis)
                 merged_edges.append(merged_edge)
-                b_splits: dict[int, CSubst] = {
-                    ai2bi.target.id: cterm_match(merged_bi_cterm, ai2bi.target.cterm) for ai2bi in ai2bis
-                }
-                self.kcfg.create_split(merged_bi.id, b_splits.items())
+                self.kcfg.create_split_by_nodes(merged_bi.id, [ai2bi.target.id for ai2bi in ai2bis])
 
             # Step 3. Create a new split from a to merged_ai
             a_splits = a_splits | {

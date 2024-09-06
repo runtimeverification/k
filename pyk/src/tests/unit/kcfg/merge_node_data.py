@@ -1,14 +1,10 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from unit.kcfg.prelude import config, config_int, ge, lt
 
+from pyk.cterm import CTerm
 from pyk.kcfg import KCFG
 from pyk.kcfg.semantics import DefaultSemantics
-
-if TYPE_CHECKING:
-    from pyk.cterm import CTerm
 
 
 def merge_node_test_kcfg() -> KCFG:
@@ -92,8 +88,6 @@ def merge_node_test_kcfg() -> KCFG:
     cfg.create_node(CTerm(config('N'), [ge('N', 0), lt('N', 2)]))
     # 21 <N> N < 0
     cfg.create_node(CTerm(config('N'), [lt('N', 0)]))
-
-    cfg.create_split()
 
     return cfg
 
