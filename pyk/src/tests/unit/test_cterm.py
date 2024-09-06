@@ -192,6 +192,7 @@ def test_from_kast(test_id: str, kast: KInner, expected: CTerm) -> None:
 ML_PRED_TEST_DATA: Final = (
     ('empty', CSubst(Subst({})), mlTop()),
     ('singleton', CSubst(Subst({'X': TRUE})), mlEquals(KVariable('X', sort=K), TRUE, arg_sort=K)),
+    ('identity', CSubst(Subst({'X': KVariable('X')})), mlTop()),
     (
         'double',
         CSubst(Subst({'X': TRUE, 'Y': intToken(4)})),

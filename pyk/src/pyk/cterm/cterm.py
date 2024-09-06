@@ -323,7 +323,7 @@ class CSubst:
         """Return an ML predicate representing this substitution."""
         _preds: list[KInner] = []
         if subst:
-            for k, v in self.subst.items():
+            for k, v in self.subst.minimize().items():
                 sort = K if not (sort_with and sort_with.sort(v)) else not_none(sort_with.sort(v))
                 _preds.append(mlEquals(KVariable(k, sort=sort), v, arg_sort=sort))
         if constraints:
