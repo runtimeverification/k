@@ -215,48 +215,39 @@ def extract_rhs(term: KInner) -> KInner:
 
 
 def extract_subst(term: KInner) -> tuple[Subst, KInner]:
-    def _subst_for_terms(term1: KInner, term2: KInner) -> Subst | None:
-        if type(term1) is KVariable and type(term2) not in {KToken, KVariable}:
-            return Subst({term1.name: term2})
-        if type(term2) is KVariable and type(term1) not in {KToken, KVariable}:
-            return Subst({term2.name: term1})
-        return None
-
-    def _extract_subst(conjunct: KInner) -> Subst | None:
-        if type(conjunct) is KApply:
-            if conjunct.label.name == '#Equals':
-                subst = _subst_for_terms(conjunct.args[0], conjunct.args[1])
-
-                if subst is not None:
-                    return subst
-
-                if (
-                    conjunct.args[0] == TRUE
-                    and type(conjunct.args[1]) is KApply
-                    and conjunct.args[1].label.name in {'_==K_', '_==Int_'}
-                ):
-                    subst = _subst_for_terms(conjunct.args[1].args[0], conjunct.args[1].args[1])
-
-                    if subst is not None:
-                        return subst
-
-        return None
-
-    conjuncts = flatten_label('#And', term)
-    subst = Subst()
+    _subst = {}
     rem_conjuncts: list[KInner] = []
 
-    for conjunct in conjuncts:
-        new_subst = _extract_subst(conjunct)
-        if new_subst is None:
-            rem_conjuncts.append(conjunct)
-        else:
-            new_subst = subst.union(new_subst)
-            if new_subst is None:
-                raise ValueError('Conflicting substitutions')  # TODO handle this case
-            subst = new_subst
+    def _extract_subst(_term1: KInner, _term2: KInner) -> tuple[str, KInner] | None:
+        if (
+            (type(_term1) is KVariable and _term1.name not in _subst)
+            and not (type(_term2) is KVariable and _term2.name in _subst)
+            and _term1.name not in free_vars(_term2)
+        ):
+            return (_term1.name, _term2)
+        if (
+            (type(_term2) is KVariable and _term2.name not in _subst)
+            and not (type(_term1) is KVariable and _term1.name in _subst)
+            and _term2.name not in free_vars(_term1)
+        ):
+            return (_term2.name, _term1)
+        if _term1 == TRUE and type(_term2) is KApply and _term2.label.name in {'_==K_', '_==Int_'}:
+            return _extract_subst(_term2.args[0], _term2.args[1])
+        if _term2 == TRUE and type(_term1) is KApply and _term1.label.name in {'_==K_', '_==Int_'}:
+            return _extract_subst(_term1.args[0], _term1.args[1])
+        return None
 
-    return subst, mlAnd(rem_conjuncts)
+    for conjunct in flatten_label('#And', term):
+        if type(conjunct) is KApply and conjunct.label.name == '#Equals':
+            if _conjunct_subst := _extract_subst(conjunct.args[0], conjunct.args[1]):
+                name, value = _conjunct_subst
+                _subst[name] = value
+            else:
+                rem_conjuncts.append(conjunct)
+        else:
+            rem_conjuncts.append(conjunct)
+
+    return Subst(_subst), mlAnd(rem_conjuncts)
 
 
 def count_vars(term: KInner) -> Counter[str]:
