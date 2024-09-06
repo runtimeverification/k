@@ -253,6 +253,26 @@ class CTerm:
         return CTerm(self.config, new_constraints)
 
 
+def cterm_match(cterm1: CTerm, cterm2: CTerm) -> CSubst | None:
+    """Find a substitution which can instantiate `cterm1` to `cterm2`.
+
+    Args:
+        cterm1: `CTerm` to instantiate to `cterm2`.
+        cterm2: `CTerm` to instantiate `cterm1` to.
+
+    Returns:
+        A `CSubst` which can instantiate `cterm1` to `cterm2`, or `None` if no such `CSubst` exists.
+    """
+    subst = cterm1.config.match(cterm2.config)
+    if subst is None:
+        return None
+    source_constraints = [subst(c) for c in cterm1.constraints]
+    constraints = [c for c in cterm2.constraints if c not in source_constraints] + [
+        c for c in source_constraints if c not in cterm2.constraints
+    ]
+    return CSubst(subst, constraints)
+
+
 def anti_unify(state1: KInner, state2: KInner, kdef: KDefinition | None = None) -> tuple[KInner, Subst, Subst]:
     """Return a generalized state over the two input states.
 

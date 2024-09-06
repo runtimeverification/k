@@ -9,6 +9,8 @@ from functools import reduce
 from threading import RLock
 from typing import TYPE_CHECKING, Final, List, Union, cast, final
 
+from pyk.cterm.cterm import cterm_match
+
 from ..cterm import CSubst, CTerm, cterm_build_claim, cterm_build_rule
 from ..kast import EMPTY_ATT
 from ..kast.inner import KApply
@@ -1044,17 +1046,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         """Create a split without crafting a CSubst."""
         source = self.node(source_id)
         targets = [self.node(nid) for nid in target_ids]
-        csubsts: list[CSubst] = []
-
-        for target in targets:
-            subst = source.cterm.config.match(target.cterm.config)
-            if subst is None:
-                return None
-            source_constraints = [subst(c) for c in source.cterm.constraints]
-            constraints = [c for c in target.cterm.constraints if c not in source_constraints] + [
-                c for c in source_constraints if c not in target.cterm.constraints
-            ]
-            csubsts.append(CSubst(subst, constraints))
+        csubsts = [cterm_match(source.cterm, target.cterm) for target in targets]
+        if any(csubst is None for csubst in csubsts):
+            return None
 
         return self.create_split(source.id, zip(target_ids, csubsts, strict=True))
 
