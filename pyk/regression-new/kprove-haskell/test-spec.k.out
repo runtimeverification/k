@@ -48,7 +48,8 @@ Subproofs: 0
 │     </generatedTop>
 │
 ┊  constraint: true
-┊  subst: GENERATEDCOUNTER_CELL_6de8d71b <- GENERATEDCOUNTER_CELL_c84b0b5f:Int
+┊  subst:
+┊      GENERATEDCOUNTER_CELL_6de8d71b <- GENERATEDCOUNTER_CELL_c84b0b5f:Int
 └─ 2 (leaf, target)
       <generatedTop>
         <k>

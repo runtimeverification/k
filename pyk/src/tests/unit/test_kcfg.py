@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 
 import pytest
+from unit.utils import ge_ml, k, lt_ml
 
 from pyk.cterm import CSubst, CTerm
 from pyk.kast.inner import KApply, KRewrite, KToken, KVariable, Subst
@@ -10,6 +11,7 @@ from pyk.kast.manip import no_cell_rewrite_to_dots
 from pyk.kcfg import KCFG, KCFGShow
 from pyk.kcfg.kcfg import KCFGNodeAttr
 from pyk.kcfg.show import NodePrinter
+from pyk.prelude.kint import INT
 from pyk.prelude.ml import mlEquals, mlTop
 from pyk.prelude.utils import token
 from pyk.utils import not_none, single
@@ -41,7 +43,7 @@ def to_csubst_id(source_id: int, target_id: int, constraints: Iterable[KInner]) 
 
 
 def x_equals(i: int) -> KInner:
-    return mlEquals(KVariable('X'), token(i))
+    return mlEquals(KVariable('X'), token(i), arg_sort=INT)
 
 
 def x_config() -> KInner:
@@ -590,8 +592,10 @@ def test_pretty_print() -> None:
         '├─ 14 (split, @bar, @foo)\n'
         '┃\n'
         '┃ (branch)\n'
-        '┣━━┓ constraint: _==K_ ( X , 15 )\n'
-        '┃  ┃ subst: V14 <- V15\n'
+        '┣━━┓ subst:\n'
+        '┃  ┃     V14 <- V15\n'
+        '┃  ┃ constraint:\n'
+        '┃  ┃     _==K_ ( X , 15 )\n'
         '┃  │\n'
         '┃  ├─ 15\n'
         '┃  │\n'
@@ -602,27 +606,35 @@ def test_pretty_print() -> None:
         '┃  └─ 13\n'
         '┃     (looped back)\n'
         '┃\n'
-        '┣━━┓ constraint: _==K_ ( X , 16 )\n'
-        '┃  ┃ subst: V14 <- V16\n'
+        '┣━━┓ subst:\n'
+        '┃  ┃     V14 <- V16\n'
+        '┃  ┃ constraint:\n'
+        '┃  ┃     _==K_ ( X , 16 )\n'
         '┃  │\n'
         '┃  └─ 16\n'
         '┃     (continues as previously)\n'
         '┃\n'
-        '┣━━┓ constraint: _==K_ ( X , 17 )\n'
-        '┃  ┃ subst: V14 <- V17\n'
+        '┣━━┓ subst:\n'
+        '┃  ┃     V14 <- V17\n'
+        '┃  ┃ constraint:\n'
+        '┃  ┃     _==K_ ( X , 17 )\n'
         '┃  │\n'
         '┃  └─ 17 (vacuous, leaf)\n'
         '┃\n'
-        '┣━━┓ constraint: _==K_ ( X , 18 )\n'
-        '┃  ┃ subst: V14 <- V18\n'
+        '┣━━┓ subst:\n'
+        '┃  ┃     V14 <- V18\n'
+        '┃  ┃ constraint:\n'
+        '┃  ┃     _==K_ ( X , 18 )\n'
         '┃  │\n'
         '┃  ├─ 18\n'
         '┃  │\n'
         '┃  │  (1 step)\n'
         '┃  └─ 17 (vacuous, leaf)\n'
         '┃\n'
-        '┣━━┓ constraint: _==K_ ( X , 20 )\n'
-        '┃  ┃ subst: V14 <- V20\n'
+        '┣━━┓ subst:\n'
+        '┃  ┃     V14 <- V20\n'
+        '┃  ┃ constraint:\n'
+        '┃  ┃     _==K_ ( X , 20 )\n'
         '┃  │\n'
         '┃  ├─ 20\n'
         '┃  ┃\n'
@@ -635,13 +647,17 @@ def test_pretty_print() -> None:
         '┃     │\n'
         '┃     └─ 25 (leaf)\n'
         '┃\n'
-        '┣━━┓ constraint: _==K_ ( X , 23 )\n'
-        '┃  ┃ subst: V14 <- V23\n'
+        '┣━━┓ subst:\n'
+        '┃  ┃     V14 <- V23\n'
+        '┃  ┃ constraint:\n'
+        '┃  ┃     _==K_ ( X , 23 )\n'
         '┃  │\n'
         '┃  └─ 23 (stuck, leaf)\n'
         '┃\n'
-        '┗━━┓ constraint: _==K_ ( X , 22 )\n'
-        '   ┃ subst: V14 <- V22\n'
+        '┗━━┓ subst:\n'
+        '   ┃     V14 <- V22\n'
+        '   ┃ constraint:\n'
+        '   ┃     _==K_ ( X , 22 )\n'
         '   │\n'
         '   ├─ 22\n'
         '   │\n'
@@ -649,7 +665,8 @@ def test_pretty_print() -> None:
         '   ├─ 19\n'
         '   │\n'
         '   ┊  constraint: true\n'
-        '   ┊  subst: V22 <- V19\n'
+        '   ┊  subst:\n'
+        '   ┊      V22 <- V19\n'
         '   └─ 22\n'
         '      (looped back)\n'
         '\n'
@@ -685,8 +702,10 @@ def test_pretty_print() -> None:
         '│     </top>\n'
         '┃\n'
         '┃ (branch)\n'
-        '┣━━┓ constraint: _==K_ ( X , 15 )\n'
-        '┃  ┃ subst: V14 <- V15\n'
+        '┣━━┓ subst:\n'
+        '┃  ┃     V14 <- V15\n'
+        '┃  ┃ constraint:\n'
+        '┃  ┃     _==K_ ( X , 15 )\n'
         '┃  │\n'
         '┃  ├─ 15\n'
         '┃  │     <top>\n'
@@ -706,8 +725,10 @@ def test_pretty_print() -> None:
         '┃        </top>\n'
         '┃     (looped back)\n'
         '┃\n'
-        '┣━━┓ constraint: _==K_ ( X , 16 )\n'
-        '┃  ┃ subst: V14 <- V16\n'
+        '┣━━┓ subst:\n'
+        '┃  ┃     V14 <- V16\n'
+        '┃  ┃ constraint:\n'
+        '┃  ┃     _==K_ ( X , 16 )\n'
         '┃  │\n'
         '┃  └─ 16\n'
         '┃        <top>\n'
@@ -715,16 +736,20 @@ def test_pretty_print() -> None:
         '┃        </top>\n'
         '┃     (continues as previously)\n'
         '┃\n'
-        '┣━━┓ constraint: _==K_ ( X , 17 )\n'
-        '┃  ┃ subst: V14 <- V17\n'
+        '┣━━┓ subst:\n'
+        '┃  ┃     V14 <- V17\n'
+        '┃  ┃ constraint:\n'
+        '┃  ┃     _==K_ ( X , 17 )\n'
         '┃  │\n'
         '┃  └─ 17 (vacuous, leaf)\n'
         '┃        <top>\n'
         '┃          V17\n'
         '┃        </top>\n'
         '┃\n'
-        '┣━━┓ constraint: _==K_ ( X , 18 )\n'
-        '┃  ┃ subst: V14 <- V18\n'
+        '┣━━┓ subst:\n'
+        '┃  ┃     V14 <- V18\n'
+        '┃  ┃ constraint:\n'
+        '┃  ┃     _==K_ ( X , 18 )\n'
         '┃  │\n'
         '┃  ├─ 18\n'
         '┃  │     <top>\n'
@@ -737,8 +762,10 @@ def test_pretty_print() -> None:
         '┃          V17\n'
         '┃        </top>\n'
         '┃\n'
-        '┣━━┓ constraint: _==K_ ( X , 20 )\n'
-        '┃  ┃ subst: V14 <- V20\n'
+        '┣━━┓ subst:\n'
+        '┃  ┃     V14 <- V20\n'
+        '┃  ┃ constraint:\n'
+        '┃  ┃     _==K_ ( X , 20 )\n'
         '┃  │\n'
         '┃  ├─ 20\n'
         '┃  │     <top>\n'
@@ -761,16 +788,20 @@ def test_pretty_print() -> None:
         '┃           </top>\n'
         '┃           #And #Equals ( X , 25 )\n'
         '┃\n'
-        '┣━━┓ constraint: _==K_ ( X , 23 )\n'
-        '┃  ┃ subst: V14 <- V23\n'
+        '┣━━┓ subst:\n'
+        '┃  ┃     V14 <- V23\n'
+        '┃  ┃ constraint:\n'
+        '┃  ┃     _==K_ ( X , 23 )\n'
         '┃  │\n'
         '┃  └─ 23 (stuck, leaf)\n'
         '┃        <top>\n'
         '┃          V23\n'
         '┃        </top>\n'
         '┃\n'
-        '┗━━┓ constraint: _==K_ ( X , 22 )\n'
-        '   ┃ subst: V14 <- V22\n'
+        '┗━━┓ subst:\n'
+        '   ┃     V14 <- V22\n'
+        '   ┃ constraint:\n'
+        '   ┃     _==K_ ( X , 22 )\n'
         '   │\n'
         '   ├─ 22\n'
         '   │     <top>\n'
@@ -784,7 +815,8 @@ def test_pretty_print() -> None:
         '   │     </top>\n'
         '   │\n'
         '   ┊  constraint: true\n'
-        '   ┊  subst: V22 <- V19\n'
+        '   ┊  subst:\n'
+        '   ┊      V22 <- V19\n'
         '   └─ 22\n'
         '         <top>\n'
         '           V22\n'
@@ -849,3 +881,96 @@ def test_no_cell_rewrite_to_dots() -> None:
 
     result = no_cell_rewrite_to_dots(term)
     assert result == term
+
+
+CREATE_SPLIT_BY_NODES_TEST_DATA: Final = (
+    (CTerm.bottom(), [CTerm.top(), CTerm.bottom()], None),
+    (CTerm.top(), [CTerm.top(), CTerm.bottom()], None),
+    (
+        CTerm.top(),
+        [CTerm(k(KVariable('X'))), CTerm(k(KVariable('Y')))],
+        None,  # todo: support split from top, because top means anything can be matched
+    ),
+    # not mutually exclusive
+    (
+        CTerm.top(),
+        [CTerm.top(), CTerm.top()],
+        KCFG.Split(
+            KCFG.Node(1, CTerm.top()), [(KCFG.Node(2, CTerm.top()), CSubst()), (KCFG.Node(3, CTerm.top()), CSubst())]
+        ),
+    ),
+    # not mutually exclusive
+    (
+        CTerm(k(KVariable('X'))),
+        [CTerm(k(KVariable('X'))), CTerm(k(KVariable('Y'))), CTerm(k(KVariable('Z')))],
+        KCFG.Split(
+            KCFG.Node(1, CTerm(k(KVariable('X')))),
+            [
+                (KCFG.Node(2, CTerm(k(KVariable('X')))), CSubst(Subst({'X': KVariable('X')}))),
+                (KCFG.Node(3, CTerm(k(KVariable('Y')))), CSubst(Subst({'X': KVariable('Y')}))),
+                (KCFG.Node(4, CTerm(k(KVariable('Z')))), CSubst(Subst({'X': KVariable('Z')}))),
+            ],
+        ),
+    ),
+    (CTerm(k(KVariable('X'))), [CTerm(k(KVariable('Y'))), CTerm(KApply('<bot>', [KVariable('Z')]))], None),
+    # not mutually exclusive
+    # this target doesn't meet the implication relationship with source.
+    # So the CTerm of target and CSubst.apply(target) are not logically equal.
+    # But source -> CSubst.apply(target) can always be true.
+    (
+        CTerm(k(KVariable('X')), [ge_ml('X', 0), lt_ml('X', 10)]),
+        [CTerm(k(KVariable('Y')), [ge_ml('Y', 0)]), CTerm(k(KVariable('Z')), [ge_ml('Z', 5)])],
+        KCFG.Split(
+            KCFG.Node(1, CTerm(k(KVariable('X')), [ge_ml('X', 0), lt_ml('X', 10)])),
+            [
+                (
+                    KCFG.Node(2, CTerm(k(KVariable('Y')), [ge_ml('Y', 0)])),
+                    CSubst(Subst({'X': KVariable('Y')}), []),
+                ),
+                (
+                    KCFG.Node(3, CTerm(k(KVariable('Z')), [ge_ml('Z', 5)])),
+                    CSubst(
+                        Subst({'X': KVariable('Z')}),
+                        [
+                            ge_ml('Z', 5),
+                        ],
+                    ),
+                ),
+            ],
+        ),
+    ),
+    (
+        CTerm(k(KVariable('X')), [ge_ml('X', 0), lt_ml('X', 10)]),
+        [
+            CTerm(k(KVariable('Y')), [ge_ml('Y', 0), lt_ml('Y', 5)]),
+            CTerm(k(KVariable('Z')), [ge_ml('Z', 5), lt_ml('Z', 10)]),
+        ],
+        KCFG.Split(
+            KCFG.Node(1, CTerm(k(KVariable('X')), [ge_ml('X', 0), lt_ml('X', 10)])),
+            [
+                (
+                    KCFG.Node(2, CTerm(k(KVariable('Y')), [ge_ml('Y', 0), lt_ml('Y', 5)])),
+                    CSubst(Subst({'X': KVariable('Y')}), [lt_ml('Y', 5)]),
+                ),
+                (
+                    KCFG.Node(3, CTerm(k(KVariable('Z')), [ge_ml('Z', 5), lt_ml('Z', 10)])),
+                    CSubst(Subst({'X': KVariable('Z')}), [ge_ml('Z', 5)]),
+                ),
+            ],
+        ),
+    ),
+)
+
+
+@pytest.mark.parametrize('source,targets,expected', CREATE_SPLIT_BY_NODES_TEST_DATA)
+def test_create_split_by_nodes(source: CTerm, targets: Iterable[CTerm], expected: KCFG.Split | None) -> None:
+    # Given
+    cfg = KCFG()
+    source_node = cfg.create_node(source)
+    target_nodes = [cfg.create_node(target) for target in targets]
+
+    # When
+    actual = cfg.create_split_by_nodes(source_node.id, [n.id for n in target_nodes])
+
+    # Then
+    assert actual == expected
