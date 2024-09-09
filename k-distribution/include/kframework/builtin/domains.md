@@ -1241,9 +1241,13 @@ You can:
                > left:
                  Int "*Int" Int                 [function, total, symbol(_*Int_), left, comm, smt-hook(*), hook(INT.mul)]
                /* FIXME: translate /Int and %Int into smtlib */
-               /* /Int and %Int implement t-division, which rounds towards 0 */
-               | Int "/Int" Int                 [function, symbol(_/Int_), left, smt-hook(div), hook(INT.tdiv)]
-               | Int "%Int" Int                 [function, symbol(_%Int_), left, smt-hook(mod), hook(INT.tmod)]
+               /* /Int and %Int implement t-division, which rounds towards 0. SMT hooks need to convert from Euclidian division operations */
+               | Int "/Int" Int                 [function, symbol(_/Int_), left,
+                                                 smt-hook((ite (or (= 0 (mod #1 #2)) (>= #1 0)) (div #1 #2) (ite (> #2 0) (+ (div #1 #2) 1) (- (div #1 #2) 1)))),
+                                                 hook(INT.tdiv)]
+               | Int "%Int" Int                 [function, symbol(_%Int_), left,
+                                                 smt-hook((ite (or (= 0 (mod #1 #2)) (>= #1 0)) (mod #1 #2) (ite (> #2 0) (- (mod #1 #2) #2) (+ (mod #1 #2) #2)))),
+                                                 hook(INT.tmod)]
                /* divInt and modInt implement e-division according to the Euclidean division theorem, therefore the remainder is always positive */
                | Int "divInt" Int               [function, symbol(_divInt_), left, smt-hook(div), hook(INT.ediv)]
                | Int "modInt" Int               [function, symbol(_modInt_), left, smt-hook(mod), hook(INT.emod)]

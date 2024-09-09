@@ -7,8 +7,7 @@ import pytest
 
 from pyk.kast.inner import KApply, KLabel, KVariable, Subst
 from pyk.kast.manip import extract_subst
-from pyk.prelude.kbool import TRUE
-from pyk.prelude.kint import intToken
+from pyk.prelude.kint import INT, intToken
 from pyk.prelude.ml import mlAnd, mlEquals, mlEqualsTrue, mlOr, mlTop
 
 from ..utils import a, b, c, f, g, h, x, y, z
@@ -108,34 +107,18 @@ def test_unapply(term: KInner, subst: dict[str, KInner], expected: KInner) -> No
     assert actual == expected
 
 
-ML_PRED_TEST_DATA: Final = (
-    ('empty', Subst({}), KApply('#Top')),
-    ('singleton', Subst({'X': TRUE}), KApply('#Equals', [KVariable('X'), TRUE])),
-    (
-        'double',
-        Subst({'X': TRUE, 'Y': intToken(4)}),
-        KApply(
-            '#And',
-            [KApply('#Equals', [KVariable('X'), TRUE]), KApply('#Equals', [KVariable('Y'), intToken(4)])],
-        ),
-    ),
-)
-
-
-@pytest.mark.parametrize('test_id,subst,pred', ML_PRED_TEST_DATA, ids=[test_id for test_id, *_ in ML_PRED_TEST_DATA])
-def test_ml_pred(test_id: str, subst: Subst, pred: KInner) -> None:
-    assert subst.ml_pred == pred
-
-
 _0 = intToken(0)
 _EQ = KLabel('_==Int_')
 EXTRACT_SUBST_TEST_DATA: Final[tuple[tuple[KInner, dict[str, KInner], KInner], ...]] = (
     (a, {}, a),
-    (mlEquals(a, b), {}, mlEquals(a, b)),
-    (mlEquals(x, a), {'x': a}, mlTop()),
-    (mlEquals(x, _0), {}, mlEquals(x, _0)),
-    (mlEquals(x, y), {}, mlEquals(x, y)),
-    (mlAnd([mlEquals(a, b), mlEquals(x, a)]), {'x': a}, mlEquals(a, b)),
+    (mlEquals(a, b, arg_sort=INT), {}, mlEquals(a, b, arg_sort=INT)),
+    (mlEquals(x, a, arg_sort=INT), {'x': a}, mlTop()),
+    (mlEquals(x, _0, arg_sort=INT), {'x': _0}, mlTop()),
+    (mlEquals(x, y, arg_sort=INT), {'x': y}, mlTop()),
+    (mlEquals(x, f(x), arg_sort=INT), {}, mlEquals(x, f(x), arg_sort=INT)),
+    (mlAnd([mlEquals(x, y, arg_sort=INT), mlEquals(x, b, arg_sort=INT)]), {'x': y}, mlEquals(x, b, arg_sort=INT)),
+    (mlAnd([mlEquals(x, b, arg_sort=INT), mlEquals(x, y, arg_sort=INT)]), {'x': b}, mlEquals(x, y, arg_sort=INT)),
+    (mlAnd([mlEquals(a, b, arg_sort=INT), mlEquals(x, a, arg_sort=INT)]), {'x': a}, mlEquals(a, b, arg_sort=INT)),
     (mlEqualsTrue(_EQ(a, b)), {}, mlEqualsTrue(_EQ(a, b))),
     (mlEqualsTrue(_EQ(x, a)), {'x': a}, mlTop()),
 )
@@ -158,7 +141,7 @@ def test_propagate_subst() -> None:
     bar_x = KApply('bar', [x])
     config = KApply('<k>', [bar_x])
 
-    subst_conjunct = mlEquals(v1, bar_x)
+    subst_conjunct = mlEquals(v1, bar_x, arg_sort=INT)
     other_conjunct = mlEqualsTrue(KApply('_<=Int_', [v1, KApply('foo', [x, bar_x])]))
 
     term = mlAnd([config, subst_conjunct, other_conjunct])
@@ -181,8 +164,8 @@ ML_SUBST_FROM_PRED_TEST_DATA: Final = (
         'positive',
         mlAnd(
             [
-                mlEquals(KVariable('X'), intToken(1)),
-                mlEquals(KVariable('Y'), intToken(2)),
+                mlEquals(KVariable('X'), intToken(1), arg_sort=INT),
+                mlEquals(KVariable('Y'), intToken(2), arg_sort=INT),
             ]
         ),
         Subst({'X': intToken(1), 'Y': intToken(2)}),
@@ -191,8 +174,8 @@ ML_SUBST_FROM_PRED_TEST_DATA: Final = (
         'wrong-connective',
         mlOr(
             [
-                mlEquals(KVariable('X'), intToken(1)),
-                mlEquals(KVariable('Y'), intToken(2)),
+                mlEquals(KVariable('X'), intToken(1), arg_sort=INT),
+                mlEquals(KVariable('Y'), intToken(2), arg_sort=INT),
             ]
         ),
         None,
@@ -201,8 +184,8 @@ ML_SUBST_FROM_PRED_TEST_DATA: Final = (
         'not-subst',
         mlAnd(
             [
-                mlEquals(KVariable('X'), intToken(1)),
-                mlEquals(KVariable('Y'), intToken(2)),
+                mlEquals(KVariable('X'), intToken(1), arg_sort=INT),
+                mlEquals(KVariable('Y'), intToken(2), arg_sort=INT),
                 mlEqualsTrue(KApply('_==K_', [KVariable('Y'), intToken(2)])),
             ]
         ),

@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from pathlib import Path
     from typing import Final
 
+    from ..cterm import CSubst
     from ..kast import KInner
     from ..kast.outer import KFlatModule, KSentence
     from ..ktool.kprint import KPrint
@@ -126,6 +127,34 @@ class KCFGShow:
         processed_nodes: list[KCFG.Node] = []
         ret_lines: list[tuple[str, list[str]]] = []
 
+        def _multi_line_print(
+            label: str, lines: list[str], default: str = 'None', indent: int = 4, max_width: int | None = None
+        ) -> list[str]:
+            ret_lines = []
+            if len(lines) == 0:
+                ret_lines.append(f'{label}: {default}')
+            else:
+                ret_lines.append(f'{label}:')
+                ret_lines.extend([f'{indent * " "}{line}' for line in lines])
+            if max_width is not None:
+                ret_lines = [
+                    ret_line if len(ret_line) <= max_width else ret_line[0:max_width] + '...' for ret_line in ret_lines
+                ]
+            return ret_lines
+
+        def _print_csubst(
+            csubst: CSubst, subst_first: bool = False, indent: int = 4, max_width: int | None = None
+        ) -> list[str]:
+            _constraint_strs = [
+                self.kprint.pretty_print(ml_pred_to_bool(constraint, unsafe=True)) for constraint in csubst.constraints
+            ]
+            constraint_strs = _multi_line_print('constraint', _constraint_strs, 'true', max_width=max_width)
+            _subst_strs = [f'{k} <- {self.kprint.pretty_print(v)}' for k, v in csubst.subst.minimize().items()]
+            subst_strs = _multi_line_print('subst', _subst_strs, '.Subst', max_width=max_width)
+            if subst_first:
+                return subst_strs + constraint_strs
+            return constraint_strs + subst_strs
+
         def _print_node(node: KCFG.Node) -> list[str]:
             return self.node_short_info(kcfg, node)
 
@@ -143,46 +172,12 @@ class KCFGShow:
             return [res] if len(res) < 78 else ['(merged edge)']
 
         def _print_cover(cover: KCFG.Cover) -> Iterable[str]:
-            subst_strs = [f'{k} <- {self.kprint.pretty_print(v)}' for k, v in cover.csubst.subst.items()]
-            subst_str = ''
-            if len(subst_strs) == 0:
-                subst_str = '.Subst'
-            if len(subst_strs) == 1:
-                subst_str = subst_strs[0]
-            if len(subst_strs) > 1 and minimize:
-                subst_str = 'OMITTED SUBST'
-            if len(subst_strs) > 1 and not minimize:
-                subst_str = '{\n    ' + '\n    '.join(subst_strs) + '\n}'
-            constraint_str = self.kprint.pretty_print(ml_pred_to_bool(cover.csubst.constraint, unsafe=True))
-            if len(constraint_str) > 78:
-                constraint_str = 'OMITTED CONSTRAINT'
-            return [
-                f'constraint: {constraint_str}',
-                f'subst: {subst_str}',
-            ]
+            max_width = None if not minimize else 78
+            return _print_csubst(cover.csubst, subst_first=False, indent=4, max_width=max_width)
 
         def _print_split_edge(split: KCFG.Split, target_id: int) -> list[str]:
-            csubst = split.splits[target_id]
-            ret_split_lines: list[str] = []
-            substs = csubst.subst.minimize().items()
-            constraints = [ml_pred_to_bool(c, unsafe=True) for c in csubst.constraints]
-            if len(constraints) == 1:
-                first_line, *rest_lines = self.kprint.pretty_print(constraints[0]).split('\n')
-                ret_split_lines.append(f'constraint: {first_line}')
-                ret_split_lines.extend(f'              {line}' for line in rest_lines)
-            elif len(constraints) > 1:
-                ret_split_lines.append('constraints:')
-                for constraint in constraints:
-                    first_line, *rest_lines = self.kprint.pretty_print(constraint).split('\n')
-                    ret_split_lines.append(f'    {first_line}')
-                    ret_split_lines.extend(f'      {line}' for line in rest_lines)
-            if len(substs) == 1:
-                vname, term = list(substs)[0]
-                ret_split_lines.append(f'subst: {vname} <- {self.kprint.pretty_print(term)}')
-            elif len(substs) > 1:
-                ret_split_lines.append('substs:')
-                ret_split_lines.extend(f'    {vname} <- {self.kprint.pretty_print(term)}' for vname, term in substs)
-            return ret_split_lines
+            max_width = None if not minimize else 78
+            return _print_csubst(split.splits[target_id], subst_first=True, indent=4, max_width=max_width)
 
         def _print_subgraph(indent: str, curr_node: KCFG.Node, prior_on_trace: list[KCFG.Node]) -> None:
             processed = curr_node in processed_nodes
@@ -474,7 +469,9 @@ class KCFGShow:
             cover_file = covers_dir / f'config_{cover.source.id}_{cover.target.id}.txt'
             cover_constraint_file = covers_dir / f'constraint_{cover.source.id}_{cover.target.id}.txt'
 
-            subst_equalities = flatten_label('#And', cover.csubst.subst.ml_pred)
+            subst_equalities = flatten_label(
+                '#And', cover.csubst.pred(sort_with=self.kprint.definition, constraints=False)
+            )
 
             if not cover_file.exists():
                 cover_file.write_text('\n'.join(self.kprint.pretty_print(se) for se in subst_equalities))

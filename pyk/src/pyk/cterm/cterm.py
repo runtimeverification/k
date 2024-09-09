@@ -6,11 +6,12 @@ from itertools import chain
 from typing import TYPE_CHECKING
 
 from ..kast import KInner
-from ..kast.inner import KApply, KRewrite, KToken, Subst, bottom_up
+from ..kast.inner import KApply, KRewrite, KToken, KVariable, Subst, bottom_up
 from ..kast.manip import (
     abstract_term_safely,
     build_claim,
     build_rule,
+    extract_subst,
     flatten_label,
     free_vars,
     ml_pred_to_bool,
@@ -20,9 +21,9 @@ from ..kast.manip import (
     split_config_and_constraints,
     split_config_from,
 )
-from ..prelude.k import GENERATED_TOP_CELL
+from ..prelude.k import GENERATED_TOP_CELL, K
 from ..prelude.kbool import andBool, orBool
-from ..prelude.ml import is_bottom, is_top, mlAnd, mlBottom, mlEqualsTrue, mlImplies, mlTop
+from ..prelude.ml import is_bottom, is_top, mlAnd, mlBottom, mlEquals, mlEqualsTrue, mlImplies, mlTop
 from ..utils import unique
 
 if TYPE_CHECKING:
@@ -38,7 +39,7 @@ class CTerm:
 
     Contains the data:
     - `config`: the _configuration_ (structural component of the state, potentially containing free variabls)
-    - `constraints`: conditiions which limit/constraint the free variables from the `config`
+    - `constraints`: conditions which limit/constraint the free variables from the `config`
     """
 
     config: KInner  # TODO Optional?
@@ -217,17 +218,7 @@ class CTerm:
             if KToken('true', 'Bool') not in [disjunct_lhs, disjunct_rhs]:
                 new_cterm = new_cterm.add_constraint(mlEqualsTrue(orBool([disjunct_lhs, disjunct_rhs])))
 
-        new_constraints = []
-        fvs = new_cterm.free_vars
-        len_fvs = 0
-        while len_fvs < len(fvs):
-            len_fvs = len(fvs)
-            for constraint in common_constraints:
-                if constraint not in new_constraints:
-                    constraint_fvs = free_vars(constraint)
-                    if any(fv in fvs for fv in constraint_fvs):
-                        new_constraints.append(constraint)
-                        fvs = fvs | constraint_fvs
+        new_constraints = remove_useless_constraints(common_constraints, new_cterm.free_vars)
 
         for constraint in new_constraints:
             new_cterm = new_cterm.add_constraint(constraint)
@@ -251,6 +242,25 @@ class CTerm:
         initial_vars = free_vars(self.config) | set(keep_vars)
         new_constraints = remove_useless_constraints(self.constraints, initial_vars)
         return CTerm(self.config, new_constraints)
+
+
+def cterm_match(cterm1: CTerm, cterm2: CTerm) -> CSubst | None:
+    """Find a substitution which can instantiate `cterm1` to `cterm2`.
+
+    Args:
+        cterm1: `CTerm` to instantiate to `cterm2`.
+        cterm2: `CTerm` to instantiate `cterm1` to.
+
+    Returns:
+        A `CSubst` which can instantiate `cterm1` to `cterm2`, or `None` if no such `CSubst` exists.
+    """
+    # todo: delete this function and use cterm1.match_with_constraint(cterm2) directly after closing #4496
+    subst = cterm1.config.match(cterm2.config)
+    if subst is None:
+        return None
+    source_constraints = [subst(c) for c in cterm1.constraints]
+    constraints = [c for c in cterm2.constraints if c not in source_constraints]
+    return CSubst(subst, constraints)
 
 
 def anti_unify(state1: KInner, state2: KInner, kdef: KDefinition | None = None) -> tuple[KInner, Subst, Subst]:
@@ -322,6 +332,26 @@ class CSubst:
         constraints = (KInner.from_dict(c) for c in dct['constraints'])
         return CSubst(subst=subst, constraints=constraints)
 
+    @staticmethod
+    def from_pred(pred: KInner) -> CSubst:
+        """Extract from a boolean predicate a CSubst."""
+        subst, pred = extract_subst(pred)
+        return CSubst(subst=subst, constraints=flatten_label('#And', pred))
+
+    def pred(self, sort_with: KDefinition | None = None, subst: bool = True, constraints: bool = True) -> KInner:
+        """Return an ML predicate representing this substitution."""
+        _preds: list[KInner] = []
+        if subst:
+            for k, v in self.subst.minimize().items():
+                sort = K
+                if sort_with is not None:
+                    _sort = sort_with.sort(v)
+                    sort = _sort if _sort is not None else sort
+                _preds.append(mlEquals(KVariable(k, sort=sort), v, arg_sort=sort))
+        if constraints:
+            _preds.extend(self.constraints)
+        return mlAnd(_preds)
+
     @property
     def constraint(self) -> KInner:
         """Return the set of constraints as a single flattened constraint using `mlAnd`."""
@@ -333,8 +363,13 @@ class CSubst:
 
     def apply(self, cterm: CTerm) -> CTerm:
         """Apply this `CSubst` to the given `CTerm` (instantiating the free variables, and adding the constraints)."""
-        _kast = self.subst(cterm.kast)
-        return CTerm(_kast, [self.constraint])
+        config = self.subst(cterm.config)
+        constraints = [self.subst(constraint) for constraint in cterm.constraints] + list(self.constraints)
+        return CTerm(config, constraints)
+
+    def __call__(self, cterm: CTerm) -> CTerm:
+        """Overload for `CSubst.apply`."""
+        return self.apply(cterm)
 
 
 def cterm_build_claim(
