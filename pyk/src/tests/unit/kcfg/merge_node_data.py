@@ -5,7 +5,7 @@ from typing import Final
 from pyk.kast.inner import KVariable, KToken
 from pyk.prelude.kint import intToken
 
-from ..kcfg.prelude import ge_ml, lt_ml
+from ..utils import ge_ml, lt_ml
 
 from pyk.cterm import CTerm
 from pyk.kcfg import KCFG
