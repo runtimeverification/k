@@ -1,10 +1,14 @@
 from __future__ import annotations
 
-from unit.kcfg.prelude import config, config_int, ge, lt
+from pyk.kast.inner import KVariable
+from pyk.prelude.kint import intToken
+
+from ..kcfg.prelude import ge_ml, lt_ml
 
 from pyk.cterm import CTerm
 from pyk.kcfg import KCFG
 from pyk.kcfg.semantics import DefaultSemantics
+from ..utils import k
 
 
 def merge_node_test_kcfg() -> KCFG:
@@ -43,51 +47,51 @@ def merge_node_test_kcfg() -> KCFG:
     | -> 8 -> 15
     """
     cfg = KCFG()
-    # 1 <X>
-    cfg.create_node(CTerm(config('X')))
-    # 2 <X> X < 0
-    cfg.create_node(CTerm(config('X'), [lt('X', 0)]))
+    # 1 <X> -10 <= X < 100
+    cfg.create_node(CTerm(k(KVariable('X')), [ge_ml('X', -10), lt_ml('X', 100)]), )
+    # 2 <X> -10 <= X < 0
+    cfg.create_node(CTerm(k(KVariable('X')), [ge_ml('X', -10), lt_ml('X', 0)]))
     # 3 <X> 0 <= X < 2
-    cfg.create_node(CTerm(config('X'), [ge('X', 0), lt('X', 2)]))
+    cfg.create_node(CTerm(k(KVariable('X')), [ge_ml('X', 0), lt_ml('X', 2)]))
     # 4 <X> 2 <= X < 4
-    cfg.create_node(CTerm(config('X'), [ge('X', 2), lt('X', 4)]))
+    cfg.create_node(CTerm(k(KVariable('X')), [ge_ml('X', 2), lt_ml('X', 4)]))
     # 5 <Y> 4 <= Y < 6
-    cfg.create_node(CTerm(config('Y'), [ge('Y', 4), lt('Y', 6)]))
+    cfg.create_node(CTerm(k(KVariable('Y')), [ge_ml('Y', 4), lt_ml('Y', 6)]))
     # 6 <X> 6 <= X < 8
-    cfg.create_node(CTerm(config('X'), [ge('X', 6), lt('X', 8)]))
+    cfg.create_node(CTerm(k(KVariable('X')), [ge_ml('X', 6), lt_ml('X', 8)]))
     # 7 <X> 8 <= Y < 10
-    cfg.create_node(CTerm(config('Y'), [ge('Y', 8), lt('Y', 10)]))
+    cfg.create_node(CTerm(k(KVariable('Y')), [ge_ml('Y', 8), lt_ml('Y', 10)]))
     # 8 <10>
-    cfg.create_node(CTerm(config_int(10)))
+    cfg.create_node(CTerm(k(intToken(10))))
     # 9 <11>
-    cfg.create_node(CTerm(config_int(11)))
-    # 10 <Z> 12 <= Z
-    cfg.create_node(CTerm(config('Z'), [ge('Z', 12)]))
+    cfg.create_node(CTerm(k(intToken(11))))
+    # 10 <Z> 12 <= Z < 100
+    cfg.create_node(CTerm(k(KVariable('Z')), [ge_ml('Z', 12), lt_ml('Z', 100)]))
 
     # 11 <X> 2 <= X < 6
-    cfg.create_node(CTerm(config('X'), [ge('X', 2), lt('X', 6)]))
+    cfg.create_node(CTerm(k(KVariable('X')), [ge_ml('X', 2), lt_ml('X', 6)]))
     # 12 <Y> 6 <= Y < 10
-    cfg.create_node(CTerm(config('Y'), [ge('Y', 6), lt('Y', 10)]))
+    cfg.create_node(CTerm(k(KVariable('Y')), [ge_ml('Y', 6), lt_ml('Y', 10)]))
 
     # Because edge denotes multiple rewriting steps, it can end up with any node.
     # 13 <N> 12 <= N
-    cfg.create_node(CTerm(config('N'), [ge('N', 12)]))
+    cfg.create_node(CTerm(k(KVariable('N')), [ge_ml('N', 12)]))
     # 14 <11>
-    cfg.create_node(CTerm(config_int(11)))
+    cfg.create_node(CTerm(k(intToken(11))))
     # 15 <10>
-    cfg.create_node(CTerm(config_int(10)))
+    cfg.create_node(CTerm(k(intToken(10))))
     # 16 <N> 8 <= N < 10
-    cfg.create_node(CTerm(config('N'), [ge('N', 8), lt('N', 10)]))
+    cfg.create_node(CTerm(k(KVariable('N')), [ge_ml('N', 8), lt_ml('N', 10)]))
     # 17 <N> 6 <= N < 8
-    cfg.create_node(CTerm(config('N'), [ge('N', 6), lt('N', 8)]))
+    cfg.create_node(CTerm(k(KVariable('N')), [ge_ml('N', 6), lt_ml('N', 8)]))
     # 18 <N> 4 <= N < 6
-    cfg.create_node(CTerm(config('N'), [ge('N', 4), lt('N', 6)]))
+    cfg.create_node(CTerm(k(KVariable('N')), [ge_ml('N', 4), lt_ml('N', 6)]))
     # 19 <N> 2 <= N < 4
-    cfg.create_node(CTerm(config('N'), [ge('N', 2), lt('N', 4)]))
+    cfg.create_node(CTerm(k(KVariable('N')), [ge_ml('N', 2), lt_ml('N', 4)]))
     # 20 <N> 0 <= N < 2
-    cfg.create_node(CTerm(config('N'), [ge('N', 0), lt('N', 2)]))
+    cfg.create_node(CTerm(k(KVariable('N')), [ge_ml('N', 0), lt_ml('N', 2)]))
     # 21 <N> N < 0
-    cfg.create_node(CTerm(config('N'), [lt('N', 0)]))
+    cfg.create_node(CTerm(k(KVariable('N')), [lt_ml('N', 0)]))
 
     return cfg
 

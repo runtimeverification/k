@@ -3,17 +3,9 @@ from pyk.prelude.kint import geInt, intToken, ltInt
 from pyk.prelude.ml import mlEqualsTrue
 
 
-def lt(var: str, n: int) -> KApply:
+def lt_ml(var: str, n: int) -> KApply:
     return mlEqualsTrue(ltInt(KVariable(var), intToken(n)))
 
 
-def ge(var: str, n: int) -> KApply:
+def ge_ml(var: str, n: int) -> KApply:
     return mlEqualsTrue(geInt(KVariable(var), intToken(n)))
-
-
-def config(var: str) -> KApply:
-    return KApply('<top>', KVariable(var))
-
-
-def config_int(n: int) -> KApply:
-    return KApply('<top>', intToken(n))
