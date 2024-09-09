@@ -263,13 +263,12 @@ def cterm_match(cterm1: CTerm, cterm2: CTerm) -> CSubst | None:
     Returns:
         A `CSubst` which can instantiate `cterm1` to `cterm2`, or `None` if no such `CSubst` exists.
     """
+    # todo: delete this function and use cterm1.match_with_constraint(cterm2) directly after closing #4496
     subst = cterm1.config.match(cterm2.config)
     if subst is None:
         return None
     source_constraints = [subst(c) for c in cterm1.constraints]
-    constraints = [c for c in cterm2.constraints if c not in source_constraints] + [
-        c for c in source_constraints if c not in cterm2.constraints
-    ]
+    constraints = [c for c in cterm2.constraints if c not in source_constraints]
     return CSubst(subst, constraints)
 
 
