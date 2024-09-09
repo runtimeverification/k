@@ -416,6 +416,10 @@ public class ModuleToKORE {
               att.add(Att.ELEMENT(), K.class, KApply(KLabel(concatProd.att().get(Att.ELEMENT()))));
           att = att.add(Att.CONCAT(), K.class, KApply(concatProd.klabel().get()));
           att = att.add(Att.UNIT(), K.class, KApply(KLabel(concatProd.att().get(Att.UNIT()))));
+          if (concatProd.att().contains(Att.UPDATE())) {
+            att =
+                att.add(Att.UPDATE(), K.class, KApply(KLabel(concatProd.att().get(Att.UPDATE()))));
+          }
           sb.append("hooked-");
         } else {
           sb.append("hooked-");
