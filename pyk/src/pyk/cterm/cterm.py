@@ -39,7 +39,7 @@ class CTerm:
 
     Contains the data:
     - `config`: the _configuration_ (structural component of the state, potentially containing free variabls)
-    - `constraints`: conditiions which limit/constraint the free variables from the `config`
+    - `constraints`: conditions which limit/constraint the free variables from the `config`
     """
 
     config: KInner  # TODO Optional?
@@ -244,6 +244,25 @@ class CTerm:
         return CTerm(self.config, new_constraints)
 
 
+def cterm_match(cterm1: CTerm, cterm2: CTerm) -> CSubst | None:
+    """Find a substitution which can instantiate `cterm1` to `cterm2`.
+
+    Args:
+        cterm1: `CTerm` to instantiate to `cterm2`.
+        cterm2: `CTerm` to instantiate `cterm1` to.
+
+    Returns:
+        A `CSubst` which can instantiate `cterm1` to `cterm2`, or `None` if no such `CSubst` exists.
+    """
+    # todo: delete this function and use cterm1.match_with_constraint(cterm2) directly after closing #4496
+    subst = cterm1.config.match(cterm2.config)
+    if subst is None:
+        return None
+    source_constraints = [subst(c) for c in cterm1.constraints]
+    constraints = [c for c in cterm2.constraints if c not in source_constraints]
+    return CSubst(subst, constraints)
+
+
 def anti_unify(state1: KInner, state2: KInner, kdef: KDefinition | None = None) -> tuple[KInner, Subst, Subst]:
     """Return a generalized state over the two input states.
 
@@ -341,8 +360,13 @@ class CSubst:
 
     def apply(self, cterm: CTerm) -> CTerm:
         """Apply this `CSubst` to the given `CTerm` (instantiating the free variables, and adding the constraints)."""
-        _kast = self.subst(cterm.kast)
-        return CTerm(_kast, [self.constraint])
+        config = self.subst(cterm.config)
+        constraints = [self.subst(constraint) for constraint in cterm.constraints] + list(self.constraints)
+        return CTerm(config, constraints)
+
+    def __call__(self, cterm: CTerm) -> CTerm:
+        """Overload for `CSubst.apply`."""
+        return self.apply(cterm)
 
 
 def cterm_build_claim(

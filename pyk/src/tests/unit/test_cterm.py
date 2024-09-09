@@ -14,7 +14,7 @@ from pyk.prelude.kbool import TRUE
 from pyk.prelude.kint import INT, intToken
 from pyk.prelude.ml import mlAnd, mlEquals, mlEqualsTrue, mlTop
 
-from .utils import a, b, c, f, g, h, k, x, y, z
+from .utils import a, b, c, f, g, ge_ml, h, k, lt_ml, x, y, z
 
 if TYPE_CHECKING:
     from typing import Final
@@ -209,3 +209,41 @@ ML_PRED_TEST_DATA: Final = (
 @pytest.mark.parametrize('test_id,csubst,pred', ML_PRED_TEST_DATA, ids=[test_id for test_id, *_ in ML_PRED_TEST_DATA])
 def test_ml_pred(test_id: str, csubst: CSubst, pred: KInner) -> None:
     assert csubst.pred() == pred
+
+
+APPLY_TEST_DATA: Final = (
+    (CTerm.top(), CSubst(), CTerm.top()),
+    (CTerm.bottom(), CSubst(), CTerm.bottom()),
+    (
+        CTerm(k(KVariable('X'))),
+        CSubst(),
+        CTerm(k(KVariable('X'))),
+    ),
+    (
+        CTerm(k(KVariable('X'))),
+        CSubst(Subst({'X': intToken(5)})),
+        CTerm(k(intToken(5))),
+    ),
+    (
+        CTerm(k(KVariable('X'))),
+        CSubst(Subst({'X': KVariable('Y')})),
+        CTerm(k(KVariable('Y'))),
+    ),
+    (
+        CTerm(k(KVariable('X')), [lt_ml('X', 5)]),
+        CSubst(Subst({'X': KVariable('Y')}), [ge_ml('Y', 0)]),
+        CTerm(k(KVariable('Y')), [ge_ml('Y', 0), lt_ml('Y', 5)]),
+    ),
+)
+
+
+@pytest.mark.parametrize(
+    'term,subst,expected',
+    APPLY_TEST_DATA,
+)
+def test_csubst_apply(term: CTerm, subst: CSubst, expected: CTerm) -> None:
+    # When
+    actual = subst(term)
+
+    # Then
+    assert actual == expected

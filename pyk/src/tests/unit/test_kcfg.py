@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 
 import pytest
+from unit.utils import ge_ml, k, lt_ml
 
 from pyk.cterm import CSubst, CTerm
 from pyk.kast.inner import KApply, KRewrite, KToken, KVariable, Subst
@@ -880,3 +881,96 @@ def test_no_cell_rewrite_to_dots() -> None:
 
     result = no_cell_rewrite_to_dots(term)
     assert result == term
+
+
+CREATE_SPLIT_BY_NODES_TEST_DATA: Final = (
+    (CTerm.bottom(), [CTerm.top(), CTerm.bottom()], None),
+    (CTerm.top(), [CTerm.top(), CTerm.bottom()], None),
+    (
+        CTerm.top(),
+        [CTerm(k(KVariable('X'))), CTerm(k(KVariable('Y')))],
+        None,  # todo: support split from top, because top means anything can be matched
+    ),
+    # not mutually exclusive
+    (
+        CTerm.top(),
+        [CTerm.top(), CTerm.top()],
+        KCFG.Split(
+            KCFG.Node(1, CTerm.top()), [(KCFG.Node(2, CTerm.top()), CSubst()), (KCFG.Node(3, CTerm.top()), CSubst())]
+        ),
+    ),
+    # not mutually exclusive
+    (
+        CTerm(k(KVariable('X'))),
+        [CTerm(k(KVariable('X'))), CTerm(k(KVariable('Y'))), CTerm(k(KVariable('Z')))],
+        KCFG.Split(
+            KCFG.Node(1, CTerm(k(KVariable('X')))),
+            [
+                (KCFG.Node(2, CTerm(k(KVariable('X')))), CSubst(Subst({'X': KVariable('X')}))),
+                (KCFG.Node(3, CTerm(k(KVariable('Y')))), CSubst(Subst({'X': KVariable('Y')}))),
+                (KCFG.Node(4, CTerm(k(KVariable('Z')))), CSubst(Subst({'X': KVariable('Z')}))),
+            ],
+        ),
+    ),
+    (CTerm(k(KVariable('X'))), [CTerm(k(KVariable('Y'))), CTerm(KApply('<bot>', [KVariable('Z')]))], None),
+    # not mutually exclusive
+    # this target doesn't meet the implication relationship with source.
+    # So the CTerm of target and CSubst.apply(target) are not logically equal.
+    # But source -> CSubst.apply(target) can always be true.
+    (
+        CTerm(k(KVariable('X')), [ge_ml('X', 0), lt_ml('X', 10)]),
+        [CTerm(k(KVariable('Y')), [ge_ml('Y', 0)]), CTerm(k(KVariable('Z')), [ge_ml('Z', 5)])],
+        KCFG.Split(
+            KCFG.Node(1, CTerm(k(KVariable('X')), [ge_ml('X', 0), lt_ml('X', 10)])),
+            [
+                (
+                    KCFG.Node(2, CTerm(k(KVariable('Y')), [ge_ml('Y', 0)])),
+                    CSubst(Subst({'X': KVariable('Y')}), []),
+                ),
+                (
+                    KCFG.Node(3, CTerm(k(KVariable('Z')), [ge_ml('Z', 5)])),
+                    CSubst(
+                        Subst({'X': KVariable('Z')}),
+                        [
+                            ge_ml('Z', 5),
+                        ],
+                    ),
+                ),
+            ],
+        ),
+    ),
+    (
+        CTerm(k(KVariable('X')), [ge_ml('X', 0), lt_ml('X', 10)]),
+        [
+            CTerm(k(KVariable('Y')), [ge_ml('Y', 0), lt_ml('Y', 5)]),
+            CTerm(k(KVariable('Z')), [ge_ml('Z', 5), lt_ml('Z', 10)]),
+        ],
+        KCFG.Split(
+            KCFG.Node(1, CTerm(k(KVariable('X')), [ge_ml('X', 0), lt_ml('X', 10)])),
+            [
+                (
+                    KCFG.Node(2, CTerm(k(KVariable('Y')), [ge_ml('Y', 0), lt_ml('Y', 5)])),
+                    CSubst(Subst({'X': KVariable('Y')}), [lt_ml('Y', 5)]),
+                ),
+                (
+                    KCFG.Node(3, CTerm(k(KVariable('Z')), [ge_ml('Z', 5), lt_ml('Z', 10)])),
+                    CSubst(Subst({'X': KVariable('Z')}), [ge_ml('Z', 5)]),
+                ),
+            ],
+        ),
+    ),
+)
+
+
+@pytest.mark.parametrize('source,targets,expected', CREATE_SPLIT_BY_NODES_TEST_DATA)
+def test_create_split_by_nodes(source: CTerm, targets: Iterable[CTerm], expected: KCFG.Split | None) -> None:
+    # Given
+    cfg = KCFG()
+    source_node = cfg.create_node(source)
+    target_nodes = [cfg.create_node(target) for target in targets]
+
+    # When
+    actual = cfg.create_split_by_nodes(source_node.id, [n.id for n in target_nodes])
+
+    # Then
+    assert actual == expected
