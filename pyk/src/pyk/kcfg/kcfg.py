@@ -9,6 +9,8 @@ from functools import reduce
 from threading import RLock
 from typing import TYPE_CHECKING, Final, List, Union, cast, final
 
+from pyk.cterm.cterm import cterm_match
+
 from ..cterm import CSubst, CTerm, cterm_build_claim, cterm_build_rule
 from ..kast import EMPTY_ATT
 from ..kast.inner import KApply
@@ -1039,6 +1041,16 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         split = KCFG.Split(self.node(source_id), tuple((self.node(nid), csubst) for nid, csubst in list(splits)))
         self.add_successor(split)
         return split
+
+    def create_split_by_nodes(self, source_id: NodeIdLike, target_ids: Iterable[NodeIdLike]) -> KCFG.Split | None:
+        """Create a split without crafting a CSubst."""
+        source = self.node(source_id)
+        targets = [self.node(nid) for nid in target_ids]
+        try:
+            csubsts = [not_none(cterm_match(source.cterm, target.cterm)) for target in targets]
+        except ValueError:
+            return None
+        return self.create_split(source.id, zip(target_ids, csubsts, strict=True))
 
     def ndbranches(self, *, source_id: NodeIdLike | None = None, target_id: NodeIdLike | None = None) -> list[NDBranch]:
         source_id = self._resolve(source_id) if source_id is not None else None
