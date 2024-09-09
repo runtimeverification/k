@@ -925,7 +925,7 @@ CREATE_SPLIT_BY_NODES_TEST_DATA: Final = (
             [
                 (
                     KCFG.Node(2, CTerm(k(KVariable('Y')), [ge_ml('Y', 0)])),
-                    CSubst(Subst({'X': KVariable('Y')}), [lt_ml('Y', 10)]),
+                    CSubst(Subst({'X': KVariable('Y')}), []),
                 ),
                 (
                     KCFG.Node(3, CTerm(k(KVariable('Z')), [ge_ml('Z', 5)])),
@@ -933,8 +933,6 @@ CREATE_SPLIT_BY_NODES_TEST_DATA: Final = (
                         Subst({'X': KVariable('Z')}),
                         [
                             ge_ml('Z', 5),
-                            lt_ml('Z', 10),
-                            ge_ml('Z', 0),
                         ],
                     ),
                 ),
@@ -952,17 +950,11 @@ CREATE_SPLIT_BY_NODES_TEST_DATA: Final = (
             [
                 (
                     KCFG.Node(2, CTerm(k(KVariable('Y')), [ge_ml('Y', 0), lt_ml('Y', 5)])),
-                    CSubst(Subst({'X': KVariable('Y')}), [lt_ml('Y', 5), lt_ml('Y', 10)]),
+                    CSubst(Subst({'X': KVariable('Y')}), [lt_ml('Y', 5)]),
                 ),
                 (
                     KCFG.Node(3, CTerm(k(KVariable('Z')), [ge_ml('Z', 5), lt_ml('Z', 10)])),
-                    CSubst(
-                        Subst({'X': KVariable('Z')}),
-                        [
-                            ge_ml('Z', 5),
-                            ge_ml('Z', 0),
-                        ],
-                    ),
+                    CSubst(Subst({'X': KVariable('Z')}), [ge_ml('Z', 5)]),
                 ),
             ],
         ),
