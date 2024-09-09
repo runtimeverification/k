@@ -150,12 +150,15 @@ class KCFGShow:
                 self.kprint.pretty_print(ml_pred_to_bool(constraint, unsafe=True)) for constraint in csubst.constraints
             ]
             constraint_strs = _multi_line_print('constraint', _constraint_strs, 'true', max_width=max_width)
-            _subst_strs = [f'{k} <- {self.kprint.pretty_print(v)}' for k, v in csubst.subst.minimize().items()]
-            subst_strs = (
-                ['...']
-                if len(_subst_strs) > 0 and minimize
-                else _multi_line_print('subst', _subst_strs, '.Subst', max_width=max_width)
-            )
+            if len(csubst.subst.minimize()) > 0 and minimize:
+                subst_strs = ['subst: ...']
+            else:
+                _subst_strs = [
+                    line
+                    for k, v in csubst.subst.minimize().items()
+                    for line in f'{k} <- {self.kprint.pretty_print(v)}'.split('\n')
+                ]
+                subst_strs = _multi_line_print('subst', _subst_strs, '.Subst', max_width=max_width)
             if subst_first:
                 return subst_strs + constraint_strs
             return constraint_strs + subst_strs
