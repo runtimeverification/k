@@ -6,11 +6,12 @@ from itertools import chain
 from typing import TYPE_CHECKING
 
 from ..kast import KInner
-from ..kast.inner import KApply, KRewrite, KToken, Subst, bottom_up
+from ..kast.inner import KApply, KRewrite, KToken, KVariable, Subst, bottom_up
 from ..kast.manip import (
     abstract_term_safely,
     build_claim,
     build_rule,
+    extract_subst,
     flatten_label,
     free_vars,
     ml_pred_to_bool,
@@ -20,9 +21,9 @@ from ..kast.manip import (
     split_config_and_constraints,
     split_config_from,
 )
-from ..prelude.k import GENERATED_TOP_CELL
+from ..prelude.k import GENERATED_TOP_CELL, K
 from ..prelude.kbool import andBool, orBool
-from ..prelude.ml import is_bottom, is_top, mlAnd, mlBottom, mlEqualsTrue, mlImplies, mlTop
+from ..prelude.ml import is_bottom, is_top, mlAnd, mlBottom, mlEquals, mlEqualsTrue, mlImplies, mlTop
 from ..utils import unique
 
 if TYPE_CHECKING:
@@ -217,17 +218,7 @@ class CTerm:
             if KToken('true', 'Bool') not in [disjunct_lhs, disjunct_rhs]:
                 new_cterm = new_cterm.add_constraint(mlEqualsTrue(orBool([disjunct_lhs, disjunct_rhs])))
 
-        new_constraints = []
-        fvs = new_cterm.free_vars
-        len_fvs = 0
-        while len_fvs < len(fvs):
-            len_fvs = len(fvs)
-            for constraint in common_constraints:
-                if constraint not in new_constraints:
-                    constraint_fvs = free_vars(constraint)
-                    if any(fv in fvs for fv in constraint_fvs):
-                        new_constraints.append(constraint)
-                        fvs = fvs | constraint_fvs
+        new_constraints = remove_useless_constraints(common_constraints, new_cterm.free_vars)
 
         for constraint in new_constraints:
             new_cterm = new_cterm.add_constraint(constraint)
@@ -340,6 +331,26 @@ class CSubst:
         subst = Subst.from_dict(dct['subst'])
         constraints = (KInner.from_dict(c) for c in dct['constraints'])
         return CSubst(subst=subst, constraints=constraints)
+
+    @staticmethod
+    def from_pred(pred: KInner) -> CSubst:
+        """Extract from a boolean predicate a CSubst."""
+        subst, pred = extract_subst(pred)
+        return CSubst(subst=subst, constraints=flatten_label('#And', pred))
+
+    def pred(self, sort_with: KDefinition | None = None, subst: bool = True, constraints: bool = True) -> KInner:
+        """Return an ML predicate representing this substitution."""
+        _preds: list[KInner] = []
+        if subst:
+            for k, v in self.subst.minimize().items():
+                sort = K
+                if sort_with is not None:
+                    _sort = sort_with.sort(v)
+                    sort = _sort if _sort is not None else sort
+                _preds.append(mlEquals(KVariable(k, sort=sort), v, arg_sort=sort))
+        if constraints:
+            _preds.extend(self.constraints)
+        return mlAnd(_preds)
 
     @property
     def constraint(self) -> KInner:

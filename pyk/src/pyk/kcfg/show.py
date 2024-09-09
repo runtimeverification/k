@@ -469,7 +469,9 @@ class KCFGShow:
             cover_file = covers_dir / f'config_{cover.source.id}_{cover.target.id}.txt'
             cover_constraint_file = covers_dir / f'constraint_{cover.source.id}_{cover.target.id}.txt'
 
-            subst_equalities = flatten_label('#And', cover.csubst.subst.ml_pred)
+            subst_equalities = flatten_label(
+                '#And', cover.csubst.pred(sort_with=self.kprint.definition, constraints=False)
+            )
 
             if not cover_file.exists():
                 cover_file.write_text('\n'.join(self.kprint.pretty_print(se) for se in subst_equalities))
