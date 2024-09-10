@@ -3,7 +3,9 @@ from __future__ import annotations
 from typing import Final, Iterable
 
 from pyk.kast.inner import KVariable, KToken, KApply, KInner, KLabel, KSort
+from pyk.kast.manip import ml_pred_to_bool
 from pyk.kcfg.minimize import KCFGMinimizer
+from pyk.prelude.kbool import andBool
 from pyk.prelude.kint import intToken
 from pyk.prelude.ml import mlOr, mlEqualsTrue
 from pyk.utils import single
@@ -124,9 +126,12 @@ class MergedOne(DefaultSemantics):
 
 class MergedPartialOne0(DefaultSemantics):
     def is_mergeable(self, c1: CTerm, c2: CTerm) -> bool:
-        assert isinstance(c1.config, KToken) and isinstance(c2.config, KToken)
-        x = int(c1.config.token)
-        y = int(c2.config.token)
+        assert isinstance(c1.config, KApply) and isinstance(c2.config, KApply)
+        x = c1.config.args[0]
+        y = c2.config.args[0]
+        assert isinstance(x, KToken) and isinstance(y, KToken)
+        x = int(x.token)
+        y = int(y.token)
         if x < 3 and y < 3:
             return True
         return False
@@ -203,28 +208,49 @@ class MergedFail(DefaultSemantics):
         return False
 
 
-def util_check_constraint_element(constraint: KInner, under_check: Iterable[int]) -> None:
+def util_check_constraint_element(constraint: KInner, merged_var: KVariable, under_check: Iterable[int]) -> None:
     # orBool
     assert isinstance(constraint, KApply) and constraint.label == KLabel('_orBool_')
     idx = 0
+    count = 0
+    eq_idx = 0
     for arg in constraint.args:
         # _==K_
         if isinstance(arg, KApply) and arg.label == KLabel('_==K_'):
             var = arg.args[0]
             token = arg.args[1]
             assert isinstance(var, KVariable) and isinstance(token, KToken)
+            assert var == merged_var
             assert int(token.token) in under_check
             under_check = [x for x in under_check if x != int(token.token)]
+            count += 1
+            eq_idx = idx
         idx += 1
-    idx = 0 if idx == 2 else 1
-    assert True
+    if count == 2:
+        assert len(under_check) == 0
+        return
+
+    idx = 0 if eq_idx == 1 else 0
+    # andBool
+    ab = constraint.args[idx]
+    assert isinstance(ab, KApply) and ab.label == KLabel('_andBool_')
+    idx = 0
+    for arg in ab.args:
+        # x ==K y
+        if isinstance(arg, KApply) and arg.label == KLabel('_==K_'):
+            assert isinstance(arg.args[0], KVariable) and isinstance(arg.args[1], KVariable)
+            m_idx = arg.args.index(merged_var)
+            other_idx = 0 if m_idx == 1 else 1
+            left_idx = 0 if idx == 1 else 1
+            util_check_constraint_element(ab.args[left_idx], arg.args[other_idx], under_check)
+        idx += 1
 
 
-def util_check_constraint(constraint: KInner, under_check: Iterable[int]) -> None:
+def util_check_constraint(constraint: KInner, merged_var: KVariable, under_check: Iterable[int]) -> None:
     # mlEqualsTrue
     assert isinstance(constraint, KApply) and constraint.label == KLabel('#Equals', [KSort('Bool'), KSort('GeneratedTopCell')])
     assert constraint.args[0] == KToken('true', KSort('Bool'))
-    util_check_constraint_element(constraint.args[1], under_check)
+    util_check_constraint_element(constraint.args[1], merged_var, under_check)
 
 
 def check_merge_no(minimizer: KCFGMinimizer) -> None:
@@ -244,17 +270,56 @@ def check_merged_one(minimizer: KCFGMinimizer) -> None:
     merged_var = merged_bi.cterm.config.args[0]
     assert isinstance(merged_var, KVariable)
     merged_constraint = single(merged_bi.cterm.constraints)
-    util_check_constraint(merged_constraint, [1, 2, 3, 4, 5, 6, 7])
+    util_check_constraint(merged_constraint, merged_var, [1, 2, 3, 4, 5, 6, 7])
     # merged bi --> 9 - 15: Split
     split = single(minimizer.kcfg.splits(source_id=merged_edge.target.id))
+    splits = split.splits
+    expected_splits = {9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 6, 15: 7}
+    for s in expected_splits:
+        assert s in splits
+        assert int(list(splits[s].subst.values())[0].token) == expected_splits[s]
 
-    assert True
+
+def check_merged_partial_one0(minimizer: KCFGMinimizer) -> None:
+    minimizer.merge_nodes()
+    # merged 9 - 10, else unchanged
+    # 1 --> merged ai (2,3) & 4 - 8: Split
+    split = single(minimizer.kcfg.splits(source_id=1))
+    splits = split.splits
+    expected_splits = [4, 5, 6, 7, 8, 24]
+    assert all(s in splits for s in expected_splits)
+    merged_ai = minimizer.kcfg.node(24)
+    merged_ai_c = single(merged_ai.cterm.constraints)
+    expected_ai_c = KLabel('#Equals', [KSort('Bool'), KSort('GeneratedTopCell')])(
+        KToken('true', KSort('Bool')),
+        KLabel('_orBool_')(
+            andBool([ml_pred_to_bool(c) for c in merge_node_test_kcfg().node(3).cterm.constraints]),
+            andBool([ml_pred_to_bool(c) for c in merge_node_test_kcfg().node(2).cterm.constraints]),
+        )
+    )
+    assert merged_ai_c == expected_ai_c
+    # merged ai (2,3) --> merged bi (9,10): MergedEdge
+    merged_edge = single(minimizer.kcfg.merged_edges(source_id=24))
+    edges = {2: 9, 3: 10}
+    assert all(e.source.id in edges and e.target.id == edges[e.source.id] for e in merged_edge.edges)
+    # merged bi (9,10) --> 9 - 10: Split
+    split = single(minimizer.kcfg.splits(source_id=merged_edge.target.id))
+    splits = split.splits
+    expected_splits = [9, 10]
+    assert all(s in splits for s in expected_splits)
+    # 4 - 8 --> 11 - 15: Edge (unchanged)
+    for i in range(4, 6):
+        edge = single(minimizer.kcfg.merged_edges(source_id=i))
+        assert edge.target.id == i + 7
+    for i in range(6, 9):
+        edge = single(minimizer.kcfg.edges(source_id=i))
+        assert edge.target.id == i + 7
 
 
 KCFG_MERGE_NODE_TEST_DATA: Final = (
-    # (MergedNo(), merge_node_test_kcfg(), check_merge_no),
+    (MergedNo(), merge_node_test_kcfg(), check_merge_no),
     (MergedOne(), merge_node_test_kcfg(), check_merged_one),
-    # (MergedPartialOne0(), merge_node_test_kcfg(), merge_node_test_kcfg()),
+    (MergedPartialOne0(), merge_node_test_kcfg(), check_merged_partial_one0),
     # (MergedPartialOne1(), merge_node_test_kcfg(), merge_node_test_kcfg()),
     # (MergedPartialOne2(), merge_node_test_kcfg(), merge_node_test_kcfg()),
     # (MergedTwo0(), merge_node_test_kcfg(), merge_node_test_kcfg()),
