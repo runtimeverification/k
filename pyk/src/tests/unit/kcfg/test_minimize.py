@@ -410,16 +410,10 @@ def test_split_constraint_accumulation() -> None:
     assert actual == expected
 
 
-@pytest.mark.parametrize('heuristics,kcfg,expected', KCFG_MERGE_NODE_TEST_DATA)
-def test_merge_nodes(heuristics, kcfg, expected) -> None:
+@pytest.mark.parametrize('heuristics,kcfg,check', KCFG_MERGE_NODE_TEST_DATA)
+def test_merge_nodes(heuristics, kcfg, check) -> None:
+    # When
     minimizer = KCFGMinimizer(kcfg, heuristics)
 
-    try:
-        repeat = True
-        while repeat:
-            repeat = minimizer.merge_nodes()
-        assert minimizer.kcfg.to_dict() == expected.to_dict()
-    except ValueError as e:
-        if expected is None:
-            return
-        raise e
+    # Then
+    check(minimizer)

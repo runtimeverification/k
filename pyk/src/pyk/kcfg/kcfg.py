@@ -953,7 +953,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
                 flatten_edges.extend(edge.edges)
             else:
                 flatten_edges.append(edge)
-        merged_edge = KCFG.MergedEdge(source, target, tuple(edges))
+        merged_edge = KCFG.MergedEdge(source, target, tuple(flatten_edges))
         self.add_successor(merged_edge)
         return merged_edge
 
