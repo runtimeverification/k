@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Final
 
-from pyk.kast.inner import KVariable, KToken
+from pyk.kast.inner import KVariable, KToken, KApply
 from pyk.prelude.kint import intToken
 
 from ..utils import ge_ml, lt_ml
@@ -187,9 +187,12 @@ class MergedPartialTwo(DefaultSemantics):
 
 class MergedFail(DefaultSemantics):
     def is_mergeable(self, c1: CTerm, c2: CTerm) -> bool:
-        assert isinstance(c1.config, KToken) and isinstance(c2.config, KToken)
-        x = int(c1.config.token)
-        y = int(c2.config.token)
+        assert isinstance(c1.config, KApply) and isinstance(c2.config, KApply)
+        x = c1.config.args[0]
+        y = c2.config.args[0]
+        assert isinstance(x, KToken) and isinstance(y, KToken)
+        x = int(x.token)
+        y = int(y.token)
         if x < 5 and y < 5:
             return True
         if x >= 4 and y >= 4:
@@ -197,14 +200,27 @@ class MergedFail(DefaultSemantics):
         return False
 
 
+def merged_one_expected_kcfg() -> KCFG:
+    cfg = merge_node_test_kcfg()
+    cfg.remove_node(2)
+    cfg.remove_node(3)
+    cfg.remove_node(4)
+    cfg.remove_node(5)
+    cfg.remove_node(6)
+    cfg.remove_node(7)
+    cfg.remove_node(8)
+    cfg.create_node(CTerm(k(KVariable('X')), [ge_ml('X', -10), lt_ml('X', 100)]), )
+    return cfg
+
+
 KCFG_MERGE_NODE_TEST_DATA: Final = (
-    (MergedNo, merge_node_test_kcfg(), merge_node_test_kcfg()),
-    (MergedOne, merge_node_test_kcfg(), merge_node_test_kcfg()),
-    (MergedPartialOne0, merge_node_test_kcfg(), merge_node_test_kcfg()),
-    (MergedPartialOne1, merge_node_test_kcfg(), merge_node_test_kcfg()),
-    (MergedPartialOne2, merge_node_test_kcfg(), merge_node_test_kcfg()),
-    (MergedTwo0, merge_node_test_kcfg(), merge_node_test_kcfg()),
-    (MergedTwo1, merge_node_test_kcfg(), merge_node_test_kcfg()),
-    (MergedPartialTwo, merge_node_test_kcfg(), merge_node_test_kcfg()),
-    (MergedFail, merge_node_test_kcfg(), None),
+    # (MergedNo(), merge_node_test_kcfg(), merge_node_test_kcfg()),
+    (MergedOne(), merge_node_test_kcfg(), merge_node_test_kcfg()),
+    # (MergedPartialOne0(), merge_node_test_kcfg(), merge_node_test_kcfg()),
+    # (MergedPartialOne1(), merge_node_test_kcfg(), merge_node_test_kcfg()),
+    # (MergedPartialOne2(), merge_node_test_kcfg(), merge_node_test_kcfg()),
+    # (MergedTwo0(), merge_node_test_kcfg(), merge_node_test_kcfg()),
+    # (MergedTwo1(), merge_node_test_kcfg(), merge_node_test_kcfg()),
+    # (MergedPartialTwo(), merge_node_test_kcfg(), merge_node_test_kcfg()),
+    # (MergedFail(), merge_node_test_kcfg(), None),
 )

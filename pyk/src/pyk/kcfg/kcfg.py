@@ -942,11 +942,17 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             return edge == other
         return False
 
-    def create_merged_edge(self, source_id: NodeIdLike, target_id: NodeIdLike, edges: Iterable[Edge]) -> MergedEdge:
+    def create_merged_edge(self, source_id: NodeIdLike, target_id: NodeIdLike, edges: Iterable[Edge | MergedEdge]) -> MergedEdge:
         if len(list(edges)) == 0:
             raise ValueError(f'Cannot build KCFG MergedEdge with no edges: {edges}')
         source = self.node(source_id)
         target = self.node(target_id)
+        flatten_edges: list[KCFG.Edge] = []
+        for edge in edges:
+            if isinstance(edge, KCFG.MergedEdge):
+                flatten_edges.extend(edge.edges)
+            else:
+                flatten_edges.append(edge)
         merged_edge = KCFG.MergedEdge(source, target, tuple(edges))
         self.add_successor(merged_edge)
         return merged_edge

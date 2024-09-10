@@ -222,9 +222,10 @@ class KCFGMinimizer:
 
         # Step 1. Find all possible mergeable KCFG sub-graphs: A -|Split|> Ai -|Edge|> Bi
         a2ai_list: list[KCFG.Split] = []  # A -|Split|> Ai
-        ai2bi_list: list[list[KCFG.Edge]] = []  # Ai -|Edge|> Bi
+        ai2bi_list: list[list[KCFG.Edge | KCFG.MergedEdge]] = []  # Ai -|Edge|> Bi
         for split in self.kcfg.splits():
             edges = [single(self.kcfg.edges(source_id=ai)) for ai in split.target_ids if self.kcfg.edges(source_id=ai)]
+            edges = edges + [single(self.kcfg.merged_edges(source_id=ai)) for ai in split.target_ids if self.kcfg.merged_edges(source_id=ai)]
             if len(edges) > 2:
                 a2ai_list.append(split)
                 ai2bi_list.append(edges)
@@ -284,7 +285,7 @@ class KCFGMinimizer:
                 merged_edge.source.id: not_none(cterm_match(a2ai.source.cterm, merged_edge.source.cterm))
                 for merged_edge in merged_edges
             }
-            if len(a_splits) == 0 and len(merged_edges) == 1:
+            if len(a_splits) == 1 and len(merged_edges) == 1:
                 self.kcfg.remove_node(merged_edges[0].source.id)
                 self.kcfg.create_merged_edge(a2ai.source.id, merged_edges[0].target.id, merged_edges[0].edges)
             else:
