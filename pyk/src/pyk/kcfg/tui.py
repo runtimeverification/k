@@ -309,7 +309,12 @@ class NodeView(Widget):
                 term_str, constraint_str = _cterm_text(crewrite)
 
             elif type(self._element) is KCFG.Cover:
-                subst_equalities = map(_boolify, flatten_label('#And', self._element.csubst.subst.ml_pred))
+                subst_equalities = map(
+                    _boolify,
+                    flatten_label(
+                        '#And', self._element.csubst.pred(sort_with=self._kprint.definition, constraints=False)
+                    ),
+                )
                 constraints = map(_boolify, flatten_label('#And', self._element.csubst.constraint))
                 term_str = '\n'.join(self._kprint.pretty_print(se) for se in subst_equalities)
                 constraint_str = '\n'.join(self._kprint.pretty_print(c) for c in constraints)
@@ -320,7 +325,10 @@ class NodeView(Widget):
                     term_strs.append('')
                     term_strs.append(f'  - {shorten_hashes(target_id)}')
                     if len(csubst.subst) > 0:
-                        subst_equalities = map(_boolify, flatten_label('#And', csubst.subst.ml_pred))
+                        subst_equalities = map(
+                            _boolify,
+                            flatten_label('#And', csubst.pred(sort_with=self._kprint.definition, constraints=False)),
+                        )
                         term_strs.extend(f'    {self._kprint.pretty_print(cline)}' for cline in subst_equalities)
                     if len(csubst.constraints) > 0:
                         constraints = map(_boolify, flatten_label('#And', csubst.constraint))

@@ -25,7 +25,7 @@ from ..kore.rpc import (
     kore_server,
 )
 from ..prelude.k import GENERATED_TOP_CELL, K_ITEM
-from ..prelude.ml import is_top, mlEquals
+from ..prelude.ml import mlAnd
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
@@ -267,19 +267,8 @@ class CTermSymbolic:
             raise ValueError('Received empty predicate for valid implication.')
         ml_subst = self.kore_to_kast(result.substitution)
         ml_pred = self.kore_to_kast(result.predicate)
-        ml_preds = flatten_label('#And', ml_pred)
-        if is_top(ml_subst):
-            csubst = CSubst(subst=Subst({}), constraints=ml_preds)
-            return CTermImplies(csubst, (), None, result.logs)
-        subst_pattern = mlEquals(KVariable('###VAR'), KVariable('###TERM'))
-        _subst: dict[str, KInner] = {}
-        for subst_pred in flatten_label('#And', ml_subst):
-            m = subst_pattern.match(subst_pred)
-            if m is not None and type(m['###VAR']) is KVariable:
-                _subst[m['###VAR'].name] = m['###TERM']
-            else:
-                raise AssertionError(f'Received a non-substitution from implies endpoint: {subst_pred}')
-        csubst = CSubst(subst=Subst(_subst), constraints=ml_preds)
+        ml_subst_pred = mlAnd(flatten_label('#And', ml_subst) + flatten_label('#And', ml_pred))
+        csubst = CSubst.from_pred(ml_subst_pred)
         return CTermImplies(csubst, (), None, result.logs)
 
     def assume_defined(self, cterm: CTerm, module_name: str | None = None) -> CTerm:

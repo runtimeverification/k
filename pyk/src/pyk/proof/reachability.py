@@ -487,14 +487,16 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
 
         return res
 
-    def path_constraints(self, final_node_id: NodeIdLike) -> KInner:
+    def path_constraints(self, final_node_id: NodeIdLike, sort_with: KDefinition | None = None) -> KInner:
         path = self.shortest_path_to(final_node_id)
         curr_constraint: KInner = mlTop()
         for edge in reversed(path):
             if type(edge) is KCFG.Split:
                 assert len(edge.targets) == 1
                 csubst = edge.splits[edge.targets[0].id]
-                curr_constraint = mlAnd([csubst.subst.minimize().ml_pred, csubst.constraint, curr_constraint])
+                curr_constraint = mlAnd(
+                    [csubst.pred(sort_with=sort_with, constraints=False), csubst.constraint, curr_constraint]
+                )
             if type(edge) is KCFG.Cover:
                 curr_constraint = mlAnd([edge.csubst.constraint, edge.csubst.subst.apply(curr_constraint)])
         return mlAnd(flatten_label('#And', curr_constraint))
@@ -549,17 +551,13 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         nodes = len(self.kcfg.nodes)
         pending = len(self.pending)
         failing = len(self.failing)
-        branches = 0
-        for branch in self.kcfg.ndbranches() + self.kcfg.splits():
-            branches += len(branch.targets)
         vacuous = len(self.kcfg.vacuous)
-        terminal = len(self.terminal)
         stuck = len(self.kcfg.stuck)
         passed = len([cover for cover in self.kcfg.covers() if cover.target.id == self.target])
         refuted = len(self.node_refutations)
         return (
             super().one_line_summary
-            + f' --- {nodes} nodes|{branches} branches|{terminal} terminal --- {pending} pending|{passed} passed|{failing} failing|{vacuous} vacuous|{refuted} refuted|{stuck} stuck'
+            + f': {nodes} nodes: {pending} pending|{passed} passed|{failing} failing|{vacuous} vacuous|{refuted} refuted|{stuck} stuck'
         )
 
     def get_refutation_id(self, node_id: int) -> str:
