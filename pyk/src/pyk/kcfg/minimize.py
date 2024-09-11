@@ -24,7 +24,7 @@ class KCFGMinimizer:
     kdef: KDefinition | None
 
     def __init__(
-        self, kcfg: KCFG, heuristics: Optional[KCFGSemantics] = None, kdef: Optional[KDefinition] = None
+        self, kcfg: KCFG, heuristics: KCFGSemantics | None = None, kdef: KDefinition | None = None
     ) -> None:
         if heuristics is None:
             heuristics = DefaultSemantics()

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING
+from collections.abc import Callable
 
 import pytest
 from unit.kcfg.merge_node_data import KCFG_MERGE_NODE_TEST_DATA

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Final, Iterable
+from typing import TYPE_CHECKING, Final
+from collections.abc import Iterable
 
 from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KLabel, KSort, KToken, KVariable
