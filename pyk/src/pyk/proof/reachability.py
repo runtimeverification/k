@@ -551,11 +551,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         nodes = len(self.kcfg.nodes)
         pending = len(self.pending)
         failing = len(self.failing)
-        branches = 0
-        for branch in self.kcfg.ndbranches() + self.kcfg.splits():
-            branches += len(branch.targets)
         vacuous = len(self.kcfg.vacuous)
-        terminal = len(self.terminal)
         stuck = len(self.kcfg.stuck)
         passed = len([cover for cover in self.kcfg.covers() if cover.target.id == self.target])
         refuted = len(self.node_refutations)
