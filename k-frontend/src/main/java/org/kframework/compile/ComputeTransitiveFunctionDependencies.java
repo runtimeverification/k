@@ -88,10 +88,12 @@ public class ComputeTransitiveFunctionDependencies {
     while (!queue.isEmpty()) {
       V v = queue.poll();
       Collection<V> neighbors = graph.getPredecessors(v);
-      for (V n : neighbors) {
-        if (!visited.contains(n)) {
-          queue.offer(n);
-          visited.add(n);
+      if (neighbors != null) {
+        for (V n : neighbors) {
+          if (!visited.contains(n)) {
+            queue.offer(n);
+            visited.add(n);
+          }
         }
       }
     }
