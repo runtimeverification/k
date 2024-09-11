@@ -561,7 +561,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         refuted = len(self.node_refutations)
         return (
             super().one_line_summary
-            + f' --- {nodes} nodes|{branches} branches|{terminal} terminal --- {pending} pending|{passed} passed|{failing} failing|{vacuous} vacuous|{refuted} refuted|{stuck} stuck'
+            + f': {nodes} nodes: {pending} pending|{passed} passed|{failing} failing|{vacuous} vacuous|{refuted} refuted|{stuck} stuck'
         )
 
     def get_refutation_id(self, node_id: int) -> str:
