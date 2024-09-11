@@ -289,7 +289,7 @@ object Att {
   final val IDEM =
     Key.builtin("idem", KeyParameter.Forbidden, onlyon[Production], KeyRange.WholePipeline)
   final val IMPURE =
-    Key.builtin("impure", KeyParameter.Forbidden, onlyon[Production], KeyRange.FrontendOnly)
+    Key.builtin("impure", KeyParameter.Forbidden, onlyon[Production], KeyRange.WholePipeline)
   final val INDEX =
     Key.builtin("index", KeyParameter.Required, onlyon[Production], KeyRange.FrontendOnly)
   final val INITIAL =
