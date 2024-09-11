@@ -124,14 +124,17 @@ class MergedOne(DefaultSemantics):
         return True
 
 
+def util_get_token(c: CTerm) -> int:
+    assert isinstance(c.config, KApply)
+    x = c.config.args[0]
+    assert isinstance(x, KToken)
+    return int(x.token)
+
+
 class MergedPartialOne0(DefaultSemantics):
     def is_mergeable(self, c1: CTerm, c2: CTerm) -> bool:
-        assert isinstance(c1.config, KApply) and isinstance(c2.config, KApply)
-        x = c1.config.args[0]
-        y = c2.config.args[0]
-        assert isinstance(x, KToken) and isinstance(y, KToken)
-        x = int(x.token)
-        y = int(y.token)
+        x = util_get_token(c1)
+        y = util_get_token(c2)
         if x < 3 and y < 3:
             return True
         return False
@@ -139,9 +142,8 @@ class MergedPartialOne0(DefaultSemantics):
 
 class MergedPartialOne1(DefaultSemantics):
     def is_mergeable(self, c1: CTerm, c2: CTerm) -> bool:
-        assert isinstance(c1.config, KToken) and isinstance(c2.config, KToken)
-        x = int(c1.config.token)
-        y = int(c2.config.token)
+        x = util_get_token(c1)
+        y = util_get_token(c2)
         if x < 4 and y < 4:
             return True
         return False
@@ -149,9 +151,8 @@ class MergedPartialOne1(DefaultSemantics):
 
 class MergedPartialOne2(DefaultSemantics):
     def is_mergeable(self, c1: CTerm, c2: CTerm) -> bool:
-        assert isinstance(c1.config, KToken) and isinstance(c2.config, KToken)
-        x = int(c1.config.token)
-        y = int(c2.config.token)
+        x = util_get_token(c1)
+        y = util_get_token(c2)
         if x < 5 and y < 5:
             return True
         return False
@@ -159,9 +160,8 @@ class MergedPartialOne2(DefaultSemantics):
 
 class MergedTwo0(DefaultSemantics):
     def is_mergeable(self, c1: CTerm, c2: CTerm) -> bool:
-        assert isinstance(c1.config, KToken) and isinstance(c2.config, KToken)
-        x = int(c1.config.token)
-        y = int(c2.config.token)
+        x = util_get_token(c1)
+        y = util_get_token(c2)
         if x < 3 and y < 3:
             return True
         if x >= 3 and y >= 3:
@@ -171,9 +171,8 @@ class MergedTwo0(DefaultSemantics):
 
 class MergedTwo1(DefaultSemantics):
     def is_mergeable(self, c1: CTerm, c2: CTerm) -> bool:
-        assert isinstance(c1.config, KToken) and isinstance(c2.config, KToken)
-        x = int(c1.config.token)
-        y = int(c2.config.token)
+        x = util_get_token(c1)
+        y = util_get_token(c2)
         if x < 4 and y < 4:
             return True
         if x >= 4 and y >= 4:
@@ -183,9 +182,8 @@ class MergedTwo1(DefaultSemantics):
 
 class MergedPartialTwo(DefaultSemantics):
     def is_mergeable(self, c1: CTerm, c2: CTerm) -> bool:
-        assert isinstance(c1.config, KToken) and isinstance(c2.config, KToken)
-        x = int(c1.config.token)
-        y = int(c2.config.token)
+        x = util_get_token(c1)
+        y = util_get_token(c2)
         if x < 4 and y < 4:
             return True
         if 4 <= x < 6 and 4 <= y < 6:
@@ -195,12 +193,8 @@ class MergedPartialTwo(DefaultSemantics):
 
 class MergedFail(DefaultSemantics):
     def is_mergeable(self, c1: CTerm, c2: CTerm) -> bool:
-        assert isinstance(c1.config, KApply) and isinstance(c2.config, KApply)
-        x = c1.config.args[0]
-        y = c2.config.args[0]
-        assert isinstance(x, KToken) and isinstance(y, KToken)
-        x = int(x.token)
-        y = int(y.token)
+        x = util_get_token(c1)
+        y = util_get_token(c2)
         if x < 5 and y < 5:
             return True
         if x >= 4 and y >= 4:
@@ -316,14 +310,154 @@ def check_merged_partial_one0(minimizer: KCFGMinimizer) -> None:
         assert edge.target.id == i + 7
 
 
+def check_merged_partial_one1(minimizer: KCFGMinimizer) -> None:
+    minimizer.merge_nodes()
+    # merged 9 - 11, else unchanged
+    # 1 --> merged ai (2,3,4) & 5 - 8: Split
+    split = single(minimizer.kcfg.splits(source_id=1))
+    splits = split.splits
+    expected_splits = [5, 6, 7, 8, 24]
+    assert all(s in splits for s in expected_splits)
+    # merged ai (2,3,4) --> merged bi (9,10,11): MergedEdge
+    merged_edge = single(minimizer.kcfg.merged_edges(source_id=24))
+    # edges = {2: 9, 3: 10, 4: 11}
+    edges = {2: 9, 3: 10, 16: 20, 17: 21}
+    assert all(e.source.id in edges and e.target.id == edges[e.source.id] for e in merged_edge.edges)
+    # merged bi (9,10,11) --> 9 - 11: Split
+    split = single(minimizer.kcfg.splits(source_id=merged_edge.target.id))
+    splits = split.splits
+    expected_splits = [9, 10, 11]
+    assert all(s in splits for s in expected_splits)
+    # 5 - 8 --> 12 - 15: Edge (unchanged)
+    edge = single(minimizer.kcfg.merged_edges(source_id=5))
+    assert edge.target.id == 12
+    for i in range(6, 9):
+        edge = single(minimizer.kcfg.edges(source_id=i))
+        assert edge.target.id == i + 7
+
+
+def check_merged_partial_one2(minimizer: KCFGMinimizer) -> None:
+    minimizer.merge_nodes()
+    # merged 9 - 12, else unchanged
+    # 1 --> merged ai (2,3,4,5) & 6 - 8: Split
+    split = single(minimizer.kcfg.splits(source_id=1))
+    splits = split.splits
+    expected_splits = [6, 7, 8, 24]
+    assert all(s in splits for s in expected_splits)
+    # merged ai (2,3,4,5) --> merged bi (9,10,11,12): MergedEdge
+    merged_edge = single(minimizer.kcfg.merged_edges(source_id=24))
+    edges = {2: 9, 3: 10, 16: 20, 17: 21, 18: 22, 19: 23}
+    assert all(e.source.id in edges and e.target.id == edges[e.source.id] for e in merged_edge.edges)
+    # merged bi (9,10,11,12) --> 9 - 12: Split
+    split = single(minimizer.kcfg.splits(source_id=merged_edge.target.id))
+    splits = split.splits
+    expected_splits = [9, 10, 11, 12]
+    assert all(s in splits for s in expected_splits)
+    # 6 - 8 --> 13 - 15: Edge (unchanged)
+    for i in range(6, 9):
+        edge = single(minimizer.kcfg.edges(source_id=i))
+        assert edge.target.id == i + 7
+
+
+def check_merged_two0(minimizer: KCFGMinimizer) -> None:
+    minimizer.merge_nodes()
+    # merged 9 - 10, 11 - 15, else unchanged
+    # 1 --> merged ai (2,3) & (4-8): Split
+    split = single(minimizer.kcfg.splits(source_id=1))
+    splits = split.splits
+    expected_splits = [24, 26]
+    assert all(s in splits for s in expected_splits)
+    # merged ai (4-8) --> merged bi (11-15): MergedEdge
+    merged_edge = single(minimizer.kcfg.merged_edges(source_id=24))
+    edges = {16: 20, 17: 21, 18: 22, 19: 23, 6: 13, 7: 14, 8: 15}
+    assert all(e.source.id in edges and e.target.id == edges[e.source.id] for e in merged_edge.edges)
+    # merged bi (11-15) --> 11 - 15: Split
+    split = single(minimizer.kcfg.splits(source_id=merged_edge.target.id))
+    splits = split.splits
+    expected_splits = [11, 12, 13, 14, 15]
+    assert all(s in splits for s in expected_splits)
+    # merged ai (2,3) --> merged bi (9,10): MergedEdge
+    merged_edge = single(minimizer.kcfg.merged_edges(source_id=26))
+    edges = {2: 9, 3: 10}
+    assert all(e.source.id in edges and e.target.id == edges[e.source.id] for e in merged_edge.edges)
+    # merged bi (9,10) --> 9 - 10: Split
+    split = single(minimizer.kcfg.splits(source_id=merged_edge.target.id))
+    splits = split.splits
+    expected_splits = [9, 10]
+    assert all(s in splits for s in expected_splits)
+
+
+def check_merged_two1(minimizer: KCFGMinimizer) -> None:
+    minimizer.merge_nodes()
+    # merged 9 - 11, 12 - 15, else unchanged
+    # 1 --> merged ai (2,3,4) & (5-8): Split
+    split = single(minimizer.kcfg.splits(source_id=1))
+    splits = split.splits
+    expected_splits = [24, 26]
+    assert all(s in splits for s in expected_splits)
+    # merged ai (5-8) --> merged bi (12-15): MergedEdge
+    merged_edge = single(minimizer.kcfg.merged_edges(source_id=24))
+    edges = {18: 22, 19: 23, 6: 13, 7: 14, 8: 15}
+    assert all(e.source.id in edges and e.target.id == edges[e.source.id] for e in merged_edge.edges)
+    # merged bi (12-15) --> 12 - 15: Split
+    split = single(minimizer.kcfg.splits(source_id=merged_edge.target.id))
+    splits = split.splits
+    expected_splits = [12, 13, 14, 15]
+    assert all(s in splits for s in expected_splits)
+    # merged ai (2,3,4) --> merged bi (9,10,11): MergedEdge
+    merged_edge = single(minimizer.kcfg.merged_edges(source_id=26))
+    edges = {2: 9, 3: 10, 16: 20, 17: 21}
+    assert all(e.source.id in edges and e.target.id == edges[e.source.id] for e in merged_edge.edges)
+    # merged bi (9,10,11) --> 9 - 11: Split
+    split = single(minimizer.kcfg.splits(source_id=merged_edge.target.id))
+    splits = split.splits
+    expected_splits = [9, 10, 11]
+    assert all(s in splits for s in expected_splits)
+
+
+def check_merged_partial_two(minimizer: KCFGMinimizer) -> None:
+    minimizer.merge_nodes()
+    # 1 --> merged ai (2,3,4) & (5,6) & 7 - 8: Split
+    split = single(minimizer.kcfg.splits(source_id=1))
+    splits = split.splits
+    expected_splits = [7, 8, 24, 26]
+    assert all(s in splits for s in expected_splits)
+    # merged ai (5,6) --> merged bi (13,14): MergedEdge
+    merged_edge = single(minimizer.kcfg.merged_edges(source_id=24))
+    edges = {18: 22, 19: 23, 6: 13}
+    assert all(e.source.id in edges and e.target.id == edges[e.source.id] for e in merged_edge.edges)
+    # merged bi (13,14) --> 13 - 14: Split
+    split = single(minimizer.kcfg.splits(source_id=merged_edge.target.id))
+    splits = split.splits
+    expected_splits = [12, 13]
+    assert all(s in splits for s in expected_splits)
+    # merged ai (2,3,4) --> merged bi (9,10,11): MergedEdge
+    merged_edge = single(minimizer.kcfg.merged_edges(source_id=26))
+    edges = {2: 9, 3: 10, 16: 20, 17: 21}
+    assert all(e.source.id in edges and e.target.id == edges[e.source.id] for e in merged_edge.edges)
+    # merged bi (9,10,11) --> 9 - 11: Split
+    split = single(minimizer.kcfg.splits(source_id=merged_edge.target.id))
+    splits = split.splits
+    expected_splits = [9, 10, 11]
+    assert all(s in splits for s in expected_splits)
+
+
+def check_merged_fail(minimizer: KCFGMinimizer) -> None:
+    try:
+        minimizer.merge_nodes()
+        assert False, 'Should raise an exception'
+    except ValueError:
+        pass
+
+
 KCFG_MERGE_NODE_TEST_DATA: Final = (
     (MergedNo(), merge_node_test_kcfg(), check_merge_no),
     (MergedOne(), merge_node_test_kcfg(), check_merged_one),
     (MergedPartialOne0(), merge_node_test_kcfg(), check_merged_partial_one0),
-    # (MergedPartialOne1(), merge_node_test_kcfg(), merge_node_test_kcfg()),
-    # (MergedPartialOne2(), merge_node_test_kcfg(), merge_node_test_kcfg()),
-    # (MergedTwo0(), merge_node_test_kcfg(), merge_node_test_kcfg()),
-    # (MergedTwo1(), merge_node_test_kcfg(), merge_node_test_kcfg()),
-    # (MergedPartialTwo(), merge_node_test_kcfg(), merge_node_test_kcfg()),
-    # (MergedFail(), merge_node_test_kcfg(), None),
+    (MergedPartialOne1(), merge_node_test_kcfg(), check_merged_partial_one1),
+    (MergedPartialOne2(), merge_node_test_kcfg(), check_merged_partial_one2),
+    (MergedTwo0(), merge_node_test_kcfg(), check_merged_two0),
+    (MergedTwo1(), merge_node_test_kcfg(), check_merged_two1),
+    (MergedPartialTwo(), merge_node_test_kcfg(), check_merged_partial_two),
+    (MergedFail(), merge_node_test_kcfg(), check_merged_fail),
 )
