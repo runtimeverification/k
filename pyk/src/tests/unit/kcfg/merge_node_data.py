@@ -1,21 +1,21 @@
 from __future__ import annotations
 
-from typing import Final, Iterable
-
-from pyk.kast.inner import KVariable, KToken, KApply, KInner, KLabel, KSort
-from pyk.kast.manip import ml_pred_to_bool
-from pyk.kcfg.minimize import KCFGMinimizer
-from pyk.prelude.kbool import andBool
-from pyk.prelude.kint import intToken
-from pyk.prelude.ml import mlOr, mlEqualsTrue
-from pyk.utils import single
-
-from ..utils import ge_ml, lt_ml
+from typing import TYPE_CHECKING, Final, Iterable
 
 from pyk.cterm import CTerm
+from pyk.kast.inner import KApply, KLabel, KSort, KToken, KVariable
+from pyk.kast.manip import ml_pred_to_bool
 from pyk.kcfg import KCFG
 from pyk.kcfg.semantics import DefaultSemantics
-from ..utils import k
+from pyk.prelude.kbool import andBool
+from pyk.prelude.kint import intToken
+from pyk.utils import single
+
+from ..utils import ge_ml, k, lt_ml
+
+if TYPE_CHECKING:
+    from pyk.kast.inner import KInner
+    from pyk.kcfg.minimize import KCFGMinimizer
 
 
 def merge_node_test_kcfg() -> KCFG:
@@ -31,7 +31,9 @@ def merge_node_test_kcfg() -> KCFG:
     cfg = KCFG()
     # Split Source: A
     # 1 <X> -10 <= X < 100
-    cfg.create_node(CTerm(k(KVariable('X')), [ge_ml('X', -10), lt_ml('X', 100)]), )
+    cfg.create_node(
+        CTerm(k(KVariable('X')), [ge_ml('X', -10), lt_ml('X', 100)]),
+    )
 
     # Split Targets & Edge Sources: Ai
     # 2 <X> -10 <= X < 0
@@ -202,9 +204,10 @@ class MergedFail(DefaultSemantics):
         return False
 
 
-def util_check_constraint_element(constraint: KInner, merged_var: KVariable, under_check: Iterable[int]) -> None:
+def util_check_constraint_element(constraint: KInner, merged_var: KInner, under_check: Iterable[int]) -> None:
     # orBool
     assert isinstance(constraint, KApply) and constraint.label == KLabel('_orBool_')
+    assert isinstance(merged_var, KVariable)
     idx = 0
     count = 0
     eq_idx = 0
@@ -221,7 +224,7 @@ def util_check_constraint_element(constraint: KInner, merged_var: KVariable, und
             eq_idx = idx
         idx += 1
     if count == 2:
-        assert len(under_check) == 0
+        assert not under_check
         return
 
     idx = 0 if eq_idx == 1 else 0
@@ -242,7 +245,9 @@ def util_check_constraint_element(constraint: KInner, merged_var: KVariable, und
 
 def util_check_constraint(constraint: KInner, merged_var: KVariable, under_check: Iterable[int]) -> None:
     # mlEqualsTrue
-    assert isinstance(constraint, KApply) and constraint.label == KLabel('#Equals', [KSort('Bool'), KSort('GeneratedTopCell')])
+    assert isinstance(constraint, KApply) and constraint.label == KLabel(
+        '#Equals', [KSort('Bool'), KSort('GeneratedTopCell')]
+    )
     assert constraint.args[0] == KToken('true', KSort('Bool'))
     util_check_constraint_element(constraint.args[1], merged_var, under_check)
 
@@ -261,6 +266,7 @@ def check_merged_one(minimizer: KCFGMinimizer) -> None:
         assert edge.source.id in edges
         assert edge.target.id == edges[edge.source.id]
     merged_bi = merged_edge.target
+    assert isinstance(merged_bi.cterm.config, KApply)
     merged_var = merged_bi.cterm.config.args[0]
     assert isinstance(merged_var, KVariable)
     merged_constraint = single(merged_bi.cterm.constraints)
@@ -271,7 +277,8 @@ def check_merged_one(minimizer: KCFGMinimizer) -> None:
     expected_splits = {9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 6, 15: 7}
     for s in expected_splits:
         assert s in splits
-        assert int(list(splits[s].subst.values())[0].token) == expected_splits[s]
+        x = list(splits[s].subst.values())[0]
+        assert isinstance(x, KToken) and int(x.token) == expected_splits[s]
 
 
 def check_merged_partial_one0(minimizer: KCFGMinimizer) -> None:
@@ -289,7 +296,7 @@ def check_merged_partial_one0(minimizer: KCFGMinimizer) -> None:
         KLabel('_orBool_')(
             andBool([ml_pred_to_bool(c) for c in merge_node_test_kcfg().node(3).cterm.constraints]),
             andBool([ml_pred_to_bool(c) for c in merge_node_test_kcfg().node(2).cterm.constraints]),
-        )
+        ),
     )
     assert merged_ai_c == expected_ai_c
     # merged ai (2,3) --> merged bi (9,10): MergedEdge
@@ -303,8 +310,8 @@ def check_merged_partial_one0(minimizer: KCFGMinimizer) -> None:
     assert all(s in splits for s in expected_splits)
     # 4 - 8 --> 11 - 15: Edge (unchanged)
     for i in range(4, 6):
-        edge = single(minimizer.kcfg.merged_edges(source_id=i))
-        assert edge.target.id == i + 7
+        medge = single(minimizer.kcfg.merged_edges(source_id=i))
+        assert medge.target.id == i + 7
     for i in range(6, 9):
         edge = single(minimizer.kcfg.edges(source_id=i))
         assert edge.target.id == i + 7
@@ -329,8 +336,8 @@ def check_merged_partial_one1(minimizer: KCFGMinimizer) -> None:
     expected_splits = [9, 10, 11]
     assert all(s in splits for s in expected_splits)
     # 5 - 8 --> 12 - 15: Edge (unchanged)
-    edge = single(minimizer.kcfg.merged_edges(source_id=5))
-    assert edge.target.id == 12
+    medge = single(minimizer.kcfg.merged_edges(source_id=5))
+    assert medge.target.id == 12
     for i in range(6, 9):
         edge = single(minimizer.kcfg.edges(source_id=i))
         assert edge.target.id == i + 7
@@ -445,7 +452,7 @@ def check_merged_partial_two(minimizer: KCFGMinimizer) -> None:
 def check_merged_fail(minimizer: KCFGMinimizer) -> None:
     try:
         minimizer.merge_nodes()
-        assert False, 'Should raise an exception'
+        raise AssertionError
     except ValueError:
         pass
 

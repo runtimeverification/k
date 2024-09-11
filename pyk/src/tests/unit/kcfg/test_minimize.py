@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 import pytest
 from unit.kcfg.merge_node_data import KCFG_MERGE_NODE_TEST_DATA
@@ -18,6 +18,7 @@ from pyk.utils import single
 if TYPE_CHECKING:
     from pyk.kast.inner import KApply
     from pyk.kcfg.kcfg import NodeIdLike
+    from pyk.kcfg.semantics import KCFGSemantics
 
 
 def contains_edge(cfg: KCFG, source: NodeIdLike, target: NodeIdLike, depth: int, rules: tuple[str, ...]) -> bool:
@@ -411,7 +412,7 @@ def test_split_constraint_accumulation() -> None:
 
 
 @pytest.mark.parametrize('heuristics,kcfg,check', KCFG_MERGE_NODE_TEST_DATA)
-def test_merge_nodes(heuristics, kcfg, check) -> None:
+def test_merge_nodes(heuristics: KCFGSemantics, kcfg: KCFG, check: Callable[[KCFGMinimizer], None]) -> None:
     # When
     minimizer = KCFGMinimizer(kcfg, heuristics)
 

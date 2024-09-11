@@ -5,13 +5,14 @@ from typing import TYPE_CHECKING, Optional
 
 from pyk.cterm import CTerm
 from pyk.cterm.cterm import cterm_match
-from pyk.kast.outer import KDefinition
 from pyk.utils import not_none, single
 
 from .semantics import DefaultSemantics
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+
+    from pyk.kast.outer import KDefinition
 
     from .kcfg import KCFG, NodeIdLike
     from .semantics import KCFGSemantics
@@ -22,7 +23,9 @@ class KCFGMinimizer:
     heuristics: KCFGSemantics
     kdef: KDefinition | None
 
-    def __init__(self, kcfg: KCFG, heuristics: Optional[KCFGSemantics] = None, kdef: Optional[KDefinition] = None) -> None:
+    def __init__(
+        self, kcfg: KCFG, heuristics: Optional[KCFGSemantics] = None, kdef: Optional[KDefinition] = None
+    ) -> None:
         if heuristics is None:
             heuristics = DefaultSemantics()
         self.kcfg = kcfg
@@ -224,14 +227,20 @@ class KCFGMinimizer:
         a2ai_list: list[KCFG.Split] = []  # A -|Split|> Ai
         ai2bi_list: list[list[KCFG.Edge | KCFG.MergedEdge]] = []  # Ai -|Edge|> Bi
         for split in self.kcfg.splits():
-            edges = [single(self.kcfg.edges(source_id=ai)) for ai in split.target_ids if self.kcfg.edges(source_id=ai)]
-            edges = edges + [single(self.kcfg.merged_edges(source_id=ai)) for ai in split.target_ids if self.kcfg.merged_edges(source_id=ai)]
+            edges: list[KCFG.Edge | KCFG.MergedEdge] = [
+                single(self.kcfg.edges(source_id=ai)) for ai in split.target_ids if self.kcfg.edges(source_id=ai)
+            ]
+            edges = edges + [
+                single(self.kcfg.merged_edges(source_id=ai))
+                for ai in split.target_ids
+                if self.kcfg.merged_edges(source_id=ai)
+            ]
             if len(edges) > 2:
                 a2ai_list.append(split)
                 ai2bi_list.append(edges)
 
         # Step 3. Apply the heuristic & Obtain the merge-able KCFG sub-graphs
-        to_merge: dict[KCFG.Split, list[list[KCFG.Edge]]] = {}  # Split |-> Merge-able Edges
+        to_merge: dict[KCFG.Split, list[list[KCFG.Edge | KCFG.MergedEdge]]] = {}  # Split |-> Merge-able Edges
         while a2ai_list:
             a2ai = a2ai_list.pop()
             ai2bi = ai2bi_list.pop()

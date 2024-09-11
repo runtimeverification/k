@@ -942,7 +942,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             return edge == other
         return False
 
-    def create_merged_edge(self, source_id: NodeIdLike, target_id: NodeIdLike, edges: Iterable[Edge | MergedEdge]) -> MergedEdge:
+    def create_merged_edge(
+        self, source_id: NodeIdLike, target_id: NodeIdLike, edges: Iterable[Edge | MergedEdge]
+    ) -> MergedEdge:
         if len(list(edges)) == 0:
             raise ValueError(f'Cannot build KCFG MergedEdge with no edges: {edges}')
         source = self.node(source_id)
