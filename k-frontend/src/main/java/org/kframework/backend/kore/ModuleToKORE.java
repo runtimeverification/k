@@ -32,6 +32,7 @@ import org.kframework.builtin.Hooks;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.AddSortInjections;
+import org.kframework.compile.ComputeTransitiveFunctionDependencies;
 import org.kframework.compile.ExpandMacros;
 import org.kframework.compile.RefreshRules;
 import org.kframework.compile.RewriteToTop;
@@ -107,6 +108,7 @@ public class ModuleToKORE {
   public static final String ONE_PATH_OP = KLabels.RL_wEF.name();
   public static final String ALL_PATH_OP = KLabels.RL_wAF.name();
   private final Module module;
+  private final Set<String> impureFunctions = new HashSet<>();
   private final AddSortInjections addSortInjections;
   private final KLabel topCellInitializer;
   private final Set<String> mlBinders = new HashSet<>();
@@ -232,6 +234,14 @@ public class ModuleToKORE {
         }
       }
     }
+    ComputeTransitiveFunctionDependencies deps = new ComputeTransitiveFunctionDependencies(module);
+    Set<KLabel> impurities =
+        stream(module.sortedProductions())
+            .filter(prod -> prod.klabel().isDefined() && prod.att().contains(Att.IMPURE()))
+            .filter(prod -> prod.att().contains(Att.IMPURE()))
+            .map(prod -> prod.klabel().get())
+            .collect(Collectors.toSet());
+    impurities.addAll(deps.ancestors(impurities));
 
     semantics.append("\n// symbols\n");
     Set<Production> overloads = new HashSet<>();
@@ -240,8 +250,8 @@ public class ModuleToKORE {
     }
 
     syntax.append(semantics);
-    translateSymbols(attributes, functionRules, overloads, semantics, false);
-    translateSymbols(attributes, functionRules, overloads, syntax, true);
+    translateSymbols(attributes, functionRules, impurities, overloads, semantics, false);
+    translateSymbols(attributes, functionRules, impurities, overloads, syntax, true);
 
     // print syntax definition
     for (Tuple2<Sort, scala.collection.immutable.List<Production>> sort :
@@ -250,6 +260,7 @@ public class ModuleToKORE {
         translateSymbol(
             attributes,
             functionRules,
+            impurities,
             overloads,
             prod.att().get(Att.BRACKET_LABEL(), KLabel.class),
             prod,
@@ -303,8 +314,8 @@ public class ModuleToKORE {
       if (isFunctional(prod)) {
         genFunctionalAxiom(prod, semantics);
       }
-      if (isConstructor(prod, functionRules)) {
-        genNoConfusionAxioms(prod, noConfusion, functionRules, semantics);
+      if (isConstructor(prod, functionRules, impurities)) {
+        genNoConfusionAxioms(prod, noConfusion, functionRules, impurities, semantics);
       }
     }
 
@@ -443,6 +454,7 @@ public class ModuleToKORE {
   private void translateSymbols(
       Map<Att.Key, Boolean> attributes,
       SetMultimap<KLabel, Rule> functionRules,
+      Set<KLabel> impurities,
       Set<Production> overloads,
       StringBuilder sb,
       boolean withSyntaxAtts) {
@@ -453,14 +465,25 @@ public class ModuleToKORE {
       if (prod.klabel().isEmpty()) {
         continue;
       }
+      if (impurities.contains(prod.klabel().get())) {
+        impureFunctions.add(prod.klabel().get().name());
+      }
       translateSymbol(
-          attributes, functionRules, overloads, prod.klabel().get(), prod, sb, withSyntaxAtts);
+          attributes,
+          functionRules,
+          impurities,
+          overloads,
+          prod.klabel().get(),
+          prod,
+          sb,
+          withSyntaxAtts);
     }
   }
 
   private void translateSymbol(
       Map<Att.Key, Boolean> attributes,
       SetMultimap<KLabel, Rule> functionRules,
+      Set<KLabel> impurities,
       Set<Production> overloads,
       KLabel label,
       Production prod,
@@ -484,7 +507,7 @@ public class ModuleToKORE {
     sb.append(") : ");
     convert(prod.sort(), prod, sb);
     sb.append(" ");
-    Att koreAtt = koreAttributes(prod, functionRules, overloads, withSyntaxAtts);
+    Att koreAtt = koreAttributes(prod, functionRules, impurities, overloads, withSyntaxAtts);
     convert(attributes, koreAtt, sb, null, null);
     sb.append("\n");
   }
@@ -718,6 +741,7 @@ public class ModuleToKORE {
       Production prod,
       Set<Tuple2<Production, Production>> noConfusion,
       SetMultimap<KLabel, Rule> functionRulesMap,
+      Set<KLabel> impurities,
       StringBuilder sb) {
     // c(x1,x2,...) /\ c(y1,y2,...) -> c(x1/\y2,x2/\y2,...)
     if (prod.arity() > 0) {
@@ -757,7 +781,7 @@ public class ModuleToKORE {
       if (prod2.klabel().isEmpty()
           || noConfusion.contains(Tuple2.apply(prod, prod2))
           || prod.equals(prod2)
-          || !isConstructor(prod2, functionRulesMap)
+          || !isConstructor(prod2, functionRulesMap, impurities)
           || isBuiltinProduction(prod2)) {
         // TODO (traiansf): add no confusion axioms for constructor vs inj.
         continue;
@@ -1619,8 +1643,9 @@ public class ModuleToKORE {
     sb.append("}");
   }
 
-  private boolean isConstructor(Production prod, SetMultimap<KLabel, Rule> functionRules) {
-    Att att = semanticAttributes(prod, functionRules, java.util.Collections.emptySet());
+  private boolean isConstructor(
+      Production prod, SetMultimap<KLabel, Rule> functionRules, Set<KLabel> impurities) {
+    Att att = semanticAttributes(prod, functionRules, impurities, java.util.Collections.emptySet());
     return att.contains(Att.CONSTRUCTOR());
   }
 
@@ -1656,6 +1681,7 @@ public class ModuleToKORE {
   private Att koreAttributes(
       Production prod,
       SetMultimap<KLabel, Rule> functionRules,
+      Set<KLabel> impurities,
       Set<Production> overloads,
       boolean withSyntaxAtts) {
     Att att = prod.att();
@@ -1673,7 +1699,7 @@ public class ModuleToKORE {
     for (Att.Key key : attsToRemove) {
       att = att.remove(key);
     }
-    att = att.addAll(semanticAttributes(prod, functionRules, overloads));
+    att = att.addAll(semanticAttributes(prod, functionRules, impurities, overloads));
     if (withSyntaxAtts) {
       att = att.addAll(syntaxAttributes(prod));
     }
@@ -1681,7 +1707,10 @@ public class ModuleToKORE {
   }
 
   private Att semanticAttributes(
-      Production prod, SetMultimap<KLabel, Rule> functionRules, Set<Production> overloads) {
+      Production prod,
+      SetMultimap<KLabel, Rule> functionRules,
+      Set<KLabel> impurities,
+      Set<Production> overloads) {
     boolean isConstructor = !isFunction(prod);
     isConstructor &= !prod.att().contains(Att.ASSOC());
     isConstructor &= !prod.att().contains(Att.COMM());
@@ -1696,16 +1725,20 @@ public class ModuleToKORE {
     boolean isMacro = prod.isMacro();
     boolean isAnywhere = overloads.contains(prod);
 
+    Att att = Att.empty();
+
     if (prod.klabel().isDefined()) {
       for (Rule r : functionRules.get(prod.klabel().get())) {
         isAnywhere |= r.att().contains(Att.ANYWHERE());
+      }
+      if (impurities.contains(prod.klabel().get())) {
+        att = att.add(Att.IMPURE());
       }
     }
 
     isConstructor &= !isMacro;
     isConstructor &= !isAnywhere;
 
-    Att att = Att.empty();
     if (isHook(prod)) {
       att = att.add(Att.HOOK(), prod.att().get(att.HOOK()));
     }
