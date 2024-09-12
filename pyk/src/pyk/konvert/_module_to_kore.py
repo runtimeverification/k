@@ -891,6 +891,7 @@ class AddCollectionAtts(SingleModulePass):
                     Atts.ELEMENT(concat_att[Atts.ELEMENT]),
                     Atts.UNIT(concat_att[Atts.UNIT]),
                 ]
+                + ([Atts.UPDATE(concat_att[Atts.UPDATE])] if Atts.UPDATE in concat_att else [])
             )
         )
 

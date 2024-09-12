@@ -349,6 +349,7 @@ class Atts:
     UNIT: Final = AttKey('unit', type=_STR)
     UNIQUE_ID: Final = AttKey('UNIQUE_ID', type=_ANY)
     UNPARSE_AVOID: Final = AttKey('unparseAvoid', type=_NONE)
+    UPDATE: Final = AttKey('update', type=_ANY)
     USER_LIST: Final = AttKey('userList', type=_ANY)
     WRAP_ELEMENT: Final = AttKey('wrapElement', type=_ANY)
 
