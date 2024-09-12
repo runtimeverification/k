@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from collections.abc import Callable
 
 import pytest
 from unit.kcfg.merge_node_data import KCFG_MERGE_NODE_TEST_DATA
@@ -17,6 +16,8 @@ from pyk.prelude.ml import mlEqualsTrue, mlTop
 from pyk.utils import single
 
 if TYPE_CHECKING:
+    from typing import Callable
+
     from pyk.kast.inner import KApply
     from pyk.kcfg.kcfg import NodeIdLike
     from pyk.kcfg.semantics import KCFGSemantics

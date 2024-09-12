@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Final
-from collections.abc import Iterable
 
 from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KLabel, KSort, KToken, KVariable
@@ -15,6 +14,8 @@ from pyk.utils import single
 from ..utils import ge_ml, k, lt_ml
 
 if TYPE_CHECKING:
+    from typing import Iterable
+
     from pyk.kast.inner import KInner
     from pyk.kcfg.minimize import KCFGMinimizer
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from functools import reduce
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from pyk.cterm import CTerm
 from pyk.cterm.cterm import cterm_match
@@ -23,9 +23,7 @@ class KCFGMinimizer:
     heuristics: KCFGSemantics
     kdef: KDefinition | None
 
-    def __init__(
-        self, kcfg: KCFG, heuristics: KCFGSemantics | None = None, kdef: KDefinition | None = None
-    ) -> None:
+    def __init__(self, kcfg: KCFG, heuristics: KCFGSemantics | None = None, kdef: KDefinition | None = None) -> None:
         if heuristics is None:
             heuristics = DefaultSemantics()
         self.kcfg = kcfg
