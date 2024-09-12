@@ -30,17 +30,14 @@ class Test0Decrement(KRunTest, ProofTraceTest):
         LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortNat{}, SortKItem{}}(Lbl0'Unds'DECREMENT-SYNTAX'Unds'Nat{}()))))
     """
 
-    HINTS_OUTPUT = """version: 12
+    HINTS_OUTPUT = """version: 13
 hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
-  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\\dv{SortKConfigVar{}}("$PGM")]
   arg: kore[Lbl0'Unds'DECREMENT-SYNTAX'Unds'Nat{}()]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\\dv{SortKConfigVar{}}("$PGM"),Lbl0'Unds'DECREMENT-SYNTAX'Unds'Nat{}())]
 hook: MAP.unit Lbl'Stop'Map{} ()
-  function: Lbl'Stop'Map{} ()
 hook result: kore[Lbl'Stop'Map{}()]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
-  function: Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\\dv{SortKConfigVar{}}("$PGM"),Lbl0'Unds'DECREMENT-SYNTAX'Unds'Nat{}())]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\\dv{SortKConfigVar{}}("$PGM"),Lbl0'Unds'DECREMENT-SYNTAX'Unds'Nat{}())]
@@ -50,12 +47,11 @@ rule: 99 1
 function: LblinitKCell{} (0)
 rule: 100 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\\dv{SortKConfigVar{}}("$PGM"),Lbl0'Unds'DECREMENT-SYNTAX'Unds'Nat{}())]
+hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\\dv{SortKConfigVar{}}("$PGM"),Lbl0'Unds'DECREMENT-SYNTAX'Unds'Nat{}())]
+  arg: kore[\\dv{SortKConfigVar{}}("$PGM")]
+hook result: kore[Lbl0'Unds'DECREMENT-SYNTAX'Unds'Nat{}()]
 function: Lblproject'Coln'KItem{} (0:0)
-  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
-    function: LblMap'Coln'lookup{} (0:0:0:0)
-    arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\\dv{SortKConfigVar{}}("$PGM"),Lbl0'Unds'DECREMENT-SYNTAX'Unds'Nat{}())]
-    arg: kore[\\dv{SortKConfigVar{}}("$PGM")]
-  hook result: kore[Lbl0'Unds'DECREMENT-SYNTAX'Unds'Nat{}()]
 rule: 139 1
   VarK = kore[Lbl0'Unds'DECREMENT-SYNTAX'Unds'Nat{}()]
 function: LblinitGeneratedCounterCell{} (1)
@@ -77,8 +73,8 @@ config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl0'Unds'D
         pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
         assert pt is not None
 
-        # 11 initialization events
-        assert len(pt.pre_trace) == 11
+        # 12 initialization events
+        assert len(pt.pre_trace) == 12
 
         # 1 post-initial-configuration event
         assert len(pt.trace) == 1
