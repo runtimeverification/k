@@ -16,7 +16,7 @@ from pyk.prelude.ml import mlEqualsTrue, mlTop
 from pyk.utils import single
 
 if TYPE_CHECKING:
-    from typing import Callable
+    from collections.abc import Callable
 
     from pyk.kast.inner import KApply
     from pyk.kcfg.kcfg import NodeIdLike

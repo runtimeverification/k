@@ -14,7 +14,7 @@ from pyk.utils import single
 from ..utils import ge_ml, k, lt_ml
 
 if TYPE_CHECKING:
-    from typing import Iterable
+    from collections.abc import Iterable
 
     from pyk.kast.inner import KInner
     from pyk.kcfg.minimize import KCFGMinimizer
