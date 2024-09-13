@@ -2106,7 +2106,7 @@ public class ModuleToKORE {
           convertStringVarList(location, freeVarsMap, strVal, sb);
         } else {
           switch (strKey) {
-            case "unit", "element" -> {
+            case "unit", "element", "update" -> {
               Production prod = production(KApply(KLabel(strVal)));
               convert(prod.klabel().get(), prod.params(), sb);
               sb.append("()");
