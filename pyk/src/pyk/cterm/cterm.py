@@ -24,7 +24,7 @@ from ..kast.manip import (
 from ..prelude.k import GENERATED_TOP_CELL, K
 from ..prelude.kbool import andBool, orBool
 from ..prelude.ml import is_bottom, is_top, mlAnd, mlBottom, mlEquals, mlEqualsTrue, mlImplies, mlTop
-from ..utils import unique
+from ..utils import not_none, unique
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
@@ -436,3 +436,33 @@ def cterm_build_rule(
         keep_vars,
         defunc_with=defunc_with,
     )
+
+
+def cterms_anti_unify(
+    cterms: Iterable[CTerm], keep_values: bool = False, kdef: KDefinition | None = None
+) -> tuple[CTerm, list[CSubst]]:
+    """Given two `CTerm` instances, find a more general `CTerm` which can instantiate to both.
+
+    Args:
+        cterms: `CTerm`s to consider for finding a more general `CTerm` with this one.
+        keep_values: do not discard information about abstracted variables in returned result.
+        kdef (optional): `KDefinition` to make analysis more precise.
+
+    Returns:
+        A tuple ``(cterm, csubsts)`` where
+
+        - ``cterm``: More general `CTerm` than any of the input `CTerm`s.
+        - ``csubsts``: List of `CSubst` which, when applied to `cterm`, yield the input `CTerm`s.
+    """
+    # TODO: optimize this function, reduce useless auto-generated variables.
+    iterator = iter(cterms)
+    try:
+        merged_cterm = next(iterator)
+    except StopIteration:
+        raise ValueError('Anti-unification failed: no terms provided')
+    
+    for cterm in iterator:
+        merged_cterm = merged_cterm.anti_unify(cterm, keep_values, kdef)[0]
+        
+    csubsts = [not_none(cterm_match(merged_cterm, cterm)) for cterm in cterms]
+    return merged_cterm, csubsts
