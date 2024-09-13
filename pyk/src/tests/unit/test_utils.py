@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Callable, Final
 
 import pytest
 
-from pyk.utils import POSet, deconstruct_short_hash, partition_with
+from pyk.utils import POSet, deconstruct_short_hash, partition
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -71,7 +71,7 @@ def test_poset(relation: Iterable[tuple[int, int]], expected: dict[int, set[int]
 def test_partition_with(iterable: Iterable[int], pred: Callable[[int, int], bool], expected: list[list[int]] | None) -> None:
     # When
     try:
-        actual = partition_with(iterable, pred)
+        actual = partition(iterable, pred)
         
     # Then
     except ValueError as e:

@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 from pyk.cterm import CTerm
 from pyk.cterm.cterm import cterm_match
-from pyk.utils import not_none, partition_with, single
+from pyk.utils import not_none, partition, single
 
 from .semantics import DefaultSemantics
 
@@ -241,7 +241,7 @@ class KCFGMinimizer:
         to_merge: list[tuple[KCFG.Split, list[list[KCFG.Edge | KCFG.MergedEdge]]]] = []  # Split & Merge-able Edges
         for a2ai, ai2bi in zip(a2ai_list, ai2bi_list):
             mergeable_edges_groups = [
-                group for group in partition_with(ai2bi, lambda x, y: self.semantics.is_mergeable(x.target.cterm, y.target.cterm))
+                group for group in partition(ai2bi, lambda x, y: self.semantics.is_mergeable(x.target.cterm, y.target.cterm))
                 if len(group) > 1
             ]
             if mergeable_edges_groups:

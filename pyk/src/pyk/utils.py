@@ -319,7 +319,7 @@ def repeat_last(iterable: Iterable[T]) -> Iterator[T]:
             yield last
 
 
-def partition_with(iterable: Iterable[T], pred: Callable[[T, T], bool]) -> list[list[T]]:
+def partition(iterable: Iterable[T], pred: Callable[[T, T], bool]) -> list[list[T]]:
     """Partition the iterable into sublists based on the given predicate.
     
     predicate pred(x, y) should satisfy:
