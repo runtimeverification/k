@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from itertools import count
-from typing import TYPE_CHECKING, Callable, Final
+from typing import TYPE_CHECKING, Final
+from collections.abc import Callable
 
 import pytest
 
