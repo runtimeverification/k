@@ -20,14 +20,14 @@ if TYPE_CHECKING:
 
 class KCFGMinimizer:
     kcfg: KCFG
-    heuristics: KCFGSemantics
+    semantics: KCFGSemantics
     kdef: KDefinition | None
 
     def __init__(self, kcfg: KCFG, heuristics: KCFGSemantics | None = None, kdef: KDefinition | None = None) -> None:
         if heuristics is None:
             heuristics = DefaultSemantics()
         self.kcfg = kcfg
-        self.heuristics = heuristics
+        self.semantics = heuristics
         self.kdef = kdef
 
     def lift_edge(self, b_id: NodeIdLike) -> None:
@@ -246,9 +246,9 @@ class KCFGMinimizer:
                 mergeable_edges = [ai2bi.pop()]
                 idx = 0
                 while idx < len(ai2bi):
-                    if self.heuristics.is_mergeable(mergeable_edges[0].target.cterm, ai2bi[idx].target.cterm):
+                    if self.semantics.is_mergeable(mergeable_edges[0].target.cterm, ai2bi[idx].target.cterm):
                         for mergable_edge in mergeable_edges[1:]:
-                            if not self.heuristics.is_mergeable(mergable_edge.target.cterm, ai2bi[idx].target.cterm):
+                            if not self.semantics.is_mergeable(mergable_edge.target.cterm, ai2bi[idx].target.cterm):
                                 raise ValueError(
                                     'Mergeable edges are not partitioned, you should provide a better heuristic'
                                 )
