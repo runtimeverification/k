@@ -238,20 +238,20 @@ class KCFGMinimizer:
                 ai2bi_list.append(edges)
 
         # Step 3. Apply the heuristic & Obtain the merge-able KCFG sub-graphs
-        to_merge: dict[KCFG.Split, list[list[KCFG.Edge | KCFG.MergedEdge]]] = {}  # Split |-> Merge-able Edges
+        to_merge: list[tuple[KCFG.Split, list[list[KCFG.Edge | KCFG.MergedEdge]]]] = []  # Split & Merge-able Edges
         for a2ai, ai2bi in zip(a2ai_list, ai2bi_list):
             mergeable_edges_groups = [
                 group for group in partition_with(ai2bi, lambda x, y: self.semantics.is_mergeable(x.target.cterm, y.target.cterm))
                 if len(group) > 1
             ]
             if mergeable_edges_groups:
-                to_merge[a2ai] = mergeable_edges_groups
+                to_merge.append((a2ai, mergeable_edges_groups))
         if not to_merge:
             return False
 
         # ---- Rewrite ----
 
-        for a2ai, ai2bis_group in to_merge.items():
+        for a2ai, ai2bis_group in to_merge:
             # Step 1. Remove the original split
             a_splits = a2ai.splits
             for ai2bis in ai2bis_group:

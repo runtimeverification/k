@@ -81,3 +81,4 @@ def test_partition_with(iterable: Iterable[int], pred: Callable[[int, int], bool
         raise
 
     assert actual == expected
+    
