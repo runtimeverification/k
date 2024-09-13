@@ -2,14 +2,13 @@ from __future__ import annotations
 
 from itertools import count
 from typing import TYPE_CHECKING, Final
-from collections.abc import Callable
 
 import pytest
 
 from pyk.utils import POSet, deconstruct_short_hash, partition
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
+    from collections.abc import Callable, Iterable
 
 
 FULL_HASH: Final = '0001000200030004000500060007000800010002000300040005000600070008'
