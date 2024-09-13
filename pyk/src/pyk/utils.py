@@ -346,8 +346,7 @@ def partition(iterable: Iterable[T], pred: Callable[[T, T], bool]) -> list[list[
                 result.append(current_group)
         
     except StopIteration:
-        if not result:
-            raise ValueError("iterable is empty")
+        return []
     
     # each pair of elements in the same group satisfies the predicate
     for group in result:
