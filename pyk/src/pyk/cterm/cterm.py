@@ -459,10 +459,10 @@ def cterms_anti_unify(
     try:
         merged_cterm = next(iterator)
     except StopIteration:
-        raise ValueError('Anti-unification failed: no terms provided')
-    
+        raise ValueError('Anti-unification failed: no terms provided') from None
+
     for cterm in iterator:
         merged_cterm = merged_cterm.anti_unify(cterm, keep_values, kdef)[0]
-        
+
     csubsts = [not_none(cterm_match(merged_cterm, cterm)) for cterm in cterms]
     return merged_cterm, csubsts

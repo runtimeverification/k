@@ -60,19 +60,24 @@ def test_poset(relation: Iterable[tuple[int, int]], expected: dict[int, set[int]
     assert actual == expected
 
 
-@pytest.mark.parametrize('iterable,pred,expected', (
-    ([1, 2, 3, 4], lambda x, y: x % 2 == y % 2, [[1, 3], [2, 4]]),
-    ([1, 2, 3, 4], lambda x, y: x % 2 == 0 and y % 2 == 0, [[1], [2, 4], [3]]),
-    ([1, 2, 3, 4], lambda x, y: x % 2 == 1 and y % 2 == 1, [[1, 3], [2], [4]]),
-    ([1, 2, 3, 4], lambda x, y: x % 2 == 0, None),
-    ([1, 2, 3, 4], lambda x, y: x % 2 == 0 and y % 2 == 1, None),
-    ([1, 2, 3, 4], lambda x, y: x % 2 == 1 and y % 2 == 0, None),
-))
-def test_partition_with(iterable: Iterable[int], pred: Callable[[int, int], bool], expected: list[list[int]] | None) -> None:
+@pytest.mark.parametrize(
+    'iterable,pred,expected',
+    (
+        ([1, 2, 3, 4], lambda x, y: x % 2 == y % 2, [[1, 3], [2, 4]]),
+        ([1, 2, 3, 4], lambda x, y: x % 2 == 0 and y % 2 == 0, [[1], [2, 4], [3]]),
+        ([1, 2, 3, 4], lambda x, y: x % 2 == 1 and y % 2 == 1, [[1, 3], [2], [4]]),
+        ([1, 2, 3, 4], lambda x, y: x % 2 == 0, None),
+        ([1, 2, 3, 4], lambda x, y: x % 2 == 0 and y % 2 == 1, None),
+        ([1, 2, 3, 4], lambda x, y: x % 2 == 1 and y % 2 == 0, None),
+    ),
+)
+def test_partition_with(
+    iterable: Iterable[int], pred: Callable[[int, int], bool], expected: list[list[int]] | None
+) -> None:
     # When
     try:
         actual = partition(iterable, pred)
-        
+
     # Then
     except ValueError as e:
         if not expected:
@@ -81,4 +86,3 @@ def test_partition_with(iterable: Iterable[int], pred: Callable[[int, int], bool
         raise
 
     assert actual == expected
-    

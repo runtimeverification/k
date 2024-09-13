@@ -3,9 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pytest
-from ..kcfg.merge_node_data import KCFG_MERGE_NODE_TEST_DATA
-from ..mock_kprint import MockKPrint
-from ..test_kcfg import edge_dicts, node_dicts, split_dicts, to_csubst_node, x_config, x_node, x_subst
 
 from pyk.kast.inner import KVariable
 from pyk.kcfg import KCFG, KCFGShow
@@ -14,6 +11,10 @@ from pyk.kcfg.show import NodePrinter
 from pyk.prelude.kint import geInt, intToken, ltInt
 from pyk.prelude.ml import mlEqualsTrue, mlTop
 from pyk.utils import single
+
+from ..kcfg.merge_node_data import KCFG_MERGE_NODE_TEST_DATA
+from ..mock_kprint import MockKPrint
+from ..test_kcfg import edge_dicts, node_dicts, split_dicts, to_csubst_node, x_config, x_node, x_subst
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -53,7 +54,7 @@ def minimization_test_kcfg() -> KCFG:
     x_lt_5 = mlEqualsTrue(ltInt(KVariable('X'), intToken(5)))
 
     d = {
-    'next': 14,
+        'next': 14,
         'nodes': node_dicts(13, config=x_config()),
         'edges': edge_dicts(
             (1, 2, 5, ('r1',)),

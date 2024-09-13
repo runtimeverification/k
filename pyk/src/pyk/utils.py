@@ -321,18 +321,18 @@ def repeat_last(iterable: Iterable[T]) -> Iterator[T]:
 
 def partition(iterable: Iterable[T], pred: Callable[[T, T], bool]) -> list[list[T]]:
     """Partition the iterable into sublists based on the given predicate.
-    
+
     predicate pred(x, y) should satisfy:
     - if pred(x, y) and pred(y, z) then pred(x, z);
     - if pred(x, y) then pred(y, x);
     """
     result = []
     iterator = iter(iterable)
-    
+
     try:
         current_group = [next(iterator)]
         result.append(current_group)
-        
+
         for item in iterator:
             found_group = 0
             for group in result:
@@ -340,21 +340,21 @@ def partition(iterable: Iterable[T], pred: Callable[[T, T], bool]) -> list[list[
                     group.append(item)
                     found_group += 1
             if found_group > 1:
-                raise ValueError("Cannot partition with the given predicate")
+                raise ValueError('Cannot partition with the given predicate')
             if found_group == 0:
                 current_group = [item]
                 result.append(current_group)
-        
+
     except StopIteration:
         return []
-    
+
     # each pair of elements in the same group satisfies the predicate
     for group in result:
         for i in range(len(group)):
             for j in range(i + 1, len(group)):
                 if not pred(group[i], group[j]) or not pred(group[j], group[i]):
-                    raise ValueError("Cannot partition with the given predicate")
-        
+                    raise ValueError('Cannot partition with the given predicate')
+
     return result
 
 

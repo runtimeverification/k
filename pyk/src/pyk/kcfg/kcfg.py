@@ -966,9 +966,13 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         if not merged_edge:
             raise ValueError(f'MergedEdge does not exist: {source_id} -> {target_id}')
         self._merged_edges.pop(source_id)
-    
-    def general_edges(self, *, source_id: NodeIdLike | None = None, target_id: NodeIdLike | None = None) -> list[Edge | MergedEdge]:
-        return self.edges(source_id=source_id, target_id=target_id) + self.merged_edges(source_id=source_id, target_id=target_id)
+
+    def general_edges(
+        self, *, source_id: NodeIdLike | None = None, target_id: NodeIdLike | None = None
+    ) -> list[Edge | MergedEdge]:
+        return self.edges(source_id=source_id, target_id=target_id) + self.merged_edges(
+            source_id=source_id, target_id=target_id
+        )
 
     def cover(self, source_id: NodeIdLike, target_id: NodeIdLike) -> Cover | None:
         source_id = self._resolve(source_id)
