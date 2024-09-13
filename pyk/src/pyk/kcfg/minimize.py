@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 from pyk.cterm import CTerm
 from pyk.cterm.cterm import cterm_match
-from pyk.utils import not_none, single
+from pyk.utils import not_none, partition_with, single
 
 from .semantics import DefaultSemantics
 
@@ -239,24 +239,13 @@ class KCFGMinimizer:
 
         # Step 3. Apply the heuristic & Obtain the merge-able KCFG sub-graphs
         to_merge: dict[KCFG.Split, list[list[KCFG.Edge | KCFG.MergedEdge]]] = {}  # Split |-> Merge-able Edges
-        while a2ai_list:
-            a2ai = a2ai_list.pop()
-            ai2bi = ai2bi_list.pop()
-            while ai2bi:
-                mergeable_edges = [ai2bi.pop()]
-                idx = 0
-                while idx < len(ai2bi):
-                    if self.semantics.is_mergeable(mergeable_edges[0].target.cterm, ai2bi[idx].target.cterm):
-                        for mergable_edge in mergeable_edges[1:]:
-                            if not self.semantics.is_mergeable(mergable_edge.target.cterm, ai2bi[idx].target.cterm):
-                                raise ValueError(
-                                    'Mergeable edges are not partitioned, you should provide a better heuristic'
-                                )
-                        mergeable_edges.append(ai2bi.pop(idx))
-                    else:
-                        idx += 1
-                if len(mergeable_edges) > 1:
-                    to_merge[a2ai] = to_merge.get(a2ai, []) + [mergeable_edges]
+        for a2ai, ai2bi in zip(a2ai_list, ai2bi_list):
+            mergeable_edges_groups = [
+                group for group in partition_with(ai2bi, lambda x, y: self.semantics.is_mergeable(x.target.cterm, y.target.cterm))
+                if len(group) > 1
+            ]
+            if mergeable_edges_groups:
+                to_merge[a2ai] = mergeable_edges_groups
         if not to_merge:
             return False
 

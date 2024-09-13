@@ -296,8 +296,8 @@ def check_merged_partial_one0(minimizer: KCFGMinimizer) -> None:
     expected_ai_c = KLabel('#Equals', [KSort('Bool'), KSort('GeneratedTopCell')])(
         KToken('true', KSort('Bool')),
         KLabel('_orBool_')(
-            andBool([ml_pred_to_bool(c) for c in merge_node_test_kcfg().node(3).cterm.constraints]),
             andBool([ml_pred_to_bool(c) for c in merge_node_test_kcfg().node(2).cterm.constraints]),
+            andBool([ml_pred_to_bool(c) for c in merge_node_test_kcfg().node(3).cterm.constraints]),
         ),
     )
     assert merged_ai_c == expected_ai_c
@@ -378,21 +378,21 @@ def check_merged_two0(minimizer: KCFGMinimizer) -> None:
     assert all(s in splits for s in expected_splits)
     # merged ai (4-8) --> merged bi (11-15): MergedEdge
     merged_edge = single(minimizer.kcfg.merged_edges(source_id=24))
-    edges = {16: 20, 17: 21, 18: 22, 19: 23, 6: 13, 7: 14, 8: 15}
+    edges = {2: 9, 3: 10}
     assert all(e.source.id in edges and e.target.id == edges[e.source.id] for e in merged_edge.edges)
     # merged bi (11-15) --> 11 - 15: Split
     split = single(minimizer.kcfg.splits(source_id=merged_edge.target.id))
     splits = split.splits
-    expected_splits = [11, 12, 13, 14, 15]
+    expected_splits = [9, 10]
     assert all(s in splits for s in expected_splits)
     # merged ai (2,3) --> merged bi (9,10): MergedEdge
     merged_edge = single(minimizer.kcfg.merged_edges(source_id=26))
-    edges = {2: 9, 3: 10}
+    edges = {16: 20, 17: 21, 18: 22, 19: 23, 6: 13, 7: 14, 8: 15}
     assert all(e.source.id in edges and e.target.id == edges[e.source.id] for e in merged_edge.edges)
     # merged bi (9,10) --> 9 - 10: Split
     split = single(minimizer.kcfg.splits(source_id=merged_edge.target.id))
     splits = split.splits
-    expected_splits = [9, 10]
+    expected_splits = [11, 12, 13, 14, 15]
     assert all(s in splits for s in expected_splits)
 
 
@@ -406,21 +406,21 @@ def check_merged_two1(minimizer: KCFGMinimizer) -> None:
     assert all(s in splits for s in expected_splits)
     # merged ai (5-8) --> merged bi (12-15): MergedEdge
     merged_edge = single(minimizer.kcfg.merged_edges(source_id=24))
-    edges = {18: 22, 19: 23, 6: 13, 7: 14, 8: 15}
+    edges = {2: 9, 3: 10, 16: 20, 17: 21}
     assert all(e.source.id in edges and e.target.id == edges[e.source.id] for e in merged_edge.edges)
     # merged bi (12-15) --> 12 - 15: Split
     split = single(minimizer.kcfg.splits(source_id=merged_edge.target.id))
     splits = split.splits
-    expected_splits = [12, 13, 14, 15]
+    expected_splits = [9, 10, 11]
     assert all(s in splits for s in expected_splits)
     # merged ai (2,3,4) --> merged bi (9,10,11): MergedEdge
     merged_edge = single(minimizer.kcfg.merged_edges(source_id=26))
-    edges = {2: 9, 3: 10, 16: 20, 17: 21}
+    edges = {18: 22, 19: 23, 6: 13, 7: 14, 8: 15}
     assert all(e.source.id in edges and e.target.id == edges[e.source.id] for e in merged_edge.edges)
     # merged bi (9,10,11) --> 9 - 11: Split
     split = single(minimizer.kcfg.splits(source_id=merged_edge.target.id))
     splits = split.splits
-    expected_splits = [9, 10, 11]
+    expected_splits = [12, 13, 14, 15]
     assert all(s in splits for s in expected_splits)
 
 
@@ -433,21 +433,21 @@ def check_merged_partial_two(minimizer: KCFGMinimizer) -> None:
     assert all(s in splits for s in expected_splits)
     # merged ai (5,6) --> merged bi (13,14): MergedEdge
     merged_edge = single(minimizer.kcfg.merged_edges(source_id=24))
-    edges = {18: 22, 19: 23, 6: 13}
+    edges = {2: 9, 3: 10, 16: 20, 17: 21}
     assert all(e.source.id in edges and e.target.id == edges[e.source.id] for e in merged_edge.edges)
     # merged bi (13,14) --> 13 - 14: Split
     split = single(minimizer.kcfg.splits(source_id=merged_edge.target.id))
     splits = split.splits
-    expected_splits = [12, 13]
+    expected_splits = [9, 10, 11]
     assert all(s in splits for s in expected_splits)
     # merged ai (2,3,4) --> merged bi (9,10,11): MergedEdge
     merged_edge = single(minimizer.kcfg.merged_edges(source_id=26))
-    edges = {2: 9, 3: 10, 16: 20, 17: 21}
+    edges = {18: 22, 19: 23, 6: 13}
     assert all(e.source.id in edges and e.target.id == edges[e.source.id] for e in merged_edge.edges)
     # merged bi (9,10,11) --> 9 - 11: Split
     split = single(minimizer.kcfg.splits(source_id=merged_edge.target.id))
     splits = split.splits
-    expected_splits = [9, 10, 11]
+    expected_splits = [12, 13]
     assert all(s in splits for s in expected_splits)
 
 
