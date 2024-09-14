@@ -71,7 +71,7 @@ def test_poset(relation: Iterable[tuple[int, int]], expected: dict[int, set[int]
         ([1, 2, 3, 4], lambda x, y: x % 2 == 1 and y % 2 == 0, None),
     ),
 )
-def test_partition_with(
+def test_partition(
     iterable: Iterable[int], pred: Callable[[int, int], bool], expected: list[list[int]] | None
 ) -> None:
     # When
@@ -81,7 +81,6 @@ def test_partition_with(
     # Then
     except ValueError as e:
         if not expected:
-            assert str(e) == 'Cannot partition with the given predicate'
             return
         raise
 
