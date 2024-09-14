@@ -234,8 +234,8 @@ class KCFGMinimizer:
                 for ai in split.target_ids
                 if self.kcfg.general_edges(source_id=ai)
             ]
-            _partitions = [p for p in partition(_edges, _is_mergeable) if len(p) > 1]
-            if _partitions:
+            _partitions = partition(_edges, _is_mergeable)
+            if len(_partitions) < len(_edges):
                 sub_graphs.append((split, _partitions))
 
         # ---- Rewrite ----
@@ -246,11 +246,14 @@ class KCFGMinimizer:
 
             # Remove the original sub-graphs
             for p in edge_partitions:
+                if len(p) == 1:
+                    continue
                 for e in p:
+                    # TODO: remove the split and edges, then safely remove the nodes.
                     self.kcfg.remove_node(e.source.id)
 
             # Create A -|MergedEdge|-> Merged_Bi -|Split|-> Bi, if one edge partition covers all the splits
-            if len(edge_partitions) == 1 and len(edge_partitions[0]) == len(split.target_ids):
+            if len(edge_partitions) == 1:
                 merged_bi_cterm, merged_bi_subst = cterms_anti_unify(
                     [edge.target.cterm for edge in edge_partitions[0]], True, self.kdef
                 )
@@ -262,8 +265,11 @@ class KCFGMinimizer:
                 continue
 
             # Create A -|Split|-> Others & Merged_Ai -|MergedEdge|-> Merged_Bi -|Split|-> Bi
-            _split_nodes = [t for t in split.target_ids if t not in {e.source.id for p in edge_partitions for e in p}]
+            _split_nodes: list[NodeIdLike] = []
             for edge_partition in edge_partitions:
+                if len(edge_partition) == 1:
+                    _split_nodes.append(edge_partition[0].source.id)
+                    continue
                 merged_ai_cterm, _ = cterms_anti_unify(
                     [ai2bi.source.cterm for ai2bi in edge_partition], True, self.kdef
                 )
