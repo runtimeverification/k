@@ -238,11 +238,12 @@ class KCFGMinimizer:
             if len(_partitions) < len(_edges):
                 sub_graphs.append((split, _partitions))
 
+        if not sub_graphs:
+            return False
+
         # ---- Rewrite ----
 
-        merged = False
         for split, edge_partitions in sub_graphs:
-            merged = True
 
             # Remove the original sub-graphs
             for p in edge_partitions:
