@@ -320,42 +320,33 @@ def repeat_last(iterable: Iterable[T]) -> Iterator[T]:
 
 
 def partition(iterable: Iterable[T], pred: Callable[[T, T], bool]) -> list[list[T]]:
-    """Partition the iterable into sublists based on the given predicate.
-
-    predicate pred(x, y) should satisfy:
-    - if pred(x, y) and pred(y, z) then pred(x, z);
-    - if pred(x, y) then pred(y, x);
+    """Partition the iterable into sublists based on the given predicate. 
+ 
+    predicate pred(_, _) should satisfy: 
+    - pred(x, x) 
+    - if pred(x, y) and pred(y, z) then pred(x, z); 
+    - if pred(x, y) then pred(y, x); 
     """
-    result = []
-    iterator = iter(iterable)
-
-    try:
-        current_group = [next(iterator)]
-        result.append(current_group)
-
-        for item in iterator:
-            found_group = 0
-            for group in result:
-                if pred(group[-1], item):
-                    group.append(item)
-                    found_group += 1
-            if found_group > 1:
-                raise ValueError('Cannot partition with the given predicate')
-            if found_group == 0:
-                current_group = [item]
-                result.append(current_group)
-
-    except StopIteration:
-        return []
-
-    # each pair of elements in the same group satisfies the predicate
-    for group in result:
-        for i in range(len(group)):
-            for j in range(i + 1, len(group)):
-                if not pred(group[i], group[j]) or not pred(group[j], group[i]):
-                    raise ValueError('Cannot partition with the given predicate')
-
-    return result
+    groups: list[list[T]] = []
+    for item in iterable:
+        found = False
+        for group in groups:
+            group_matches = []
+            for group_item in group:
+                group_match = pred(group_item, item)
+                if group_match != pred(item, group_item):
+                    raise ValueError(f'Partitioning failed, predicate commutativity failed on: {(item, group_item)}')
+                group_matches.append(group_match) 
+            if found and any(group_matches):
+                raise ValueError(f'Partitioning failed, item matched multiple groups: {item}')
+            if all(group_matches):
+                found = True
+                group.append(item)
+            elif any(group_matches):
+                raise ValueError(f'Partitioning failed, item matched only some elements of group: {(item, group)}')
+        if not found:
+            groups.append([item])
+    return groups
 
 
 def nonempty_str(x: Any) -> str:
