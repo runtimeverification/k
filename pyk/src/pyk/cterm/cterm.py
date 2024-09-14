@@ -454,6 +454,7 @@ def cterms_anti_unify(
         - ``cterm``: More general `CTerm` than any of the input `CTerm`s.
         - ``csubsts``: List of `CSubst` which, when applied to `cterm`, yield the input `CTerm`s.
     """
+    # TODO: optimize this function, reduce useless auto-generated variables.
     if not cterms:
         raise ValueError('Anti-unification failed, no CTerms provided')
     merged_cterm = cterms[0]
