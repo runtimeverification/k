@@ -256,7 +256,7 @@ class KCFGMinimizer:
             # Create A -|MergedEdge|-> Merged_Bi -|Split|-> Bi, if one edge partition covers all the splits
             if len(edge_partitions) == 1:
                 merged_bi_cterm, merged_bi_subst = cterms_anti_unify(
-                    [edge.target.cterm for edge in edge_partitions[0]], True, self.kdef
+                    [edge.target.cterm for edge in edge_partitions[0]], keep_values=True, kdef=self.kdef
                 )
                 merged_bi = self.kcfg.create_node(merged_bi_cterm)
                 self.kcfg.create_merged_edge(split.source.id, merged_bi.id, edge_partitions[0])
@@ -272,10 +272,10 @@ class KCFGMinimizer:
                     _split_nodes.append(edge_partition[0].source.id)
                     continue
                 merged_ai_cterm, _ = cterms_anti_unify(
-                    [ai2bi.source.cterm for ai2bi in edge_partition], True, self.kdef
+                    [ai2bi.source.cterm for ai2bi in edge_partition], keep_values=True, kdef=self.kdef
                 )
                 merged_bi_cterm, merged_bi_subst = cterms_anti_unify(
-                    [ai2bi.target.cterm for ai2bi in edge_partition], True, self.kdef
+                    [ai2bi.target.cterm for ai2bi in edge_partition], keep_values=True, kdef=self.kdef
                 )
                 merged_ai = self.kcfg.create_node(merged_ai_cterm)
                 _split_nodes.append(merged_ai.id)
@@ -286,7 +286,7 @@ class KCFGMinimizer:
                 )
             self.kcfg.create_split_by_nodes(split.source.id, _split_nodes)
 
-        return merged
+        return True
 
     def minimize(self) -> None:
         """Minimize KCFG by repeatedly performing the lifting transformations.
