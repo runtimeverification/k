@@ -320,12 +320,12 @@ def repeat_last(iterable: Iterable[T]) -> Iterator[T]:
 
 
 def partition(iterable: Iterable[T], pred: Callable[[T, T], bool]) -> list[list[T]]:
-    """Partition the iterable into sublists based on the given predicate. 
- 
-    predicate pred(_, _) should satisfy: 
-    - pred(x, x) 
-    - if pred(x, y) and pred(y, z) then pred(x, z); 
-    - if pred(x, y) then pred(y, x); 
+    """Partition the iterable into sublists based on the given predicate.
+
+    predicate pred(_, _) should satisfy:
+    - pred(x, x)
+    - if pred(x, y) and pred(y, z) then pred(x, z);
+    - if pred(x, y) then pred(y, x);
     """
     groups: list[list[T]] = []
     for item in iterable:
@@ -336,7 +336,7 @@ def partition(iterable: Iterable[T], pred: Callable[[T, T], bool]) -> list[list[
                 group_match = pred(group_item, item)
                 if group_match != pred(item, group_item):
                     raise ValueError(f'Partitioning failed, predicate commutativity failed on: {(item, group_item)}')
-                group_matches.append(group_match) 
+                group_matches.append(group_match)
             if found and any(group_matches):
                 raise ValueError(f'Partitioning failed, item matched multiple groups: {item}')
             if all(group_matches):
