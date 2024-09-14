@@ -441,7 +441,7 @@ def cterm_build_rule(
 def cterms_anti_unify(
     cterms: Iterable[CTerm], keep_values: bool = False, kdef: KDefinition | None = None
 ) -> tuple[CTerm, list[CSubst]]:
-    """Given two `CTerm` instances, find a more general `CTerm` which can instantiate to both.
+    """Given many `CTerm` instances, find a more general `CTerm` which can instantiate to all.
 
     Args:
         cterms: `CTerm`s to consider for finding a more general `CTerm` with this one.
@@ -454,15 +454,10 @@ def cterms_anti_unify(
         - ``cterm``: More general `CTerm` than any of the input `CTerm`s.
         - ``csubsts``: List of `CSubst` which, when applied to `cterm`, yield the input `CTerm`s.
     """
-    # TODO: optimize this function, reduce useless auto-generated variables.
-    iterator = iter(cterms)
-    try:
-        merged_cterm = next(iterator)
-    except StopIteration:
-        raise ValueError('Anti-unification failed: no terms provided') from None
-
-    for cterm in iterator:
+    if not cterms:
+        raise ValueError('Anti-unification failed, no CTerms provided')
+    merged_cterm = cterms[0]
+    for cterm in cterms[1:]:
         merged_cterm = merged_cterm.anti_unify(cterm, keep_values, kdef)[0]
-
     csubsts = [not_none(cterm_match(merged_cterm, cterm)) for cterm in cterms]
     return merged_cterm, csubsts
