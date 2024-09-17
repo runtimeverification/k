@@ -2225,6 +2225,9 @@ ListItem(E1) ListItem(E2) L:List ListItem(E3) ListItem(E4)
 // the empty list
 .List
 
+// 1 or more list update operations applied to a variable
+L:List [ K1 <- E1 ] [ K2 <- E2 ]
+
 // 0 or more elements in any order plus 0 or 1 variables of sort Set
 // in any order
 SetItem(K1) SetItem(K2) S::Set SetItem(K3) SetItem(K4)
@@ -2255,9 +2258,10 @@ though E3 is itself unbound.
 In the above examples, E1, E2, E3, and E4 can be any pattern that is normally
 allowed on the lhs of a rule.
 
-When a map or set key contains function symbols, we know that the variables in
-that key are bound (because of the above restriction), so it is possible to
-evaluate the function to a concrete term prior to performing the lookup.
+When a map, set, or list key contains function symbols, we know that the
+variables in that key are bound (because of the above restriction), so it is
+possible to evaluate the function to a concrete term prior to performing the
+lookup.
 
 Indeed, this is the precise semantics which occurs; the function is evaluated
 and the result is looked up in the collection.

@@ -65,22 +65,26 @@ public class LLVMBackend extends KoreBackend {
     MutableInt warnings = new MutableInt();
     boolean optimize =
         kompileOptions.optimize1 || kompileOptions.optimize2 || kompileOptions.optimize3;
-    Matching.writeDecisionTreeToFile(
-        files.resolveKompiled("definition.kore"),
-        options.heuristic,
-        files.resolveKompiled("dt"),
-        Matching.getThreshold(getThreshold()),
-        !optimize,
-        globalOptions.includesExceptionType(ExceptionType.USELESS_RULE),
-        options.enableSearch,
-        ex -> {
-          var translated = translateError(ex, hookAtts);
-          kem.addKException(translated);
-          if (globalOptions.includesExceptionType(translated.getType())) {
-            warnings.increment();
-          }
-          return null;
-        });
+    try {
+      Matching.writeDecisionTreeToFile(
+          files.resolveKompiled("definition.kore"),
+          options.heuristic,
+          files.resolveKompiled("dt"),
+          Matching.getThreshold(getThreshold()),
+          !optimize,
+          globalOptions.includesExceptionType(ExceptionType.USELESS_RULE),
+          options.enableSearch,
+          ex -> {
+            var translated = translateError(ex, hookAtts);
+            kem.addKException(translated);
+            if (globalOptions.includesExceptionType(translated.getType())) {
+              warnings.increment();
+            }
+            return null;
+          });
+    } catch (MatchingException e) {
+      throw new KEMException(translateError(e, hookAtts));
+    }
     sw.printIntermediate("  Write decision tree");
     if (warnings.intValue() > 0 && kem.options.warnings2errors) {
       throw KEMException.compilerError("Had " + warnings.intValue() + " pattern matching errors.");
