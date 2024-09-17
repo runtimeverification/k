@@ -103,7 +103,6 @@ rand
 rangemap-tests-llvm
 rat
 search-bound
-seqstrict-predicate
 set-symbolic-tests
 set_unification
 spec-rule-application
