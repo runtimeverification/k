@@ -427,6 +427,10 @@ public class ModuleToKORE {
               att.add(Att.ELEMENT(), K.class, KApply(KLabel(concatProd.att().get(Att.ELEMENT()))));
           att = att.add(Att.CONCAT(), K.class, KApply(concatProd.klabel().get()));
           att = att.add(Att.UNIT(), K.class, KApply(KLabel(concatProd.att().get(Att.UNIT()))));
+          if (concatProd.att().contains(Att.UPDATE())) {
+            att =
+                att.add(Att.UPDATE(), K.class, KApply(KLabel(concatProd.att().get(Att.UPDATE()))));
+          }
           sb.append("hooked-");
         } else {
           sb.append("hooked-");
@@ -2102,7 +2106,7 @@ public class ModuleToKORE {
           convertStringVarList(location, freeVarsMap, strVal, sb);
         } else {
           switch (strKey) {
-            case "unit", "element" -> {
+            case "unit", "element", "update" -> {
               Production prod = production(KApply(KLabel(strVal)));
               convert(prod.klabel().get(), prod.params(), sb);
               sb.append("()");
