@@ -187,12 +187,9 @@ def _parse_special_att_value(key: AttKey, value: Any) -> tuple[tuple[Sort, ...],
     if key == Atts.FORMAT:
         assert isinstance(value, Format)
         return (), (String(value.unparse()),)
-    if key == Atts.ELEMENT:
+    if key == Atts.ELEMENT or key == Atts.UNIT or key == Atts.UPDATE:
         # TODO avoid special casing by pre-processing the attribute into a KApply
         # This should be handled by the frontend
-        assert isinstance(value, str)
-        return (), (App(_label_name(value)),)
-    if key == Atts.UNIT:  # TODO same here
         assert isinstance(value, str)
         return (), (App(_label_name(value)),)
     return None
@@ -891,6 +888,7 @@ class AddCollectionAtts(SingleModulePass):
                     Atts.ELEMENT(concat_att[Atts.ELEMENT]),
                     Atts.UNIT(concat_att[Atts.UNIT]),
                 ]
+                + ([Atts.UPDATE(concat_att[Atts.UPDATE])] if Atts.UPDATE in concat_att else [])
             )
         )
 

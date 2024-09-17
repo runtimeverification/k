@@ -442,6 +442,8 @@ object Att {
     Key.builtin("unparseAvoid", KeyParameter.Forbidden, onlyon[Production], KeyRange.FrontendOnly)
   final val UNUSED =
     Key.builtin("unused", KeyParameter.Forbidden, onlyon[Production], KeyRange.FrontendOnly)
+  final val UPDATE =
+    Key.builtin("update", KeyParameter.Required, onlyon[Production], KeyRange.WholePipeline)
   final val WRAP_ELEMENT =
     Key.builtin("wrapElement", KeyParameter.Required, onlyon[Production], KeyRange.FrontendOnly)
 

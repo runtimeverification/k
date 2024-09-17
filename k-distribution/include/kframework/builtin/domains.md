@@ -926,7 +926,7 @@ side, it is O(N), where N is the number of elements matched on the front and
 back of the list.
 
 ```k
-  syntax List ::= List List               [left, function, total, hook(LIST.concat), symbol(_List_), smtlib(smt_seq_concat), assoc, unit(.List), element(ListItem), format(%1%n%2)]
+  syntax List ::= List List               [left, function, total, hook(LIST.concat), symbol(_List_), smtlib(smt_seq_concat), assoc, unit(.List), element(ListItem), update(List:set), format(%1%n%2)]
 ```
 
 ### List unit
