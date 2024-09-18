@@ -12,4 +12,5 @@ __pycache__/
 *.debug-log
 
 .idea/
+.vscode
 .DS_Store
