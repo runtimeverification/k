@@ -168,6 +168,7 @@ class LLVMSideConditionEventExit(LLVMStepEvent):
         """Return the boolean result of the evaluation of the side condition that corresponds to this event."""
         return self._side_condition_end_event.check_result
 
+
 @final
 class LLVMPatternMatchingFailureEvent(LLVMStepEvent):
     """Represents an LLVM pattern matching failure event.
@@ -331,6 +332,8 @@ class LLVMArgument:
             return LLVMFunctionEvent(self._argument.step_event)
         elif isinstance(self._argument.step_event, llvm_hook_event):
             return LLVMHookEvent(self._argument.step_event)
+        elif isinstance(self._argument.step_event, llvm_pattern_matching_failure_event):
+            return LLVMPatternMatchingFailureEvent(self._argument.step_event)
         else:
             raise AssertionError()
 
