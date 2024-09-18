@@ -77,9 +77,9 @@ def test_partition(iterable: Iterable[int], pred: Callable[[int, int], bool], ex
         actual = partition(iterable, pred)
 
     # Then
-    except ValueError:
+    except ValueError as e:
         if not expected:
-            return
+            str(e).startswith('Partitioning failed')
         raise
 
     assert actual == expected
