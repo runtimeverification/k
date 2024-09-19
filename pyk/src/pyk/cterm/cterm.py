@@ -24,7 +24,7 @@ from ..kast.manip import (
 from ..prelude.k import GENERATED_TOP_CELL, K
 from ..prelude.kbool import andBool, orBool
 from ..prelude.ml import is_bottom, is_top, mlAnd, mlBottom, mlEquals, mlEqualsTrue, mlImplies, mlTop
-from ..utils import unique
+from ..utils import not_none, unique
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
