@@ -435,6 +435,7 @@ def cterm_build_rule(
         defunc_with=defunc_with,
     )
 
+
 def cterms_anti_unify(
     cterms: Iterable[CTerm], keep_values: bool = False, kdef: KDefinition | None = None
 ) -> tuple[CTerm, list[CSubst]]:

@@ -6,11 +6,12 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk.cterm import CSubst, CTerm, cterm_build_claim, cterm_build_rule
+from pyk.cterm.cterm import cterms_anti_unify
 from pyk.kast import Atts, KAtt
 from pyk.kast.inner import KApply, KLabel, KRewrite, KSequence, KSort, KVariable, Subst
 from pyk.kast.outer import KClaim
 from pyk.prelude.k import GENERATED_TOP_CELL, K
-from pyk.prelude.kbool import TRUE
+from pyk.prelude.kbool import TRUE, andBool, orBool
 from pyk.prelude.kint import INT, intToken
 from pyk.prelude.ml import mlAnd, mlEquals, mlEqualsTrue, mlTop
 
@@ -244,6 +245,105 @@ APPLY_TEST_DATA: Final = (
 def test_csubst_apply(term: CTerm, subst: CSubst, expected: CTerm) -> None:
     # When
     actual = subst(term)
+
+    # Then
+    assert actual == expected
+
+
+CTERMS: Final = [
+    CTerm(k(KVariable('X')), [ge_ml('X', -10), lt_ml('X', 0)]),
+    CTerm(k(KVariable('X')), [ge_ml('X', 0), lt_ml('X', 2)]),
+    CTerm(k(KVariable('A')), [ge_ml('A', 2), lt_ml('A', 6)]),
+    CTerm(k(KVariable('B')), [ge_ml('B', 6), lt_ml('B', 10)]),
+    CTerm(k(intToken(10))),
+    CTerm(k(intToken(11))),
+    CTerm(k(KVariable('Z')), [ge_ml('Z', 12), lt_ml('Z', 100)]),
+]
+
+
+CTERMS_ANTI_UNIFY_TEST_DATA: Final = (
+    # (
+    #     [CTERMS[0], CTERMS[1]],
+    #     CTerm(
+    #         k(KVariable('X')),
+    #         [
+    #             mlEqualsTrue(
+    #                 orBool(
+    #                     [
+    #                         andBool([ltInt(KVariable('X'), intToken(0)), geInt(KVariable('X'), intToken(-10))]),
+    #                         andBool([ltInt(KVariable('X'), intToken(2)), geInt(KVariable('X'), intToken(0))]),
+    #                     ]
+    #                 )
+    #             )
+    #         ],
+    #     ),
+    # ),
+    # (
+    #     [CTERMS[0], CTERMS[2]],
+    #     CTerm(
+    #         k(KVariable('V_a3feab80')),
+    #         [
+    #             mlEqualsTrue(
+    #                 orBool(
+    #                     [
+    #                         andBool(
+    #                             [
+    #                                 KLabel('_==K_')(KVariable('V_a3feab80'), KVariable('X')),
+    #                                 ltInt(KVariable('X'), intToken(0)),
+    #                                 geInt(KVariable('X'), intToken(-10)),
+    #                             ]
+    #                         ),
+    #                         andBool(
+    #                             [
+    #                                 KLabel('_==K_')(KVariable('V_a3feab80'), KVariable('A')),
+    #                                 ltInt(KVariable('A'), intToken(6)),
+    #                                 geInt(KVariable('A'), intToken(2)),
+    #                             ]
+    #                         ),
+    #                     ]
+    #                 )
+    #             )
+    #         ],
+    #     ),
+    # ),
+    (
+        [CTERMS[2], CTERMS[3], CTERMS[4]],
+        CTerm(
+            k(KVariable('V_7673d238')),
+            [
+                mlEqualsTrue(
+                    orBool([
+                        andBool([
+                            KLabel('_==K_')(KVariable('V_7673d238'), KVariable('V_7a3e40bf')),
+                            orBool([
+                                andBool([
+                                    KLabel('_==K_')(KVariable('V_7a3e40bf'), KVariable('A')),
+                                    KLabel('_<Int_')(KVariable('A'), intToken(6)),
+                                    KLabel('_>=Int_')(KVariable('A'), intToken(2)),
+                                ]),
+                                andBool([
+                                    KLabel('_==K_')(KVariable('V_7a3e40bf'), KVariable('B')),
+                                    KLabel('_<Int_')(KVariable('B'), intToken(10)),
+                                    KLabel('_>=Int_')(KVariable('B'), intToken(6)),
+                                ]),
+                            ]),
+                        ]),
+                        KLabel('_==K_')(KVariable('V_7673d238'), intToken(10)),
+                    ])
+                )
+            ],
+        ),
+    ),
+)
+
+
+@pytest.mark.parametrize(
+    'cterms,expected',
+    CTERMS_ANTI_UNIFY_TEST_DATA,
+)
+def test_cterms_anti_unify(cterms: list[CTerm], expected: CTerm) -> None:
+    # When
+    actual, _ = cterms_anti_unify(cterms, keep_values=True, kdef=None)
 
     # Then
     assert actual == expected
