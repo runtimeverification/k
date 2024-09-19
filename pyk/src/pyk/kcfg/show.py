@@ -149,7 +149,7 @@ class KCFGShow:
             _constraint_strs = [
                 self.kprint.pretty_print(ml_pred_to_bool(constraint, unsafe=True)) for constraint in csubst.constraints
             ]
-            constraint_strs = _multi_line_print('constraint', _constraint_strs, 'true', max_width=max_width)
+            constraint_strs = _multi_line_print('constraint', _constraint_strs, 'true')
             if len(csubst.subst.minimize()) > 0 and minimize:
                 subst_strs = ['subst: ...']
             else:
