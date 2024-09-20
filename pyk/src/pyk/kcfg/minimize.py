@@ -3,9 +3,8 @@ from __future__ import annotations
 from functools import reduce
 from typing import TYPE_CHECKING
 
-from pyk.cterm import CTerm
 from pyk.cterm.cterm import cterms_anti_unify
-from pyk.utils import not_none, partition, single
+from pyk.utils import partition, single
 
 from .semantics import DefaultSemantics
 
@@ -103,12 +102,12 @@ class KCFGMinimizer:
         # Remove the node `B`, effectively removing the entire initial structure
         self.kcfg.remove_node(b_id)
         # Create the nodes `[ A #And cond_I | I = 1..N ]`.
-        ai: list[NodeIdLike] = [self.kcfg.create_node(cterm).id for (cterm, _) in new_cterms_with_constraints]
+        ai: list[NodeIdLike] = [self.kcfg.create_node(cterm).id for cterm in new_cterms_with_constraints]
         # Create the edges `[A #And cond_1 --M steps--> C_I | I = 1..N ]`
         for i in range(len(ai)):
             self.kcfg.create_edge(ai[i], ci[i], a_to_b.depth, a_to_b.rules)
         # Create the split `A --[cond_1, ..., cond_N]--> [A #And cond_1, ..., A #And cond_N]
-        self.kcfg.create_split(a.id, zip(ai, csubsts, strict=True))
+        self.kcfg.create_split_by_nodes(a.id, ai)
 
     def lift_split_split(self, b_id: NodeIdLike) -> None:
         """Lift a split up a split directly preceding it, joining them into a single split.
@@ -129,7 +128,7 @@ class KCFGMinimizer:
         split_from_a, split_from_b = single(self.kcfg.splits(target_id=b_id)), single(self.kcfg.splits(source_id=b_id))
         splits_from_a, splits_from_b = split_from_a.splits, split_from_b.splits
         a = split_from_a.source
-        ci = list(splits_from_b.keys())
+        list(splits_from_b.keys())
         # Ensure split can be lifted soundly (i.e., that it does not introduce fresh variables)
         assert (  # <-- Does it will be a problem when using merging nodes, because it would introduce new variables?
             len(split_from_b.source_vars.difference(a.free_vars)) == 0
