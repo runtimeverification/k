@@ -5,10 +5,10 @@ from typing import TYPE_CHECKING, Final
 
 import pytest
 
-from pyk.utils import POSet, deconstruct_short_hash
+from pyk.utils import POSet, deconstruct_short_hash, partition
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
+    from collections.abc import Callable, Iterable
 
 
 FULL_HASH: Final = '0001000200030004000500060007000800010002000300040005000600070008'
@@ -57,4 +57,30 @@ def test_poset(relation: Iterable[tuple[int, int]], expected: dict[int, set[int]
     actual = {x: set(ys) for x, ys in image.items()}
 
     # Then
+    assert actual == expected
+
+
+@pytest.mark.parametrize(
+    'iterable,pred,expected',
+    (
+        ([1, 2, 3, 4], lambda x, y: x % 2 == y % 2, [[1, 3], [2, 4]]),
+        ([1, 2, 3, 4], lambda x, y: x % 2 == 0 and y % 2 == 0, [[1], [2, 4], [3]]),
+        ([1, 2, 3, 4], lambda x, y: x % 2 == 1 and y % 2 == 1, [[1, 3], [2], [4]]),
+        ([1, 2, 3, 4], lambda x, y: x % 2 == 0, None),
+        ([1, 2, 3, 4], lambda x, y: x % 2 == 0 and y % 2 == 1, None),
+        ([1, 2, 3, 4], lambda x, y: x % 2 == 1 and y % 2 == 0, None),
+    ),
+)
+def test_partition(iterable: Iterable[int], pred: Callable[[int, int], bool], expected: list[list[int]] | None) -> None:
+    # When
+    try:
+        actual = partition(iterable, pred)
+
+    # Then
+    except ValueError as e:
+        if not expected:
+            assert str(e).startswith('Partitioning failed')
+            return
+        raise
+
     assert actual == expected

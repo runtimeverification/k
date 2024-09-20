@@ -3,8 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pytest
-from unit.mock_kprint import MockKPrint
-from unit.test_kcfg import edge_dicts, node_dicts, split_dicts, to_csubst_node, x_config, x_node, x_subst
 
 from pyk.kast.inner import KVariable
 from pyk.kcfg import KCFG, KCFGShow
@@ -14,9 +12,16 @@ from pyk.prelude.kint import geInt, intToken, ltInt
 from pyk.prelude.ml import mlEqualsTrue, mlTop
 from pyk.utils import single
 
+from ..kcfg.merge_node_data import KCFG_MERGE_NODE_TEST_DATA
+from ..mock_kprint import MockKPrint
+from ..test_kcfg import edge_dicts, node_dicts, split_dicts, to_csubst_node, x_config, x_node, x_subst
+
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from pyk.kast.inner import KApply
     from pyk.kcfg.kcfg import NodeIdLike
+    from pyk.kcfg.semantics import KCFGSemantics
 
 
 def contains_edge(cfg: KCFG, source: NodeIdLike, target: NodeIdLike, depth: int, rules: tuple[str, ...]) -> bool:
@@ -407,3 +412,12 @@ def test_split_constraint_accumulation() -> None:
     )
 
     assert actual == expected
+
+
+@pytest.mark.parametrize('heuristics,kcfg,check', KCFG_MERGE_NODE_TEST_DATA)
+def test_merge_nodes(heuristics: KCFGSemantics, kcfg: KCFG, check: Callable[[KCFGMinimizer], None]) -> None:
+    # When
+    minimizer = KCFGMinimizer(kcfg, heuristics)
+
+    # Then
+    check(minimizer)
