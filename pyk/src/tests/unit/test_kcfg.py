@@ -27,8 +27,9 @@ if TYPE_CHECKING:
 
 
 def to_csubst_cterm(term_1: CTerm, term_2: CTerm, constraints: Iterable[KInner]) -> CSubst:
-    csubst = term_1.match_with_constraint(term_2)
-    assert csubst is not None
+    subst = term_1.config.match(term_2.config)
+    assert subst is not None
+    csubst = CSubst(subst, [])
     for constraint in constraints:
         csubst = csubst.add_constraint(constraint)
     return csubst
