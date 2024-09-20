@@ -17,7 +17,7 @@ from pyk.prelude.kint import gtInt, intToken, leInt
 from pyk.prelude.ml import is_top, mlEqualsTrue
 from pyk.proof import APRProof, APRProver, ImpliesProver, ProofStatus, RefutationProof
 from pyk.testing import KCFGExploreTest, KProveTest
-from pyk.utils import not_none, single
+from pyk.utils import single
 
 from ..utils import K_FILES
 
@@ -328,7 +328,7 @@ class TestAPRProof(KCFGExploreTest, KProveTest):
         cfg.create_node(CTerm(config, [l_le_0, m_le_0]))
 
         proof.kcfg.create_split_by_nodes(1, [3, 4, 5, 6])
-        
+
         # When
         prover.advance_proof(proof, max_iterations=4)
         # After the minimization, nodes 7-10 created by the advancement of the proof
