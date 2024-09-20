@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Final
 
 import pytest
-from unit.utils import ge_ml, k, lt_ml
 
 from pyk.cterm import CSubst, CTerm
 from pyk.kast.inner import KApply, KRewrite, KToken, KVariable, Subst
@@ -17,6 +16,7 @@ from pyk.prelude.utils import token
 from pyk.utils import not_none, single
 
 from .mock_kprint import MockKPrint
+from .utils import ge_ml, k, lt_ml
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
