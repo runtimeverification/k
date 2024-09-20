@@ -131,29 +131,15 @@ class KCFGMinimizer:
         a = split_from_a.source
         ci = list(splits_from_b.keys())
         # Ensure split can be lifted soundly (i.e., that it does not introduce fresh variables)
-        assert (
+        assert (  # <-- Does it will be a problem when using merging nodes, because it would introduce new variables?
             len(split_from_b.source_vars.difference(a.free_vars)) == 0
             and len(split_from_b.target_vars.difference(split_from_b.source_vars)) == 0
         )
-        # Get the substitution for `B`, at the same time removing 'B' from the targets of `A`.
-        csubst_b = splits_from_a.pop(self.kcfg.node(b_id).id)
-        # Generate substitutions for additional targets `C_I`, which all exist by construction;
-        # the constraints are cumulative, resulting in `cond_B #And cond_I`
-        additional_csubsts = [
-            not_none(a.cterm.match_with_constraint(self.kcfg.node(ci).cterm))
-            .add_constraint(csubst_b.constraint)
-            .add_constraint(csubst.constraint)
-            for ci, csubst in splits_from_b.items()
-        ]
-        # Create the targets of the new split
-        ci = list(splits_from_b.keys())
-        new_splits = zip(
-            list(splits_from_a.keys()) + ci, list(splits_from_a.values()) + additional_csubsts, strict=True
-        )
         # Remove the node `B`, thereby removing the two splits as well
         self.kcfg.remove_node(b_id)
+        splits_from_a.pop(self.kcfg.node(b_id).id)
         # Create the new split `A --[..., cond_B #And cond_1, ..., cond_B #And cond_N, ...]--> [..., C_1, ..., C_N, ...]`
-        self.kcfg.create_split(a.id, new_splits)
+        self.kcfg.create_split_by_nodes(a.id, list(splits_from_a.keys()) + list(splits_from_b.keys()))
 
     def lift_splits(self) -> bool:
         """Perform all possible split liftings.
