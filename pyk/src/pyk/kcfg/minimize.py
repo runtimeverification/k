@@ -3,20 +3,32 @@ from __future__ import annotations
 from functools import reduce
 from typing import TYPE_CHECKING
 
-from ..cterm import CTerm
-from ..utils import not_none, single
+from pyk.cterm import CTerm
+from pyk.cterm.cterm import cterms_anti_unify
+from pyk.utils import not_none, partition, single
+
+from .semantics import DefaultSemantics
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    from pyk.kast.outer import KDefinition
+
     from .kcfg import KCFG, NodeIdLike
+    from .semantics import KCFGSemantics
 
 
 class KCFGMinimizer:
     kcfg: KCFG
+    semantics: KCFGSemantics
+    kdef: KDefinition | None
 
-    def __init__(self, kcfg: KCFG) -> None:
+    def __init__(self, kcfg: KCFG, heuristics: KCFGSemantics | None = None, kdef: KDefinition | None = None) -> None:
+        if heuristics is None:
+            heuristics = DefaultSemantics()
         self.kcfg = kcfg
+        self.semantics = heuristics
+        self.kdef = kdef
 
     def lift_edge(self, b_id: NodeIdLike) -> None:
         """Lift an edge up another edge directly preceding it.
@@ -188,6 +200,94 @@ class KCFGMinimizer:
             _fold_lift, [(self.kcfg.edges, self.lift_split_edge), (self.kcfg.splits, self.lift_split_split)], False
         )
 
+    def merge_nodes(self) -> bool:
+        """Merge targets of Split for cutting down the number of branches, using heuristics KCFGSemantics.is_mergeable.
+
+        Side Effect: The KCFG is rewritten by the following rewrite pattern,
+            - Match: A -|Split|-> A_i -|Edge|-> B_i
+            - Rewrite:
+                - if `B_x, B_y, ..., B_z are not mergeable` then unchanged
+                - if `B_x, B_y, ..., B_z are mergeable`, then
+                    - A -|Split|-> A_x or A_y or ... or A_z
+                    - A_x or A_y or ... or A_z -|Edge|-> B_x or B_y or ... or B_z
+                    - B_x or B_y or ... or B_z -|Split|-> B_x, B_y, ..., B_z
+
+        Specifically, when `B_merge = B_x or B_y or ... or B_z`
+        - `or`: fresh variables in places where the configurations differ
+        - `Edge` in A_merged -|Edge|-> B_merge: list of merged edges is from A_i -|Edge|-> B_i
+        - `Split` in B_merge -|Split|-> B_x, B_y, ..., B_z: subst for it is from A -|Split|-> A_1, A_2, ..., A_n
+        :param semantics: provides the is_mergeable heuristic
+        :return: whether any merge was performed
+        """
+
+        def _is_mergeable(x: KCFG.Edge | KCFG.MergedEdge, y: KCFG.Edge | KCFG.MergedEdge) -> bool:
+            return self.semantics.is_mergeable(x.target.cterm, y.target.cterm)
+
+        # ---- Match ----
+
+        # A -|Split|> Ai -|Edge/MergedEdge|> Mergeable Bi
+        sub_graphs: list[tuple[KCFG.Split, list[list[KCFG.Edge | KCFG.MergedEdge]]]] = []
+
+        for split in self.kcfg.splits():
+            _edges = [
+                single(self.kcfg.general_edges(source_id=ai))
+                for ai in split.target_ids
+                if self.kcfg.general_edges(source_id=ai)
+            ]
+            _partitions = partition(_edges, _is_mergeable)
+            if len(_partitions) < len(_edges):
+                sub_graphs.append((split, _partitions))
+
+        if not sub_graphs:
+            return False
+
+        # ---- Rewrite ----
+
+        for split, edge_partitions in sub_graphs:
+
+            # Remove the original sub-graphs
+            for p in edge_partitions:
+                if len(p) == 1:
+                    continue
+                for e in p:
+                    # TODO: remove the split and edges, then safely remove the nodes.
+                    self.kcfg.remove_node(e.source.id)
+
+            # Create A -|MergedEdge|-> Merged_Bi -|Split|-> Bi, if one edge partition covers all the splits
+            if len(edge_partitions) == 1:
+                merged_bi_cterm, merged_bi_subst = cterms_anti_unify(
+                    [edge.target.cterm for edge in edge_partitions[0]], keep_values=True, kdef=self.kdef
+                )
+                merged_bi = self.kcfg.create_node(merged_bi_cterm)
+                self.kcfg.create_merged_edge(split.source.id, merged_bi.id, edge_partitions[0])
+                self.kcfg.create_split(
+                    merged_bi.id, zip([e.target.id for e in edge_partitions[0]], merged_bi_subst, strict=True)
+                )
+                continue
+
+            # Create A -|Split|-> Others & Merged_Ai -|MergedEdge|-> Merged_Bi -|Split|-> Bi
+            _split_nodes: list[NodeIdLike] = []
+            for edge_partition in edge_partitions:
+                if len(edge_partition) == 1:
+                    _split_nodes.append(edge_partition[0].source.id)
+                    continue
+                merged_ai_cterm, _ = cterms_anti_unify(
+                    [ai2bi.source.cterm for ai2bi in edge_partition], keep_values=True, kdef=self.kdef
+                )
+                merged_bi_cterm, merged_bi_subst = cterms_anti_unify(
+                    [ai2bi.target.cterm for ai2bi in edge_partition], keep_values=True, kdef=self.kdef
+                )
+                merged_ai = self.kcfg.create_node(merged_ai_cterm)
+                _split_nodes.append(merged_ai.id)
+                merged_bi = self.kcfg.create_node(merged_bi_cterm)
+                self.kcfg.create_merged_edge(merged_ai.id, merged_bi.id, edge_partition)
+                self.kcfg.create_split(
+                    merged_bi.id, zip([ai2bi.target.id for ai2bi in edge_partition], merged_bi_subst, strict=True)
+                )
+            self.kcfg.create_split_by_nodes(split.source.id, _split_nodes)
+
+        return True
+
     def minimize(self) -> None:
         """Minimize KCFG by repeatedly performing the lifting transformations.
 
@@ -198,3 +298,7 @@ class KCFGMinimizer:
         while repeat:
             repeat = self.lift_edges()
             repeat = self.lift_splits() or repeat
+
+        repeat = True
+        while repeat:
+            repeat = self.merge_nodes()
