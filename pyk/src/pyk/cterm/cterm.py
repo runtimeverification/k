@@ -184,7 +184,8 @@ class CTerm:
 
     def add_constraint(self, new_constraint: KInner) -> CTerm:
         """Return a new `CTerm` with the additional constraints."""
-        return CTerm(self.config, [new_constraint] + list(self.constraints))
+        new_constraint = flatten_label('#And', new_constraint)
+        return CTerm(self.config, new_constraint + list(self.constraints))
 
     def anti_unify(
         self, other: CTerm, keep_values: bool = False, kdef: KDefinition | None = None
