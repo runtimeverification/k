@@ -105,6 +105,9 @@ pyupgrade: poetry-install
 	$(POETRY_RUN) pyupgrade --py310-plus $(SRC_FILES)
 
 
+pr: format check pyupgrade
+	git rebase -i develop
+
 # Documentation
 
 DOCS_API_DIR   := docs/api
