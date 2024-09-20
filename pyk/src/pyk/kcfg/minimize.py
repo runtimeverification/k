@@ -96,17 +96,10 @@ class KCFGMinimizer:
         # Ensure split can be lifted soundly (i.e., that it does not introduce fresh variables)
         assert (
             len(split_from_b.source_vars.difference(a.free_vars)) == 0
-            and len(split_from_b.target_vars.difference(split_from_b.source_vars)) == 0
+            and len(split_from_b.target_vars.difference(split_from_b.source_vars)) == 0  # <-- Can we delete this check?
         )
         # Create CTerms and CSubsts corresponding to the new targets of the split
-        new_cterms_with_constraints = [
-            (CTerm(a.cterm.config, a.cterm.constraints + csubst.constraints), csubst.constraint) for csubst in csubsts
-        ]
-        # Generate substitutions for new targets, which all exist by construction
-        new_csubsts = [
-            not_none(a.cterm.match_with_constraint(cterm)).add_constraint(constraint)
-            for (cterm, constraint) in new_cterms_with_constraints
-        ]
+        new_cterms_with_constraints = [csubst(a.cterm) for csubst in csubsts]
         # Remove the node `B`, effectively removing the entire initial structure
         self.kcfg.remove_node(b_id)
         # Create the nodes `[ A #And cond_I | I = 1..N ]`.
@@ -115,7 +108,7 @@ class KCFGMinimizer:
         for i in range(len(ai)):
             self.kcfg.create_edge(ai[i], ci[i], a_to_b.depth, a_to_b.rules)
         # Create the split `A --[cond_1, ..., cond_N]--> [A #And cond_1, ..., A #And cond_N]
-        self.kcfg.create_split(a.id, zip(ai, new_csubsts, strict=True))
+        self.kcfg.create_split(a.id, zip(ai, csubsts, strict=True))
 
     def lift_split_split(self, b_id: NodeIdLike) -> None:
         """Lift a split up a split directly preceding it, joining them into a single split.
