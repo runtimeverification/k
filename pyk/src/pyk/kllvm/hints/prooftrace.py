@@ -15,6 +15,7 @@ from _kllvm.prooftrace import (  # type: ignore  # noqa: F401, TC002
     llvm_side_condition_end_event,
     llvm_side_condition_event,
     llvm_step_event,
+    llvm_pattern_matching_failure_event,
     annotated_llvm_event,
     llvm_rewrite_trace_iterator,
     EventType,
@@ -169,6 +170,40 @@ class LLVMSideConditionEventExit(LLVMStepEvent):
 
 
 @final
+class LLVMPatternMatchingFailureEvent(LLVMStepEvent):
+    """Represents an LLVM pattern matching failure event.
+
+    This event is used to indicate that the pattern matching failed during the rewriting process.
+
+    Attributes:
+        _pattern_matching_failure_event (llvm_pattern_matching_failure_event): The underlying pattern matching failure event.
+    """
+
+    _pattern_matching_failure_event: llvm_pattern_matching_failure_event
+
+    def __init__(self, pattern_matching_failure_event: llvm_pattern_matching_failure_event) -> None:
+        """Initialize a new instance of the LLVMPatternMatchingFailureEvent class.
+
+        Args:
+            pattern_matching_failure_event (llvm_pattern_matching_failure_event): The LLVM pattern matching failure event object.
+        """
+        self._pattern_matching_failure_event = pattern_matching_failure_event
+
+    def __repr__(self) -> str:
+        """Return a string representation of the object.
+
+        Returns:
+            A string representation of the LLVMPatternMatchingFailureEvent object using the AST printing method.
+        """
+        return self._pattern_matching_failure_event.__repr__()
+
+    @property
+    def function_name(self) -> str:
+        """Return the name of the function that failed to match the pattern."""
+        return self._pattern_matching_failure_event.function_name
+
+
+@final
 class LLVMFunctionEvent(LLVMStepEvent):
     """Represent an LLVM function event in a proof trace.
 
@@ -297,6 +332,8 @@ class LLVMArgument:
             return LLVMFunctionEvent(self._argument.step_event)
         elif isinstance(self._argument.step_event, llvm_hook_event):
             return LLVMHookEvent(self._argument.step_event)
+        elif isinstance(self._argument.step_event, llvm_pattern_matching_failure_event):
+            return LLVMPatternMatchingFailureEvent(self._argument.step_event)
         else:
             raise AssertionError()
 
