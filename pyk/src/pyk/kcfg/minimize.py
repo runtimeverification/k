@@ -135,8 +135,8 @@ class KCFGMinimizer:
             and len(split_from_b.target_vars.difference(split_from_b.source_vars)) == 0
         )
         # Remove the node `B`, thereby removing the two splits as well
-        self.kcfg.remove_node(b_id)
         splits_from_a.pop(self.kcfg.node(b_id).id)
+        self.kcfg.remove_node(b_id)
         # Create the new split `A --[..., cond_B #And cond_1, ..., cond_B #And cond_N, ...]--> [..., C_1, ..., C_N, ...]`
         self.kcfg.create_split_by_nodes(a.id, list(splits_from_a.keys()) + list(splits_from_b.keys()))
 
