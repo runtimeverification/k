@@ -56,6 +56,7 @@ public record CheckFunctions(Set<KEMException> errors, Module m) {
             && !(hook.equals("LIST.element")
                 || hook.equals("LIST.concat")
                 || hook.equals("LIST.unit")
+                || hook.equals("LIST.update")
                 || hook.equals("SET.element")
                 || hook.equals("SET.concat")
                 || hook.equals("SET.unit")
@@ -77,6 +78,11 @@ public record CheckFunctions(Set<KEMException> errors, Module m) {
         if (hook.equals("SET.element")) return;
         if (hook.equals("MAP.element")) {
           apply(k.items().get(1));
+          return;
+        }
+        if (hook.equals("LIST.update")) {
+          apply(k.items().get(0));
+          apply(k.items().get(2));
           return;
         }
         super.apply(k);

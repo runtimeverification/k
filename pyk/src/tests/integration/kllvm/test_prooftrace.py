@@ -808,8 +808,13 @@ class TestPeano(ProofTraceTest):
         # 12 initialization events
         assert len(pt.pre_trace) == 12
 
-        # 404 post-initial-configuration events
+        # 776 post-initial-configuration events
         assert len(pt.trace) == 776
+
+        # Assert that we have a pattern matching failure as the 135th event
+        assert pt.trace[135].is_step_event() and isinstance(
+            pt.trace[135].step_event, prooftrace.LLVMPatternMatchingFailureEvent
+        )
 
 
 class TestIMP5(ProofTraceTest):

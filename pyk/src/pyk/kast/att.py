@@ -336,7 +336,7 @@ class Atts:
     PROJECTION: Final = AttKey('projection', type=_NONE)
     RIGHT: Final = AttKey('right', type=_ANY)  # RIGHT and RIGHT_INTERNAL on the Frontend
     SIMPLIFICATION: Final = AttKey('simplification', type=_ANY)
-    SEQSTRICT: Final = AttKey('seqstrict', type=_NONE)
+    SEQSTRICT: Final = AttKey('seqstrict', type=_ANY)
     SORT: Final = AttKey('org.kframework.kore.Sort', type=_ANY)
     SOURCE: Final = AttKey('org.kframework.attributes.Source', type=_PATH)
     STRICT: Final = AttKey('strict', type=_ANY)
@@ -349,6 +349,7 @@ class Atts:
     UNIT: Final = AttKey('unit', type=_STR)
     UNIQUE_ID: Final = AttKey('UNIQUE_ID', type=_ANY)
     UNPARSE_AVOID: Final = AttKey('unparseAvoid', type=_NONE)
+    UPDATE: Final = AttKey('update', type=_ANY)
     USER_LIST: Final = AttKey('userList', type=_ANY)
     WRAP_ELEMENT: Final = AttKey('wrapElement', type=_ANY)
 
