@@ -786,7 +786,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
     def step_proof(self, step: APRProofStep) -> list[APRProofResult]:
         # Check if the current node should be bounded
         prior_loops: tuple[int, ...] = ()
-        if step.bmc_depth is not None:
+        if step.bmc_depth is not None and self.kcfg_explore.kcfg_semantics.is_loop(step.node.cterm):
             for node in step.shortest_path_to_node:
                 if self.kcfg_explore.kcfg_semantics.same_loop(node.cterm, step.node.cterm):
                     if node.id in step.prior_loops_cache:

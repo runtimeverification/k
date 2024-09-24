@@ -33,7 +33,6 @@ if TYPE_CHECKING:
     from pyk.kast.inner import KInner
     from pyk.kast.outer import KDefinition
     from pyk.kcfg import KCFGExplore
-    from pyk.kcfg.kcfg import KCFGExtendResult
     from pyk.kcfg.semantics import KCFGSemantics
     from pyk.ktool.kprint import KPrint, SymbolTable
     from pyk.ktool.kprove import KProve
@@ -65,21 +64,21 @@ class ImpSemantics(DefaultSemantics):
             return True
         return False
 
-    def abstract_node(self, c: CTerm) -> CTerm:
-        return c
+    def is_loop(self, c: CTerm) -> bool:
+        k_cell = c.cell('K_CELL')
+        return (
+            type(k_cell) is KSequence
+            and len(k_cell) > 0
+            and type(k_cell[0]) is KApply
+            and k_cell[0].label.name == 'while(_)_'
+        )
 
     def same_loop(self, c1: CTerm, c2: CTerm) -> bool:
         k_cell_1 = c1.cell('K_CELL')
         k_cell_2 = c2.cell('K_CELL')
-        if k_cell_1 == k_cell_2 and type(k_cell_1) is KSequence and type(k_cell_1[0]) is KApply:
+        if k_cell_1 == k_cell_2 and type(k_cell_1) is KSequence and len(k_cell_1) > 0 and type(k_cell_1[0]) is KApply:
             return k_cell_1[0].label.name == 'while(_)_'
         return False
-
-    def can_make_custom_step(self, c: CTerm) -> bool:
-        return False
-
-    def custom_step(self, c: CTerm) -> KCFGExtendResult | None:
-        return None
 
 
 EMPTY_STATES: Final[list[tuple[str, str]]] = []
