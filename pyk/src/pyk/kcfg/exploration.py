@@ -109,5 +109,5 @@ class KCFGExploration:
     #
 
     # Minimizing the KCFG
-    def minimize_kcfg(self) -> None:
-        KCFGMinimizer(self.kcfg).minimize()
+    def minimize_kcfg(self, merge: bool = True) -> None:
+        KCFGMinimizer(self.kcfg).minimize(merge=merge)
