@@ -58,18 +58,6 @@ class CustomStepSemanticsWithoutStep(DefaultSemantics):
             return True
         return False
 
-    def abstract_node(self, c: CTerm) -> CTerm:
-        return c
-
-    def same_loop(self, c1: CTerm, c2: CTerm) -> bool:
-        return False
-
-    def can_make_custom_step(self, c: CTerm) -> bool:
-        return False
-
-    def custom_step(self, c: CTerm) -> KCFGExtendResult | None:
-        return None
-
 
 class CustomStepSemanticsWithStep(CustomStepSemanticsWithoutStep):
     def can_make_custom_step(self, c: CTerm) -> bool:
