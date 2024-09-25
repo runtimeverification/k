@@ -103,7 +103,7 @@ class TestProofTrace(ProofTraceTest):
         list_of_events = list(it)
 
         # Test length of the list
-        assert len(list_of_events) == 14
+        assert len(list_of_events) == 13
 
         # Test the type of the events
         for event in list_of_events:
@@ -189,8 +189,8 @@ class TestSingleRewrite(ProofTraceTest):
         pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
         assert pt is not None
 
-        # 12 initialization events
-        assert len(pt.pre_trace) == 12
+        # 10 initialization events
+        assert len(pt.pre_trace) == 10
 
         # 2 post-initial-configuration events
         assert len(pt.trace) == 2
@@ -259,8 +259,8 @@ class TestTreeReverse(ProofTraceTest):
         pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
         assert pt is not None
 
-        # 12 initialization events
-        assert len(pt.pre_trace) == 12
+        # 10 initialization events
+        assert len(pt.pre_trace) == 10
 
         # 9 post-initial-configuration events
         assert len(pt.trace) == 9
@@ -384,8 +384,8 @@ class TestNonRecFunction(ProofTraceTest):
         pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
         assert pt is not None
 
-        # 12 initialization events
-        assert len(pt.pre_trace) == 12
+        # 10 initialization events
+        assert len(pt.pre_trace) == 10
 
         # 6 post-initial-configuration events
         assert len(pt.trace) == 6
@@ -467,8 +467,8 @@ class TestDV(ProofTraceTest):
         pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
         assert pt is not None
 
-        # 12 initialization events
-        assert len(pt.pre_trace) == 12
+        # 10 initialization events
+        assert len(pt.pre_trace) == 10
 
         # 3 post-initial-configuration events
         assert len(pt.trace) == 3
@@ -548,8 +548,8 @@ class TestConcurrentCounters(ProofTraceTest):
         pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
         assert pt is not None
 
-        # 12 initialization events
-        assert len(pt.pre_trace) == 12
+        # 10 initialization events
+        assert len(pt.pre_trace) == 10
 
         # 37 post-initial-configuration events
         assert len(pt.trace) == 37
@@ -708,8 +708,8 @@ class Test0Decrement(ProofTraceTest):
         pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
         assert pt is not None
 
-        # 12 initialization events
-        assert len(pt.pre_trace) == 12
+        # 10 initialization events
+        assert len(pt.pre_trace) == 10
 
         # 1 post-initial-configuration event
         assert len(pt.trace) == 1
@@ -737,8 +737,8 @@ class Test1Decrement(ProofTraceTest):
         pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
         assert pt is not None
 
-        # 12 initialization events
-        assert len(pt.pre_trace) == 12
+        # 10 initialization events
+        assert len(pt.pre_trace) == 10
 
         # 2 post-initial-configuration events
         assert len(pt.trace) == 2
@@ -766,8 +766,8 @@ class Test2Decrement(ProofTraceTest):
         pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
         assert pt is not None
 
-        # 12 initialization events
-        assert len(pt.pre_trace) == 12
+        # 10 initialization events
+        assert len(pt.pre_trace) == 10
 
         # 3 post-initial-configuration events
         assert len(pt.trace) == 3
@@ -805,8 +805,8 @@ class TestPeano(ProofTraceTest):
         pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
         assert pt is not None
 
-        # 12 initialization events
-        assert len(pt.pre_trace) == 12
+        # 10 initialization events
+        assert len(pt.pre_trace) == 10
 
         # 776 post-initial-configuration events
         assert len(pt.trace) == 776
@@ -914,8 +914,8 @@ class TestIMP5(ProofTraceTest):
         pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
         assert pt is not None
 
-        # 16 initialization events
-        assert len(pt.pre_trace) == 16
+        # 14 initialization events
+        assert len(pt.pre_trace) == 14
 
         # 2 post-initial-configuration events
         assert len(pt.trace) == 2
@@ -953,8 +953,8 @@ class TestBuiltInHookEvents(ProofTraceTest):
         pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
         assert pt is not None
 
-        # 12 initialization events
-        assert len(pt.pre_trace) == 12
+        # 10 initialization events
+        assert len(pt.pre_trace) == 10
 
         # 4 post-initial-configuration events
         assert len(pt.trace) == 4
