@@ -31,12 +31,6 @@ class Test0Decrement(KRunTest, ProofTraceTest):
     """
 
     HINTS_OUTPUT = """version: 13
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
-  arg: kore[\\dv{SortKConfigVar{}}("$PGM")]
-  arg: kore[Lbl0'Unds'DECREMENT-SYNTAX'Unds'Nat{}()]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\\dv{SortKConfigVar{}}("$PGM"),Lbl0'Unds'DECREMENT-SYNTAX'Unds'Nat{}())]
-hook: MAP.unit Lbl'Stop'Map{} ()
-hook result: kore[Lbl'Stop'Map{}()]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\\dv{SortKConfigVar{}}("$PGM"),Lbl0'Unds'DECREMENT-SYNTAX'Unds'Nat{}())]
@@ -73,8 +67,8 @@ config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl0'Unds'D
         pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
         assert pt is not None
 
-        # 12 initialization events
-        assert len(pt.pre_trace) == 12
+        # 10 initialization events
+        assert len(pt.pre_trace) == 10
 
         # 1 post-initial-configuration event
         assert len(pt.trace) == 1
