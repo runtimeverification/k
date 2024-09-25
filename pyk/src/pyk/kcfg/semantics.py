@@ -20,6 +20,11 @@ class KCFGSemantics(ABC):
     """Implement an abstraction mechanism."""
 
     @abstractmethod
+    def is_loop(self, c: CTerm) -> bool: ...
+
+    """Check whether or not the given ``CTerm`` represents a loop head."""
+
+    @abstractmethod
     def same_loop(self, c1: CTerm, c2: CTerm) -> bool: ...
 
     """Check whether or not the two given ``CTerm``s represent the same loop head."""
@@ -46,6 +51,9 @@ class DefaultSemantics(KCFGSemantics):
 
     def abstract_node(self, c: CTerm) -> CTerm:
         return c
+
+    def is_loop(self, c: CTerm) -> bool:
+        return False
 
     def same_loop(self, c1: CTerm, c2: CTerm) -> bool:
         return False

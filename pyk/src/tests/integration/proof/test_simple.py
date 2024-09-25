@@ -17,7 +17,6 @@ if TYPE_CHECKING:
     from pyk.cterm import CTerm
     from pyk.kast.outer import KDefinition
     from pyk.kcfg import KCFGExplore
-    from pyk.kcfg.kcfg import KCFGExtendResult
     from pyk.kcfg.semantics import KCFGSemantics
     from pyk.ktool.kprove import KProve
 
@@ -30,18 +29,6 @@ class SimpleSemantics(DefaultSemantics):
         if type(k_cell) is KSequence and type(k_cell[0]) is KApply and k_cell[0].label.name == 'f_SIMPLE-PROOFS_Step':
             return True
         return False
-
-    def abstract_node(self, c: CTerm) -> CTerm:
-        return c
-
-    def same_loop(self, c1: CTerm, c2: CTerm) -> bool:
-        return False
-
-    def can_make_custom_step(self, c: CTerm) -> bool:
-        return False
-
-    def custom_step(self, c: CTerm) -> KCFGExtendResult | None:
-        return None
 
 
 class TestSimpleProof(KCFGExploreTest, KProveTest):
