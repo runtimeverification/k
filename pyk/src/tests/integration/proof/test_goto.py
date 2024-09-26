@@ -23,7 +23,6 @@ if TYPE_CHECKING:
     from pyk.cterm import CTerm
     from pyk.kast.outer import KDefinition
     from pyk.kcfg import KCFGExplore
-    from pyk.kcfg.kcfg import KCFGExtendResult
     from pyk.kcfg.semantics import KCFGSemantics
     from pyk.ktool.kprove import KProve
 
@@ -31,11 +30,14 @@ _LOGGER: Final = logging.getLogger(__name__)
 
 
 class GotoSemantics(DefaultSemantics):
-    def is_terminal(self, c: CTerm) -> bool:
-        return False
-
-    def abstract_node(self, c: CTerm) -> CTerm:
-        return c
+    def is_loop(self, c: CTerm) -> bool:
+        k_cell = c.cell('K_CELL')
+        return (
+            type(k_cell) is KSequence
+            and len(k_cell) > 0
+            and type(k_cell[0]) is KApply
+            and k_cell[0].label.name == 'jumpi'
+        )
 
     def same_loop(self, c1: CTerm, c2: CTerm) -> bool:
         k_cell = c1.cell('K_CELL')
@@ -44,12 +46,6 @@ class GotoSemantics(DefaultSemantics):
         if pc_cell_1 == pc_cell_2 and type(k_cell) is KSequence and len(k_cell) > 0 and type(k_cell[0]) is KApply:
             return k_cell[0].label.name == 'jumpi'
         return False
-
-    def can_make_custom_step(self, c: CTerm) -> bool:
-        return False
-
-    def custom_step(self, c: CTerm) -> KCFGExtendResult | None:
-        return None
 
 
 APRBMC_PROVE_TEST_DATA: Iterable[
