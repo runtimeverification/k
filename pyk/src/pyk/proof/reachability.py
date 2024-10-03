@@ -135,7 +135,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         admitted: bool = False,
         _exec_time: float = 0,
         error_info: Exception | None = None,
-        prior_loops_cache: dict[int, tuple[int, ...]] | None = None,
+        prior_loops_cache: dict[int, Iterable[int]] | None = None,
     ):
         Proof.__init__(self, id, proof_dir=proof_dir, subproof_ids=subproof_ids, admitted=admitted)
         KCFGExploration.__init__(self, kcfg, terminal)
@@ -148,7 +148,9 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         self.logs = logs
         self.circularity = circularity
         self.node_refutations = {}
-        self.prior_loops_cache = prior_loops_cache if prior_loops_cache is not None else {}
+        self.prior_loops_cache = (
+            {int(k): tuple(v) for k, v in prior_loops_cache.items()} if prior_loops_cache is not None else {}
+        )
         self.kcfg._kcfg_store = KCFGStore(self.proof_subdir / 'kcfg') if self.proof_subdir else None
         self._exec_time = _exec_time
         self.error_info = error_info
