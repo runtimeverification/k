@@ -584,7 +584,9 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
             kcfg._resolve(int(node_id)): proof_id for node_id, proof_id in proof_dict['node_refutations'].items()
         }
 
-        prior_loops_cache = {int(k): v for k, v in proof_dict.get('loops_cache', {}).items()}
+        prior_loops_cache: dict[int, tuple[int, ...]] = {
+            int(k): tuple(v) for k, v in proof_dict.get('loops_cache', {}).items()
+        }
 
         return APRProof(
             id=id,
