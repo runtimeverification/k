@@ -98,11 +98,11 @@ class KCFGMinimizer:
             and len(split_from_b.target_vars.difference(split_from_b.source_vars)) == 0  # <-- Can we delete this check?
         )
         # Create CTerms and CSubsts corresponding to the new targets of the split
-        new_cterms_with_constraints = [csubst(a.cterm) for csubst in csubsts]
+        new_cterms = [csubst(a.cterm) for csubst in csubsts]
         # Remove the node `B`, effectively removing the entire initial structure
         self.kcfg.remove_node(b_id)
         # Create the nodes `[ A #And cond_I | I = 1..N ]`.
-        ai: list[NodeIdLike] = [self.kcfg.create_node(cterm).id for cterm in new_cterms_with_constraints]
+        ai: list[NodeIdLike] = [self.kcfg.create_node(cterm).id for cterm in new_cterms]
         # Create the edges `[A #And cond_1 --M steps--> C_I | I = 1..N ]`
         for i in range(len(ai)):
             self.kcfg.create_edge(ai[i], ci[i], a_to_b.depth, a_to_b.rules)
