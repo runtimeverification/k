@@ -255,12 +255,12 @@ def util_check_constraint(constraint: KInner, merged_var: KVariable, under_check
 
 
 def check_merge_no(minimizer: KCFGMinimizer) -> None:
-    minimizer.minimize()
+    minimizer.minimize(merge=True)
     assert minimizer.kcfg.to_dict() == merge_node_test_kcfg().to_dict()
 
 
 def check_merged_one(minimizer: KCFGMinimizer) -> None:
-    minimizer.minimize()
+    minimizer.minimize(merge=True)
     # 1 --> merged bi: Merged Edge
     merged_edge = single(minimizer.kcfg.merged_edges(source_id=1))
     edges = {2: 9, 3: 10, 16: 20, 17: 21, 18: 22, 19: 23, 6: 13, 7: 14, 8: 15}
