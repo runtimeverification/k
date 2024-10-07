@@ -167,9 +167,10 @@ class CTerm:
         if subst is None:
             return None
 
-        constraint = self._ml_impl(cterm.constraints, map(subst, self.constraints))
+        source_constraints = [subst(c) for c in self.constraints]
+        constraints = [c for c in cterm.constraints if c not in source_constraints]
 
-        return CSubst(subst=subst, constraints=[constraint])
+        return CSubst(subst, constraints)
 
     @staticmethod
     def _ml_impl(antecedents: Iterable[KInner], consequents: Iterable[KInner]) -> KInner:
@@ -244,25 +245,6 @@ class CTerm:
         initial_vars = free_vars(self.config) | set(keep_vars)
         new_constraints = remove_useless_constraints(self.constraints, initial_vars)
         return CTerm(self.config, new_constraints)
-
-
-def cterm_match(cterm1: CTerm, cterm2: CTerm) -> CSubst | None:
-    """Find a substitution which can instantiate `cterm1` to `cterm2`.
-
-    Args:
-        cterm1: `CTerm` to instantiate to `cterm2`.
-        cterm2: `CTerm` to instantiate `cterm1` to.
-
-    Returns:
-        A `CSubst` which can instantiate `cterm1` to `cterm2`, or `None` if no such `CSubst` exists.
-    """
-    # todo: delete this function and use cterm1.match_with_constraint(cterm2) directly after closing #4496
-    subst = cterm1.config.match(cterm2.config)
-    if subst is None:
-        return None
-    source_constraints = [subst(c) for c in cterm1.constraints]
-    constraints = [c for c in cterm2.constraints if c not in source_constraints]
-    return CSubst(subst, constraints)
 
 
 def anti_unify(state1: KInner, state2: KInner, kdef: KDefinition | None = None) -> tuple[KInner, Subst, Subst]:
@@ -461,5 +443,5 @@ def cterms_anti_unify(
     merged_cterm = cterms[0]
     for cterm in cterms[1:]:
         merged_cterm = merged_cterm.anti_unify(cterm, keep_values, kdef)[0]
-    csubsts = [not_none(cterm_match(merged_cterm, cterm)) for cterm in cterms]
+    csubsts = [not_none(merged_cterm.match_with_constraint(cterm)) for cterm in cterms]
     return merged_cterm, csubsts

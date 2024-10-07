@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Final
 
 import pytest
-from unit.utils import ge_ml, k, lt_ml
 
 from pyk.cterm import CSubst, CTerm
 from pyk.kast.inner import KApply, KRewrite, KToken, KVariable, Subst
@@ -17,6 +16,7 @@ from pyk.prelude.utils import token
 from pyk.utils import not_none, single
 
 from .mock_kprint import MockKPrint
+from .utils import ge_ml, k, lt_ml
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -27,8 +27,9 @@ if TYPE_CHECKING:
 
 
 def to_csubst_cterm(term_1: CTerm, term_2: CTerm, constraints: Iterable[KInner]) -> CSubst:
-    csubst = term_1.match_with_constraint(term_2)
-    assert csubst is not None
+    subst = term_1.config.match(term_2.config)
+    assert subst is not None
+    csubst = CSubst(subst, [])
     for constraint in constraints:
         csubst = csubst.add_constraint(constraint)
     return csubst
