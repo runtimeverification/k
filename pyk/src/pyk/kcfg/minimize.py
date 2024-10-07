@@ -266,7 +266,7 @@ class KCFGMinimizer:
 
         return True
 
-    def minimize(self) -> None:
+    def minimize(self, merge: bool = False) -> None:
         """Minimize KCFG by repeatedly performing the lifting transformations.
 
         The KCFG is transformed to an equivalent in which no further lifting transformations are possible.
@@ -278,5 +278,5 @@ class KCFGMinimizer:
             repeat = self.lift_splits() or repeat
 
         repeat = True
-        while repeat:
+        while repeat and merge:
             repeat = self.merge_nodes()
