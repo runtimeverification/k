@@ -5,11 +5,8 @@ import logging
 from abc import ABC, abstractmethod
 from collections.abc import Container
 from dataclasses import dataclass, field
-from functools import reduce
 from threading import RLock
 from typing import TYPE_CHECKING, Final, List, Union, cast, final
-
-from pyk.cterm.cterm import cterm_match
 
 from ..cterm import CSubst, CTerm, cterm_build_claim, cterm_build_rule
 from ..kast import EMPTY_ATT
@@ -18,7 +15,6 @@ from ..kast.manip import (
     bool_to_ml_pred,
     extract_lhs,
     extract_rhs,
-    flatten_label,
     inline_cell_maps,
     minimize_rule_like,
     rename_generated_vars,
@@ -1062,7 +1058,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         source = self.node(source_id)
         targets = [self.node(nid) for nid in target_ids]
         try:
-            csubsts = [not_none(cterm_match(source.cterm, target.cterm)) for target in targets]
+            csubsts = [not_none(source.cterm.match_with_constraint(target.cterm)) for target in targets]
         except ValueError:
             return None
         return self.create_split(source.id, zip(target_ids, csubsts, strict=True))
@@ -1091,10 +1087,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         source = self.node(source_id)
         branch_node_ids = [self.create_node(source.cterm.add_constraint(c)).id for c in constraints]
         csubsts = [not_none(source.cterm.match_with_constraint(self.node(id).cterm)) for id in branch_node_ids]
-        csubsts = [
-            reduce(CSubst.add_constraint, flatten_label('#And', constraint), csubst)
-            for (csubst, constraint) in zip(csubsts, constraints, strict=True)
-        ]
         self.create_split(source.id, zip(branch_node_ids, csubsts, strict=True))
         return branch_node_ids
 

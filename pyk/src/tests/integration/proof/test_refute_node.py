@@ -17,7 +17,7 @@ from pyk.prelude.kint import gtInt, intToken, leInt
 from pyk.prelude.ml import is_top, mlEqualsTrue
 from pyk.proof import APRProof, APRProver, ImpliesProver, ProofStatus, RefutationProof
 from pyk.testing import KCFGExploreTest, KProveTest
-from pyk.utils import not_none, single
+from pyk.utils import single
 
 from ..utils import K_FILES
 
@@ -327,35 +327,7 @@ class TestAPRProof(KCFGExploreTest, KProveTest):
         cfg.create_node(CTerm(config, [l_le_0, m_gt_0]))
         cfg.create_node(CTerm(config, [l_le_0, m_le_0]))
 
-        proof.kcfg.create_split(
-            1,
-            [
-                (
-                    3,
-                    not_none(cfg.node(1).cterm.match_with_constraint(cfg.node(3).cterm))
-                    .add_constraint(l_gt_0)
-                    .add_constraint(m_gt_0),
-                ),
-                (
-                    4,
-                    not_none(cfg.node(1).cterm.match_with_constraint(cfg.node(4).cterm))
-                    .add_constraint(l_gt_0)
-                    .add_constraint(m_le_0),
-                ),
-                (
-                    5,
-                    not_none(cfg.node(1).cterm.match_with_constraint(cfg.node(5).cterm))
-                    .add_constraint(l_le_0)
-                    .add_constraint(m_gt_0),
-                ),
-                (
-                    6,
-                    not_none(cfg.node(1).cterm.match_with_constraint(cfg.node(6).cterm))
-                    .add_constraint(l_le_0)
-                    .add_constraint(m_gt_0),
-                ),
-            ],
-        )
+        proof.kcfg.create_split_by_nodes(1, [3, 4, 5, 6])
 
         # When
         prover.advance_proof(proof, max_iterations=4)

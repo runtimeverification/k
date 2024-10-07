@@ -205,7 +205,7 @@ def test_lifting_functions_automatic() -> None:
             [
                 (node_15, to_csubst_node(x_node(1), node_19, [x_lt_0])),
                 (node_18, to_csubst_node(x_node(1), node_18, [x_ge_0, x_ge_5])),
-                (node_19, to_csubst_node(x_node(1), node_19, [x_ge_0, x_lt_5])),
+                (node_19, to_csubst_node(x_node(1), node_19, [x_lt_5, x_ge_0])),
             ],
         )
     )
@@ -248,7 +248,7 @@ def test_minimize_01() -> None:
             [
                 (node_15, to_csubst_node(x_node(1), node_19, [x_lt_0])),
                 (node_18, to_csubst_node(x_node(1), node_18, [x_ge_0, x_ge_5])),
-                (node_19, to_csubst_node(x_node(1), node_19, [x_ge_0, x_lt_5])),
+                (node_19, to_csubst_node(x_node(1), node_19, [x_lt_5, x_ge_0])),
             ],
         )
     )
@@ -355,41 +355,41 @@ def test_split_constraint_accumulation() -> None:
         '┃\n'
         '┣━━┓ subst: .Subst\n'
         '┃  ┃ constraint:\n'
+        '┃  ┃     _<Int_ ( X , 64 )\n'
         '┃  ┃     _>=Int_ ( X , 0 )\n'
         '┃  ┃     _>=Int_ ( X , 32 )\n'
-        '┃  ┃     _<Int_ ( X , 64 )\n'
         '┃  │\n'
         '┃  └─ 9 (leaf)\n'
         '┃\n'
         '┣━━┓ subst: .Subst\n'
         '┃  ┃ constraint:\n'
-        '┃  ┃     _>=Int_ ( X , 0 )\n'
         '┃  ┃     _<Int_ ( X , 32 )\n'
+        '┃  ┃     _>=Int_ ( X , 0 )\n'
         '┃  ┃     _>=Int_ ( X , 16 )\n'
         '┃  │\n'
         '┃  └─ 10 (leaf)\n'
         '┃\n'
         '┣━━┓ subst: .Subst\n'
         '┃  ┃ constraint:\n'
-        '┃  ┃     _>=Int_ ( X , 0 )\n'
-        '┃  ┃     _<Int_ ( X , 32 )\n'
         '┃  ┃     _<Int_ ( X , 16 )\n'
+        '┃  ┃     _<Int_ ( X , 32 )\n'
+        '┃  ┃     _>=Int_ ( X , 0 )\n'
         '┃  │\n'
         '┃  └─ 11 (leaf)\n'
         '┃\n'
         '┣━━┓ subst: .Subst\n'
         '┃  ┃ constraint:\n'
         '┃  ┃     _<Int_ ( X , 0 )\n'
-        '┃  ┃     _>=Int_ ( X , -32 )\n'
         '┃  ┃     _>=Int_ ( X , -16 )\n'
+        '┃  ┃     _>=Int_ ( X , -32 )\n'
         '┃  │\n'
         '┃  └─ 12 (leaf)\n'
         '┃\n'
         '┣━━┓ subst: .Subst\n'
         '┃  ┃ constraint:\n'
         '┃  ┃     _<Int_ ( X , 0 )\n'
-        '┃  ┃     _>=Int_ ( X , -32 )\n'
         '┃  ┃     _<Int_ ( X , -16 )\n'
+        '┃  ┃     _>=Int_ ( X , -32 )\n'
         '┃  │\n'
         '┃  └─ 13 (leaf)\n'
         '┃\n'
