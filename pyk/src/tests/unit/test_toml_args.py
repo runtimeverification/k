@@ -62,6 +62,28 @@ def test_prove_legacy_kargs() -> None:
     assert len(args_dict['k_args']) == 2
 
 
+def test_prove_legacy_profiles() -> None:
+    parser = create_argument_parser()
+    cmd_args = [
+        'prove-legacy',
+        '--config-file',
+        str(TEST_TOML),
+        '--config-profile',
+        'verbose',
+        tempfile.gettempdir(),
+        str(TEST_TOML),
+        str(TEST_TOML),
+        'spec-module',
+        'cmd_args',
+    ]
+    args = parser.parse_args(cmd_args)
+    args_dict = parse_toml_args(args)
+    assert len(args_dict['k_args']) == 2
+    assert hasattr(args, 'verbose')
+    assert 'verbose' in args_dict
+    assert args_dict['verbose']
+
+
 def test_toml_read() -> None:
     change_in_toml('definition = "(.*)"', f'definition = "{tempfile.gettempdir()}"')
     parser = create_argument_parser()
