@@ -892,31 +892,31 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         expected_leaf_number: int,
         tmp_path_factory: TempPathFactory,
     ) -> None:
-        with tmp_path_factory.mktemp(f'apr_tmp_proofs-{test_id}') as proof_dir:
-            spec_modules = kprove.get_claim_modules(Path(spec_file), spec_module_name=spec_module)
-            spec_label = f'{spec_module}.{claim_id}'
-            proofs = APRProof.from_spec_modules(
-                kprove.definition,
-                spec_modules,
-                spec_labels=[spec_label],
-                logs={},
-                proof_dir=proof_dir,
-            )
-            proof = single([p for p in proofs if p.id == spec_label])
-            if admit_deps:
-                for subproof in proof.subproofs:
-                    subproof.admit()
-                    subproof.write_proof_data()
+        proof_dir = tmp_path_factory.mktemp(f'apr_tmp_proofs-{test_id}')
+        spec_modules = kprove.get_claim_modules(Path(spec_file), spec_module_name=spec_module)
+        spec_label = f'{spec_module}.{claim_id}'
+        proofs = APRProof.from_spec_modules(
+            kprove.definition,
+            spec_modules,
+            spec_labels=[spec_label],
+            logs={},
+            proof_dir=proof_dir,
+        )
+        proof = single([p for p in proofs if p.id == spec_label])
+        if admit_deps:
+            for subproof in proof.subproofs:
+                subproof.admit()
+                subproof.write_proof_data()
 
-            prover = APRProver(kcfg_explore=kcfg_explore, execute_depth=max_depth, cut_point_rules=cut_rules)
-            prover.advance_proof(proof, max_iterations=max_iterations)
+        prover = APRProver(kcfg_explore=kcfg_explore, execute_depth=max_depth, cut_point_rules=cut_rules)
+        prover.advance_proof(proof, max_iterations=max_iterations)
 
-            kcfg_show = KCFGShow(kprove, node_printer=APRProofNodePrinter(proof, kprove, full_printer=True))
-            cfg_lines = kcfg_show.show(proof.kcfg)
-            _LOGGER.info('\n'.join(cfg_lines))
+        kcfg_show = KCFGShow(kprove, node_printer=APRProofNodePrinter(proof, kprove, full_printer=True))
+        cfg_lines = kcfg_show.show(proof.kcfg)
+        _LOGGER.info('\n'.join(cfg_lines))
 
-            assert proof.status == proof_status
-            assert leaf_number(proof) == expected_leaf_number
+        assert proof.status == proof_status
+        assert leaf_number(proof) == expected_leaf_number
 
     def test_terminal_node_subsumption(
         self,
@@ -929,24 +929,24 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         spec_module: str = 'IMP-SIMPLE-SPEC'
         claim_id: str = 'terminal-node-subsumption'
         cut_rules: Iterable[str] = []
-        with tmp_path_factory.mktemp(f'apr_tmp_proofs-{test_id}') as proof_dir:
-            spec_modules = kprove.get_claim_modules(Path(spec_file), spec_module_name=spec_module)
-            spec_label = f'{spec_module}.{claim_id}'
-            proofs = APRProof.from_spec_modules(
-                kprove.definition,
-                spec_modules,
-                spec_labels=[spec_label],
-                logs={},
-                proof_dir=proof_dir,
-            )
-            proof = single([p for p in proofs if p.id == spec_label])
-            prover = APRProver(kcfg_explore=kcfg_explore, execute_depth=7, cut_point_rules=cut_rules)
-            prover.advance_proof(proof, max_iterations=1)
-            # We have reached a terminal node, but not yet checked subsumption
-            assert proof.status != ProofStatus.PASSED
-            # The next advance only checks subsumption
-            prover.advance_proof(proof, max_iterations=1)
-            assert proof.status == ProofStatus.PASSED
+        proof_dir = tmp_path_factory.mktemp(f'apr_tmp_proofs-{test_id}')
+        spec_modules = kprove.get_claim_modules(Path(spec_file), spec_module_name=spec_module)
+        spec_label = f'{spec_module}.{claim_id}'
+        proofs = APRProof.from_spec_modules(
+            kprove.definition,
+            spec_modules,
+            spec_labels=[spec_label],
+            logs={},
+            proof_dir=proof_dir,
+        )
+        proof = single([p for p in proofs if p.id == spec_label])
+        prover = APRProver(kcfg_explore=kcfg_explore, execute_depth=7, cut_point_rules=cut_rules)
+        prover.advance_proof(proof, max_iterations=1)
+        # We have reached a terminal node, but not yet checked subsumption
+        assert proof.status != ProofStatus.PASSED
+        # The next advance only checks subsumption
+        prover.advance_proof(proof, max_iterations=1)
+        assert proof.status == ProofStatus.PASSED
 
     @pytest.mark.parametrize(
         'test_id,spec_file,spec_module,claim_id,max_iterations,max_depth,terminal_rules,cut_rules,expected_constraint',
@@ -1440,34 +1440,32 @@ class TestImpParallelProof(ParallelTest, KProveTest):
         tmp_path_factory: TempPathFactory,
         create_prover: Callable[[int, Iterable[str]], Prover],
     ) -> None:
-        with tmp_path_factory.mktemp(f'apr_tmp_proofs-{test_id}') as proof_dir:
-            spec_modules = kprove.get_claim_modules(Path(spec_file), spec_module_name=spec_module)
-            spec_label = f'{spec_module}.{claim_id}'
-            proofs = APRProof.from_spec_modules(
-                kprove.definition,
-                spec_modules,
-                spec_labels=[spec_label],
-                logs={},
-                proof_dir=proof_dir,
-            )
-            proof = single([p for p in proofs if p.id == spec_label])
-            if admit_deps:
-                for subproof in proof.subproofs:
-                    subproof.admit()
-                    subproof.write_proof_data()
+        proof_dir = tmp_path_factory.mktemp(f'apr_tmp_proofs-{test_id}')
+        spec_modules = kprove.get_claim_modules(Path(spec_file), spec_module_name=spec_module)
+        spec_label = f'{spec_module}.{claim_id}'
+        proofs = APRProof.from_spec_modules(
+            kprove.definition,
+            spec_modules,
+            spec_labels=[spec_label],
+            logs={},
+            proof_dir=proof_dir,
+        )
+        proof = single([p for p in proofs if p.id == spec_label])
+        if admit_deps:
+            for subproof in proof.subproofs:
+                subproof.admit()
+                subproof.write_proof_data()
 
-            _create_prover = partial(create_prover, max_depth, cut_rules)
+        _create_prover = partial(create_prover, max_depth, cut_rules)
 
-            parallel_advance_proof(
-                proof=proof, max_iterations=max_iterations, create_prover=_create_prover, max_workers=2
-            )
+        parallel_advance_proof(proof=proof, max_iterations=max_iterations, create_prover=_create_prover, max_workers=2)
 
-            kcfg_show = KCFGShow(kprove, node_printer=APRProofNodePrinter(proof, kprove, full_printer=True))
-            cfg_lines = kcfg_show.show(proof.kcfg)
-            _LOGGER.info('\n'.join(cfg_lines))
+        kcfg_show = KCFGShow(kprove, node_printer=APRProofNodePrinter(proof, kprove, full_printer=True))
+        cfg_lines = kcfg_show.show(proof.kcfg)
+        _LOGGER.info('\n'.join(cfg_lines))
 
-            assert proof.status == proof_status
-            assert leaf_number(proof) == expected_leaf_number
+        assert proof.status == proof_status
+        assert leaf_number(proof) == expected_leaf_number
 
     def test_all_path_reachability_prove_parallel_resources(
         self,
@@ -1481,39 +1479,37 @@ class TestImpParallelProof(ParallelTest, KProveTest):
         spec_module = 'IMP-SIMPLE-SPEC'
         claim_id = 'addition-1'
 
-        with tmp_path_factory.mktemp(f'apr_tmp_proofs-{test_id}') as proof_dir:
-            spec_modules = kprove.get_claim_modules(Path(spec_file), spec_module_name=spec_module)
-            spec_label = f'{spec_module}.{claim_id}'
-            proofs = APRProof.from_spec_modules(
-                kprove.definition,
-                spec_modules,
-                spec_labels=[spec_label],
-                logs={},
-                proof_dir=proof_dir,
-            )
-            proof = single([p for p in proofs if p.id == spec_label])
+        proof_dir = tmp_path_factory.mktemp(f'apr_tmp_proofs-{test_id}')
+        spec_modules = kprove.get_claim_modules(Path(spec_file), spec_module_name=spec_module)
+        spec_label = f'{spec_module}.{claim_id}'
+        proofs = APRProof.from_spec_modules(
+            kprove.definition,
+            spec_modules,
+            spec_labels=[spec_label],
+            logs={},
+            proof_dir=proof_dir,
+        )
+        proof = single([p for p in proofs if p.id == spec_label])
 
-            _create_prover = partial(create_prover, 1, [])
+        _create_prover = partial(create_prover, 1, [])
 
-            provers_created = 0
+        provers_created = 0
 
-            class MyAPRProver(APRProver):
-                provers_closed: int = 0
+        class MyAPRProver(APRProver):
+            provers_closed: int = 0
 
-                def close(self) -> None:
-                    MyAPRProver.provers_closed += 1
-                    super().close()
+            def close(self) -> None:
+                MyAPRProver.provers_closed += 1
+                super().close()
 
-            def create_prover_res_counter() -> APRProver:
-                nonlocal provers_created
-                provers_created += 1
-                prover = _create_prover()
-                prover.__class__ = MyAPRProver
-                assert type(prover) is MyAPRProver
-                return prover
+        def create_prover_res_counter() -> APRProver:
+            nonlocal provers_created
+            provers_created += 1
+            prover = _create_prover()
+            prover.__class__ = MyAPRProver
+            assert type(prover) is MyAPRProver
+            return prover
 
-            parallel_advance_proof(
-                proof=proof, max_iterations=2, create_prover=create_prover_res_counter, max_workers=2
-            )
+        parallel_advance_proof(proof=proof, max_iterations=2, create_prover=create_prover_res_counter, max_workers=2)
 
-            assert provers_created == MyAPRProver.provers_closed
+        assert provers_created == MyAPRProver.provers_closed
