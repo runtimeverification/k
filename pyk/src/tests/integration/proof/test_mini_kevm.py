@@ -76,33 +76,29 @@ class TestMiniKEVM(KCFGExploreTest, KProveTest):
         expected_leaf_number: int,
         tmp_path_factory: TempPathFactory,
     ) -> None:
-        with tmp_path_factory.mktemp('apr_tmp_proofs') as proof_dir:
-            claim = single(
-                kprove.get_claims(
-                    Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}']
-                )
-            )
-            proof = APRProof.from_claim(kprove.definition, claim, logs={}, proof_dir=proof_dir)
+        proof_dir = tmp_path_factory.mktemp('apr_tmp_proofs')
+        claim = single(
+            kprove.get_claims(Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}'])
+        )
+        proof = APRProof.from_claim(kprove.definition, claim, logs={}, proof_dir=proof_dir)
 
-            new_init_cterm = kcfg_explore.cterm_symbolic.assume_defined(proof.kcfg.node(proof.init).cterm)
-            proof.kcfg.let_node(proof.init, cterm=new_init_cterm)
-            kcfg_explore.simplify(proof.kcfg, {})
+        new_init_cterm = kcfg_explore.cterm_symbolic.assume_defined(proof.kcfg.node(proof.init).cterm)
+        proof.kcfg.let_node(proof.init, cterm=new_init_cterm)
+        kcfg_explore.simplify(proof.kcfg, {})
 
-            prover = APRProver(
-                kcfg_explore=kcfg_explore,
-                execute_depth=max_depth,
-                cut_point_rules=cut_rules,
-            )
-            prover.advance_proof(proof, max_iterations=max_iterations)
+        prover = APRProver(
+            kcfg_explore=kcfg_explore,
+            execute_depth=max_depth,
+            cut_point_rules=cut_rules,
+        )
+        prover.advance_proof(proof, max_iterations=max_iterations)
 
-            kcfg_show = KCFGShow(
-                kprove, node_printer=APRProofNodePrinter(proof, kprove, full_printer=True, minimize=False)
-            )
-            cfg_lines = kcfg_show.show(proof.kcfg)
-            _LOGGER.info('\n'.join(cfg_lines))
+        kcfg_show = KCFGShow(kprove, node_printer=APRProofNodePrinter(proof, kprove, full_printer=True, minimize=False))
+        cfg_lines = kcfg_show.show(proof.kcfg)
+        _LOGGER.info('\n'.join(cfg_lines))
 
-            assert proof.status == proof_status
-            assert leaf_number(proof) == expected_leaf_number
+        assert proof.status == proof_status
+        assert leaf_number(proof) == expected_leaf_number
 
     def test_implication_failure_reason_cell_mismatch(
         self,
