@@ -579,7 +579,9 @@ def parse_toml_args(
         if len(profile_list) == 0 or profile_list[0] not in toml_profile:
             return {k: v for k, v in toml_profile.items() if type(v) is not dict}
         elif len(profile_list) == 1:
-            return {k: v for k, v in toml_profile[profile_list[0]].items() if type(v) is not dict}
+            active_profile = {k: v for k, v in toml_profile.get(profile_list[0], {}).items() if type(v) is not dict}
+            default_profile = {k: v for k, v in toml_profile.get('default', {}).items() if type(v) is not dict}
+            return {**default_profile, **active_profile}
         return get_profile(toml_profile[profile_list[0]], profile_list[1:])
 
     toml_args: dict[str, Any] = {}
