@@ -6,8 +6,11 @@ definition = "/tmp"
 input = "kast-json"
 no-minimize = true
 
-[prove-legacy]
+[prove-legacy.default]
 kArgs = ["arg 1","args 2"]
+
+[prove-legacy.verbose]
+verbose = true
 
 [coverage.a_profile]
 verbose = true
