@@ -1063,7 +1063,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             return None
         return self.create_split(source.id, zip(target_ids, csubsts, strict=True))
 
-    def ndbranches(self, *, source_id: NodeIdLike | None = None, target_id: NodeIdLike | None = None) -> list[KCFG.NDBranch]:
+    def ndbranches(
+        self, *, source_id: NodeIdLike | None = None, target_id: NodeIdLike | None = None
+    ) -> list[KCFG.NDBranch]:
         source_id = self._resolve(source_id) if source_id is not None else None
         target_id = self._resolve(target_id) if target_id is not None else None
         return [
