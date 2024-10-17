@@ -119,4 +119,10 @@ public class LLVMKompileOptions {
       description = "Use a faster, unsound representation for byte arrays on the LLVM backend",
       hidden = true)
   public boolean llvmMutableBytes;
+
+  @Parameter(
+      names = "--llvm-hidden-visibility",
+      description = "Build the llvm backend with -fvisibility=hidden",
+      hidden = true)
+  public boolean llvmHiddenVisibility;
 }
