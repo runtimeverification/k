@@ -1366,10 +1366,10 @@ module INT-SYMBOLIC [symbolic]
   rule X   %Int N => X requires 0 <=Int X andBool X <Int N [simplification]
 
   // Bit-shifts
-  rule X <<Int 0 => X [simplification]
-  rule 0 <<Int _ => 0 [simplification]
-  rule X >>Int 0 => X [simplification]
-  rule 0 >>Int _ => 0 [simplification]
+  rule X <<Int 0 => X                    [simplification, preserves-definedness]
+  rule 0 <<Int Y => 0 requires 0 <=Int Y [simplification, preserves-definedness]
+  rule X >>Int 0 => X                    [simplification, preserves-definedness]
+  rule 0 >>Int Y => 0 requires 0 <=Int Y [simplification, preserves-definedness]
 endmodule
 
 module INT-SYMBOLIC-KORE [symbolic, haskell]
