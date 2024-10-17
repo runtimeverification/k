@@ -146,6 +146,9 @@ public class LLVMBackend extends KoreBackend {
       if (options.llvmMutableBytes) {
         args.add("--mutable-bytes");
       }
+      if (options.llvmHiddenVisibility) {
+        args.add("--hidden-visibility");
+      }
 
       if (options.debug) {
         args.add("-g");
