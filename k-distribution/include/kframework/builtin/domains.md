@@ -414,28 +414,28 @@ module MAP-KORE-SYMBOLIC [symbolic,haskell]
 
   // Adding the definedness condition `notBool (K in_keys(M))` in the ensures clause of the following rule would be redundant
   // because K also appears in the rhs, preserving the case when it's #Bottom.
-  rule (K |-> _ M:Map) [ K <- V ] => (K |-> V M) [simplification, preserves-definedness]
-  rule M:Map [ K <- V ] => (K |-> V M) requires notBool (K in_keys(M)) [simplification, preserves-definedness]
+  rule (K |-> _ M:Map) [ K <- V ] => (K |-> V M) [simplification]
+  rule M:Map [ K <- V ] => (K |-> V M) requires notBool (K in_keys(M)) [simplification]
   rule M:Map [ K <- _ ] [ K <- V ] => M [ K <- V ] [simplification]
   // Adding the definedness condition `notBool (K1 in_keys(M))` in the ensures clause of the following rule would be redundant
   // because K1 also appears in the rhs, preserving the case when it's #Bottom.
-  rule (K1 |-> V1 M:Map) [ K2 <- V2 ] => (K1 |-> V1 (M [ K2 <- V2 ])) requires K1 =/=K K2 [simplification, preserves-definedness]
+  rule (K1 |-> V1 M:Map) [ K2 <- V2 ] => (K1 |-> V1 (M [ K2 <- V2 ])) requires K1 =/=K K2 [simplification]
 
   // Symbolic remove
-  rule (K |-> _ M:Map) [ K <- undef ] => M ensures notBool (K in_keys(M)) [simplification, preserves-definedness]
+  rule (K |-> _ M:Map) [ K <- undef ] => M ensures notBool (K in_keys(M)) [simplification]
   rule M:Map [ K <- undef ] => M requires notBool (K in_keys(M)) [simplification]
   // Adding the definedness condition `notBool (K1 in_keys(M))` in the ensures clause of the following rule would be redundant
   // because K1 also appears in the rhs, preserving the case when it's #Bottom.
-  rule (K1 |-> V1 M:Map) [ K2 <- undef ] => (K1 |-> V1 (M [ K2 <- undef ])) requires K1 =/=K K2 [simplification, preserves-definedness]
+  rule (K1 |-> V1 M:Map) [ K2 <- undef ] => (K1 |-> V1 (M [ K2 <- undef ])) requires K1 =/=K K2 [simplification]
 
   // Symbolic lookup
-  rule (K  |->  V M:Map) [ K ]  => V ensures notBool (K in_keys(M)) [simplification, preserves-definedness]
-  rule (K1 |-> _V M:Map) [ K2 ] => M [K2] requires K1 =/=K K2 ensures notBool (K1 in_keys(M)) [simplification, preserves-definedness]
-  rule (_MAP:Map [ K  <-  V1 ]) [ K ]  => V1 [simplification, preserves-definedness]
-  rule ( MAP:Map [ K1 <- _V1 ]) [ K2 ] => MAP [ K2 ] requires K1 =/=K K2 [simplification, preserves-definedness]
+  rule (K  |->  V M:Map) [ K ]  => V ensures notBool (K in_keys(M)) [simplification]
+  rule (K1 |-> _V M:Map) [ K2 ] => M [K2] requires K1 =/=K K2 ensures notBool (K1 in_keys(M)) [simplification]
+  rule (_MAP:Map [ K  <-  V1 ]) [ K ]  => V1 [simplification]
+  rule ( MAP:Map [ K1 <- _V1 ]) [ K2 ] => MAP [ K2 ] requires K1 =/=K K2 [simplification]
 
-  rule (K  |->  V M:Map) [  K ] orDefault _ => V ensures notBool (K in_keys(M)) [simplification, preserves-definedness]
-  rule (K1 |-> _V M:Map) [ K2 ] orDefault D => M [K2] orDefault D requires K1 =/=K K2 ensures notBool (K1 in_keys(M)) [simplification, preserves-definedness]
+  rule (K  |->  V M:Map) [  K ] orDefault _ => V ensures notBool (K in_keys(M)) [simplification]
+  rule (K1 |-> _V M:Map) [ K2 ] orDefault D => M [K2] orDefault D requires K1 =/=K K2 ensures notBool (K1 in_keys(M)) [simplification]
   rule (_MAP:Map [ K  <-  V1 ]) [ K ] orDefault _ => V1 [simplification]
   rule ( MAP:Map [ K1 <- _V1 ]) [ K2 ] orDefault D => MAP [ K2 ] orDefault D requires K1 =/=K K2 [simplification]
   rule .Map [ _ ] orDefault D => D [simplification]
@@ -835,13 +835,13 @@ module SET-KORE-SYMBOLIC [symbolic,haskell]
   rule S              -Set .Set           => S          [simplification]
   rule .Set           -Set  _             => .Set       [simplification]
   rule SetItem(X)     -Set (S SetItem(X)) => .Set
-                               ensures notBool (X in S) [simplification, preserves-definedness]
+                               ensures notBool (X in S) [simplification]
   rule S              -Set (S SetItem(X)) => .Set
-                               ensures notBool (X in S) [simplification, preserves-definedness]
+                               ensures notBool (X in S) [simplification]
   rule (S SetItem(X)) -Set S              => SetItem(X)
-                               ensures notBool (X in S) [simplification, preserves-definedness]
+                               ensures notBool (X in S) [simplification]
   rule (S SetItem(X)) -Set SetItem(X)     => S
-                               ensures notBool (X in S) [simplification, preserves-definedness]
+                               ensures notBool (X in S) [simplification]
   // rule SetItem(X)     -Set S              => SetItem(X)
   //                            requires notBool (X in S)  [simplification]
   // rule (S1 SetItem(X)) -Set (S2 SetItem(X))  => S1 -Set S2
@@ -855,7 +855,7 @@ module SET-KORE-SYMBOLIC [symbolic,haskell]
   rule S    |Set S    => S    [simplification]
 
   rule (S SetItem(X)) |Set SetItem(X) => S SetItem(X)
-                             ensures notBool (X in S) [simplification, comm, preserves-definedness]
+                             ensures notBool (X in S) [simplification, comm]
   // Currently disabled, see runtimeverification/haskell-backend#3301
   // rule (S SetItem(X)) |Set S          => S SetItem(X)
   //                            ensures notBool (X in S) [simplification, comm]
@@ -865,17 +865,17 @@ module SET-KORE-SYMBOLIC [symbolic,haskell]
   rule intersectSet( S  , S   ) =>  S      [simplification]
 
   rule intersectSet( S SetItem(X), SetItem(X))     => SetItem(X)
-                                                        ensures notBool (X in S)      [simplification, comm, preserves-definedness]
+                                                        ensures notBool (X in S)      [simplification, comm]
   // Currently disabled, see runtimeverification/haskell-backend#3294
   // rule intersectSet( S SetItem(X) , S)             => S ensures notBool (X in S)      [simplification, comm]
   rule intersectSet( S1 SetItem(X), S2 SetItem(X)) => intersectSet(S1, S2) SetItem(X)
                                                         ensures notBool (X in S1)
-                                                        andBool notBool (X in S2)     [simplification, preserves-definedness]
+                                                        andBool notBool (X in S2)     [simplification]
 
   // membership simplifications
   rule _E in .Set           => false   [simplification]
   rule E  in (S SetItem(E)) => true
-              ensures notBool (E in S) [simplification, preserves-definedness]
+              ensures notBool (E in S) [simplification]
 
 // These two rules would be sound but impose a giant overhead on `in` evaluation:
   // rule E1 in (S SetItem(E2)) => true requires E1 in S
@@ -884,9 +884,9 @@ module SET-KORE-SYMBOLIC [symbolic,haskell]
   //                                 ensures notBool (E2 in S) [simplification]
 
   rule X in ((SetItem(X) S) |Set  _            ) => true
-                                    ensures notBool (X in S) [simplification, preserves-definedness]
+                                    ensures notBool (X in S) [simplification]
   rule X in ( _             |Set (SetItem(X) S)) => true
-                                    ensures notBool (X in S) [simplification, preserves-definedness]
+                                    ensures notBool (X in S) [simplification]
 
 endmodule
 
@@ -1362,14 +1362,14 @@ module INT-SYMBOLIC [symbolic]
   rule I +Int 0 => I [simplification]
   rule I -Int 0 => I [simplification]
 
-  rule X modInt N => X requires 0 <=Int X andBool X <Int N [simplification, preserves-definedness]
-  rule X   %Int N => X requires 0 <=Int X andBool X <Int N [simplification, preserves-definedness]
+  rule X modInt N => X requires 0 <=Int X andBool X <Int N [simplification]
+  rule X   %Int N => X requires 0 <=Int X andBool X <Int N [simplification]
 
   // Bit-shifts
-  rule X <<Int 0 => X [simplification, preserves-definedness]
-  rule 0 <<Int _ => 0 [simplification, preserves-definedness]
-  rule X >>Int 0 => X [simplification, preserves-definedness]
-  rule 0 >>Int _ => 0 [simplification, preserves-definedness]
+  rule X <<Int 0 => X requires 0 <=Int X [simplification, preserves-definedness]
+  rule 0 <<Int Y => 0 requires 0 <=Int Y [simplification, preserves-definedness]
+  rule X >>Int 0 => X requires 0 <=Int X [simplification, preserves-definedness]
+  rule 0 >>Int Y => 0 requires 0 <=Int Y [simplification, preserves-definedness]
 endmodule
 
 module INT-SYMBOLIC-KORE [symbolic, haskell]
