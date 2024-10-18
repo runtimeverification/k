@@ -1,0 +1,7 @@
+pyk.prelude.kbool module
+========================
+
+.. automodule:: pyk.prelude.kbool
+   :members:
+   :undoc-members:
+   :show-inheritance:

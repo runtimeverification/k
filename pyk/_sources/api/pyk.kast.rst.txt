@@ -1,0 +1,30 @@
+pyk.kast package
+================
+
+.. automodule:: pyk.kast
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pyk.kast.att
+   pyk.kast.color
+   pyk.kast.formatter
+   pyk.kast.inner
+   pyk.kast.kast
+   pyk.kast.lexer
+   pyk.kast.manip
+   pyk.kast.markdown
+   pyk.kast.outer
+   pyk.kast.outer_lexer
+   pyk.kast.outer_parser
+   pyk.kast.outer_syntax
+   pyk.kast.parser
+   pyk.kast.pretty
+   pyk.kast.rewrite
+   pyk.kast.utils

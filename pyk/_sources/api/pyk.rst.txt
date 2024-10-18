@@ -1,0 +1,39 @@
+pyk package
+===========
+
+.. automodule:: pyk
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pyk.cterm
+   pyk.kast
+   pyk.kbuild
+   pyk.kcfg
+   pyk.kdist
+   pyk.kllvm
+   pyk.konvert
+   pyk.kore
+   pyk.kore_exec_covr
+   pyk.krepl
+   pyk.ktool
+   pyk.prelude
+   pyk.proof
+   pyk.testing
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pyk.coverage
+   pyk.dequote
+   pyk.kcovr
+   pyk.utils
