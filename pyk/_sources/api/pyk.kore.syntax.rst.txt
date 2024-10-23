@@ -1,0 +1,7 @@
+pyk.kore.syntax module
+======================
+
+.. automodule:: pyk.kore.syntax
+   :members:
+   :undoc-members:
+   :show-inheritance:
