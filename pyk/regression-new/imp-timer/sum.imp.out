@@ -1,9 +1,13 @@
-<T>
-  <k>
-    .K
-  </k>
-  <state>
-    n |-> 0
-    sum |-> 5050
-  </state>
-</T>
+<generatedTop>
+  <T>
+    <k>
+      .K
+    </k>
+    <state>
+      n |-> 0 sum |-> 5050
+    </state>
+  </T>
+  <generatedCounter>
+    0
+  </generatedCounter>
+</generatedTop>

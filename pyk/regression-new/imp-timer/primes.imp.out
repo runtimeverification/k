@@ -1,17 +1,13 @@
-<T>
-  <k>
-    .K
-  </k>
-  <state>
-    i |-> 2
-    m |-> 10
-    n |-> 11
-    q |-> 0
-    r |-> 1
-    s |-> 4
-    t |-> 0
-    x |-> 0
-    y |-> 20
-    z |-> 10
-  </state>
-</T>
+<generatedTop>
+  <T>
+    <k>
+      .K
+    </k>
+    <state>
+      q |-> 0 x |-> 0 s |-> 4 n |-> 11 i |-> 2 z |-> 10 r |-> 1 m |-> 10 y |-> 20 t |-> 0
+    </state>
+  </T>
+  <generatedCounter>
+    0
+  </generatedCounter>
+</generatedTop>
