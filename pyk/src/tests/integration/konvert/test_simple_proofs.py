@@ -536,6 +536,10 @@ KRULE_TO_KORE_DATA: Final = (
         'SIMPLE-PROOFS.foo-to-baz-owise',
         r"""axiom{} \rewrites{SortGeneratedTopCell{}}(\and{SortGeneratedTopCell{}}(Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblfoo'Unds'SIMPLE-PROOFS'Unds'KItem{}(), kseq{}(Lblfoo'Unds'SIMPLE-PROOFS'Unds'KItem{}(), kseq{}(Lblfoo'Unds'SIMPLE-PROOFS'Unds'KItem{}(), Var'Unds'DotVar1 : SortK{})))), Var'Unds'Gen0 : SortStateCell{}, Var'Unds'Gen1 : SortGeneratedCounterCell{}), \top{SortGeneratedTopCell{}}()), Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortBaz{}, SortKItem{}}(Lblbaz{}()), kseq{}(Lblfoo'Unds'SIMPLE-PROOFS'Unds'KItem{}(), kseq{}(Lblfoo'Unds'SIMPLE-PROOFS'Unds'KItem{}(), Var'Unds'DotVar1 : SortK{})))), Var'Unds'Gen0 : SortStateCell{}, Var'Unds'Gen1 : SortGeneratedCounterCell{})) [priority{}("200"), label{}("SIMPLE-PROOFS.foo-to-baz-owise")]""",
     ),
+    (
+        'SIMPLE-PROOFS.simple-func',
+        r"""axiom{} \rewrites{SortKItem{}}(\and{SortKItem{}}(LblsimpleFunc{}(), \top{SortKItem{}}()), inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("3"))) [priority{}("50"), label{}("SIMPLE-PROOFS.simple-func")]""",
+    ),
 )
 
 KRULE_TO_KORE_EXPLICIT_DATA: Final = (
