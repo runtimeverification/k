@@ -31,7 +31,7 @@ class TestEmitJsonSpec(KProveTest):
     @pytest.fixture
     def spec_module(self, kprove: KProve) -> KFlatModule:
         spec_file = K_FILES / 'looping-spec.k'
-        kfml = kprove.get_claim_modules(spec_file)
+        kfml = kprove.parse_modules(spec_file)
         module = kfml.modules[0]
         claim = module.claims[0]
         claim = claim.let(body=remove_generated_cells(claim.body), att=EMPTY_ATT)
