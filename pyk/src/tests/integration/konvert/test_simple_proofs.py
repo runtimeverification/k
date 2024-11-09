@@ -544,6 +544,14 @@ KRULE_TO_KORE_DATA: Final = (
         'SIMPLE-PROOFS.simple-func-req-1',
         r"""axiom{} \rewrites{SortInt{}}(\and{SortInt{}}(LblleqZero{}(VarX : SortInt{}), \equals{SortBool{}, SortInt{}}(\dv{SortBool{}}("true"), Lbl'Unds-LT-Eqls'Int'Unds'{}(VarX : SortInt{}, \dv{SortInt{}}("0")))), \dv{SortInt{}}("0")) [priority{}("50"), label{}("SIMPLE-PROOFS.simple-func-req-1")]""",
     ),
+    (
+        'SIMPLE-PROOFS.simple-func-simplification',
+        r"""axiom{} \rewrites{SortInt{}}(\and{SortInt{}}(LblleqZero{}(VarX : SortInt{}), \equals{SortBool{}, SortInt{}}(\dv{SortBool{}}("true"), Lbl'Unds-LT-'Int'Unds'{}(\dv{SortInt{}}("0"), VarX : SortInt{}))), \dv{SortInt{}}("1")) [label{}("SIMPLE-PROOFS.simple-func-simplification"), simplification{}("")]""",
+    ),
+    (
+        'SIMPLE-PROOFS.simple-func-simplification-prio',
+        r"""axiom{} \rewrites{SortInt{}}(\and{SortInt{}}(LblleqZero{}(VarX : SortInt{}), \equals{SortBool{}, SortInt{}}(\dv{SortBool{}}("true"), Lbl'Unds-LT-'Int'Unds'{}(\dv{SortInt{}}("0"), VarX : SortInt{}))), \dv{SortInt{}}("1")) [label{}("SIMPLE-PROOFS.simple-func-simplification-prio"), simplification{}("38")]""",
+    ),
 )
 
 KRULE_TO_KORE_EXPLICIT_DATA: Final = (
