@@ -208,17 +208,11 @@ def krule_to_kore(definition: KDefinition, krule: KRule) -> Axiom:
 
     top_level_kore_sort = SortApp('SortGeneratedTopCell')
     top_level_k_sort = KSort('GeneratedTopCell')
+
+    kore_lhs = kast_to_kore(definition, krule_lhs, sort=top_level_k_sort)
     # The backend does not like rewrite rules without a precondition
-    if len(krule_lhs_constraints) > 0:
-        kore_lhs: Pattern = kast_to_kore(definition, krule_lhs, sort=top_level_k_sort)
-    else:
-        kore_lhs = And(
-            top_level_kore_sort,
-            (
-                kast_to_kore(definition, krule_lhs, sort=top_level_k_sort),
-                Top(top_level_kore_sort),
-            ),
-        )
+    if len(krule_lhs_constraints) == 0:
+        kore_lhs = And(top_level_kore_sort, (kore_lhs, Top(top_level_kore_sort)))
 
     kore_rhs: Pattern = kast_to_kore(definition, krule_rhs, sort=top_level_k_sort)
 
