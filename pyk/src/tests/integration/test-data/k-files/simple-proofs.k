@@ -50,7 +50,7 @@ module SIMPLE-PROOFS
 
     syntax Foo ::= abcd(K) [symbol(abcd)]
 
-    syntax KItem ::= simpleFunction() [symbol(simpleFunc), function, total]
+    syntax Int ::= simpleFunction() [symbol(simpleFunc), function, total]
     rule [simple-func]: simpleFunction() => 3
 
 endmodule

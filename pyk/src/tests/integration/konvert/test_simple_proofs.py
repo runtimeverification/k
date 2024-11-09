@@ -538,7 +538,7 @@ KRULE_TO_KORE_DATA: Final = (
     ),
     (
         'SIMPLE-PROOFS.simple-func',
-        r"""axiom{} \rewrites{SortKItem{}}(\and{SortKItem{}}(LblsimpleFunc{}(), \top{SortKItem{}}()), inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("3"))) [priority{}("50"), label{}("SIMPLE-PROOFS.simple-func")]""",
+        r"""axiom{} \rewrites{SortInt{}}(\and{SortInt{}}(LblsimpleFunc{}(), \top{SortInt{}}()), \dv{SortInt{}}("3")) [priority{}("50"), label{}("SIMPLE-PROOFS.simple-func")]""",
     ),
 )
 
