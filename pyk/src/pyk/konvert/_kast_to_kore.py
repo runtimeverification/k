@@ -206,8 +206,11 @@ def krule_to_kore(definition: KDefinition, krule: KRule) -> Axiom:
     krule_lhs = mlAnd([krule_lhs_config] + krule_lhs_constraints)
     krule_rhs = mlAnd([krule_rhs_config] + krule_rhs_constraints)
 
-    top_level_kore_sort = SortApp('SortGeneratedTopCell')
+    # Assume it's a semantic rule, but more specific sort for functional rules
     top_level_k_sort = KSort('GeneratedTopCell')
+    if isinstance(krule_lhs_config, KApply) and krule_lhs_config.label.name in definition.function_labels:
+        top_level_k_sort = definition.sort_strict(krule_lhs_config)
+    top_level_kore_sort = _ksort_to_kore(top_level_k_sort)
 
     kore_lhs = kast_to_kore(definition, krule_lhs, sort=top_level_k_sort)
     # The backend does not like rewrite rules without a precondition
