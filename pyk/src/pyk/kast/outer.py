@@ -1118,6 +1118,11 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         return tuple(func for module in self.modules for func in module.functions)
 
     @cached_property
+    def function_labels(self) -> tuple[str, ...]:
+        """Returns the label names of all the `KProduction` which are function symbols for all modules in this definition."""
+        return tuple(func.klabel.name for func in self.functions if func.klabel is not None)
+
+    @cached_property
     def constructors(self) -> tuple[KProduction, ...]:
         """Returns the `KProduction` which are constructor declarations transitively imported by the main module of this definition."""
         return tuple(ctor for module in self.modules for ctor in module.constructors)
