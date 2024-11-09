@@ -540,6 +540,10 @@ KRULE_TO_KORE_DATA: Final = (
         'SIMPLE-PROOFS.simple-func',
         r"""axiom{} \rewrites{SortInt{}}(\and{SortInt{}}(LblsimpleFunc{}(), \top{SortInt{}}()), \dv{SortInt{}}("3")) [priority{}("50"), label{}("SIMPLE-PROOFS.simple-func")]""",
     ),
+    (
+        'SIMPLE-PROOFS.simple-func-req-1',
+        r"""axiom{} \rewrites{SortInt{}}(\and{SortInt{}}(LblleqZero{}(VarX : SortInt{}), \equals{SortBool{}, SortInt{}}(\dv{SortBool{}}("true"), Lbl'Unds-LT-Eqls'Int'Unds'{}(VarX : SortInt{}, \dv{SortInt{}}("0")))), \dv{SortInt{}}("0")) [priority{}("50"), label{}("SIMPLE-PROOFS.simple-func-req-1")]""",
+    ),
 )
 
 KRULE_TO_KORE_EXPLICIT_DATA: Final = (
