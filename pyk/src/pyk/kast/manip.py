@@ -102,15 +102,15 @@ def if_ktype(ktype: type[KI], then: Callable[[KI], KInner]) -> Callable[[KInner]
     return fun
 
 
-def bool_to_ml_pred(kast: KInner) -> KInner:
+def bool_to_ml_pred(kast: KInner, sort: str | KSort = GENERATED_TOP_CELL) -> KInner:
     def _bool_constraint_to_ml(_kast: KInner) -> KInner:
         if _kast == TRUE:
             return mlTop()
         if _kast == FALSE:
             return mlBottom()
-        return mlEqualsTrue(_kast)
+        return mlEqualsTrue(_kast, sort=sort)
 
-    return mlAnd([_bool_constraint_to_ml(cond) for cond in flatten_label('_andBool_', kast)])
+    return mlAnd([_bool_constraint_to_ml(cond) for cond in flatten_label('_andBool_', kast)], sort=sort)
 
 
 def ml_pred_to_bool(kast: KInner, unsafe: bool = False) -> KInner:
