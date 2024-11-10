@@ -260,8 +260,15 @@ def kflatmodule_to_kore(definition: KDefinition, kflatmodule: KFlatModule) -> Mo
 
 def _katt_to_kore(att_entry: AttEntry) -> App:
     match att_entry.key:
-        case Atts.LABEL | Atts.PRIORITY | Atts.SIMPLIFICATION:
+        case Atts.LABEL | Atts.PRIORITY:
             return App(symbol=att_entry.key.name, sorts=(), args=(String(str(att_entry.value)),))
+        case Atts.SIMPLIFICATION:
+            args = () if not att_entry.value else (String(str(att_entry.value)),)
+            return App(symbol=att_entry.key.name, sorts=(), args=args)
+        case Atts.SYMBOLIC | Atts.CONCRETE:
+            return App(symbol=att_entry.key.name, sorts=(), args=())
+        case Atts.SMTLEMMA:
+            return App(symbol=att_entry.key.name, sorts=(), args=())
         case _:
             raise ValueError(f'Do not know how to convert AttEntry to Kore: {att_entry}')
 

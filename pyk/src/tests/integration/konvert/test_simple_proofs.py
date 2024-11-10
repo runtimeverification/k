@@ -546,11 +546,31 @@ KRULE_TO_KORE_DATA: Final = (
     ),
     (
         'SIMPLE-PROOFS.simple-func-simplification',
-        r"""axiom{} \rewrites{SortInt{}}(\and{SortInt{}}(LblleqZero{}(VarX : SortInt{}), \equals{SortBool{}, SortInt{}}(\dv{SortBool{}}("true"), Lbl'Unds-LT-'Int'Unds'{}(\dv{SortInt{}}("0"), VarX : SortInt{}))), \dv{SortInt{}}("1")) [simplification{}(""), label{}("SIMPLE-PROOFS.simple-func-simplification")]""",
+        r"""axiom{} \rewrites{SortInt{}}(\and{SortInt{}}(LblleqZero{}(VarX : SortInt{}), \equals{SortBool{}, SortInt{}}(\dv{SortBool{}}("true"), Lbl'Unds-LT-'Int'Unds'{}(\dv{SortInt{}}("0"), VarX : SortInt{}))), \dv{SortInt{}}("1")) [simplification{}(), label{}("SIMPLE-PROOFS.simple-func-simplification")]""",
     ),
     (
         'SIMPLE-PROOFS.simple-func-simplification-prio',
         r"""axiom{} \rewrites{SortInt{}}(\and{SortInt{}}(LblleqZero{}(VarX : SortInt{}), \equals{SortBool{}, SortInt{}}(\dv{SortBool{}}("true"), Lbl'Unds-LT-'Int'Unds'{}(\dv{SortInt{}}("0"), VarX : SortInt{}))), \dv{SortInt{}}("1")) [simplification{}("38"), label{}("SIMPLE-PROOFS.simple-func-simplification-prio")]""",
+    ),
+    (
+        'SIMPLE-PROOFS.simple-func-simplification-concrete-noarg',
+        r"""axiom{} \rewrites{SortInt{}}(\and{SortInt{}}(LblleqZero{}(VarX : SortInt{}), \equals{SortBool{}, SortInt{}}(\dv{SortBool{}}("true"), Lbl'Unds-LT-'Int'Unds'{}(\dv{SortInt{}}("0"), VarX : SortInt{}))), \dv{SortInt{}}("1")) [simplification{}(), concrete{}(), label{}("SIMPLE-PROOFS.simple-func-simplification-concrete-noarg")]""",
+    ),
+    (
+        'SIMPLE-PROOFS.simple-func-simplification-concrete',
+        r"""axiom{} \rewrites{SortInt{}}(\and{SortInt{}}(LblleqZero{}(VarX : SortInt{}), \equals{SortBool{}, SortInt{}}(\dv{SortBool{}}("true"), Lbl'Unds-LT-'Int'Unds'{}(\dv{SortInt{}}("0"), VarX : SortInt{}))), \dv{SortInt{}}("1")) [simplification{}(), concrete{}(VarX:SortInt), label{}("SIMPLE-PROOFS.simple-func-simplification-concrete")]""",
+    ),
+    (
+        'SIMPLE-PROOFS.simple-func-simplification-symbolic',
+        r"""axiom{} \rewrites{SortInt{}}(\and{SortInt{}}(LblleqZero{}(VarX : SortInt{}), \equals{SortBool{}, SortInt{}}(\dv{SortBool{}}("true"), Lbl'Unds-LT-'Int'Unds'{}(\dv{SortInt{}}("0"), VarX : SortInt{}))), \dv{SortInt{}}("1")) [simplification{}(), label{}("SIMPLE-PROOFS.simple-func-simplification-symbolic"), symbolic{}(VarX:SortInt)]""",
+    ),
+    (
+        'SIMPLE-PROOFS.simple-func-simplification-comm',
+        r"""axiom{} \rewrites{SortInt{}}(\and{SortInt{}}(LblleqZero{}(VarX : SortInt{}), \equals{SortBool{}, SortInt{}}(\dv{SortBool{}}("true"), Lbl'Unds-LT-'Int'Unds'{}(\dv{SortInt{}}("0"), VarX : SortInt{}))), \dv{SortInt{}}("1")) [simplification{}(), comm{}(), label{}("SIMPLE-PROOFS.simple-func-simplification-comm")]""",
+    ),
+    (
+        'SIMPLE-PROOFS.simple-func-simplification-smt-lemma',
+        r"""axiom{} \rewrites{SortBool{}}(\and{SortBool{}}(Lbl'UndsEqlsEqls'Int'Unds'{}(\dv{SortInt{}}("1"), \dv{SortInt{}}("0")), \top{SortBool{}}()), \dv{SortBool{}}("false")) [simplification{}(), smt-lemma{}(), label{}("SIMPLE-PROOFS.simple-func-simplification-smt-lemma")]""",
     ),
 )
 

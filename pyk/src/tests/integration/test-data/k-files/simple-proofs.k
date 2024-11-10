@@ -57,6 +57,7 @@ module SIMPLE-PROOFS
     rule [simple-func-req-2]: leqZero(X) => 1 requires 0 <Int X
     rule [simple-func-simplification]: leqZero(X) => 1 requires 0 <Int X [simplification]
     rule [simple-func-simplification-prio]: leqZero(X) => 1 requires 0 <Int X [simplification(38)]
+    rule [simple-func-simplification-concrete-noarg]: leqZero(X) => 1 requires 0 <Int X [simplification, concrete]
     rule [simple-func-simplification-concrete]: leqZero(X) => 1 requires 0 <Int X [simplification, concrete(X)]
     rule [simple-func-simplification-symbolic]: leqZero(X) => 1 requires 0 <Int X [simplification, symbolic(X)]
     rule [simple-func-simplification-comm]: 1 ==Int leqZero(X) => true requires 0 <Int X [simplification, comm]
