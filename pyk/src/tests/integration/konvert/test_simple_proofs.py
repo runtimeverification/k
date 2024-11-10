@@ -530,7 +530,7 @@ KRULE_TO_KORE_DATA: Final = (
     ),
     (
         'SIMPLE-PROOFS.foo-to-bar-false',
-        r"""axiom{} \rewrites{SortGeneratedTopCell{}}(\and{SortGeneratedTopCell{}}(Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblfoo'Unds'SIMPLE-PROOFS'Unds'KItem{}(), Var'Unds'RestK : SortK{})), Lbl'-LT-'state'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("3")), inj{SortInt{}, SortKItem{}}(VarN : SortInt{})), Var'Unds'RestState : SortMap{})), Var'Unds'DotVar0 : SortGeneratedCounterCell{}), \and{SortGeneratedTopCell{}}(\equals{SortBool{}, SortGeneratedTopCell{}}(\dv{SortBool{}}("true"), Lblpred1{}(VarN : SortInt{})), \bottom{SortGeneratedTopCell{}}())), Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblbar'Unds'SIMPLE-PROOFS'Unds'KItem{}(), Var'Unds'RestK : SortK{})), Lbl'-LT-'state'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("3")), inj{SortInt{}, SortKItem{}}(VarN : SortInt{})), Var'Unds'RestState : SortMap{})), Var'Unds'DotVar0 : SortGeneratedCounterCell{})) [label{}("SIMPLE-PROOFS.foo-to-bar-false"), priority{}("30")]""",
+        r"""axiom{} \rewrites{SortGeneratedTopCell{}}(\and{SortGeneratedTopCell{}}(Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblfoo'Unds'SIMPLE-PROOFS'Unds'KItem{}(), Var'Unds'RestK : SortK{})), Lbl'-LT-'state'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("3")), inj{SortInt{}, SortKItem{}}(VarN : SortInt{})), Var'Unds'RestState : SortMap{})), Var'Unds'DotVar0 : SortGeneratedCounterCell{}), \and{SortGeneratedTopCell{}}(\equals{SortBool{}, SortGeneratedTopCell{}}(\dv{SortBool{}}("true"), Lblpred1{}(VarN : SortInt{})), \bottom{SortGeneratedTopCell{}}())), Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblbar'Unds'SIMPLE-PROOFS'Unds'KItem{}(), Var'Unds'RestK : SortK{})), Lbl'-LT-'state'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("3")), inj{SortInt{}, SortKItem{}}(VarN : SortInt{})), Var'Unds'RestState : SortMap{})), Var'Unds'DotVar0 : SortGeneratedCounterCell{})) [priority{}("30"), label{}("SIMPLE-PROOFS.foo-to-bar-false")]""",
     ),
     (
         'SIMPLE-PROOFS.foo-to-baz-owise',
@@ -546,11 +546,11 @@ KRULE_TO_KORE_DATA: Final = (
     ),
     (
         'SIMPLE-PROOFS.simple-func-simplification',
-        r"""axiom{} \rewrites{SortInt{}}(\and{SortInt{}}(LblleqZero{}(VarX : SortInt{}), \equals{SortBool{}, SortInt{}}(\dv{SortBool{}}("true"), Lbl'Unds-LT-'Int'Unds'{}(\dv{SortInt{}}("0"), VarX : SortInt{}))), \dv{SortInt{}}("1")) [label{}("SIMPLE-PROOFS.simple-func-simplification"), simplification{}("")]""",
+        r"""axiom{} \rewrites{SortInt{}}(\and{SortInt{}}(LblleqZero{}(VarX : SortInt{}), \equals{SortBool{}, SortInt{}}(\dv{SortBool{}}("true"), Lbl'Unds-LT-'Int'Unds'{}(\dv{SortInt{}}("0"), VarX : SortInt{}))), \dv{SortInt{}}("1")) [simplification{}(""), label{}("SIMPLE-PROOFS.simple-func-simplification")]""",
     ),
     (
         'SIMPLE-PROOFS.simple-func-simplification-prio',
-        r"""axiom{} \rewrites{SortInt{}}(\and{SortInt{}}(LblleqZero{}(VarX : SortInt{}), \equals{SortBool{}, SortInt{}}(\dv{SortBool{}}("true"), Lbl'Unds-LT-'Int'Unds'{}(\dv{SortInt{}}("0"), VarX : SortInt{}))), \dv{SortInt{}}("1")) [label{}("SIMPLE-PROOFS.simple-func-simplification-prio"), simplification{}("38")]""",
+        r"""axiom{} \rewrites{SortInt{}}(\and{SortInt{}}(LblleqZero{}(VarX : SortInt{}), \equals{SortBool{}, SortInt{}}(\dv{SortBool{}}("true"), Lbl'Unds-LT-'Int'Unds'{}(\dv{SortInt{}}("0"), VarX : SortInt{}))), \dv{SortInt{}}("1")) [simplification{}("38"), label{}("SIMPLE-PROOFS.simple-func-simplification-prio")]""",
     ),
 )
 

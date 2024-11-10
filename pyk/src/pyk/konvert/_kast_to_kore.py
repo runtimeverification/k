@@ -21,6 +21,7 @@ if TYPE_CHECKING:
     from typing import Final
 
     from ..kast import KInner
+    from ..kast.att import AttEntry
     from ..kast.outer import KDefinition, KFlatModule, KImport
     from ..kore.syntax import Pattern, Sentence, Sort
 
@@ -225,11 +226,16 @@ def krule_to_kore(definition: KDefinition, krule: KRule) -> Axiom:
     if not isinstance(kore_lhs, And):
         kore_lhs = And(top_level_kore_sort, (kore_lhs, Top(top_level_kore_sort)))
 
-    prio = krule.priority
-    attrs = [App(symbol='priority', sorts=(), args=(String(str(prio)),))]
-    if Atts.LABEL in krule.att:
-        label = krule.att[Atts.LABEL]
-        attrs.append(App(symbol='label', sorts=(), args=(String(label),)))
+    # Make adjustments to Rule attributes
+    att = krule.att.discard([Atts.PRODUCTION, Atts.UNIQUE_ID, Atts.SOURCE, Atts.LOCATION])
+    if Atts.PRIORITY not in att:
+        if Atts.OWISE in att:
+            att = att.update([Atts.PRIORITY(200)])
+            att = att.discard([Atts.OWISE])
+        else:
+            att = att.update([Atts.PRIORITY(50)])
+    attrs = [_katt_to_kore(att_entry) for att_entry in att.entries()]
+
     axiom = Axiom(
         vars=(),
         pattern=Rewrites(
@@ -250,6 +256,14 @@ def kflatmodule_to_kore(definition: KDefinition, kflatmodule: KFlatModule) -> Mo
         kore_axioms.append(krule_to_kore(definition, sent))
     imports: list[Sentence] = [_kimport_to_kore(kimport) for kimport in kflatmodule.imports]
     return Module(name=kflatmodule.name, sentences=(imports + kore_axioms))
+
+
+def _katt_to_kore(att_entry: AttEntry) -> App:
+    match att_entry.key:
+        case Atts.LABEL | Atts.PRIORITY:
+            return App(symbol=att_entry.key.name, sorts=(), args=(String(str(att_entry.value)),))
+        case _:
+            raise ValueError(f'Do not know how to convert AttEntry to Kore: {att_entry}')
 
 
 def _kimport_to_kore(kimport: KImport) -> Import:
