@@ -1399,7 +1399,7 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         return top_down(_add_ksequence_under_k_productions, kast)
 
     def sort_vars(self, kast: KInner, sort: KSort | None = None) -> KInner:
-        """Return the original term with all the variables having there sorts added or specialized, failing if recieving conflicting sorts for a given variable."""
+        """Return the original term with all the variables having the sorts added or specialized, failing if recieving conflicting sorts for a given variable."""
         if type(kast) is KVariable and kast.sort is None and sort is not None:
             return kast.let(sort=sort)
 
