@@ -232,7 +232,7 @@ def krule_to_kore(definition: KDefinition, krule: KRule) -> Axiom:
         if Atts.OWISE in att:
             att = att.update([Atts.PRIORITY(200)])
             att = att.discard([Atts.OWISE])
-        else:
+        elif Atts.SIMPLIFICATION not in att:
             att = att.update([Atts.PRIORITY(50)])
     attrs = [_katt_to_kore(att_entry) for att_entry in att.entries()]
 
@@ -260,7 +260,7 @@ def kflatmodule_to_kore(definition: KDefinition, kflatmodule: KFlatModule) -> Mo
 
 def _katt_to_kore(att_entry: AttEntry) -> App:
     match att_entry.key:
-        case Atts.LABEL | Atts.PRIORITY:
+        case Atts.LABEL | Atts.PRIORITY | Atts.SIMPLIFICATION:
             return App(symbol=att_entry.key.name, sorts=(), args=(String(str(att_entry.value)),))
         case _:
             raise ValueError(f'Do not know how to convert AttEntry to Kore: {att_entry}')
