@@ -5,8 +5,8 @@ from functools import reduce
 from typing import TYPE_CHECKING
 
 from ..kast import Atts
-from ..kast.inner import KApply, KLabel, KSequence, KSort, KToken, KVariable, top_down
-from ..kast.manip import bool_to_ml_pred, extract_lhs, extract_rhs, flatten_label
+from ..kast.inner import KApply, KLabel, KRewrite, KSequence, KSort, KToken, KVariable, top_down
+from ..kast.manip import bool_to_ml_pred, extract_lhs, extract_rhs, flatten_label, var_occurrences
 from ..kast.outer import KRule
 from ..kore.prelude import SORT_K
 from ..kore.syntax import DV, And, App, Axiom, EVar, Import, MLPattern, MLQuant, Module, Rewrites, SortApp, String, Top
@@ -199,6 +199,7 @@ def _inject(definition: KDefinition, term: KInner, sort: KSort) -> KInner:
 
 # 'krule' should have sorts on variables
 def krule_to_kore(definition: KDefinition, krule: KRule) -> Axiom:
+
     krule_body = krule.body
     krule_lhs_config = extract_lhs(krule_body)
     krule_rhs_config = extract_rhs(krule_body)
@@ -219,12 +220,18 @@ def krule_to_kore(definition: KDefinition, krule: KRule) -> Axiom:
     kast_lhs = mlAnd([krule_lhs_config] + krule_lhs_constraints, sort=top_level_k_sort)
     kast_rhs = mlAnd([krule_rhs_config] + krule_rhs_constraints, sort=top_level_k_sort)
 
-    kore_lhs = kast_to_kore(definition, kast_lhs, sort=top_level_k_sort)
-    kore_rhs = kast_to_kore(definition, kast_rhs, sort=top_level_k_sort)
+    kast_rule_sorted = definition.sort_vars(KRewrite(kast_lhs, kast_rhs))
+    kast_lhs_sorted = extract_lhs(kast_rule_sorted)
+    kast_rhs_sorted = extract_rhs(kast_rule_sorted)
+
+    kore_lhs = kast_to_kore(definition, kast_lhs_sorted, sort=top_level_k_sort)
+    kore_rhs = kast_to_kore(definition, kast_rhs_sorted, sort=top_level_k_sort)
 
     # The backend does not like rewrite rules without a precondition
     if not isinstance(kore_lhs, And):
         kore_lhs = And(top_level_kore_sort, (kore_lhs, Top(top_level_kore_sort)))
+
+    kore_rule = Rewrites(sort=top_level_kore_sort, left=kore_lhs, right=kore_rhs)
 
     # Make adjustments to Rule attributes
     att = krule.att.discard([Atts.PRODUCTION, Atts.UNIQUE_ID, Atts.SOURCE, Atts.LOCATION])
@@ -234,18 +241,10 @@ def krule_to_kore(definition: KDefinition, krule: KRule) -> Axiom:
             att = att.discard([Atts.OWISE])
         elif Atts.SIMPLIFICATION not in att:
             att = att.update([Atts.PRIORITY(50)])
-    attrs = [_katt_to_kore(att_entry) for att_entry in att.entries()]
 
-    axiom = Axiom(
-        vars=(),
-        pattern=Rewrites(
-            sort=top_level_kore_sort,
-            left=kore_lhs,
-            right=kore_rhs,
-        ),
-        attrs=attrs,
-    )
-    return axiom
+    attrs = [_krule_att_to_kore(att_entry, var_occurrences(kast_rule_sorted)) for att_entry in att.entries()]
+
+    return Axiom(vars=(), pattern=kore_rule, attrs=attrs)
 
 
 def kflatmodule_to_kore(definition: KDefinition, kflatmodule: KFlatModule) -> Module:
@@ -258,7 +257,7 @@ def kflatmodule_to_kore(definition: KDefinition, kflatmodule: KFlatModule) -> Mo
     return Module(name=kflatmodule.name, sentences=(imports + kore_axioms))
 
 
-def _katt_to_kore(att_entry: AttEntry) -> App:
+def _krule_att_to_kore(att_entry: AttEntry, kast_rule_vars: dict[str, list[KVariable]]) -> App:
     match att_entry.key:
         case Atts.LABEL | Atts.PRIORITY:
             return App(symbol=att_entry.key.name, sorts=(), args=(String(str(att_entry.value)),))
@@ -266,7 +265,14 @@ def _katt_to_kore(att_entry: AttEntry) -> App:
             args = () if not att_entry.value else (String(str(att_entry.value)),)
             return App(symbol=att_entry.key.name, sorts=(), args=args)
         case Atts.SYMBOLIC | Atts.CONCRETE:
-            return App(symbol=att_entry.key.name, sorts=(), args=())
+            if not att_entry.value:
+                return App(symbol=att_entry.key.name, sorts=(), args=())
+            kore_vars = []
+            for var_name in att_entry.value.split(','):
+                if var_name not in kast_rule_vars:
+                    raise ValueError(f'Variable in {att_entry.key} not present in rule: {var_name}')
+                kore_vars.append(_kvariable_to_kore(kast_rule_vars[var_name][0]))
+            return App(symbol=att_entry.key.name, sorts=(), args=tuple(kore_vars))
         case Atts.SMTLEMMA:
             return App(symbol=att_entry.key.name, sorts=(), args=())
         case _:
