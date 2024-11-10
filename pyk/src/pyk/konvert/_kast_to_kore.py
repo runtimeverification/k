@@ -201,10 +201,6 @@ def krule_to_kore(definition: KDefinition, krule: KRule) -> Axiom:
     krule_body = krule.body
     krule_lhs_config = extract_lhs(krule_body)
     krule_rhs_config = extract_rhs(krule_body)
-    krule_lhs_constraints = [bool_to_ml_pred(c) for c in flatten_label('_andBool_', krule.requires) if not c == TRUE]
-    krule_rhs_constraints = [bool_to_ml_pred(c) for c in flatten_label('_andBool_', krule.ensures) if not c == TRUE]
-    krule_lhs = mlAnd([krule_lhs_config] + krule_lhs_constraints)
-    krule_rhs = mlAnd([krule_rhs_config] + krule_rhs_constraints)
 
     # Assume it's a semantic rule, but more specific sort for functional rules
     top_level_k_sort = KSort('GeneratedTopCell')
@@ -212,12 +208,22 @@ def krule_to_kore(definition: KDefinition, krule: KRule) -> Axiom:
         top_level_k_sort = definition.sort_strict(krule_lhs_config)
     top_level_kore_sort = _ksort_to_kore(top_level_k_sort)
 
-    kore_lhs = kast_to_kore(definition, krule_lhs, sort=top_level_k_sort)
-    # The backend does not like rewrite rules without a precondition
-    if len(krule_lhs_constraints) == 0:
-        kore_lhs = And(top_level_kore_sort, (kore_lhs, Top(top_level_kore_sort)))
+    krule_lhs_constraints = [
+        bool_to_ml_pred(c, sort=top_level_k_sort) for c in flatten_label('_andBool_', krule.requires) if not c == TRUE
+    ]
+    krule_rhs_constraints = [
+        bool_to_ml_pred(c, sort=top_level_k_sort) for c in flatten_label('_andBool_', krule.ensures) if not c == TRUE
+    ]
 
-    kore_rhs: Pattern = kast_to_kore(definition, krule_rhs, sort=top_level_k_sort)
+    kast_lhs = mlAnd([krule_lhs_config] + krule_lhs_constraints, sort=top_level_k_sort)
+    kast_rhs = mlAnd([krule_rhs_config] + krule_rhs_constraints, sort=top_level_k_sort)
+
+    kore_lhs = kast_to_kore(definition, kast_lhs, sort=top_level_k_sort)
+    kore_rhs = kast_to_kore(definition, kast_rhs, sort=top_level_k_sort)
+
+    # The backend does not like rewrite rules without a precondition
+    if not isinstance(kore_lhs, And):
+        kore_lhs = And(top_level_kore_sort, (kore_lhs, Top(top_level_kore_sort)))
 
     prio = krule.priority
     attrs = [App(symbol='priority', sorts=(), args=(String(str(prio)),))]
