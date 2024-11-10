@@ -52,6 +52,8 @@ module SIMPLE-PROOFS
 
     syntax Int ::= simpleFunction() [symbol(simpleFunc), function, total]
                  | leqZero(Int) [symbol(leqZero), function, total]
+                 | leq(Int, Int) [symbol(leq), function, total]
+    rule leq(_,_) => 0
     rule [simple-func]: simpleFunction() => 3
     rule [simple-func-req-1]: leqZero(X) => 0 requires X <=Int 0
     rule [simple-func-req-2]: leqZero(X) => 1 requires 0 <Int X
@@ -60,7 +62,7 @@ module SIMPLE-PROOFS
     rule [simple-func-simplification-concrete-noarg]: leqZero(X) => 1 requires 0 <Int X [simplification, concrete]
     rule [simple-func-simplification-concrete]: leqZero(X) => 1 requires 0 <Int X [simplification, concrete(X)]
     rule [simple-func-simplification-symbolic]: leqZero(X) => 1 requires 0 <Int X [simplification, symbolic(X)]
-    rule [simple-func-simplification-comm]: 1 ==Int leqZero(X) => true requires 0 <Int X [simplification, comm]
+    rule [simple-func-simplification-symbolic-2vars]: leq(X,_Y) => 1 requires 0 <Int X [simplification, symbolic(X,_Y)]
     rule [simple-func-simplification-smt-lemma]: 1 ==Int 0 => false [simplification, smt-lemma]
 
 endmodule
