@@ -893,7 +893,7 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         tmp_path_factory: TempPathFactory,
     ) -> None:
         proof_dir = tmp_path_factory.mktemp(f'apr_tmp_proofs-{test_id}')
-        spec_modules = kprove.parse_modules(Path(spec_file), spec_module_name=spec_module)
+        spec_modules = kprove.parse_modules(Path(spec_file), module_name=spec_module)
         spec_label = f'{spec_module}.{claim_id}'
         proofs = APRProof.from_spec_modules(
             kprove.definition,
@@ -930,7 +930,7 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         claim_id: str = 'terminal-node-subsumption'
         cut_rules: Iterable[str] = []
         proof_dir = tmp_path_factory.mktemp(f'apr_tmp_proofs-{test_id}')
-        spec_modules = kprove.parse_modules(Path(spec_file), spec_module_name=spec_module)
+        spec_modules = kprove.parse_modules(Path(spec_file), module_name=spec_module)
         spec_label = f'{spec_module}.{claim_id}'
         proofs = APRProof.from_spec_modules(
             kprove.definition,
@@ -1441,7 +1441,7 @@ class TestImpParallelProof(ParallelTest, KProveTest):
         create_prover: Callable[[int, Iterable[str]], Prover],
     ) -> None:
         proof_dir = tmp_path_factory.mktemp(f'apr_tmp_proofs-{test_id}')
-        spec_modules = kprove.parse_modules(Path(spec_file), spec_module_name=spec_module)
+        spec_modules = kprove.parse_modules(Path(spec_file), module_name=spec_module)
         spec_label = f'{spec_module}.{claim_id}'
         proofs = APRProof.from_spec_modules(
             kprove.definition,
@@ -1480,7 +1480,7 @@ class TestImpParallelProof(ParallelTest, KProveTest):
         claim_id = 'addition-1'
 
         proof_dir = tmp_path_factory.mktemp(f'apr_tmp_proofs-{test_id}')
-        spec_modules = kprove.parse_modules(Path(spec_file), spec_module_name=spec_module)
+        spec_modules = kprove.parse_modules(Path(spec_file), module_name=spec_module)
         spec_label = f'{spec_module}.{claim_id}'
         proofs = APRProof.from_spec_modules(
             kprove.definition,
