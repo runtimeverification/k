@@ -121,6 +121,14 @@ BRACKETS_TEST_DATA = (
     (KApply('_*_', token(1), KApply('_+_', token(2), token(3))), '1 * ( 2 + 3 )'),
     (KApply('_*_', KApply('_+_', token(1), token(2)), token(3)), '( 1 + 2 ) * 3'),
     (KApply('sgn(_)', KApply('_+_', token(1), token(2))), 'sgn ( 1 + 2 )'),
+    (
+        KApply('<k>', KSequence(KApply('_*_', KApply('_+_', token(1), token(2)), token(3)))),
+        """
+        <k>
+          ( 1 + 2 ) * 3 ~> .K
+        </k>
+        """,
+    ),
 )
 
 

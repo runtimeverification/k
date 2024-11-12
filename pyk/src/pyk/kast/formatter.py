@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from ..utils import intersperse
 from .att import Atts
-from .inner import KApply, KToken, KVariable
+from .inner import KApply, KToken, KVariable, bottom_up
 from .outer import KNonTerminal, KRegexTerminal, KSequence, KTerminal
 
 if TYPE_CHECKING:
@@ -112,24 +112,27 @@ class Formatter:
 
 
 def add_brackets(definition: KDefinition, term: KInner) -> KInner:
-    if not isinstance(term, KApply):
-        return term
-    prod = definition.symbols[term.label.name]
+    def _add_brackets(term: KInner) -> KInner:
+        if not isinstance(term, KApply):
+            return term
 
-    args: list[KInner] = []
+        prod = definition.symbols[term.label.name]
 
-    arg_index = -1
-    for index, item in enumerate(prod.items):
-        if not isinstance(item, KNonTerminal):
-            continue
+        args: list[KInner] = []
 
-        arg_index += 1
-        arg = term.args[arg_index]
-        arg = add_brackets(definition, arg)
-        arg = _with_bracket(definition, term, arg, item.sort, index)
-        args.append(arg)
+        arg_index = -1
+        for index, item in enumerate(prod.items):
+            if not isinstance(item, KNonTerminal):
+                continue
 
-    return term.let(args=args)
+            arg_index += 1
+            arg = term.args[arg_index]
+            arg = _with_bracket(definition, term, arg, item.sort, index)
+            args.append(arg)
+
+        return term.let(args=args)
+
+    return bottom_up(_add_brackets, term)
 
 
 def _with_bracket(definition: KDefinition, parent: KApply, term: KInner, bracket_sort: KSort, index: int) -> KInner:
