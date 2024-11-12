@@ -120,6 +120,7 @@ BRACKETS_TEST_DATA = (
     (KApply('_+_', KApply('_*_', token(1), token(2)), token(3)), '1 * 2 + 3'),
     (KApply('_*_', token(1), KApply('_+_', token(2), token(3))), '1 * ( 2 + 3 )'),
     (KApply('_*_', KApply('_+_', token(1), token(2)), token(3)), '( 1 + 2 ) * 3'),
+    (KApply('_*Int_', KApply('_+Int_', token(1), token(2)), token(3)), '( 1 +Int 2 ) *Int 3'),
     (KApply('sgn(_)', KApply('_+_', token(1), token(2))), 'sgn ( 1 + 2 )'),
     (
         KApply('<k>', KSequence(KApply('_*_', KApply('_+_', token(1), token(2)), token(3)))),
@@ -135,7 +136,7 @@ BRACKETS_TEST_DATA = (
 class TestBrackets(FormatterTest):
     KOMPILE_DEFINITION = """
         module BRACKETS
-            imports INT-SYNTAX
+            imports INT
             syntax Exp ::= Int
                          | sgn ( Exp ) [symbol(sgn(_))]
                          > Exp "*" Exp [symbol(_*_), left]
