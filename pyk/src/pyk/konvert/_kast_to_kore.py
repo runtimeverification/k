@@ -311,7 +311,10 @@ def krule_to_kore(definition: KDefinition, krule: KRule) -> Axiom:
         elif Atts.SIMPLIFICATION not in att:
             att = att.update([Atts.PRIORITY(50)])
 
-    attrs = [_krule_att_to_kore(att_entry, var_occurrences(kast_rule_sorted)) for att_entry in att.entries()]
+    attrs = [
+        _krule_att_to_kore(att_entry, var_occurrences(kast_rule_sorted))
+        for att_entry in sorted(att.entries(), key=(lambda a: a.key.name))
+    ]
 
     return Axiom(vars=axiom_vars, pattern=kore_axiom, attrs=attrs)
 
