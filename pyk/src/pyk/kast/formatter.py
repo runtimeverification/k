@@ -2,15 +2,59 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from ..prelude.k import K_ITEM
 from ..utils import intersperse
-from .att import Atts
-from .inner import KApply, KToken, KVariable
-from .outer import KNonTerminal, KRegexTerminal, KSequence, KTerminal
+from .att import Atts, Format, KAtt
+from .inner import KApply, KToken, KVariable, bottom_up
+from .outer import KNonTerminal, KProduction, KRegexTerminal, KSequence, KTerminal
 
 if TYPE_CHECKING:
+    from typing import Final
+
     from . import KInner
     from .inner import KSort
-    from .outer import KDefinition, KProduction
+    from .outer import KDefinition
+
+
+"""
+Notes on _DEFAULT_BRACKET
+-------------------------
+
+Module KSEQ defines the following production:
+
+syntax {Sort} Sort ::= "(" Sort ")" [bracket, group(defaultBracket), applyPriority(1)]
+
+https://github.com/runtimeverification/k/blob/5c84d48f697b73ad779395c53b7edc934ed4e8f5/k-distribution/include/kframework/builtin/kast.md?plain=1#L102
+
+For pretty printing, the K Frontend instantiates a module where parametric productions,
+including this one, are instantiated with actual sorts:
+
+https://github.com/runtimeverification/k/blob/5c84d48f697b73ad779395c53b7edc934ed4e8f5/k-frontend/src/main/java/org/kframework/parser/inner/RuleGrammarGenerator.java
+
+_DEFAULT_BRACKET emulates this behavior without the need of actually constructing the module.
+
+Since the default bracket production is not included in syntaxDefinition.kore,
+the pretty printer of the LLVM backend follows a similar approach (on the KORE level):
+
+https://github.com/runtimeverification/llvm-backend/blob/d5eab4b0f0e610bc60843ebb482f79c043b92702/lib/printer/addBrackets.cpp#L446-L447
+https://github.com/runtimeverification/llvm-backend/blob/d5eab4b0f0e610bc60843ebb482f79c043b92702/lib/printer/printer.cpp#L63
+"""
+_DEFAULT_BRACKET_LABEL: Final = '__bracket__'
+_DEFAULT_BRACKET: Final = KProduction(
+    sort=K_ITEM,  # sort is irrelevant
+    items=(
+        KTerminal('('),
+        KNonTerminal(K_ITEM),  # sort is irrelevant
+        KTerminal(value=')'),
+    ),
+    att=KAtt(  # except for 'format', the other attributes are not necessary
+        (
+            Atts.BRACKET_LABEL({'name': _DEFAULT_BRACKET_LABEL}),
+            Atts.BRACKET(None),
+            Atts.FORMAT(Format.parse('%1 %2 %3')),
+        )
+    ),
+)
 
 
 class Formatter:
@@ -52,7 +96,12 @@ class Formatter:
         return [chunk for chunks in intersperse(items, [' ~> ']) for chunk in chunks]
 
     def _format_kapply(self, kapply: KApply) -> list[str]:
-        production = self.definition.syntax_symbols[kapply.label.name]
+        production: KProduction
+        if kapply.label.name == _DEFAULT_BRACKET_LABEL:
+            production = _DEFAULT_BRACKET
+        else:
+            production = self.definition.syntax_symbols[kapply.label.name]
+
         formatt = production.att.get(Atts.FORMAT, production.default_format)
         return [
             chunk
@@ -112,34 +161,34 @@ class Formatter:
 
 
 def add_brackets(definition: KDefinition, term: KInner) -> KInner:
-    if not isinstance(term, KApply):
-        return term
-    prod = definition.symbols[term.label.name]
+    def _add_brackets(term: KInner) -> KInner:
+        if not isinstance(term, KApply):
+            return term
 
-    args: list[KInner] = []
+        prod = definition.symbols[term.label.name]
 
-    arg_index = -1
-    for index, item in enumerate(prod.items):
-        if not isinstance(item, KNonTerminal):
-            continue
+        args: list[KInner] = []
 
-        arg_index += 1
-        arg = term.args[arg_index]
-        arg = add_brackets(definition, arg)
-        arg = _with_bracket(definition, term, arg, item.sort, index)
-        args.append(arg)
+        arg_index = -1
+        for index, item in enumerate(prod.items):
+            if not isinstance(item, KNonTerminal):
+                continue
 
-    return term.let(args=args)
+            arg_index += 1
+            arg = term.args[arg_index]
+            arg = _with_bracket(definition, term, arg, item.sort, index)
+            args.append(arg)
+
+        return term.let(args=args)
+
+    return bottom_up(_add_brackets, term)
 
 
 def _with_bracket(definition: KDefinition, parent: KApply, term: KInner, bracket_sort: KSort, index: int) -> KInner:
     if not _requires_bracket(definition, parent, term, index):
         return term
 
-    bracket_prod = definition.brackets.get(bracket_sort)
-    if not bracket_prod:
-        return term
-
+    bracket_prod = definition.brackets.get(bracket_sort, _DEFAULT_BRACKET)
     bracket_label = bracket_prod.att[Atts.BRACKET_LABEL]['name']
     return KApply(bracket_label, term)
 
