@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 from pyk.kcfg.kcfg import KCFG, NodeAttr
 from pyk.kcfg.minimize import KCFGMinimizer
+from pyk.kcfg.semantics import KCFGSemantics
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
@@ -109,5 +110,5 @@ class KCFGExploration:
     #
 
     # Minimizing the KCFG
-    def minimize_kcfg(self, merge: bool = False) -> None:
-        KCFGMinimizer(self.kcfg).minimize(merge=merge)
+    def minimize_kcfg(self, heuristics: KCFGSemantics | None = None, merge: bool = False) -> None:
+        KCFGMinimizer(kcfg=self.kcfg, heuristics=heuristics).minimize(merge=merge)
