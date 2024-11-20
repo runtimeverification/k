@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 from pyk.kcfg.kcfg import KCFG, NodeAttr
 from pyk.kcfg.minimize import KCFGMinimizer
+from pyk.kcfg.semantics import KCFGSemantics
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
