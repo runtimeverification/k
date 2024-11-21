@@ -570,7 +570,7 @@ KRULE_TO_KORE_DATA: Final = (
     ),
     (
         'SIMPLE-PROOFS.simple-func-simplification-smt-lemma',
-        r"""axiom{R} \implies{R}(\equals{SortBool{}, R}(\dv{SortBool{}}("true"), \dv{SortBool{}}("true")), \equals{SortBool{}, R}(Lbl'UndsEqlsEqls'Int'Unds'{}(\dv{SortInt{}}("1"), \dv{SortInt{}}("0")), \and{SortBool{}}(\dv{SortBool{}}("false"), \top{SortBool{}}()))) [label{}("SIMPLE-PROOFS.simple-func-simplification-smt-lemma"), simplification{}(""), smt-lemma{}()]""",
+        r"""axiom{R} \implies{R}(\equals{SortBool{}, R}(\dv{SortBool{}}("true"), \dv{SortBool{}}("true")), \equals{SortBool{}, R}(Lbl'UndsEqlsEqls'Int'Unds'{}(Lblleq{}(Var'Unds'Gen0 : SortInt{}, Var'Unds'Gen1 : SortInt{}), \dv{SortInt{}}("0")), \and{SortBool{}}(\dv{SortBool{}}("false"), \top{SortBool{}}()))) [label{}("SIMPLE-PROOFS.simple-func-simplification-smt-lemma"), simplification{}(""), smt-lemma{}()]""",
     ),
 )
 
