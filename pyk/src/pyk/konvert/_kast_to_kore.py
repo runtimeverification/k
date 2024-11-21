@@ -218,7 +218,6 @@ def _inject(definition: KDefinition, term: KInner, sort: KSort) -> KInner:
 
 # 'krule' should have sorts on variables
 def krule_to_kore(definition: KDefinition, krule: KRule) -> Axiom:
-
     krule_body = krule.body
     krule_lhs_config = extract_lhs(krule_body)
     krule_rhs_config = extract_rhs(krule_body)
