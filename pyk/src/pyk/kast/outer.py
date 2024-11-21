@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, final, overload
 
 from ..prelude.kbool import TRUE
 from ..prelude.ml import ML_QUANTIFIERS
-from ..utils import FrozenDict, POSet, filter_none, single, unique
+from ..utils import FrozenDict, POSet, filter_none, not_none, single, unique
 from .att import EMPTY_ATT, Atts, Format, KAst, KAtt, WithKAtt
 from .inner import (
     KApply,
@@ -1120,7 +1120,7 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
     @cached_property
     def function_labels(self) -> tuple[str, ...]:
         """Returns the label names of all the `KProduction` which are function symbols for all modules in this definition."""
-        return tuple(func.klabel.name for func in self.functions if func.klabel is not None)
+        return tuple(not_none(func.klabel).name for func in self.functions)
 
     @cached_property
     def constructors(self) -> tuple[KProduction, ...]:
