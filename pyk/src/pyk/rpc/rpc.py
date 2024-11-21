@@ -5,7 +5,8 @@ import logging
 from dataclasses import dataclass
 from functools import partial
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import TYPE_CHECKING, Any, Final, Iterable
+from typing import TYPE_CHECKING, Any, Final
+from collections.abc import Iterable
 
 from typing_extensions import Protocol
 
