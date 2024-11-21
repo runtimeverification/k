@@ -50,4 +50,19 @@ module SIMPLE-PROOFS
 
     syntax Foo ::= abcd(K) [symbol(abcd)]
 
+    syntax Int ::= simpleFunction() [symbol(simpleFunc), function, total]
+                 | leqZero(Int) [symbol(leqZero), function, total]
+                 | leq(Int, Int) [symbol(leq), function, total, smtlib(leq)]
+    rule leq(_,_) => 0
+    rule [simple-func]: simpleFunction() => 3
+    rule [simple-func-req-1]: leqZero(X) => 0 requires X <=Int 0
+    rule [simple-func-req-2]: leqZero(X) => 1 requires 0 <Int X
+    rule [simple-func-simplification]: leqZero(X) => 1 requires 0 <Int X [simplification]
+    rule [simple-func-simplification-prio]: leqZero(X) => 1 requires 0 <Int X [simplification(38)]
+    rule [simple-func-simplification-concrete-noarg]: leqZero(X) => 1 requires 0 <Int X [simplification, concrete]
+    rule [simple-func-simplification-concrete]: leqZero(X) => 1 requires 0 <Int X [simplification, concrete(X)]
+    rule [simple-func-simplification-symbolic]: leqZero(X) => 1 requires 0 <Int X [simplification, symbolic(X)]
+    rule [simple-func-simplification-symbolic-2vars]: leq(X,_Y) => 1 requires 0 <Int X [simplification, symbolic(X,_Y)]
+    rule [simple-func-simplification-smt-lemma]: leq(_,_) ==Int 0 => false [simplification, smt-lemma]
+
 endmodule

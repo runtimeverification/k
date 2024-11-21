@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, final, overload
 
 from ..prelude.kbool import TRUE
 from ..prelude.ml import ML_QUANTIFIERS
-from ..utils import FrozenDict, POSet, filter_none, single, unique
+from ..utils import FrozenDict, POSet, filter_none, not_none, single, unique
 from .att import EMPTY_ATT, Atts, Format, KAst, KAtt, WithKAtt
 from .inner import (
     KApply,
@@ -1118,6 +1118,11 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         return tuple(func for module in self.modules for func in module.functions)
 
     @cached_property
+    def function_labels(self) -> tuple[str, ...]:
+        """Returns the label names of all the `KProduction` which are function symbols for all modules in this definition."""
+        return tuple(not_none(func.klabel).name for func in self.functions)
+
+    @cached_property
     def constructors(self) -> tuple[KProduction, ...]:
         """Returns the `KProduction` which are constructor declarations transitively imported by the main module of this definition."""
         return tuple(ctor for module in self.modules for ctor in module.constructors)
@@ -1394,7 +1399,7 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         return top_down(_add_ksequence_under_k_productions, kast)
 
     def sort_vars(self, kast: KInner, sort: KSort | None = None) -> KInner:
-        """Return the original term with all the variables having there sorts added or specialized, failing if recieving conflicting sorts for a given variable."""
+        """Return the original term with all the variables having the sorts added or specialized, failing if recieving conflicting sorts for a given variable."""
         if type(kast) is KVariable and kast.sort is None and sort is not None:
             return kast.let(sort=sort)
 
