@@ -6,14 +6,13 @@ from dataclasses import dataclass
 from functools import partial
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import TYPE_CHECKING, Any, Final
-from collections.abc import Iterable
 
 from typing_extensions import Protocol
 
 from ..cli.cli import Options
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Iterable
     from pathlib import Path
 
 
