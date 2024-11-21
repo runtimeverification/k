@@ -5,14 +5,14 @@ import logging
 from dataclasses import dataclass
 from functools import partial
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import TYPE_CHECKING, Any, Final
+from typing import TYPE_CHECKING, Any, Final, NamedTuple
 
 from typing_extensions import Protocol
 
 from ..cli.cli import Options
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterable
+    from collections.abc import Callable
     from pathlib import Path
 
 
@@ -72,41 +72,16 @@ class JsonRpcMethod(Protocol):
     def __call__(self, **kwargs: Any) -> Any: ...
 
 
-@dataclass(frozen=True)
-class JsonRpcRequest:
-
+class JsonRpcRequest(NamedTuple):
+    id: str | int
     method: str
     params: Any
-    id: Any
-
-    @staticmethod
-    def validate(request_dict: Any, valid_methods: Iterable[str]) -> JsonRpcRequest | JsonRpcError:
-        required_fields = ['jsonrpc', 'method', 'id']
-        for field in required_fields:
-            if field not in request_dict:
-                return JsonRpcError(-32600, f'Invalid request: missing field "{field}"', request_dict.get('id', None))
-
-        jsonrpc_version = request_dict['jsonrpc']
-        if jsonrpc_version != JsonRpcServer.JSONRPC_VERSION:
-            return JsonRpcError(
-                -32600, f'Invalid request: bad version: "{jsonrpc_version}"', request_dict.get('id', None)
-            )
-
-        method_name = request_dict['method']
-        if method_name not in valid_methods:
-            return JsonRpcError(-32601, f'Method "{method_name}" not found.', request_dict.get('id', None))
-
-        return JsonRpcRequest(
-            method=request_dict['method'], params=request_dict.get('params', None), id=request_dict.get('id', None)
-        )
 
 
-@dataclass(frozen=True)
-class JsonRpcBatchRequest:
+class JsonRpcBatchRequest(NamedTuple):
     requests: tuple[JsonRpcRequest]
 
 
-@dataclass(frozen=True)
 class JsonRpcResult:
 
     def encode(self) -> bytes:
@@ -118,7 +93,7 @@ class JsonRpcError(JsonRpcResult):
 
     code: int
     message: str
-    id: Any
+    id: str | int | None
 
     def to_json(self) -> dict[str, Any]:
         return {
@@ -204,13 +179,12 @@ class JsonRpcRequestHandler(BaseHTTPRequestHandler):
         return JsonRpcBatchResult(tuple(self._single_request(request) for request in requests))
 
     def _single_request(self, request: dict[str, Any]) -> JsonRpcError | JsonRpcSuccess:
-        validation_result = JsonRpcRequest.validate(request, self.methods.keys())
+        validation_result = self._validate_request(request)
         if isinstance(validation_result, JsonRpcError):
             return validation_result
 
-        method_name = request['method']
+        id, method_name, params = validation_result
         method = self.methods[method_name]
-        params = validation_result.params
         _LOGGER.info(f'Executing method {method_name}')
         result: Any
         if type(params) is dict:
@@ -220,6 +194,26 @@ class JsonRpcRequestHandler(BaseHTTPRequestHandler):
         elif params is None:
             result = method()
         else:
-            return JsonRpcError(-32602, 'Unrecognized method parameter format.', validation_result.id)
+            return JsonRpcError(-32602, 'Unrecognized method parameter format.', id)
         _LOGGER.debug(f'Got response {result}')
-        return JsonRpcSuccess(result, validation_result.id)
+        return JsonRpcSuccess(result, id)
+
+    def _validate_request(self, request_dict: Any) -> JsonRpcRequest | JsonRpcError:
+        required_fields = ['jsonrpc', 'method', 'id']
+        for field in required_fields:
+            if field not in request_dict:
+                return JsonRpcError(-32600, f'Invalid request: missing field "{field}"', request_dict.get('id', None))
+
+        jsonrpc_version = request_dict['jsonrpc']
+        if jsonrpc_version != JsonRpcServer.JSONRPC_VERSION:
+            return JsonRpcError(
+                -32600, f'Invalid request: bad version: "{jsonrpc_version}"', request_dict.get('id', None)
+            )
+
+        method_name = request_dict['method']
+        if method_name not in self.methods.keys():
+            return JsonRpcError(-32601, f'Method "{method_name}" not found.', request_dict.get('id', None))
+
+        return JsonRpcRequest(
+            method=request_dict['method'], params=request_dict.get('params', None), id=request_dict.get('id', None)
+        )
