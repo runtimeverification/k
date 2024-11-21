@@ -606,6 +606,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
     def to_dict_no_nodes(self) -> dict[str, Any]:
         nodes = list(self._nodes.keys())
         edges = [edge.to_dict() for edge in self.edges()]
+        merged_edges = [merged_edge.to_dict() for merged_edge in self.merged_edges()]
         covers = [cover.to_dict() for cover in self.covers()]
         splits = [split.to_dict() for split in self.splits()]
         ndbranches = [ndbranch.to_dict() for ndbranch in self.ndbranches()]
@@ -616,6 +617,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             'next': self._node_id,
             'nodes': nodes,
             'edges': edges,
+            'merged_edges': merged_edges,
             'covers': covers,
             'splits': splits,
             'ndbranches': ndbranches,
