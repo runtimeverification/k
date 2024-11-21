@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from typing import Any
 
     from pyk.kcfg.kcfg import NodeIdLike
+    from pyk.kcfg.semantics import KCFGSemantics
 
 
 class KCFGExplorationNodeAttr(NodeAttr):
@@ -109,5 +110,5 @@ class KCFGExploration:
     #
 
     # Minimizing the KCFG
-    def minimize_kcfg(self, merge: bool = False) -> None:
-        KCFGMinimizer(self.kcfg).minimize(merge=merge)
+    def minimize_kcfg(self, heuristics: KCFGSemantics | None = None, merge: bool = False) -> None:
+        KCFGMinimizer(kcfg=self.kcfg, heuristics=heuristics).minimize(merge=merge)
