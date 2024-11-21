@@ -275,7 +275,10 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             return KCFG.MergedEdge(
                 nodes[dct['source']],
                 nodes[dct['target']],
-                tuple(KCFG.Edge(edge['source'], edge['target'], edge['depth'], tuple(edge['rules'])) for edge in dct['edges']),
+                tuple(
+                    KCFG.Edge(edge['source'], edge['target'], edge['depth'], tuple(edge['rules']))
+                    for edge in dct['edges']
+                ),
             )
 
         def replace_source(self, node: KCFG.Node) -> KCFG.Successor:
