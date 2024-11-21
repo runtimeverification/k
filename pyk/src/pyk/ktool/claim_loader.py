@@ -69,9 +69,9 @@ class ClaimLoader:
 
         if not cache_hit:
             _LOGGER.info('Generating claim modules')
-            module_list = self._kprove.get_claim_modules(
-                spec_file=spec_file,
-                spec_module_name=spec_module_name,
+            module_list = self._kprove.parse_modules(
+                file_path=spec_file,
+                module_name=spec_module_name,
                 include_dirs=include_dirs,
                 md_selector=md_selector,
                 type_inference_mode=type_inference_mode,

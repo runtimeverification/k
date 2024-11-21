@@ -714,6 +714,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
     direct_subproof_rules: bool
     assume_defined: bool
     kcfg_explore: KCFGExplore
+    extra_module: KFlatModule | None
 
     def __init__(
         self,
@@ -725,6 +726,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         fast_check_subsumption: bool = False,
         direct_subproof_rules: bool = False,
         assume_defined: bool = False,
+        extra_module: KFlatModule | None = None,
     ) -> None:
 
         self.kcfg_explore = kcfg_explore
@@ -736,11 +738,19 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         self.fast_check_subsumption = fast_check_subsumption
         self.direct_subproof_rules = direct_subproof_rules
         self.assume_defined = assume_defined
+        self.extra_module = extra_module
 
     def close(self) -> None:
         self.kcfg_explore.cterm_symbolic._kore_client.close()
 
     def init_proof(self, proof: APRProof) -> None:
+        main_module_name = self.main_module_name
+        if self.extra_module:
+            _kore_module = kflatmodule_to_kore(self.kcfg_explore.cterm_symbolic._definition, self.extra_module)
+            _LOGGER.warning(f'_kore_module: {_kore_module.text}')
+            self.kcfg_explore.cterm_symbolic._kore_client.add_module(_kore_module, name_as_id=True)
+            main_module_name = self.extra_module.name
+
         def _inject_module(module_name: str, import_name: str, sentences: list[KRule]) -> None:
             _module = KFlatModule(module_name, sentences, [KImport(import_name)])
             _kore_module = kflatmodule_to_kore(self.kcfg_explore.cterm_symbolic._definition, _module)
@@ -759,7 +769,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         ]
         circularity_rule = proof.as_rule(priority=20)
 
-        _inject_module(proof.dependencies_module_name, self.main_module_name, dependencies_as_rules)
+        _inject_module(proof.dependencies_module_name, main_module_name, dependencies_as_rules)
         _inject_module(proof.circularities_module_name, proof.dependencies_module_name, [circularity_rule])
 
         for node_id in [proof.init, proof.target]:

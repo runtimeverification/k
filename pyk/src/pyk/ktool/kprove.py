@@ -255,19 +255,19 @@ class KProve(KPrint):
                 depth=depth,
             )
 
-    def get_claim_modules(
+    def parse_modules(
         self,
-        spec_file: Path,
-        spec_module_name: str | None = None,
+        file_path: Path,
+        module_name: str | None = None,
         include_dirs: Iterable[Path] = (),
         md_selector: str | None = None,
         type_inference_mode: TypeInferenceMode | None = None,
     ) -> KFlatModuleList:
-        with self._temp_file(prefix=f'{spec_file.name}.parsed.json.') as ntf:
+        with self._temp_file(prefix=f'{file_path.name}.parsed.json.') as ntf:
             _kprove(
-                spec_file=spec_file,
+                spec_file=file_path,
                 kompiled_dir=self.definition_dir,
-                spec_module_name=spec_module_name,
+                spec_module_name=module_name,
                 include_dirs=include_dirs,
                 md_selector=md_selector,
                 output=KProveOutput.JSON,
@@ -288,9 +288,9 @@ class KProve(KPrint):
         md_selector: str | None = None,
         type_inference_mode: TypeInferenceMode | None = None,
     ) -> ClaimIndex:
-        module_list = self.get_claim_modules(
-            spec_file=spec_file,
-            spec_module_name=spec_module_name,
+        module_list = self.parse_modules(
+            file_path=spec_file,
+            module_name=spec_module_name,
             include_dirs=include_dirs,
             md_selector=md_selector,
             type_inference_mode=type_inference_mode,

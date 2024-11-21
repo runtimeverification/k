@@ -5,14 +5,33 @@ from functools import reduce
 from typing import TYPE_CHECKING
 
 from ..kast import Atts
-from ..kast.inner import KApply, KLabel, KSequence, KSort, KToken, KVariable, top_down
-from ..kast.manip import bool_to_ml_pred, extract_lhs, extract_rhs, flatten_label
+from ..kast.inner import KApply, KLabel, KRewrite, KSequence, KSort, KToken, KVariable, top_down
+from ..kast.manip import bool_to_ml_pred, extract_lhs, extract_rhs, flatten_label, ml_pred_to_bool, var_occurrences
 from ..kast.outer import KRule
+from ..kore.prelude import BOOL as KORE_BOOL
 from ..kore.prelude import SORT_K
-from ..kore.syntax import DV, And, App, Axiom, EVar, Import, MLPattern, MLQuant, Module, Rewrites, SortApp, String, Top
+from ..kore.prelude import TRUE as KORE_TRUE
+from ..kore.syntax import (
+    DV,
+    And,
+    App,
+    Axiom,
+    Equals,
+    EVar,
+    Implies,
+    Import,
+    MLPattern,
+    MLQuant,
+    Module,
+    Rewrites,
+    SortApp,
+    SortVar,
+    String,
+    Top,
+)
 from ..prelude.bytes import BYTES, pretty_bytes_str
 from ..prelude.k import K_ITEM, K, inj
-from ..prelude.kbool import TRUE
+from ..prelude.kbool import BOOL, TRUE, andBool
 from ..prelude.ml import mlAnd
 from ..prelude.string import STRING, pretty_string
 from ._utils import munge
@@ -21,6 +40,7 @@ if TYPE_CHECKING:
     from typing import Final
 
     from ..kast import KInner
+    from ..kast.att import AttEntry
     from ..kast.outer import KDefinition, KFlatModule, KImport
     from ..kore.syntax import Pattern, Sentence, Sort
 
@@ -201,42 +221,101 @@ def krule_to_kore(definition: KDefinition, krule: KRule) -> Axiom:
     krule_body = krule.body
     krule_lhs_config = extract_lhs(krule_body)
     krule_rhs_config = extract_rhs(krule_body)
-    krule_lhs_constraints = [bool_to_ml_pred(c) for c in flatten_label('_andBool_', krule.requires) if not c == TRUE]
-    krule_rhs_constraints = [bool_to_ml_pred(c) for c in flatten_label('_andBool_', krule.ensures) if not c == TRUE]
-    krule_lhs = mlAnd([krule_lhs_config] + krule_lhs_constraints)
-    krule_rhs = mlAnd([krule_rhs_config] + krule_rhs_constraints)
 
-    top_level_kore_sort = SortApp('SortGeneratedTopCell')
-    top_level_k_sort = KSort('GeneratedTopCell')
-    # The backend does not like rewrite rules without a precondition
-    if len(krule_lhs_constraints) > 0:
-        kore_lhs: Pattern = kast_to_kore(definition, krule_lhs, sort=top_level_k_sort)
-    else:
-        kore_lhs = And(
-            top_level_kore_sort,
-            (
-                kast_to_kore(definition, krule_lhs, sort=top_level_k_sort),
-                Top(top_level_kore_sort),
-            ),
-        )
+    is_functional = isinstance(krule_lhs_config, KApply) and krule_lhs_config.label.name in definition.function_labels
 
-    kore_rhs: Pattern = kast_to_kore(definition, krule_rhs, sort=top_level_k_sort)
+    top_level_k_sort = KSort('GeneratedTopCell') if not is_functional else definition.sort_strict(krule_lhs_config)
+    top_level_kore_sort = _ksort_to_kore(top_level_k_sort)
 
-    prio = krule.priority
-    attrs = [App(symbol='priority', sorts=(), args=(String(str(prio)),))]
-    if Atts.LABEL in krule.att:
-        label = krule.att[Atts.LABEL]
-        attrs.append(App(symbol='label', sorts=(), args=(String(label),)))
-    axiom = Axiom(
-        vars=(),
-        pattern=Rewrites(
-            sort=top_level_kore_sort,
-            left=kore_lhs,
-            right=kore_rhs,
-        ),
-        attrs=attrs,
+    # Do sort inference on the entire rule at once
+    kast_lhs = mlAnd(
+        [krule_lhs_config]
+        + [
+            bool_to_ml_pred(constraint, sort=top_level_k_sort)
+            for constraint in flatten_label('_andBool_', krule.requires)
+            if not constraint == TRUE
+        ],
+        sort=top_level_k_sort,
     )
-    return axiom
+    kast_rhs = mlAnd(
+        [krule_rhs_config]
+        + [
+            bool_to_ml_pred(constraint, sort=top_level_k_sort)
+            for constraint in flatten_label('_andBool_', krule.ensures)
+            if not constraint == TRUE
+        ],
+        sort=top_level_k_sort,
+    )
+    kast_rule_sorted = definition.sort_vars(KRewrite(kast_lhs, kast_rhs))
+
+    kast_lhs_body, *kast_lhs_constraints = flatten_label('#And', extract_lhs(kast_rule_sorted))
+    kast_rhs_body, *kast_rhs_constraints = flatten_label('#And', extract_rhs(kast_rule_sorted))
+    kore_lhs_body = kast_to_kore(definition, kast_lhs_body, sort=top_level_k_sort)
+    kore_rhs_body = kast_to_kore(definition, kast_rhs_body, sort=top_level_k_sort)
+
+    axiom_vars: tuple[SortVar, ...] = ()
+    kore_axiom: Pattern
+    if not is_functional:
+        kore_lhs_constraints = [
+            kast_to_kore(definition, kast_lhs_constraint, sort=top_level_k_sort)
+            for kast_lhs_constraint in kast_lhs_constraints
+        ]
+        kore_rhs_constraints = [
+            kast_to_kore(definition, kast_rhs_constraint, sort=top_level_k_sort)
+            for kast_rhs_constraint in kast_rhs_constraints
+        ]
+        kore_lhs_constraint: Pattern = Top(top_level_kore_sort)
+        if len(kore_lhs_constraints) == 1:
+            kore_lhs_constraint = kore_lhs_constraints[0]
+        elif len(kore_lhs_constraints) > 1:
+            kore_lhs_constraint = And(top_level_kore_sort, kore_lhs_constraints)
+        kore_lhs = And(top_level_kore_sort, [kore_lhs_body, kore_lhs_constraint])
+        kore_rhs = (
+            kore_rhs_body
+            if not kore_rhs_constraints
+            else And(top_level_kore_sort, [kore_rhs_body] + kore_rhs_constraints)
+        )
+        kore_axiom = Rewrites(sort=top_level_kore_sort, left=kore_lhs, right=kore_rhs)
+    else:
+        axiom_sort = SortVar('R')
+        axiom_vars = (axiom_sort,)
+        kast_lhs_constraints_bool = [
+            ml_pred_to_bool(kast_lhs_constraint) for kast_lhs_constraint in kast_lhs_constraints
+        ]
+        kore_antecedent = Equals(
+            KORE_BOOL, axiom_sort, kast_to_kore(definition, andBool(kast_lhs_constraints_bool), sort=BOOL), KORE_TRUE
+        )
+        kore_ensures: Pattern = Top(top_level_kore_sort)
+        if kast_rhs_constraints:
+            kast_rhs_constraints_bool = [
+                ml_pred_to_bool(kast_rhs_constraint) for kast_rhs_constraint in kast_rhs_constraints
+            ]
+            kore_ensures = Equals(
+                KORE_BOOL,
+                top_level_kore_sort,
+                kast_to_kore(definition, andBool(kast_rhs_constraints_bool), sort=BOOL),
+                KORE_TRUE,
+            )
+        kore_consequent = Equals(
+            top_level_kore_sort, axiom_sort, kore_lhs_body, And(top_level_kore_sort, [kore_rhs_body, kore_ensures])
+        )
+        kore_axiom = Implies(axiom_sort, kore_antecedent, kore_consequent)
+
+    # Make adjustments to Rule attributes
+    att = krule.att.discard([Atts.PRODUCTION, Atts.UNIQUE_ID, Atts.SOURCE, Atts.LOCATION])
+    if Atts.PRIORITY not in att:
+        if Atts.OWISE in att:
+            att = att.update([Atts.PRIORITY(200)])
+            att = att.discard([Atts.OWISE])
+        elif Atts.SIMPLIFICATION not in att:
+            att = att.update([Atts.PRIORITY(50)])
+
+    attrs = [
+        _krule_att_to_kore(att_entry, var_occurrences(kast_rule_sorted))
+        for att_entry in sorted(att.entries(), key=(lambda a: a.key.name))
+    ]
+
+    return Axiom(vars=axiom_vars, pattern=kore_axiom, attrs=attrs)
 
 
 def kflatmodule_to_kore(definition: KDefinition, kflatmodule: KFlatModule) -> Module:
@@ -247,6 +326,25 @@ def kflatmodule_to_kore(definition: KDefinition, kflatmodule: KFlatModule) -> Mo
         kore_axioms.append(krule_to_kore(definition, sent))
     imports: list[Sentence] = [_kimport_to_kore(kimport) for kimport in kflatmodule.imports]
     return Module(name=kflatmodule.name, sentences=(imports + kore_axioms))
+
+
+def _krule_att_to_kore(att_entry: AttEntry, kast_rule_vars: dict[str, list[KVariable]]) -> App:
+    match att_entry.key:
+        case Atts.LABEL | Atts.PRIORITY | Atts.SIMPLIFICATION:
+            return App(symbol=att_entry.key.name, sorts=(), args=(String(str(att_entry.value)),))
+        case Atts.SYMBOLIC | Atts.CONCRETE:
+            if not att_entry.value:
+                return App(symbol=att_entry.key.name, sorts=(), args=())
+            kore_vars = []
+            for var_name in att_entry.value.split(','):
+                if var_name not in kast_rule_vars:
+                    raise ValueError(f'Variable in {att_entry.key} not present in rule: {var_name}')
+                kore_vars.append(_kvariable_to_kore(kast_rule_vars[var_name][0]))
+            return App(symbol=att_entry.key.name, sorts=(), args=tuple(kore_vars))
+        case Atts.SMTLEMMA:
+            return App(symbol=att_entry.key.name, sorts=(), args=())
+        case _:
+            raise ValueError(f'Do not know how to convert AttEntry to Kore: {att_entry}')
 
 
 def _kimport_to_kore(kimport: KImport) -> Import:
