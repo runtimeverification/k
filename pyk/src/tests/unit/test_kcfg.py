@@ -113,9 +113,19 @@ def edge_dicts(*edges: Iterable) -> list[dict[str, Any]]:
 
 
 def merged_edge_dicts(*merged_edges: Iterable) -> list[dict[str, Any]]:
+    def _make_edge_dicts(*edges: Iterable) -> list[dict[str, Any]]:
+        def _make_edge_dict(i: int, j: int, depth: int = 1, rules: tuple[str, ...] = ()) -> dict[str, Any]:
+            return {
+                'source': node_dicts(1, start=i)[0],
+                'target': node_dicts(1, start=j)[0],
+                'depth': depth,
+                'rules': list(rules),
+            }
+
+        return [_make_edge_dict(*edge) for edge in edges]
 
     def _make_merged_edge_dict(s: int, t: int, *edges: Iterable) -> dict[str, Any]:
-        return {'source': s, 'target': t, 'edges': edge_dicts(*edges)}
+        return {'source': s, 'target': t, 'edges': _make_edge_dicts(*edges)}
 
     return [_make_merged_edge_dict(*merged_edge) for merged_edge in merged_edges]
 

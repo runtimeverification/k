@@ -264,21 +264,36 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         edges: tuple[KCFG.Edge, ...]
 
         def to_dict(self) -> dict[str, Any]:
+
+            def _merged_edge_to_dict(edge: KCFG.Edge) -> dict[str, Any]:
+                return {
+                    'source': edge.source.to_dict(),
+                    'target': edge.target.to_dict(),
+                    'depth': edge.depth,
+                    'rules': list(edge.rules),
+                }
+
             return {
                 'source': self.source.id,
                 'target': self.target.id,
-                'edges': [edge.to_dict() for edge in self.edges],
+                'edges': [_merged_edge_to_dict(e) for e in self.edges],
             }
 
         @staticmethod
         def from_dict(dct: dict[str, Any], nodes: Mapping[int, KCFG.Node]) -> KCFG.Successor:
+
+            def _merged_edge_from_dict(dct: dict[str, Any]) -> KCFG.Edge:
+                return KCFG.Edge(
+                    KCFG.Node.from_dict(dct['source']),
+                    KCFG.Node.from_dict(dct['target']),
+                    dct['depth'],
+                    tuple(dct['rules']),
+                )
+
             return KCFG.MergedEdge(
                 nodes[dct['source']],
                 nodes[dct['target']],
-                tuple(
-                    KCFG.Edge(edge['source'], edge['target'], edge['depth'], tuple(edge['rules']))
-                    for edge in dct['edges']
-                ),
+                tuple(_merged_edge_from_dict(e) for e in dct['edges']),
             )
 
         def replace_source(self, node: KCFG.Node) -> KCFG.Successor:
