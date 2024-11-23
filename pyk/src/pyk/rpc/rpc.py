@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from functools import partial
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -82,10 +83,10 @@ class JsonRpcBatchRequest(NamedTuple):
     requests: tuple[JsonRpcRequest]
 
 
-class JsonRpcResult:
+class JsonRpcResult(ABC):
 
-    def encode(self) -> bytes:
-        raise NotImplementedError('Subclasses must implement this method')
+    @abstractmethod
+    def encode(self) -> bytes: ...
 
 
 @dataclass(frozen=True)
