@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import json
 import logging
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from functools import partial
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import TYPE_CHECKING, Any, Final
+from typing import TYPE_CHECKING, Any, Final, NamedTuple
 
 from typing_extensions import Protocol
 
@@ -71,6 +73,67 @@ class JsonRpcMethod(Protocol):
     def __call__(self, **kwargs: Any) -> Any: ...
 
 
+class JsonRpcRequest(NamedTuple):
+    id: str | int
+    method: str
+    params: Any
+
+
+class JsonRpcBatchRequest(NamedTuple):
+    requests: tuple[JsonRpcRequest]
+
+
+class JsonRpcResult(ABC):
+
+    @abstractmethod
+    def encode(self) -> bytes: ...
+
+
+@dataclass(frozen=True)
+class JsonRpcError(JsonRpcResult):
+
+    code: int
+    message: str
+    id: str | int | None
+
+    def to_json(self) -> dict[str, Any]:
+        return {
+            'jsonrpc': JsonRpcServer.JSONRPC_VERSION,
+            'error': {
+                'code': self.code,
+                'message': self.message,
+            },
+            'id': self.id,
+        }
+
+    def encode(self) -> bytes:
+        return json.dumps(self.to_json()).encode('ascii')
+
+
+@dataclass(frozen=True)
+class JsonRpcSuccess(JsonRpcResult):
+    payload: Any
+    id: Any
+
+    def to_json(self) -> dict[str, Any]:
+        return {
+            'jsonrpc': JsonRpcServer.JSONRPC_VERSION,
+            'result': self.payload,
+            'id': self.id,
+        }
+
+    def encode(self) -> bytes:
+        return json.dumps(self.to_json()).encode('ascii')
+
+
+@dataclass(frozen=True)
+class JsonRpcBatchResult(JsonRpcResult):
+    results: tuple[JsonRpcError | JsonRpcSuccess, ...]
+
+    def encode(self) -> bytes:
+        return json.dumps([result.to_json() for result in self.results]).encode('ascii')
+
+
 class JsonRpcRequestHandler(BaseHTTPRequestHandler):
     methods: dict[str, JsonRpcMethod]
 
@@ -78,30 +141,12 @@ class JsonRpcRequestHandler(BaseHTTPRequestHandler):
         self.methods = methods
         super().__init__(*args, **kwargs)
 
-    def send_json_error(self, code: int, message: str, id: Any = None) -> None:
-        error_dict = {
-            'jsonrpc': JsonRpcServer.JSONRPC_VERSION,
-            'error': {
-                'code': code,
-                'message': message,
-            },
-            'id': id,
-        }
-        error_bytes = json.dumps(error_dict).encode('ascii')
-        self.set_response()
-        self.wfile.write(error_bytes)
-
-    def send_json_success(self, result: Any, id: Any) -> None:
-        response_dict = {
-            'jsonrpc': JsonRpcServer.JSONRPC_VERSION,
-            'result': result,
-            'id': id,
-        }
-        response_bytes = json.dumps(response_dict).encode('ascii')
-        self.set_response()
+    def _send_response(self, response: JsonRpcResult) -> None:
+        self.send_response_headers()
+        response_bytes = response.encode()
         self.wfile.write(response_bytes)
 
-    def set_response(self) -> None:
+    def send_response_headers(self) -> None:
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
@@ -113,37 +158,36 @@ class JsonRpcRequestHandler(BaseHTTPRequestHandler):
         content = self.rfile.read(int(content_len))
         _LOGGER.debug(f'Received bytes: {content.decode()}')
 
-        request: dict
+        request: dict[str, Any] | list[dict[str, Any]]
         try:
             request = json.loads(content)
             _LOGGER.info(f'Received request: {request}')
         except json.JSONDecodeError:
             _LOGGER.warning(f'Invalid JSON: {content.decode()}')
-            self.send_json_error(-32700, 'Invalid JSON')
+            json_error = JsonRpcError(-32700, 'Invalid JSON', None)
+            self._send_response(json_error)
             return
 
-        required_fields = ['jsonrpc', 'method', 'id']
-        for field in required_fields:
-            if field not in request:
-                _LOGGER.warning(f'Missing required field "{field}": {request}')
-                self.send_json_error(-32600, f'Invalid request: missing field "{field}"', request.get('id', None))
-                return
+        response: JsonRpcResult
+        if isinstance(request, list):
+            response = self._batch_request(request)
+        else:
+            response = self._single_request(request)
 
-        jsonrpc_version = request['jsonrpc']
-        if jsonrpc_version != JsonRpcServer.JSONRPC_VERSION:
-            _LOGGER.warning(f'Bad JSON-RPC version: {jsonrpc_version}')
-            self.send_json_error(-32600, f'Invalid request: bad version: "{jsonrpc_version}"', request['id'])
-            return
+        self._send_response(response)
 
-        method_name = request['method']
-        if method_name not in self.methods:
-            _LOGGER.warning(f'Method not found: {method_name}')
-            self.send_json_error(-32601, f'Method "{method_name}" not found.', request['id'])
-            return
+    def _batch_request(self, requests: list[dict[str, Any]]) -> JsonRpcBatchResult:
+        return JsonRpcBatchResult(tuple(self._single_request(request) for request in requests))
 
+    def _single_request(self, request: dict[str, Any]) -> JsonRpcError | JsonRpcSuccess:
+        validation_result = self._validate_request(request)
+        if isinstance(validation_result, JsonRpcError):
+            return validation_result
+
+        id, method_name, params = validation_result
         method = self.methods[method_name]
-        params = request.get('params', None)
         _LOGGER.info(f'Executing method {method_name}')
+        result: Any
         if type(params) is dict:
             result = method(**params)
         elif type(params) is list:
@@ -151,6 +195,26 @@ class JsonRpcRequestHandler(BaseHTTPRequestHandler):
         elif params is None:
             result = method()
         else:
-            self.send_json_error(-32602, 'Unrecognized method parameter format.')
+            return JsonRpcError(-32602, 'Unrecognized method parameter format.', id)
         _LOGGER.debug(f'Got response {result}')
-        self.send_json_success(result, request['id'])
+        return JsonRpcSuccess(result, id)
+
+    def _validate_request(self, request_dict: Any) -> JsonRpcRequest | JsonRpcError:
+        required_fields = ['jsonrpc', 'method', 'id']
+        for field in required_fields:
+            if field not in request_dict:
+                return JsonRpcError(-32600, f'Invalid request: missing field "{field}"', request_dict.get('id', None))
+
+        jsonrpc_version = request_dict['jsonrpc']
+        if jsonrpc_version != JsonRpcServer.JSONRPC_VERSION:
+            return JsonRpcError(
+                -32600, f'Invalid request: bad version: "{jsonrpc_version}"', request_dict.get('id', None)
+            )
+
+        method_name = request_dict['method']
+        if method_name not in self.methods.keys():
+            return JsonRpcError(-32601, f'Method "{method_name}" not found.', request_dict.get('id', None))
+
+        return JsonRpcRequest(
+            method=request_dict['method'], params=request_dict.get('params', None), id=request_dict.get('id', None)
+        )
