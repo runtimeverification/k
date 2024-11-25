@@ -11,10 +11,7 @@ jobs:
   change-base:
     name: 'Change base to develop branch'
     runs-on: ubuntu-24.04
-    permissions:
-      pull-requests: write
-      actions: write
-      contents: read
+    permissions: "write-all"
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v4
