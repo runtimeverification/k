@@ -35,7 +35,7 @@ jobs:
         run: |
           set -x
           pull_number=$(jq --raw-output .pull_request.number "${GITHUB_EVENT_PATH}")
-          comment_body='The default branch has been changed from master to develop. Thank you for your support!'
+          comment_body='The target branch has been updated from master > develop. Thank you for your support!'
           curl -X POST                                                               \
             -H "Accept: application/vnd.github+json"                                 \
             -H "Authorization: Bearer ${GITHUB_TOKEN}"                               \
