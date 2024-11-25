@@ -1,9 +1,13 @@
 name: 'Test PR'
 on:
   pull_request:
-    types: [opened, edited, reopened, synchronize]
+    types: [opened, reopened, synchronize]
     branches:
       - 'develop'
+  workflow_run:
+    workflows: ['Test PR']
+    types:
+      - completed
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true

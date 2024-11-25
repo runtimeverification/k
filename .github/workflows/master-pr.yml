@@ -8,7 +8,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-
   change-base:
     name: 'Change base to develop branch'
     runs-on: ubuntu-24.04
@@ -30,3 +29,15 @@ jobs:
             -H "Authorization: Bearer ${GITHUB_TOKEN}"                                \
             "https://api.github.com/repos/runtimeverification/k/pulls/${pull_number}" \
             -d '{"base":"develop"}'
+      - name: 'Post comment about base change'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -x
+          pull_number=$(jq --raw-output .pull_request.number "${GITHUB_EVENT_PATH}")
+          comment_body='The default branch has been changed from master to develop. Thank you for your support!'
+          curl -X POST                                                               \
+            -H "Accept: application/vnd.github+json"                                 \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}"                               \
+            "https://api.github.com/repos/runtimeverification/k/issues/${pull_number}/comments" \
+            -d "{\"body\":\"${comment_body}\"}"
