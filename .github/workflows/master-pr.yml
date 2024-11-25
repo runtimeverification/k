@@ -1,4 +1,4 @@
-name: 'Test PR'
+name: 'Configure PR'
 on:
   pull_request:
     branches:

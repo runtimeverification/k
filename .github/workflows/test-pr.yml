@@ -5,7 +5,7 @@ on:
     branches:
       - 'develop'
   workflow_run:
-    workflows: ['Test PR']
+    workflows: ['Configure PR']
     types:
       - completed
 concurrency:
