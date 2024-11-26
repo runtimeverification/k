@@ -80,10 +80,12 @@ class KCFGStore:
         stuck_nodes = [node_id for node_id in kcfg._nodes.keys() if KCFGNodeAttr.STUCK in kcfg._nodes[node_id].attrs]
         dct['vacuous'] = vacuous_nodes
         dct['stuck'] = stuck_nodes
-        for node_id in deleted_nodes:
-            self.kcfg_node_path(node_id).unlink(missing_ok=True)
-        for node_id in created_nodes:
+        for node_id in kcfg._nodes.keys():
             self.kcfg_node_path(node_id).write_text(json.dumps(kcfg._nodes[node_id].to_dict()))
+        # for node_id in deleted_nodes:
+        #     self.kcfg_node_path(node_id).unlink(missing_ok=True)
+        # for node_id in created_nodes:
+        #     self.kcfg_node_path(node_id).write_text(json.dumps(kcfg._nodes[node_id].to_dict()))
         self.kcfg_json_path.write_text(json.dumps(dct))
 
     def read_cfg_data(self) -> dict[str, Any]:
