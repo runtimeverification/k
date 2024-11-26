@@ -760,11 +760,12 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         return node
 
     def remove_node(self, node_id: NodeIdLike) -> None:
+        self.remove_edges_around(node_id)
+        
         node_id = self._resolve(node_id)
         self._nodes.pop(node_id)
         self._deleted_nodes.add(node_id)
         self._created_nodes.discard(node_id)
-        self.remove_edges_around(node_id)
 
     def remove_edges_around(self, node_id: NodeIdLike) -> None:
         node_id = self._resolve(node_id)
