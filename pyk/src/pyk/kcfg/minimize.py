@@ -229,7 +229,7 @@ class KCFGMinimizer:
                     continue
                 for e in p:
                     # TODO: remove the split and edges, then safely remove the nodes.
-                    self.kcfg.remove_node(e.source.id)
+                    self.kcfg.remove_node_silent(e.source.id)
 
             # Create A -|MergedEdge|-> Merged_Bi -|Split|-> Bi, if one edge partition covers all the splits
             if len(edge_partitions) == 1:
