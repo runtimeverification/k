@@ -606,6 +606,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
     def to_dict_no_nodes(self) -> dict[str, Any]:
         nodes = list(self._nodes.keys())
         edges = [edge.to_dict() for edge in self.edges()]
+        merged_edges = [merged_edge.to_dict() for merged_edge in self.merged_edges()]
         covers = [cover.to_dict() for cover in self.covers()]
         splits = [split.to_dict() for split in self.splits()]
         ndbranches = [ndbranch.to_dict() for ndbranch in self.ndbranches()]
@@ -616,6 +617,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             'next': self._node_id,
             'nodes': nodes,
             'edges': edges,
+            'merged_edges': merged_edges,
             'covers': covers,
             'splits': splits,
             'ndbranches': ndbranches,
@@ -758,11 +760,15 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         return node
 
     def remove_node(self, node_id: NodeIdLike) -> None:
-        node_id = self._resolve(node_id)
+        self.remove_edges_around(node_id)
 
-        node = self._nodes.pop(node_id)
+        node_id = self._resolve(node_id)
+        self._nodes.pop(node_id)
+        self._deleted_nodes.add(node_id)
         self._created_nodes.discard(node_id)
-        self._deleted_nodes.add(node.id)
+
+    def remove_edges_around(self, node_id: NodeIdLike) -> None:
+        node_id = self._resolve(node_id)
 
         self._edges = {k: s for k, s in self._edges.items() if k != node_id and node_id not in s.target_ids}
         self._merged_edges = {
