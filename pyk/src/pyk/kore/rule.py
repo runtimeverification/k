@@ -9,12 +9,39 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, final
 
-from .syntax import And, App, Ceil, Equals, EVar, Implies, In, Not, Rewrites, String, Top
+from .prelude import inj
+from .syntax import And, App, Axiom, Ceil, Equals, EVar, Implies, In, Not, Rewrites, SortVar, String, Top
 
 if TYPE_CHECKING:
-    from .syntax import Axiom, Definition, Pattern
+    from typing import Final
+
+    from .syntax import Definition, Pattern
 
     Attrs = dict[str, tuple[Pattern, ...]]
+
+
+# There's a simplification rule with irregular form in the prelude module INJ.
+# This rule is skipped in Rule.extract_all.
+_S1, _S2, _S3, _R = (SortVar(name) for name in ['S1', 'S2', 'S3', 'R'])
+_T: Final = EVar('T', _S1)
+# axiom {S1, S2, S3, R} \equals{S3, R}(inj{S2, S3}(inj{S1, S2}(T:S1)), inj{S1, S3}(T:S1)) [simplification{}()]
+_INJ_AXIOM: Final = Axiom(
+    vars=(_S1, _S2, _S3, _R),
+    pattern=Equals(_S3, _R, inj(_S2, _S3, inj(_S1, _S2, _T)), inj(_S1, _S3, _T)),
+    attrs=(App('simplification'),),
+)
+
+# The following attributes mark axioms that are not rule axioms.
+# Such axioms are skipped in Rule.extract_all.
+_SKIPPED_ATTRS: Final = (
+    'assoc',
+    'constructor',
+    'functional',
+    'idem',
+    'symbol-overload',
+    'subsort',
+    'unit',
+)
 
 
 class Rule(ABC):
@@ -37,27 +64,16 @@ class Rule(ABC):
 
     @staticmethod
     def extract_all(defn: Definition) -> list[Rule]:
-        filter_attrs = [
-            'assoc',
-            'constructor',
-            'functional',
-            'idem',
-            'symbol-overload',
-            'subsort',
-            'unit',
-        ]
-
         res: list[Rule] = []
         for axiom in defn.axioms:
             attrs = {attr.symbol for attr in axiom.attrs}
-            if any(attr in attrs for attr in filter_attrs):
+            if any(attr in attrs for attr in _SKIPPED_ATTRS):
+                continue
+
+            if axiom == _INJ_AXIOM:
                 continue
 
             match axiom.pattern:
-                case Equals():
-                    # A single simplification from prelude module INJ:
-                    # axiom {S1, S2, S3, R} \equals{S3, R}(inj{S2, S3}(inj{S1, S2}(T:S1)), inj{S1, S3}(T:S1)) [simplification{}()]
-                    continue
                 case Implies(right=Equals(left=Ceil())):
                     # Ceil rule
                     continue
@@ -239,8 +255,6 @@ class SimpliRule(Rule):
                 pass
             case Implies(left=Equals(left=req), right=Equals(left=lhs, right=And(ops=(rhs, Top() | Equals() as _ens)))):
                 pass
-            case Equals():
-                raise ValueError(f'Not a user-defined simplification rule: {axiom.text}')
             case Implies(right=Equals(left=Ceil())):
                 raise ValueError(f'Axiom is a ceil rule: {axiom.text}')
             case _:
