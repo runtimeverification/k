@@ -63,22 +63,22 @@ class Rule(ABC):
 
     @staticmethod
     def extract_all(defn: Definition) -> list[Rule]:
-        res: list[Rule] = []
-        for axiom in defn.axioms:
-            if any(attr in axiom.attrs_by_key for attr in _SKIPPED_ATTRS):
-                continue
+        return [Rule.from_axiom(axiom) for axiom in defn.axioms if Rule._is_rule(axiom)]
 
-            if axiom == _INJ_AXIOM:
-                continue
+    @staticmethod
+    def _is_rule(axiom: Axiom) -> bool:
+        if axiom == _INJ_AXIOM:
+            return False
 
-            match axiom.pattern:
-                case Implies(right=Equals(left=Ceil())):
-                    # Ceil rule
-                    continue
+        if any(attr in axiom.attrs_by_key for attr in _SKIPPED_ATTRS):
+            return False
 
-            res.append(Rule.from_axiom(axiom))
+        match axiom.pattern:
+            case Implies(right=Equals(left=Ceil())):
+                # Ceil rule
+                return False
 
-        return res
+        return True
 
 
 @final
