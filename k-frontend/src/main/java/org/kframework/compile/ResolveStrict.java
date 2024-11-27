@@ -119,7 +119,7 @@ public class ResolveStrict {
   private static final ContextAlias DEFAULT_ALIAS =
       ContextAlias(KVariable("HERE"), BooleanUtils.TRUE, Att.empty());
 
-  private static final ContextAlias defaultAliasWithAtts(Att att) {
+  private static final ContextAlias defaultAliasFor(Production production) {
     if (!att.contains(Att.RESULT())) {
       return DEFAULT_ALIAS;
     }
