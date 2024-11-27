@@ -56,8 +56,7 @@ class Rule(ABC):
         if isinstance(axiom.pattern, Rewrites):
             return RewriteRule.from_axiom(axiom)
 
-        attrs = (attr.symbol for attr in axiom.attrs)
-        if 'simplification' in attrs:
+        if 'simplification' in axiom.attrs_by_key:
             return SimpliRule.from_axiom(axiom)
 
         return FunctionRule.from_axiom(axiom)
@@ -66,8 +65,7 @@ class Rule(ABC):
     def extract_all(defn: Definition) -> list[Rule]:
         res: list[Rule] = []
         for axiom in defn.axioms:
-            attrs = {attr.symbol for attr in axiom.attrs}
-            if any(attr in attrs for attr in _SKIPPED_ATTRS):
+            if any(attr in axiom.attrs_by_key for attr in _SKIPPED_ATTRS):
                 continue
 
             if axiom == _INJ_AXIOM:
@@ -99,10 +97,9 @@ class RewriteRule(Rule):
     def from_axiom(axiom: Axiom) -> RewriteRule:
         lhs, req, ctx = RewriteRule._extract_lhs(axiom)
         rhs, ens = RewriteRule._extract_rhs(axiom)
-        attrs = {attr.symbol: attr.args for attr in axiom.attrs}
-        priority = _extract_priority(attrs)
-        uid = _extract_uid(attrs)
-        label = _extract_label(attrs)
+        priority = _extract_priority(axiom)
+        uid = _extract_uid(axiom)
+        label = _extract_label(axiom)
         return RewriteRule(
             lhs=lhs,
             rhs=rhs,
@@ -172,8 +169,7 @@ class FunctionRule(Rule):
         args, req = FunctionRule._extract_args(axiom)
         app, rhs, ens = FunctionRule._extract_rhs(axiom)
         lhs = app.let(args=args)
-        attrs = {attr.symbol: attr.args for attr in axiom.attrs}
-        priority = _extract_priority(attrs)
+        priority = _extract_priority(axiom)
         return FunctionRule(
             lhs=lhs,
             rhs=rhs,
@@ -235,8 +231,7 @@ class SimpliRule(Rule):
     @staticmethod
     def from_axiom(axiom: Axiom) -> SimpliRule:
         lhs, rhs, req, ens = SimpliRule._extract(axiom)
-        attrs = {attr.symbol: attr.args for attr in axiom.attrs}
-        priority = _extract_priority(attrs)
+        priority = _extract_priority(axiom)
         return SimpliRule(
             lhs=lhs,
             rhs=rhs,
@@ -273,29 +268,33 @@ def _extract_ensures(ens: Top | Equals | None) -> Pattern | None:
             raise AssertionError()
 
 
-def _extract_uid(attrs: Attrs) -> str:
+def _extract_uid(axiom: Axiom) -> str:
+    attrs = axiom.attrs_by_key
     match attrs["UNIQUE'Unds'ID"]:
-        case (String(uid),):
+        case App(args=(String(uid),)):
             return uid
         case _:
-            raise ValueError(f'Cannot extract uid from attributes: {attrs}')
+            raise ValueError(f'Cannot extract uid from axiom: {axiom.text}')
 
 
-def _extract_label(attrs: Attrs) -> str | None:
+def _extract_label(axiom: Axiom) -> str | None:
+    attrs = axiom.attrs_by_key
     match attrs.get('label'):
-        case (String(label),):
+        case App(args=(String(label),)):
             return label
         case None:
             return None
         case _:
-            raise ValueError(f'Cannot extract label from attributes: {attrs}')
+            raise ValueError(f'Cannot extract label from axiom: {axiom.text}')
 
 
-def _extract_priority(attrs: Attrs) -> int:
+def _extract_priority(axiom: Axiom) -> int:
+    attrs = axiom.attrs_by_key
     match attrs.get('priority'):
-        case (String(p),):
+        case App(args=(String(p),)):
+            assert 'owise' not in attrs
             return int(p)
         case None:
             return 200 if 'owise' in attrs else 50
         case _:
-            raise ValueError(f'Cannot extract priority from attributes: {attrs}')
+            raise ValueError(f'Cannot extract priority from axiom: {axiom.text}')

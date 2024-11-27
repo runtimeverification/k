@@ -11,7 +11,7 @@ from typing import ClassVar  # noqa: TC003
 from typing import TYPE_CHECKING, final
 
 from ..dequote import enquoted
-from ..utils import check_type
+from ..utils import FrozenDict, check_type
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator, Mapping
@@ -1791,6 +1791,10 @@ class WithAttrs(ABC):
 
     def map_attrs(self: WA, f: Callable[[tuple[App, ...]], Iterable[App]]) -> WA:
         return self.let_attrs(f(self.attrs))
+
+    @cached_property
+    def attrs_by_key(self) -> FrozenDict[str, App]:
+        return FrozenDict({attr.symbol: attr for attr in self.attrs})
 
 
 class Sentence(Kore, WithAttrs): ...
