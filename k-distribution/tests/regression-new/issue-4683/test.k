@@ -14,6 +14,4 @@ module TEST
   syntax Bool ::= isMyResult(K)  [function, total, symbol(isMyResult)]
   rule isMyResult(_) => false  [owise]
   rule isMyResult(c) => true
-
-
 endmodule

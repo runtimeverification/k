@@ -116,12 +116,10 @@ public class ResolveStrict {
     }
   }
 
-  private static final ContextAlias DEFAULT_ALIAS =
-      ContextAlias(KVariable("HERE"), BooleanUtils.TRUE, Att.empty());
-
   private static final ContextAlias defaultAliasFor(Production production) {
+    Att att = production.att();
     if (!att.contains(Att.RESULT())) {
-      return DEFAULT_ALIAS;
+      return ContextAlias(KVariable("HERE"), BooleanUtils.TRUE, Att.empty());
     }
     return ContextAlias(
         KVariable("HERE"), BooleanUtils.TRUE, Att.empty().add(Att.RESULT(), att.get(Att.RESULT())));
@@ -210,14 +208,14 @@ public class ResolveStrict {
       for (int i = 1; i <= arity; i++) {
         strictnessPositions.add(i);
       }
-      aliases.add(defaultAliasWithAtts(production.att()));
+      aliases.add(defaultAliasFor(production));
       resolve(sequential, sentences, arity, strictnessPositions, allPositions, aliases, production);
       allPositions.addAll(strictnessPositions);
     } else {
       String[] components = attribute.split(";");
       if (components.length == 1) {
         if (Character.isDigit(components[0].trim().charAt(0))) {
-          aliases.add(defaultAliasWithAtts(production.att()));
+          aliases.add(defaultAliasFor(production));
           setPositions(components[0].trim(), strictnessPositions, arity, production);
         } else {
           for (int i = 1; i <= arity; i++) {
