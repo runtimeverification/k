@@ -177,12 +177,16 @@ class FunctionRule(Rule):
         # Cases 7-10 of get_left_hand_side
         # Cases 0-3 of get_requires
         match axiom.pattern:
-            case Implies(left=And(ops=(Not(), And(ops=(_req, pat))))):
-                return FunctionRule._get_patterns(pat), _extract_condition(_req)
-            case Implies(left=And(ops=(_req, pat))):
-                return FunctionRule._get_patterns(pat), _extract_condition(_req)
+            case Implies(left=And(ops=(Not(), And(ops=(_req, _args))))):
+                pass
+            case Implies(left=And(ops=(_req, _args))):
+                pass
             case _:
                 raise ValueError(f'Cannot extract LHS from axiom: {axiom.text}')
+
+        args = FunctionRule._get_patterns(_args)
+        req = _extract_condition(_req)
+        return args, req
 
     @staticmethod
     def _get_patterns(pattern: Pattern) -> tuple[Pattern, ...]:
