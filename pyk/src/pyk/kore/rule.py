@@ -73,9 +73,16 @@ class Rule(ABC):
         if any(attr in axiom.attrs_by_key for attr in _SKIPPED_ATTRS):
             return False
 
-        match axiom.pattern:
-            case Implies(right=Equals(left=Ceil() | Equals())):
-                return False
+        if 'simplification' in axiom.attrs_by_key:
+            match axiom.pattern:
+                case Implies(
+                    left=Top() | Equals(),
+                    right=Equals(
+                        left=Ceil() | Equals(),
+                        right=And(ops=(_, Top() | Equals())),
+                    ),
+                ):
+                    return False
 
         return True
 
