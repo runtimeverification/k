@@ -160,9 +160,7 @@ class FunctionRule(Rule):
 
     @staticmethod
     def from_axiom(axiom: Axiom) -> FunctionRule:
-        args, req = FunctionRule._extract_args(axiom)
-        app, rhs, ens = FunctionRule._extract_rhs(axiom)
-        lhs = app.let(args=args)
+        lhs, rhs, req, ens = FunctionRule._extract(axiom)
         priority = _extract_priority(axiom)
         return FunctionRule(
             lhs=lhs,
@@ -173,20 +171,24 @@ class FunctionRule(Rule):
         )
 
     @staticmethod
-    def _extract_args(axiom: Axiom) -> tuple[tuple[Pattern, ...], Pattern | None]:
+    def _extract(axiom: Axiom) -> tuple[App, Pattern, Pattern | None, Pattern | None]:
         # Cases 7-10 of get_left_hand_side
         # Cases 0-3 of get_requires
+        # Case 0 of get_right_hand_side
         match axiom.pattern:
             case Implies(
                 left=And(
                     ops=(Not(), And(ops=(_req, _args))) | (_req, _args),
                 ),
+                right=Equals(left=App() as app, right=_rhs),
             ):
                 args = FunctionRule._get_patterns(_args)
+                lhs = app.let(args=args)
                 req = _extract_condition(_req)
-                return args, req
+                rhs, ens = _extract_rhs(_rhs)
+                return lhs, rhs, req, ens
             case _:
-                raise ValueError(f'Cannot extract LHS from axiom: {axiom.text}')
+                raise ValueError(f'Cannot extract function rule from axiom: {axiom.text}')
 
     @staticmethod
     def _get_patterns(pattern: Pattern) -> tuple[Pattern, ...]:
@@ -199,16 +201,6 @@ class FunctionRule(Rule):
                 return (arg,) + FunctionRule._get_patterns(rest)
             case _:
                 raise ValueError(f'Cannot extract argument list from pattern: {pattern.text}')
-
-    @staticmethod
-    def _extract_rhs(axiom: Axiom) -> tuple[App, Pattern, Pattern | None]:
-        # Case 0 of get_right_hand_side
-        match axiom.pattern:
-            case Implies(right=Equals(left=App() as app, right=_rhs)):
-                rhs, ens = _extract_rhs(_rhs)
-                return app, rhs, ens
-            case _:
-                raise ValueError(f'Cannot extract RHS from axiom: {axiom.text}')
 
 
 @final
