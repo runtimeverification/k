@@ -157,7 +157,7 @@ class RewriteRule(Rule):
                 pass
             case _:
                 raise ValueError(f'Cannot extract RHS from axiom: {axiom.text}')
-        ens = _extract_ensures(_ens)
+        ens = _extract_condition(_ens)
         return rhs, ens
 
 
@@ -221,7 +221,7 @@ class FunctionRule(Rule):
                 pass
             case _:
                 raise ValueError(f'Cannot extract RHS from axiom: {axiom.text}')
-        ens = _extract_ensures(_ens)
+        ens = _extract_condition(_ens)
         return app, rhs, ens
 
 
@@ -262,16 +262,16 @@ class SimpliRule(Rule):
                 raise ValueError(fr'Axiom is a \ceil or \equals rule: {axiom.text}')
             case _:
                 raise ValueError(f'Cannot extract simplification rule from axiom: {axiom.text}')
-        ens = _extract_ensures(_ens)
+        ens = _extract_condition(_ens)
         return lhs, rhs, req, ens
 
 
-def _extract_ensures(ens: Top | Equals | None) -> Pattern | None:
-    match ens:
+def _extract_condition(pattern: Top | Equals) -> Pattern | None:
+    match pattern:
         case Top():
             return None
-        case Equals(left=res):
-            return res
+        case Equals(left=cond):
+            return cond
         case _:
             raise AssertionError()
 
