@@ -1,8 +1,3 @@
-"""Parse KORE axioms into rewrite rules.
-
-Based on the [LLVM Backend's implementation](https://github.com/runtimeverification/llvm-backend/blob/d5eab4b0f0e610bc60843ebb482f79c043b92702/lib/ast/pattern_matching.cpp).
-"""
-
 from __future__ import annotations
 
 from abc import ABC
@@ -118,11 +113,6 @@ class RewriteRule(Rule):
 
     @staticmethod
     def _extract(axiom: Axiom) -> tuple[App, App, Pattern | None, Pattern | None, EVar | None]:
-        # Cases 0-5 of get_left_hand_side
-        # Cases 5-10 of get_requires
-        # Case 2 of get_right_hand_side:
-        # 2: rhs(\rewrites(_, \and(X, Y))) = get_builtin(\and(X, Y))
-        # Below is a special case without get_builtin
         match axiom.pattern:
             case Rewrites(left=And(ops=(_lhs, _req)), right=_rhs):
                 pass
@@ -172,9 +162,6 @@ class FunctionRule(Rule):
 
     @staticmethod
     def _extract(axiom: Axiom) -> tuple[App, Pattern, Pattern | None, Pattern | None]:
-        # Cases 7-10 of get_left_hand_side
-        # Cases 0-3 of get_requires
-        # Case 0 of get_right_hand_side
         match axiom.pattern:
             case Implies(
                 left=And(
@@ -224,8 +211,6 @@ class SimpliRule(Rule):
 
     @staticmethod
     def _extract(axiom: Axiom) -> tuple[App, Pattern, Pattern | None, Pattern | None]:
-        # Cases 11-12 of get_left_hand_side
-        # Case 0 of get_right_hand_side
         match axiom.pattern:
             case Implies(left=_req, right=Equals(left=App() as lhs, right=_rhs)):
                 req = _extract_condition(_req)
