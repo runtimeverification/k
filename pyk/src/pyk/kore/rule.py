@@ -62,29 +62,28 @@ class Rule(ABC):
 
     @staticmethod
     def extract_all(defn: Definition) -> list[Rule]:
-        return [Rule.from_axiom(axiom) for axiom in defn.axioms if Rule._is_rule(axiom)]
+        def is_rule(axiom: Axiom) -> bool:
+            if axiom == _INJ_AXIOM:
+                return False
 
-    @staticmethod
-    def _is_rule(axiom: Axiom) -> bool:
-        if axiom == _INJ_AXIOM:
-            return False
+            if any(attr in axiom.attrs_by_key for attr in _SKIPPED_ATTRS):
+                return False
 
-        if any(attr in axiom.attrs_by_key for attr in _SKIPPED_ATTRS):
-            return False
+            if 'simplification' in axiom.attrs_by_key:
+                match axiom.pattern:
+                    case Implies(
+                        left=Top() | Equals(),
+                        right=Equals(
+                            left=Ceil() | Equals(),
+                            right=And(ops=(_, Top() | Equals())),
+                        ),
+                    ):
+                        _LOGGER.info(fr'Skipping \ceil or \equals simplification rule: {axiom.text}')
+                        return False
 
-        if 'simplification' in axiom.attrs_by_key:
-            match axiom.pattern:
-                case Implies(
-                    left=Top() | Equals(),
-                    right=Equals(
-                        left=Ceil() | Equals(),
-                        right=And(ops=(_, Top() | Equals())),
-                    ),
-                ):
-                    _LOGGER.info(fr'Skipping \ceil or \equals simplification rule: {axiom.text}')
-                    return False
+            return True
 
-        return True
+        return [Rule.from_axiom(axiom) for axiom in defn.axioms if is_rule(axiom)]
 
 
 @final
