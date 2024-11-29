@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, final
 
 from .prelude import inj
-from .syntax import And, App, Axiom, Ceil, Equals, EVar, Implies, In, Not, Rewrites, SortVar, String, Top
+from .syntax import DV, And, App, Axiom, Ceil, Equals, EVar, Implies, In, Not, Rewrites, SortApp, SortVar, String, Top
 
 if TYPE_CHECKING:
     from typing import Final
@@ -232,7 +232,7 @@ def _extract_condition(pattern: Pattern) -> Pattern | None:
     match pattern:
         case Top():
             return None
-        case Equals(left=cond):
+        case Equals(left=cond, right=DV(SortApp('SortBool'), String('true'))):
             return cond
         case _:
             raise ValueError(f'Cannot extract condition from pattern: {pattern.text}')
