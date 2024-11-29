@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from abc import ABC
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, final
@@ -13,6 +14,9 @@ if TYPE_CHECKING:
     from .syntax import Definition, Pattern
 
     Attrs = dict[str, tuple[Pattern, ...]]
+
+
+_LOGGER: Final = logging.getLogger(__name__)
 
 
 # There's a simplification rule with irregular form in the prelude module INJ.
@@ -77,6 +81,7 @@ class Rule(ABC):
                         right=And(ops=(_, Top() | Equals())),
                     ),
                 ):
+                    _LOGGER.info(fr'Skipping \ceil or \equals simplification rule: {axiom.text}')
                     return False
 
         return True
