@@ -228,7 +228,7 @@ class FunctionRule(Rule):
 @final
 @dataclass
 class SimpliRule(Rule):
-    lhs: Pattern
+    lhs: App
     rhs: Pattern
     req: Pattern | None
     ens: Pattern | None
@@ -247,17 +247,19 @@ class SimpliRule(Rule):
         )
 
     @staticmethod
-    def _extract(axiom: Axiom) -> tuple[Pattern, Pattern, Pattern | None, Pattern | None]:
+    def _extract(axiom: Axiom) -> tuple[App, Pattern, Pattern | None, Pattern | None]:
         req: Pattern | None = None
         # Cases 11-12 of get_left_hand_side
         # Case 0 of get_right_hand_side
         match axiom.pattern:
+            case Implies(left=Top(), right=Equals(left=App() as lhs, right=And(ops=(rhs, Top() | Equals() as _ens)))):
+                pass
+            case Implies(
+                left=Equals(left=req), right=Equals(left=App() as lhs, right=And(ops=(rhs, Top() | Equals() as _ens)))
+            ):
+                pass
             case Implies(right=Equals(left=Ceil() | Equals())):
                 raise ValueError(fr'Axiom is a \ceil or \equals rule: {axiom.text}')
-            case Implies(left=Top(), right=Equals(left=lhs, right=And(ops=(rhs, Top() | Equals() as _ens)))):
-                pass
-            case Implies(left=Equals(left=req), right=Equals(left=lhs, right=And(ops=(rhs, Top() | Equals() as _ens)))):
-                pass
             case _:
                 raise ValueError(f'Cannot extract simplification rule from axiom: {axiom.text}')
         ens = _extract_ensures(_ens)
