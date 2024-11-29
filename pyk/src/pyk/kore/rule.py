@@ -182,7 +182,7 @@ class FunctionRule(Rule):
                 ),
                 right=Equals(left=App() as app, right=_rhs),
             ):
-                args = FunctionRule._get_patterns(_args)
+                args = FunctionRule._extract_args(_args)
                 lhs = app.let(args=args)
                 req = _extract_condition(_req)
                 rhs, ens = _extract_rhs(_rhs)
@@ -191,14 +191,12 @@ class FunctionRule(Rule):
                 raise ValueError(f'Cannot extract function rule from axiom: {axiom.text}')
 
     @staticmethod
-    def _get_patterns(pattern: Pattern) -> tuple[Pattern, ...]:
-        # get_patterns(\top()) = []
-        # get_patterns(\and(\in(_, X), Y)) = X : get_patterns(Y)
+    def _extract_args(pattern: Pattern) -> tuple[Pattern, ...]:
         match pattern:
             case Top():
                 return ()
             case And(ops=(In(left=EVar(), right=arg), rest)):
-                return (arg,) + FunctionRule._get_patterns(rest)
+                return (arg,) + FunctionRule._extract_args(rest)
             case _:
                 raise ValueError(f'Cannot extract argument list from pattern: {pattern.text}')
 
