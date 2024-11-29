@@ -153,7 +153,7 @@ class RewriteRule(Rule):
         # 2: rhs(\rewrites(_, \and(X, Y))) = get_builtin(\and(X, Y))
         # Below is a special case without get_builtin
         match axiom.pattern:
-            case Rewrites(right=And(ops=(App("Lbl'-LT-'generatedTop'-GT-'") as rhs, Top() | Equals() as _ens))):
+            case Rewrites(right=And(ops=(App("Lbl'-LT-'generatedTop'-GT-'") as rhs, _ens))):
                 pass
             case _:
                 raise ValueError(f'Cannot extract RHS from axiom: {axiom.text}')
@@ -217,7 +217,7 @@ class FunctionRule(Rule):
     def _extract_rhs(axiom: Axiom) -> tuple[App, Pattern, Pattern | None]:
         # Case 0 of get_right_hand_side
         match axiom.pattern:
-            case Implies(right=Equals(left=App() as app, right=And(ops=(rhs, Top() | Equals() as _ens)))):
+            case Implies(right=Equals(left=App() as app, right=And(ops=(rhs, _ens)))):
                 pass
             case _:
                 raise ValueError(f'Cannot extract RHS from axiom: {axiom.text}')
@@ -252,11 +252,9 @@ class SimpliRule(Rule):
         # Cases 11-12 of get_left_hand_side
         # Case 0 of get_right_hand_side
         match axiom.pattern:
-            case Implies(left=Top(), right=Equals(left=App() as lhs, right=And(ops=(rhs, Top() | Equals() as _ens)))):
+            case Implies(left=Top(), right=Equals(left=App() as lhs, right=And(ops=(rhs, _ens)))):
                 pass
-            case Implies(
-                left=Equals(left=req), right=Equals(left=App() as lhs, right=And(ops=(rhs, Top() | Equals() as _ens)))
-            ):
+            case Implies(left=Equals(left=req), right=Equals(left=App() as lhs, right=And(ops=(rhs, _ens)))):
                 pass
             case Implies(right=Equals(left=Ceil() | Equals())):
                 raise ValueError(fr'Axiom is a \ceil or \equals rule: {axiom.text}')
@@ -266,7 +264,7 @@ class SimpliRule(Rule):
         return lhs, rhs, req, ens
 
 
-def _extract_condition(pattern: Top | Equals) -> Pattern | None:
+def _extract_condition(pattern: Pattern) -> Pattern | None:
     match pattern:
         case Top():
             return None
