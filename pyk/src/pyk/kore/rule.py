@@ -123,10 +123,6 @@ class RewriteRule(Rule):
         # Cases 0-5 of get_left_hand_side
         # Cases 5-10 of get_requires
         match axiom.pattern:
-            case Rewrites(left=And(ops=(Top(), lhs))):
-                pass
-            case Rewrites(left=And(ops=(Equals(left=req), lhs))):
-                pass
             case Rewrites(left=And(ops=(lhs, Top()))):
                 pass
             case Rewrites(left=And(ops=(lhs, Equals(left=req)))):
