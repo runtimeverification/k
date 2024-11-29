@@ -208,8 +208,8 @@ class FunctionRule(Rule):
         match pattern:
             case Top():
                 return ()
-            case And(ops=(In(right=x), y)):
-                return (x,) + FunctionRule._get_patterns(y)
+            case And(ops=(In(left=EVar(), right=arg), rest)):
+                return (arg,) + FunctionRule._get_patterns(rest)
             case _:
                 raise ValueError(f'Cannot extract argument list from pattern: {pattern.text}')
 
