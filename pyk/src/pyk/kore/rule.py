@@ -177,16 +177,16 @@ class FunctionRule(Rule):
         # Cases 7-10 of get_left_hand_side
         # Cases 0-3 of get_requires
         match axiom.pattern:
-            case Implies(left=And(ops=(Not(), And(ops=(_req, _args))))):
-                pass
-            case Implies(left=And(ops=(_req, _args))):
-                pass
+            case Implies(
+                left=And(
+                    ops=(Not(), And(ops=(_req, _args))) | (_req, _args),
+                ),
+            ):
+                args = FunctionRule._get_patterns(_args)
+                req = _extract_condition(_req)
+                return args, req
             case _:
                 raise ValueError(f'Cannot extract LHS from axiom: {axiom.text}')
-
-        args = FunctionRule._get_patterns(_args)
-        req = _extract_condition(_req)
-        return args, req
 
     @staticmethod
     def _get_patterns(pattern: Pattern) -> tuple[Pattern, ...]:
@@ -205,11 +205,10 @@ class FunctionRule(Rule):
         # Case 0 of get_right_hand_side
         match axiom.pattern:
             case Implies(right=Equals(left=App() as app, right=_rhs)):
-                pass
+                rhs, ens = _extract_rhs(_rhs)
+                return app, rhs, ens
             case _:
                 raise ValueError(f'Cannot extract RHS from axiom: {axiom.text}')
-        rhs, ens = _extract_rhs(_rhs)
-        return app, rhs, ens
 
 
 @final
@@ -239,12 +238,11 @@ class SimpliRule(Rule):
         # Case 0 of get_right_hand_side
         match axiom.pattern:
             case Implies(left=_req, right=Equals(left=App() as lhs, right=_rhs)):
-                pass
+                req = _extract_condition(_req)
+                rhs, ens = _extract_rhs(_rhs)
+                return lhs, rhs, req, ens
             case _:
                 raise ValueError(f'Cannot extract simplification rule from axiom: {axiom.text}')
-        req = _extract_condition(_req)
-        rhs, ens = _extract_rhs(_rhs)
-        return lhs, rhs, req, ens
 
 
 def _extract_rhs(pattern: Pattern) -> tuple[Pattern, Pattern | None]:
