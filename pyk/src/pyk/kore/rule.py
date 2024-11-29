@@ -124,7 +124,7 @@ class RewriteRule(Rule):
         # 2: rhs(\rewrites(_, \and(X, Y))) = get_builtin(\and(X, Y))
         # Below is a special case without get_builtin
         match axiom.pattern:
-            case Rewrites(left=And(ops=(_lhs, _req)), right=And(ops=(rhs, _ens))):
+            case Rewrites(left=And(ops=(_lhs, _req)), right=_rhs):
                 pass
             case _:
                 raise ValueError(f'Cannot extract rewrite rule from axiom: {axiom.text}')
@@ -138,14 +138,14 @@ class RewriteRule(Rule):
             case _:
                 raise ValueError(f'Cannot extract LHS configuration from axiom: {axiom.text}')
 
+        req = _extract_condition(_req)
+        rhs, ens = _extract_rhs(_rhs)
         match rhs:
             case App("Lbl'-LT-'generatedTop'-GT-'"):
                 pass
             case _:
                 raise ValueError(f'Cannot extract RHS configuration from axiom: {axiom.text}')
 
-        req = _extract_condition(_req)
-        ens = _extract_condition(_ens)
         return lhs, rhs, req, ens, ctx
 
 
@@ -204,11 +204,11 @@ class FunctionRule(Rule):
     def _extract_rhs(axiom: Axiom) -> tuple[App, Pattern, Pattern | None]:
         # Case 0 of get_right_hand_side
         match axiom.pattern:
-            case Implies(right=Equals(left=App() as app, right=And(ops=(rhs, _ens)))):
+            case Implies(right=Equals(left=App() as app, right=_rhs)):
                 pass
             case _:
                 raise ValueError(f'Cannot extract RHS from axiom: {axiom.text}')
-        ens = _extract_condition(_ens)
+        rhs, ens = _extract_rhs(_rhs)
         return app, rhs, ens
 
 
@@ -238,13 +238,21 @@ class SimpliRule(Rule):
         # Cases 11-12 of get_left_hand_side
         # Case 0 of get_right_hand_side
         match axiom.pattern:
-            case Implies(left=_req, right=Equals(left=App() as lhs, right=And(ops=(rhs, _ens)))):
+            case Implies(left=_req, right=Equals(left=App() as lhs, right=_rhs)):
                 pass
             case _:
                 raise ValueError(f'Cannot extract simplification rule from axiom: {axiom.text}')
         req = _extract_condition(_req)
-        ens = _extract_condition(_ens)
+        rhs, ens = _extract_rhs(_rhs)
         return lhs, rhs, req, ens
+
+
+def _extract_rhs(pattern: Pattern) -> tuple[Pattern, Pattern | None]:
+    match pattern:
+        case And(ops=(rhs, _ens)):
+            return rhs, _extract_condition(_ens)
+        case _:
+            raise ValueError(f'Cannot extract RHS from pattern: {pattern.text}')
 
 
 def _extract_condition(pattern: Pattern) -> Pattern | None:
