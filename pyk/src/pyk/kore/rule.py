@@ -101,8 +101,7 @@ class RewriteRule(Rule):
 
     @staticmethod
     def from_axiom(axiom: Axiom) -> RewriteRule:
-        lhs, req, ctx = RewriteRule._extract_lhs(axiom)
-        rhs, ens = RewriteRule._extract_rhs(axiom)
+        lhs, rhs, req, ens, ctx = RewriteRule._extract(axiom)
         priority = _extract_priority(axiom)
         uid = _extract_uid(axiom)
         label = _extract_label(axiom)
@@ -118,38 +117,36 @@ class RewriteRule(Rule):
         )
 
     @staticmethod
-    def _extract_lhs(axiom: Axiom) -> tuple[App, Pattern | None, EVar | None]:
+    def _extract(axiom: Axiom) -> tuple[App, App, Pattern | None, Pattern | None, EVar | None]:
         # Cases 0-5 of get_left_hand_side
         # Cases 5-10 of get_requires
-        match axiom.pattern:
-            case Rewrites(left=And(ops=(lhs, _req))):
-                pass
-            case _:
-                raise ValueError(f'Cannot extract LHS from axiom: {axiom.text}')
-
-        req = _extract_condition(_req)
-
-        ctx: EVar | None = None
-        match lhs:
-            case App("Lbl'-LT-'generatedTop'-GT-'") as app:
-                pass
-            case And(_, (App("Lbl'-LT-'generatedTop'-GT-'") as app, EVar("Var'Hash'Configuration") as ctx)):
-                pass
-
-        return app, req, ctx
-
-    @staticmethod
-    def _extract_rhs(axiom: Axiom) -> tuple[App, Pattern | None]:
         # Case 2 of get_right_hand_side:
         # 2: rhs(\rewrites(_, \and(X, Y))) = get_builtin(\and(X, Y))
         # Below is a special case without get_builtin
         match axiom.pattern:
-            case Rewrites(right=And(ops=(App("Lbl'-LT-'generatedTop'-GT-'") as rhs, _ens))):
+            case Rewrites(left=And(ops=(_lhs, _req)), right=And(ops=(rhs, _ens))):
                 pass
             case _:
-                raise ValueError(f'Cannot extract RHS from axiom: {axiom.text}')
+                raise ValueError(f'Cannot extract rewrite rule from axiom: {axiom.text}')
+
+        ctx: EVar | None = None
+        match _lhs:
+            case App("Lbl'-LT-'generatedTop'-GT-'") as lhs:
+                pass
+            case And(_, (App("Lbl'-LT-'generatedTop'-GT-'") as lhs, EVar("Var'Hash'Configuration") as ctx)):
+                pass
+            case _:
+                raise ValueError(f'Cannot extract LHS configuration from axiom: {axiom.text}')
+
+        match rhs:
+            case App("Lbl'-LT-'generatedTop'-GT-'"):
+                pass
+            case _:
+                raise ValueError(f'Cannot extract RHS configuration from axiom: {axiom.text}')
+
+        req = _extract_condition(_req)
         ens = _extract_condition(_ens)
-        return rhs, ens
+        return lhs, rhs, req, ens, ctx
 
 
 @final
