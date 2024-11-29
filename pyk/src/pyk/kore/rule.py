@@ -74,8 +74,7 @@ class Rule(ABC):
             return False
 
         match axiom.pattern:
-            case Implies(right=Equals(left=Ceil())):
-                # Ceil rule
+            case Implies(right=Equals(left=Ceil() | Equals())):
                 return False
 
         return True
@@ -246,8 +245,8 @@ class SimpliRule(Rule):
         # Cases 11-12 of get_left_hand_side
         # Case 0 of get_right_hand_side
         match axiom.pattern:
-            case Implies(right=Equals(left=Ceil())):
-                raise ValueError(f'Axiom is a ceil rule: {axiom.text}')
+            case Implies(right=Equals(left=Ceil() | Equals())):
+                raise ValueError(fr'Axiom is a \ceil or \equals rule: {axiom.text}')
             case Implies(left=Top(), right=Equals(left=lhs, right=And(ops=(rhs, Top() | Equals() as _ens)))):
                 pass
             case Implies(left=Equals(left=req), right=Equals(left=lhs, right=And(ops=(rhs, Top() | Equals() as _ens)))):
