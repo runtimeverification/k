@@ -241,8 +241,6 @@ class SimpliRule(Rule):
         match axiom.pattern:
             case Implies(left=_req, right=Equals(left=App() as lhs, right=And(ops=(rhs, _ens)))):
                 pass
-            case Implies(right=Equals(left=Ceil() | Equals())):
-                raise ValueError(fr'Axiom is a \ceil or \equals rule: {axiom.text}')
             case _:
                 raise ValueError(f'Cannot extract simplification rule from axiom: {axiom.text}')
         req = _extract_condition(_req)
