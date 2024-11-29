@@ -211,7 +211,7 @@ class FunctionRule(Rule):
             case And(ops=(In(right=x), y)):
                 return (x,) + FunctionRule._get_patterns(y)
             case _:
-                raise AssertionError()
+                raise ValueError(f'Cannot extract argument list from pattern: {pattern.text}')
 
     @staticmethod
     def _extract_rhs(axiom: Axiom) -> tuple[App, Pattern, Pattern | None]:
@@ -271,7 +271,7 @@ def _extract_condition(pattern: Pattern) -> Pattern | None:
         case Equals(left=cond):
             return cond
         case _:
-            raise AssertionError()
+            raise ValueError(f'Cannot extract condition from pattern: {pattern.text}')
 
 
 def _extract_uid(axiom: Axiom) -> str:
