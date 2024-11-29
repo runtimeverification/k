@@ -119,20 +119,17 @@ class RewriteRule(Rule):
 
     @staticmethod
     def _extract_lhs(axiom: Axiom) -> tuple[App, Pattern | None, EVar | None]:
-        req: Pattern | None = None
         # Cases 0-5 of get_left_hand_side
         # Cases 5-10 of get_requires
         match axiom.pattern:
-            case Rewrites(left=And(ops=(lhs, Top()))):
+            case Rewrites(left=And(ops=(Not(), And(ops=(_req, lhs))))):
                 pass
-            case Rewrites(left=And(ops=(lhs, Equals(left=req)))):
-                pass
-            case Rewrites(left=And(ops=(Not(), And(ops=(Top(), lhs))))):
-                pass
-            case Rewrites(left=And(ops=(Not(), And(ops=(Equals(left=req), lhs))))):
+            case Rewrites(left=And(ops=(lhs, _req))):
                 pass
             case _:
                 raise ValueError(f'Cannot extract LHS from axiom: {axiom.text}')
+
+        req = _extract_condition(_req)
 
         ctx: EVar | None = None
         match lhs:
@@ -182,18 +179,13 @@ class FunctionRule(Rule):
 
     @staticmethod
     def _extract_args(axiom: Axiom) -> tuple[tuple[Pattern, ...], Pattern | None]:
-        req: Pattern | None = None
         # Cases 7-10 of get_left_hand_side
         # Cases 0-3 of get_requires
         match axiom.pattern:
-            case Implies(left=And(ops=(Top(), pat))):
-                return FunctionRule._get_patterns(pat), req
-            case Implies(left=And(ops=(Equals(left=req), pat))):
-                return FunctionRule._get_patterns(pat), req
-            case Implies(left=And(ops=(Not(), And(ops=(Top(), pat))))):
-                return FunctionRule._get_patterns(pat), req
-            case Implies(left=And(ops=(Not(), And(ops=(Equals(left=req), pat))))):
-                return FunctionRule._get_patterns(pat), req
+            case Implies(left=And(ops=(Not(), And(ops=(_req, pat))))):
+                return FunctionRule._get_patterns(pat), _extract_condition(_req)
+            case Implies(left=And(ops=(_req, pat))):
+                return FunctionRule._get_patterns(pat), _extract_condition(_req)
             case _:
                 raise ValueError(f'Cannot extract LHS from axiom: {axiom.text}')
 
@@ -244,18 +236,16 @@ class SimpliRule(Rule):
 
     @staticmethod
     def _extract(axiom: Axiom) -> tuple[App, Pattern, Pattern | None, Pattern | None]:
-        req: Pattern | None = None
         # Cases 11-12 of get_left_hand_side
         # Case 0 of get_right_hand_side
         match axiom.pattern:
-            case Implies(left=Top(), right=Equals(left=App() as lhs, right=And(ops=(rhs, _ens)))):
-                pass
-            case Implies(left=Equals(left=req), right=Equals(left=App() as lhs, right=And(ops=(rhs, _ens)))):
+            case Implies(left=_req, right=Equals(left=App() as lhs, right=And(ops=(rhs, _ens)))):
                 pass
             case Implies(right=Equals(left=Ceil() | Equals())):
                 raise ValueError(fr'Axiom is a \ceil or \equals rule: {axiom.text}')
             case _:
                 raise ValueError(f'Cannot extract simplification rule from axiom: {axiom.text}')
+        req = _extract_condition(_req)
         ens = _extract_condition(_ens)
         return lhs, rhs, req, ens
 
