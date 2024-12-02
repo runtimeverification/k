@@ -56,7 +56,7 @@ class Rule(ABC):
             return RewriteRule.from_axiom(axiom)
 
         if 'simplification' in axiom.attrs_by_key:
-            return SimpliRule.from_axiom(axiom)
+            return AppRule.from_axiom(axiom)
 
         return FunctionRule.from_axiom(axiom)
 
@@ -192,9 +192,17 @@ class FunctionRule(Rule):
                 raise ValueError(f'Cannot extract argument list from pattern: {pattern.text}')
 
 
+class SimpliRule(Rule, ABC):
+    lhs: Pattern
+    rhs: Pattern
+    req: Pattern | None
+    ens: Pattern | None
+    priority: int
+
+
 @final
 @dataclass
-class SimpliRule(Rule):
+class AppRule(SimpliRule):
     lhs: App
     rhs: Pattern
     req: Pattern | None
@@ -202,10 +210,10 @@ class SimpliRule(Rule):
     priority: int
 
     @staticmethod
-    def from_axiom(axiom: Axiom) -> SimpliRule:
-        lhs, rhs, req, ens = SimpliRule._extract(axiom)
+    def from_axiom(axiom: Axiom) -> AppRule:
+        lhs, rhs, req, ens = AppRule._extract(axiom)
         priority = _extract_priority(axiom)
-        return SimpliRule(
+        return AppRule(
             lhs=lhs,
             rhs=rhs,
             req=req,
