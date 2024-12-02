@@ -3,17 +3,37 @@ from __future__ import annotations
 import logging
 from abc import ABC
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, final
+from typing import TYPE_CHECKING, Generic, TypeVar, final
 
 from .prelude import inj
-from .syntax import DV, And, App, Axiom, Ceil, Equals, EVar, Implies, In, Not, Rewrites, SortApp, SortVar, String, Top
+from .syntax import (
+    DV,
+    And,
+    App,
+    Axiom,
+    Ceil,
+    Equals,
+    EVar,
+    Implies,
+    In,
+    Not,
+    Pattern,
+    Rewrites,
+    SortApp,
+    SortVar,
+    String,
+    Top,
+)
 
 if TYPE_CHECKING:
     from typing import Final
 
-    from .syntax import Definition, Pattern
+    from .syntax import Definition
 
     Attrs = dict[str, tuple[Pattern, ...]]
+
+
+P = TypeVar('P', bound=Pattern)
 
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -55,10 +75,18 @@ class Rule(ABC):
         if isinstance(axiom.pattern, Rewrites):
             return RewriteRule.from_axiom(axiom)
 
-        if 'simplification' in axiom.attrs_by_key:
-            return AppRule.from_axiom(axiom)
+        if 'simplification' not in axiom.attrs_by_key:
+            return FunctionRule.from_axiom(axiom)
 
-        return FunctionRule.from_axiom(axiom)
+        match axiom.pattern:
+            case Implies(right=Equals(left=App())):
+                return AppRule.from_axiom(axiom)
+            case Implies(right=Equals(left=Ceil())):
+                return CeilRule.from_axiom(axiom)
+            case Implies(right=Equals(left=Equals())):
+                return EqualsRule.from_axiom(axiom)
+            case _:
+                raise ValueError(f'Cannot parse simplification rule: {axiom.text}')
 
     @staticmethod
     def extract_all(defn: Definition) -> list[Rule]:
@@ -68,18 +96,6 @@ class Rule(ABC):
 
             if any(attr in axiom.attrs_by_key for attr in _SKIPPED_ATTRS):
                 return False
-
-            if 'simplification' in axiom.attrs_by_key:
-                match axiom.pattern:
-                    case Implies(
-                        left=Top() | Equals(),
-                        right=Equals(
-                            left=Ceil() | Equals(),
-                            right=And(ops=(_, Top() | Equals())),
-                        ),
-                    ):
-                        _LOGGER.info(fr'Skipping \ceil or \equals simplification rule: {axiom.text}')
-                        return False
 
             return True
 
@@ -192,17 +208,25 @@ class FunctionRule(Rule):
                 raise ValueError(f'Cannot extract argument list from pattern: {pattern.text}')
 
 
-class SimpliRule(Rule, ABC):
-    lhs: Pattern
-    rhs: Pattern
-    req: Pattern | None
-    ens: Pattern | None
-    priority: int
+class SimpliRule(Rule, Generic[P], ABC):
+    lhs: P
+
+    @staticmethod
+    def _extract(axiom: Axiom, lhs_type: type[P]) -> tuple[P, Pattern, Pattern | None, Pattern | None]:
+        match axiom.pattern:
+            case Implies(left=_req, right=Equals(left=lhs, right=_rhs)):
+                req = _extract_condition(_req)
+                rhs, ens = _extract_rhs(_rhs)
+                if not isinstance(lhs, lhs_type):
+                    raise ValueError(f'Invalid LHS type from simplification axiom: {axiom.text}')
+                return lhs, rhs, req, ens
+            case _:
+                raise ValueError(f'Cannot extract simplification rule from axiom: {axiom.text}')
 
 
 @final
 @dataclass
-class AppRule(SimpliRule):
+class AppRule(SimpliRule[App]):
     lhs: App
     rhs: Pattern
     req: Pattern | None
@@ -211,7 +235,7 @@ class AppRule(SimpliRule):
 
     @staticmethod
     def from_axiom(axiom: Axiom) -> AppRule:
-        lhs, rhs, req, ens = AppRule._extract(axiom)
+        lhs, rhs, req, ens = SimpliRule._extract(axiom, App)
         priority = _extract_priority(axiom)
         return AppRule(
             lhs=lhs,
@@ -221,15 +245,51 @@ class AppRule(SimpliRule):
             priority=priority,
         )
 
+
+@final
+@dataclass
+class CeilRule(SimpliRule):
+    lhs: Ceil
+    rhs: Pattern
+    req: Pattern | None
+    ens: Pattern | None
+    priority: int
+
     @staticmethod
-    def _extract(axiom: Axiom) -> tuple[App, Pattern, Pattern | None, Pattern | None]:
-        match axiom.pattern:
-            case Implies(left=_req, right=Equals(left=App() as lhs, right=_rhs)):
-                req = _extract_condition(_req)
-                rhs, ens = _extract_rhs(_rhs)
-                return lhs, rhs, req, ens
-            case _:
-                raise ValueError(f'Cannot extract simplification rule from axiom: {axiom.text}')
+    def from_axiom(axiom: Axiom) -> CeilRule:
+        lhs, rhs, req, ens = SimpliRule._extract(axiom, Ceil)
+        priority = _extract_priority(axiom)
+        return CeilRule(
+            lhs=lhs,
+            rhs=rhs,
+            req=req,
+            ens=ens,
+            priority=priority,
+        )
+
+
+@final
+@dataclass
+class EqualsRule(SimpliRule):
+    lhs: Equals
+    rhs: Pattern
+    req: Pattern | None
+    ens: Pattern | None
+    priority: int
+
+    @staticmethod
+    def from_axiom(axiom: Axiom) -> EqualsRule:
+        lhs, rhs, req, ens = SimpliRule._extract(axiom, Equals)
+        if not isinstance(lhs, Equals):
+            raise ValueError(f'Cannot extract LHS as Equals from axiom: {axiom.text}')
+        priority = _extract_priority(axiom)
+        return EqualsRule(
+            lhs=lhs,
+            rhs=rhs,
+            req=req,
+            ens=ens,
+            priority=priority,
+        )
 
 
 def _extract_rhs(pattern: Pattern) -> tuple[Pattern, Pattern | None]:
