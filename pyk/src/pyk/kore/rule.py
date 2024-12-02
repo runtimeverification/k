@@ -103,7 +103,7 @@ class Rule(ABC):
 
 
 @final
-@dataclass
+@dataclass(frozen=True)
 class RewriteRule(Rule):
     lhs: App
     rhs: App
@@ -160,7 +160,7 @@ class RewriteRule(Rule):
 
 
 @final
-@dataclass
+@dataclass(frozen=True)
 class FunctionRule(Rule):
     lhs: App
     rhs: Pattern
@@ -225,7 +225,7 @@ class SimpliRule(Rule, Generic[P], ABC):
 
 
 @final
-@dataclass
+@dataclass(frozen=True)
 class AppRule(SimpliRule[App]):
     lhs: App
     rhs: Pattern
@@ -247,7 +247,7 @@ class AppRule(SimpliRule[App]):
 
 
 @final
-@dataclass
+@dataclass(frozen=True)
 class CeilRule(SimpliRule):
     lhs: Ceil
     rhs: Pattern
@@ -269,7 +269,7 @@ class CeilRule(SimpliRule):
 
 
 @final
-@dataclass
+@dataclass(frozen=True)
 class EqualsRule(SimpliRule):
     lhs: Equals
     rhs: Pattern
