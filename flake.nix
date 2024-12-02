@@ -1,7 +1,7 @@
 {
   description = "K Framework";
   inputs = {
-    llvm-backend.url = "github:runtimeverification/llvm-backend/v0.1.108";
+    llvm-backend.url = "github:runtimeverification/llvm-backend/v0.1.109";
     haskell-backend = {
       url = "github:runtimeverification/haskell-backend/v0.1.101";
       inputs.rv-utils.follows = "llvm-backend/rv-utils";
