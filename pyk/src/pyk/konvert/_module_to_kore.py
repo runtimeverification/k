@@ -117,6 +117,19 @@ def module_to_kore(definition: KDefinition) -> Module:
     sentences += _overload_axioms(defn)
 
     res = Module(name=name, sentences=sentences, attrs=attrs)
+
+    # Filter the assoc attribute
+    res = res.let(
+        sentences=(
+            (
+                sent.let_attrs(attr for attr in sent.attrs if attr.symbol != 'assoc')
+                if isinstance(sent, SymbolDecl)
+                else sent
+            )
+            for sent in res.sentences
+        )
+    )
+
     # Filter the overload attribute
     res = res.let(
         sentences=(sent.let_attrs(attr for attr in sent.attrs if attr.symbol != 'overload') for sent in res.sentences)
@@ -709,7 +722,6 @@ def simplified_module(definition: KDefinition, module_name: str | None = None) -
         PullUpRewrites(),
         DiscardSymbolAtts(
             [
-                Atts.ASSOC,
                 Atts.CELL_FRAGMENT,
                 Atts.CELL_NAME,
                 Atts.CELL_OPT_ABSENT,
