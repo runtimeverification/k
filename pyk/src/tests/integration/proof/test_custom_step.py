@@ -68,7 +68,7 @@ class CustomStepSemanticsWithStep(CustomStepSemanticsWithoutStep):
             and k_cell[0].label.name == 'c_CUSTOM-STEP-SYNTAX_Step'
         )
 
-    def custom_step(self, c: CTerm) -> KCFGExtendResult | None:
+    def custom_step(self, c: CTerm, cs: CTermSymbolic) -> KCFGExtendResult | None:
         if self.can_make_custom_step(c):
             new_cterm = CTerm.from_kast(set_cell(c.kast, 'K_CELL', KSequence(KApply('d_CUSTOM-STEP-SYNTAX_Step'))))
             return Step(new_cterm, 1, (), ['CUSTOM-STEP.c.d'], cut=True)
@@ -141,11 +141,17 @@ class TestCustomStep(CTermSymbolicTest, KProveTest):
         CUSTOM_STEP_TEST_DATA_APPLY,
         ids=[test_id for test_id, *_ in CUSTOM_STEP_TEST_DATA_APPLY],
     )
-    def test_custom_step_exec(self, test_id: str, cterm: CTerm, expected: KCFGExtendResult | None) -> None:
+    def test_custom_step_exec(
+        self,
+        test_id: str,
+        cterm: CTerm,
+        cterm_symbolic: CTermSymbolic,
+        expected: KCFGExtendResult | None,
+    ) -> None:
 
         # When
         kcfg_semantics = CustomStepSemanticsWithStep()
-        actual = kcfg_semantics.custom_step(cterm)
+        actual = kcfg_semantics.custom_step(cterm, cterm_symbolic)
         # Then
         assert expected == actual
 

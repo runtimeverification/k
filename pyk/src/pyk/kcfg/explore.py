@@ -220,7 +220,7 @@ class KCFGExplore:
         module_name: str | None = None,
     ) -> list[KCFGExtendResult]:
 
-        custom_step_result = self.kcfg_semantics.custom_step(_cterm)
+        custom_step_result = self.kcfg_semantics.custom_step(_cterm, self.cterm_symbolic)
         if custom_step_result is not None:
             return [custom_step_result]
 

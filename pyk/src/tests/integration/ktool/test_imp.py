@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
     from typing import Final
 
-    from pyk.cterm import CTerm
+    from pyk.cterm import CTerm, CTermSymbolic
     from pyk.kast.outer import KDefinition
     from pyk.kcfg import KCFGExplore
     from pyk.kcfg.kcfg import KCFGExtendResult
@@ -71,7 +71,7 @@ class ImpSemantics(DefaultSemantics):
     def can_make_custom_step(self, c: CTerm) -> bool:
         return False
 
-    def custom_step(self, c: CTerm) -> KCFGExtendResult | None:
+    def custom_step(self, c: CTerm, cs: CTermSymbolic) -> KCFGExtendResult | None:
         return None
 
 

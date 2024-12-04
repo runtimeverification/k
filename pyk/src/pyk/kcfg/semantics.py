@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ..cterm import CTerm
+    from ..cterm import CTerm, CTermSymbolic
     from .kcfg import KCFGExtendResult
 
 
@@ -35,7 +35,7 @@ class KCFGSemantics(ABC):
     """Check whether or not the semantics can make a custom step from a given ``CTerm``."""
 
     @abstractmethod
-    def custom_step(self, c: CTerm) -> KCFGExtendResult | None: ...
+    def custom_step(self, c: CTerm, cs: CTermSymbolic) -> KCFGExtendResult | None: ...
 
     """Implement a custom semantic step."""
 
@@ -61,7 +61,7 @@ class DefaultSemantics(KCFGSemantics):
     def can_make_custom_step(self, c: CTerm) -> bool:
         return False
 
-    def custom_step(self, c: CTerm) -> KCFGExtendResult | None:
+    def custom_step(self, c: CTerm, cs: CTermSymbolic) -> KCFGExtendResult | None:
         return None
 
     def is_mergeable(self, c1: CTerm, c2: CTerm) -> bool:
