@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, NamedTuple, final
 
 from ..kast import EMPTY_ATT, AttKey, Atts, KInner
 from ..kast.att import Format, NoneType
-from ..kast.inner import KApply, KRewrite, KSort
+from ..kast.inner import KApply, KLabel, KRewrite, KSort, collect
 from ..kast.manip import extract_lhs, extract_rhs
 from ..kast.outer import KDefinition, KNonTerminal, KProduction, KRegexTerminal, KRule, KSyntaxSort, KTerminal
 from ..kore.prelude import inj
@@ -46,7 +46,6 @@ if TYPE_CHECKING:
     from typing import Any, Final
 
     from ..kast import AttEntry, KAtt
-    from ..kast.inner import KLabel
     from ..kast.outer import KFlatModule, KSentence
     from ..kore.syntax import Pattern, Sentence, Sort
 
@@ -733,7 +732,6 @@ def simplified_module(definition: KDefinition, module_name: str | None = None) -
                 Atts.COMM,
                 Atts.FORMAT,
                 Atts.GROUP,
-                Atts.IMPURE,
                 Atts.INDEX,
                 Atts.INITIALIZER,
                 Atts.LEFT,
@@ -750,6 +748,7 @@ def simplified_module(definition: KDefinition, module_name: str | None = None) -
             ],
         ),
         DiscardHookAtts(),
+        AddImpureAtts(),
         AddSymbolAtts(Atts.MACRO(None), _is_macro),
         AddSymbolAtts(Atts.FUNCTIONAL(None), _is_functional),
         AddSymbolAtts(Atts.INJECTIVE(None), _is_injective),
@@ -957,6 +956,78 @@ class PullUpRewrites(RulePass):
 
         rewrite = KRewrite(lhs=extract_lhs(rule.body), rhs=extract_rhs(rule.body))
         return rule.let(body=rewrite)
+
+
+@dataclass
+class AddImpureAtts(SingleModulePass):
+    """Add the `impure` attribute to all function symbol productions whose definition transitively contains `impure`."""
+
+    def _transform_module(self, module: KFlatModule) -> KFlatModule:
+        impurities = AddImpureAtts._impurities(module)
+
+        def update(production: KProduction) -> KProduction:
+            if not production.klabel:
+                return production
+
+            klabel = production.klabel
+
+            if klabel.name in impurities:
+                return production.let(att=production.att.update([Atts.IMPURE(None)]))
+
+            return production
+
+        module = module.map_sentences(update, of_type=KProduction)
+        return module
+
+    @staticmethod
+    def _impurities(module: KFlatModule) -> set[str]:
+        callers = AddImpureAtts._callers(module)
+
+        res: set[str] = set()
+        pending = [
+            prod.klabel.name
+            for prod in module.sentences
+            if isinstance(prod, KProduction) and prod.klabel is not None and Atts.IMPURE in prod.att
+        ]
+        while pending:
+            label = pending.pop()
+            if label in res:
+                continue
+            res.add(label)
+            pending.extend(callers.get(label, []))
+        return res
+
+    @staticmethod
+    def _callers(module: KFlatModule) -> dict[str, set[str]]:
+        function_labels = {prod.klabel.name for prod in module.productions if prod.klabel and Atts.FUNCTION in prod.att}
+
+        res: dict[str, set[str]] = {}
+        for rule in module.rules:
+            assert isinstance(rule.body, KRewrite)
+
+            match rule.body:
+                case KRewrite(KApply(KLabel(label)), rhs):
+                    if label in function_labels:
+                        rhs_labels = AddImpureAtts._labels(rhs)
+                        for called in rhs_labels:
+                            res.setdefault(called, set()).add(label)
+                case _:
+                    pass
+        return res
+
+    @staticmethod
+    def _labels(inner: KInner) -> set[str]:
+        res: set[str] = set()
+
+        def add_label(inner: KInner) -> None:
+            match inner:
+                case KApply(KLabel(label)):
+                    res.add(label)
+                case _:
+                    pass
+
+        collect(add_label, inner)
+        return res
 
 
 @dataclass
