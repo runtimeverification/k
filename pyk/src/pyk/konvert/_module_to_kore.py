@@ -9,8 +9,8 @@ from pathlib import Path
 from typing import ClassVar  # noqa: TC003
 from typing import TYPE_CHECKING, NamedTuple, final
 
-from ..kast import EMPTY_ATT, Atts, KInner
-from ..kast.att import Format
+from ..kast import EMPTY_ATT, AttKey, Atts, KInner
+from ..kast.att import Format, NoneType
 from ..kast.inner import KApply, KRewrite, KSort
 from ..kast.manip import extract_lhs, extract_rhs
 from ..kast.outer import KDefinition, KNonTerminal, KProduction, KRegexTerminal, KRule, KSyntaxSort, KTerminal
@@ -45,7 +45,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Mapping
     from typing import Any, Final
 
-    from ..kast import AttEntry, AttKey, KAtt
+    from ..kast import AttEntry, KAtt
     from ..kast.inner import KLabel
     from ..kast.outer import KFlatModule, KSentence
     from ..kore.syntax import Pattern, Sentence, Sort
@@ -83,6 +83,9 @@ BUILTIN_LABELS: Final = {
 }
 
 
+_INTERNAL_CONSTRUCTOR: Final = AttKey('internal-constructor', type=NoneType())
+
+
 def module_to_kore(definition: KDefinition) -> Module:
     """Convert the main module of a kompiled KAST definition to KORE format."""
     module = simplified_module(definition)
@@ -118,11 +121,11 @@ def module_to_kore(definition: KDefinition) -> Module:
 
     res = Module(name=name, sentences=sentences, attrs=attrs)
 
-    # Filter the assoc attribute
+    # Filter the assoc, and _internal_constructor attribute
     res = res.let(
         sentences=(
             (
-                sent.let_attrs(attr for attr in sent.attrs if attr.symbol != 'assoc')
+                sent.let_attrs(attr for attr in sent.attrs if attr.symbol not in ['assoc', 'internal-constructor'])
                 if isinstance(sent, SymbolDecl)
                 else sent
             )
@@ -552,7 +555,7 @@ def _no_confusion_axioms(module: KFlatModule) -> list[Axiom]:
         if isinstance(sent, KProduction)
         and sent.klabel
         and sent.klabel.name not in BUILTIN_LABELS
-        and Atts.CONSTRUCTOR in sent.att
+        and _INTERNAL_CONSTRUCTOR in sent.att
     ]
 
     res: list[Axiom] = []
@@ -747,10 +750,15 @@ def simplified_module(definition: KDefinition, module_name: str | None = None) -
             ],
         ),
         DiscardHookAtts(),
-        AddAnywhereAtts(),
         AddSymbolAtts(Atts.MACRO(None), _is_macro),
         AddSymbolAtts(Atts.FUNCTIONAL(None), _is_functional),
         AddSymbolAtts(Atts.INJECTIVE(None), _is_injective),
+        AddAnywhereAttsFromRules(),
+        # Mark symbols that require constructor axioms with an internal attribute.
+        # Has to precede `AddAnywhereAttsFromOverloads`: symbols that would be considewred constructors without
+        # the extra `anywhere` require a constructor axiom.
+        AddSymbolAtts(_INTERNAL_CONSTRUCTOR(None), _is_constructor),
+        AddAnywhereAttsFromOverloads(),
         AddSymbolAtts(Atts.CONSTRUCTOR(None), _is_constructor),
     )
     definition = reduce(lambda defn, step: step.execute(defn), pipeline, definition)
@@ -952,13 +960,10 @@ class PullUpRewrites(RulePass):
 
 
 @dataclass
-class AddAnywhereAtts(KompilerPass):
-    """Add the anywhere attribute to all symbol productions that are overloads or have a corresponding anywhere rule."""
+class AddAnywhereAttsFromRules(SingleModulePass):
+    """Add the anywhere attribute to all symbol productions that have a corresponding anywhere rule."""
 
-    def execute(self, definition: KDefinition) -> KDefinition:
-        if len(definition.modules) > 1:
-            raise ValueError('Expected a single module')
-        module = definition.modules[0]
+    def _transform_module(self, module: KFlatModule) -> KFlatModule:
         rules = self._rules_by_klabel(module)
 
         def update(production: KProduction) -> KProduction:
@@ -970,13 +975,10 @@ class AddAnywhereAtts(KompilerPass):
             if any(Atts.ANYWHERE in rule.att for rule in rules.get(klabel, [])):
                 return production.let(att=production.att.update([Atts.ANYWHERE(None)]))
 
-            if klabel.name in definition.overloads:
-                return production.let(att=production.att.update([Atts.ANYWHERE(None)]))
-
             return production
 
         module = module.map_sentences(update, of_type=KProduction)
-        return KDefinition(module.name, (module,))
+        return module
 
     @staticmethod
     def _rules_by_klabel(module: KFlatModule) -> dict[KLabel, list[KRule]]:
@@ -993,6 +995,30 @@ class AddAnywhereAtts(KompilerPass):
             label = rule.body.lhs.label
             res.setdefault(label, []).append(rule)
         return res
+
+
+@dataclass
+class AddAnywhereAttsFromOverloads(KompilerPass):
+    """Add the anywhere attribute to all symbol productions that are overloads."""
+
+    def execute(self, definition: KDefinition) -> KDefinition:
+        if len(definition.modules) > 1:
+            raise ValueError('Expected a single module')
+        module = definition.modules[0]
+
+        def update(production: KProduction) -> KProduction:
+            if not production.klabel:
+                return production
+
+            klabel = production.klabel
+
+            if klabel.name in definition.overloads:
+                return production.let(att=production.att.update([Atts.ANYWHERE(None)]))
+
+            return production
+
+        module = module.map_sentences(update, of_type=KProduction)
+        return KDefinition(module.name, (module,))
 
 
 @dataclass
