@@ -4,12 +4,12 @@ import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from functools import reduce
-from itertools import repeat
+from itertools import chain, repeat
 from pathlib import Path
 from typing import ClassVar  # noqa: TC003
 from typing import TYPE_CHECKING, NamedTuple, final
 
-from ..kast import EMPTY_ATT, AttKey, Atts, KInner
+from ..kast import AttKey, Atts, KAtt, KInner
 from ..kast.att import Format, NoneType
 from ..kast.inner import KApply, KLabel, KRewrite, KSort, collect
 from ..kast.manip import extract_lhs, extract_rhs
@@ -45,7 +45,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Mapping
     from typing import Any, Final
 
-    from ..kast import AttEntry, KAtt
+    from ..kast import AttEntry
     from ..kast.outer import KFlatModule, KSentence
     from ..kore.syntax import Pattern, Sentence, Sort
 
@@ -835,31 +835,33 @@ class AddSyntaxSorts(SingleModulePass):
     @staticmethod
     def _syntax_sorts(module: KFlatModule) -> list[KSyntaxSort]:
         """Return a declaration for each sort in the module."""
-        declarations: dict[KSort, KAtt] = {}
 
         def is_higher_order(production: KProduction) -> bool:
             # Example: syntax {Sort} Sort ::= Sort "#as" Sort
             return production.sort in production.params
 
+        def merge_atts(atts: list[KAtt]) -> KAtt:
+            grouped: dict[AttKey, set[Any]] = {}
+            for att, value in chain.from_iterable(att.items() for att in atts):
+                grouped.setdefault(att, set()).add(value)
+
+            entries = [att(next(iter(values))) for att, values in grouped.items() if len(values) == 1]
+            return KAtt(entries)
+
+        declarations: dict[KSort, list[KAtt]] = {}
+
         # Merge attributes from KSyntaxSort instances
         for syntax_sort in module.syntax_sorts:
-            sort = syntax_sort.sort
-            if sort not in declarations:
-                declarations[sort] = syntax_sort.att
-            else:
-                assert declarations[sort].keys().isdisjoint(syntax_sort.att)
-                declarations[sort] = declarations[sort].update(syntax_sort.att.entries())
+            declarations.setdefault(syntax_sort.sort, []).append(syntax_sort.att)
 
         # Also consider production sorts
         for production in module.productions:
             if is_higher_order(production):
                 continue
 
-            sort = production.sort
-            if sort not in declarations:
-                declarations[sort] = EMPTY_ATT
+            declarations.setdefault(production.sort, [])
 
-        return [KSyntaxSort(sort, att=att) for sort, att in declarations.items()]
+        return [KSyntaxSort(sort, att=merge_atts(atts)) for sort, atts in declarations.items()]
 
 
 @dataclass
