@@ -717,6 +717,11 @@ def simplified_module(definition: KDefinition, module_name: str | None = None) -
     pipeline = (
         FlattenDefinition(module_name),
         # sorts
+        DiscardSyntaxSortAtts(
+            [
+                Atts.CELL_COLLECTION,
+            ],
+        ),
         AddSyntaxSorts(),
         AddCollectionAtts(),
         AddDomainValueAtts(),
@@ -724,27 +729,35 @@ def simplified_module(definition: KDefinition, module_name: str | None = None) -
         PullUpRewrites(),
         DiscardSymbolAtts(
             [
+                Atts.AVOID,
+                Atts.CELL_COLLECTION,
                 Atts.CELL_FRAGMENT,
                 Atts.CELL_NAME,
                 Atts.CELL_OPT_ABSENT,
                 Atts.COLOR,
                 Atts.COLORS,
                 Atts.COMM,
+                Atts.EXIT,
                 Atts.FORMAT,
                 Atts.GROUP,
                 Atts.INDEX,
                 Atts.INITIALIZER,
                 Atts.LEFT,
                 Atts.MAINCELL,
+                Atts.MULTIPLICITY,
                 Atts.PREDICATE,
                 Atts.PREFER,
                 Atts.PRIVATE,
                 Atts.PRODUCTION,
                 Atts.PROJECTION,
+                Atts.RETURNS_UNIT,
                 Atts.RIGHT,
                 Atts.SEQSTRICT,
                 Atts.STRICT,
+                Atts.TYPE,
+                Atts.TERMINATOR_SYMBOL,
                 Atts.USER_LIST,
+                Atts.WRAP_ELEMENT,
             ],
         ),
         DiscardHookAtts(),
@@ -821,6 +834,22 @@ class FlattenDefinition(KompilerPass):
             imported.add(module_name)
 
         return res
+
+
+@dataclass
+class DiscardSyntaxSortAtts(SingleModulePass):
+    """Remove certain attributes from syntax sorts."""
+
+    keys: frozenset[AttKey]
+
+    def __init__(self, keys: Iterable[AttKey]):
+        self.keys = frozenset(keys)
+
+    def _transform_module(self, module: KFlatModule) -> KFlatModule:
+        return module.map_sentences(self._update, of_type=KSyntaxSort)
+
+    def _update(self, syntax_sort: KSyntaxSort) -> KSyntaxSort:
+        return syntax_sort.let(att=syntax_sort.att.discard(self.keys))
 
 
 @dataclass
