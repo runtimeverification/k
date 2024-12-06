@@ -876,38 +876,36 @@ class AddCollectionAtts(SingleModulePass):
     )
 
     def _transform_module(self, module: KFlatModule) -> KFlatModule:
-        # Example: syntax Map ::= Map Map [..., klabel(_Map_), element(_|->_), unit(.Map), ...]
-        concat_atts = {prod.sort: prod.att for prod in module.productions if Atts.ELEMENT in prod.att}
+        # Example: syntax Map ::= Map Map [..., element(_|->_), unit(.Map), ...]
+        concat_prods = {prod.sort: prod for prod in module.productions if Atts.ELEMENT in prod.att}
 
         assert all(
-            Atts.UNIT in att for _, att in concat_atts.items()
+            Atts.UNIT in prod.att for _, prod in concat_prods.items()
         )  # TODO Could be saved with a different attribute structure: concat(Element, Unit)
 
-        return module.map_sentences(lambda syntax_sort: self._update(syntax_sort, concat_atts), of_type=KSyntaxSort)
+        return module.map_sentences(lambda syntax_sort: self._update(syntax_sort, concat_prods), of_type=KSyntaxSort)
 
     @staticmethod
-    def _update(syntax_sort: KSyntaxSort, concat_atts: Mapping[KSort, KAtt]) -> KSyntaxSort:
+    def _update(syntax_sort: KSyntaxSort, concat_prods: Mapping[KSort, KProduction]) -> KSyntaxSort:
         if syntax_sort.att.get(Atts.HOOK) not in AddCollectionAtts.COLLECTION_HOOKS:
             return syntax_sort
 
-        assert syntax_sort.sort in concat_atts
-        concat_att = concat_atts[syntax_sort.sort]
+        assert syntax_sort.sort in concat_prods
+        concat_prod = concat_prods[syntax_sort.sort]
 
-        # Workaround until zero-argument symbol is removed, rather than
-        # deprecated.
-        symbol = concat_att[Atts.SYMBOL]
-        assert symbol is not None
+        klabel = concat_prod.klabel
+        assert klabel is not None
 
         return syntax_sort.let(
             att=syntax_sort.att.update(
                 [
                     # TODO Here, the attriubte is stored as dict, but ultimately we should parse known attributes in KAtt.from_dict
-                    Atts.CONCAT(KApply(symbol).to_dict()),
+                    Atts.CONCAT(KApply(klabel).to_dict()),
                     # TODO Here, we keep the format from the frontend so that the attributes on SyntaxSort and Production are of the same type.
-                    Atts.ELEMENT(concat_att[Atts.ELEMENT]),
-                    Atts.UNIT(concat_att[Atts.UNIT]),
+                    Atts.ELEMENT(concat_prod.att[Atts.ELEMENT]),
+                    Atts.UNIT(concat_prod.att[Atts.UNIT]),
                 ]
-                + ([Atts.UPDATE(concat_att[Atts.UPDATE])] if Atts.UPDATE in concat_att else [])
+                + ([Atts.UPDATE(concat_prod.att[Atts.UPDATE])] if Atts.UPDATE in concat_prod.att else [])
             )
         )
 
