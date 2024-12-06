@@ -71,8 +71,8 @@ def test_module_to_kore(kast_defn: KDefinition, kore_module: Module) -> None:
     # Then
 
     # Check module name and attributes
-    assert actual.name == expected.name
-    assert actual.attrs == expected.attrs
+    assert expected.name == actual.name
+    assert expected.attrs == actual.attrs
 
     check_generated_sentences(actual, expected)
     check_missing_sentences(actual, expected)
@@ -121,7 +121,7 @@ def check_generated_sentences(actual: Module, expected: Module) -> None:
             pytest.fail(f'Invalid sentence: {sent.text}')
 
         # Fail with diff
-        assert sent.text == expected_sent.text
+        assert expected_sent.text == sent.text
 
 
 def check_missing_sentences(actual: Module, expected: Module) -> None:
