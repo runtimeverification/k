@@ -37,7 +37,7 @@ from ..kore.syntax import (
     Top,
 )
 from ..prelude.k import K_ITEM, K
-from ..utils import FrozenDict, intersperse
+from ..utils import FrozenDict, intersperse, not_none
 from ._kast_to_kore import _kast_to_kore
 from ._utils import munge
 
@@ -100,9 +100,9 @@ def module_to_kore(definition: KDefinition) -> Module:
         if syntax_sort.sort.name not in [K.name, K_ITEM.name]
     ]
     symbol_decls = [
-        symbol_prod_to_kore(sentence)
-        for sentence in module.sentences
-        if isinstance(sentence, KProduction) and sentence.klabel and sentence.klabel.name not in BUILTIN_LABELS
+        symbol_prod_to_kore(prod)
+        for prod in module.productions
+        if prod.klabel and prod.klabel.name not in BUILTIN_LABELS
     ]
 
     sentences: list[Sentence] = []
@@ -280,11 +280,8 @@ def _subsort_axioms(module: KFlatModule) -> list[Axiom]:
         )
 
     res: list[Axiom] = []
-    for sentence in module.sentences:
-        if not isinstance(sentence, KProduction):
-            continue
-
-        subsort_res = sentence.as_subsort
+    for prod in module.productions:
+        subsort_res = prod.as_subsort
         if not subsort_res:
             continue
 
@@ -342,17 +339,15 @@ def _assoc_axioms(defn: KDefinition) -> list[Axiom]:
     module = defn.modules[0]
 
     res: list[Axiom] = []
-    for sentence in module.sentences:
-        if not isinstance(sentence, KProduction):
+    for prod in module.productions:
+        if not prod.klabel:
             continue
-        if not sentence.klabel:
+        if prod.klabel.name in BUILTIN_LABELS:
             continue
-        if sentence.klabel.name in BUILTIN_LABELS:
-            continue
-        if not Atts.ASSOC in sentence.att:
+        if not Atts.ASSOC in prod.att:
             continue
 
-        res.append(assoc_axiom(sentence))
+        res.append(assoc_axiom(prod))
     return res
 
 
@@ -388,16 +383,14 @@ def _idem_axioms(module: KFlatModule) -> list[Axiom]:
         )
 
     res: list[Axiom] = []
-    for sentence in module.sentences:
-        if not isinstance(sentence, KProduction):
+    for prod in module.productions:
+        if not prod.klabel:
             continue
-        if not sentence.klabel:
+        if prod.klabel.name in BUILTIN_LABELS:
             continue
-        if sentence.klabel.name in BUILTIN_LABELS:
+        if not Atts.IDEM in prod.att:
             continue
-        if not Atts.IDEM in sentence.att:
-            continue
-        res.append(idem_axiom(sentence))
+        res.append(idem_axiom(prod))
     return res
 
 
@@ -440,18 +433,16 @@ def _unit_axioms(module: KFlatModule) -> list[Axiom]:
         return left_unit, right_unit
 
     res: list[Axiom] = []
-    for sentence in module.sentences:
-        if not isinstance(sentence, KProduction):
+    for prod in module.productions:
+        if not prod.klabel:
             continue
-        if not sentence.klabel:
+        if prod.klabel.name in BUILTIN_LABELS:
             continue
-        if sentence.klabel.name in BUILTIN_LABELS:
+        if not Atts.FUNCTION in prod.att:
             continue
-        if not Atts.FUNCTION in sentence.att:
+        if not Atts.UNIT in prod.att:
             continue
-        if not Atts.UNIT in sentence.att:
-            continue
-        res.extend(unit_axioms(sentence))
+        res.extend(unit_axioms(prod))
     return res
 
 
@@ -478,16 +469,14 @@ def _functional_axioms(module: KFlatModule) -> list[Axiom]:
         )
 
     res: list[Axiom] = []
-    for sentence in module.sentences:
-        if not isinstance(sentence, KProduction):
+    for prod in module.productions:
+        if not prod.klabel:
             continue
-        if not sentence.klabel:
+        if prod.klabel.name in BUILTIN_LABELS:
             continue
-        if sentence.klabel.name in BUILTIN_LABELS:
+        if not Atts.FUNCTIONAL in prod.att:
             continue
-        if not Atts.FUNCTIONAL in sentence.att:
-            continue
-        res.append(functional_axiom(sentence))
+        res.append(functional_axiom(prod))
     return res
 
 
@@ -549,21 +538,26 @@ def _no_confusion_axioms(module: KFlatModule) -> list[Axiom]:
         )
 
     prods = [
-        sent
-        for sent in module.sentences
-        if isinstance(sent, KProduction)
-        and sent.klabel
-        and sent.klabel.name not in BUILTIN_LABELS
-        and _INTERNAL_CONSTRUCTOR in sent.att
+        prod
+        for prod in module.productions
+        if prod.klabel and prod.klabel.name not in BUILTIN_LABELS and _INTERNAL_CONSTRUCTOR in prod.att
     ]
 
     res: list[Axiom] = []
     res += (axiom_for_same_constr(p) for p in prods if p.non_terminals)
+
+    prods_by_sort: dict[KSort, list[KProduction]] = {}
+    for prod in prods:
+        prods_by_sort.setdefault(prod.sort, []).append(prod)
+
+    for _, prods in prods_by_sort.items():
+        prods.sort(key=lambda p: not_none(p.klabel).name)  # type: ignore [attr-defined]
+
     res += (
-        axiom_for_diff_constr(p1, p2)
-        for p1 in prods
-        for p2 in prods
-        if p1.sort == p2.sort and p1.klabel and p2.klabel and p1.klabel.name < p2.klabel.name
+        axiom_for_diff_constr(prods[i], prods[j])
+        for prods in prods_by_sort.values()
+        for i in range(len(prods))
+        for j in range(i + 1, len(prods))
     )
     return res
 
@@ -1017,9 +1011,7 @@ class AddImpureAtts(SingleModulePass):
 
         res: set[str] = set()
         pending = [
-            prod.klabel.name
-            for prod in module.sentences
-            if isinstance(prod, KProduction) and prod.klabel is not None and Atts.IMPURE in prod.att
+            prod.klabel.name for prod in module.productions if prod.klabel is not None and Atts.IMPURE in prod.att
         ]
         while pending:
             label = pending.pop()
