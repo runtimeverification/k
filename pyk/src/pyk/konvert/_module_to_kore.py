@@ -4,14 +4,14 @@ import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from functools import reduce
-from itertools import repeat
+from itertools import chain, repeat
 from pathlib import Path
 from typing import ClassVar  # noqa: TC003
 from typing import TYPE_CHECKING, NamedTuple, final
 
-from ..kast import EMPTY_ATT, Atts, KInner
-from ..kast.att import Format
-from ..kast.inner import KApply, KRewrite, KSort
+from ..kast import AttKey, Atts, KAtt, KInner
+from ..kast.att import Format, NoneType
+from ..kast.inner import KApply, KLabel, KRewrite, KSort, collect
 from ..kast.manip import extract_lhs, extract_rhs
 from ..kast.outer import KDefinition, KNonTerminal, KProduction, KRegexTerminal, KRule, KSyntaxSort, KTerminal
 from ..kore.prelude import inj
@@ -37,7 +37,7 @@ from ..kore.syntax import (
     Top,
 )
 from ..prelude.k import K_ITEM, K
-from ..utils import FrozenDict, intersperse
+from ..utils import FrozenDict, intersperse, not_none
 from ._kast_to_kore import _kast_to_kore
 from ._utils import munge
 
@@ -45,8 +45,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Mapping
     from typing import Any, Final
 
-    from ..kast import AttEntry, AttKey, KAtt
-    from ..kast.inner import KLabel
+    from ..kast import AttEntry
     from ..kast.outer import KFlatModule, KSentence
     from ..kore.syntax import Pattern, Sentence, Sort
 
@@ -83,6 +82,9 @@ BUILTIN_LABELS: Final = {
 }
 
 
+_INTERNAL_CONSTRUCTOR: Final = AttKey('internal-constructor', type=NoneType())
+
+
 def module_to_kore(definition: KDefinition) -> Module:
     """Convert the main module of a kompiled KAST definition to KORE format."""
     module = simplified_module(definition)
@@ -98,9 +100,9 @@ def module_to_kore(definition: KDefinition) -> Module:
         if syntax_sort.sort.name not in [K.name, K_ITEM.name]
     ]
     symbol_decls = [
-        symbol_prod_to_kore(sentence)
-        for sentence in module.sentences
-        if isinstance(sentence, KProduction) and sentence.klabel and sentence.klabel.name not in BUILTIN_LABELS
+        symbol_prod_to_kore(prod)
+        for prod in module.productions
+        if prod.klabel and prod.klabel.name not in BUILTIN_LABELS
     ]
 
     sentences: list[Sentence] = []
@@ -117,6 +119,19 @@ def module_to_kore(definition: KDefinition) -> Module:
     sentences += _overload_axioms(defn)
 
     res = Module(name=name, sentences=sentences, attrs=attrs)
+
+    # Filter the assoc, and _internal_constructor attribute
+    res = res.let(
+        sentences=(
+            (
+                sent.let_attrs(attr for attr in sent.attrs if attr.symbol not in ['assoc', 'internal-constructor'])
+                if isinstance(sent, SymbolDecl)
+                else sent
+            )
+            for sent in res.sentences
+        )
+    )
+
     # Filter the overload attribute
     res = res.let(
         sentences=(sent.let_attrs(attr for attr in sent.attrs if attr.symbol != 'overload') for sent in res.sentences)
@@ -265,11 +280,8 @@ def _subsort_axioms(module: KFlatModule) -> list[Axiom]:
         )
 
     res: list[Axiom] = []
-    for sentence in module.sentences:
-        if not isinstance(sentence, KProduction):
-            continue
-
-        subsort_res = sentence.as_subsort
+    for prod in module.productions:
+        subsort_res = prod.as_subsort
         if not subsort_res:
             continue
 
@@ -327,17 +339,15 @@ def _assoc_axioms(defn: KDefinition) -> list[Axiom]:
     module = defn.modules[0]
 
     res: list[Axiom] = []
-    for sentence in module.sentences:
-        if not isinstance(sentence, KProduction):
+    for prod in module.productions:
+        if not prod.klabel:
             continue
-        if not sentence.klabel:
+        if prod.klabel.name in BUILTIN_LABELS:
             continue
-        if sentence.klabel.name in BUILTIN_LABELS:
-            continue
-        if not Atts.ASSOC in sentence.att:
+        if not Atts.ASSOC in prod.att:
             continue
 
-        res.append(assoc_axiom(sentence))
+        res.append(assoc_axiom(prod))
     return res
 
 
@@ -373,16 +383,14 @@ def _idem_axioms(module: KFlatModule) -> list[Axiom]:
         )
 
     res: list[Axiom] = []
-    for sentence in module.sentences:
-        if not isinstance(sentence, KProduction):
+    for prod in module.productions:
+        if not prod.klabel:
             continue
-        if not sentence.klabel:
+        if prod.klabel.name in BUILTIN_LABELS:
             continue
-        if sentence.klabel.name in BUILTIN_LABELS:
+        if not Atts.IDEM in prod.att:
             continue
-        if not Atts.IDEM in sentence.att:
-            continue
-        res.append(idem_axiom(sentence))
+        res.append(idem_axiom(prod))
     return res
 
 
@@ -425,18 +433,16 @@ def _unit_axioms(module: KFlatModule) -> list[Axiom]:
         return left_unit, right_unit
 
     res: list[Axiom] = []
-    for sentence in module.sentences:
-        if not isinstance(sentence, KProduction):
+    for prod in module.productions:
+        if not prod.klabel:
             continue
-        if not sentence.klabel:
+        if prod.klabel.name in BUILTIN_LABELS:
             continue
-        if sentence.klabel.name in BUILTIN_LABELS:
+        if not Atts.FUNCTION in prod.att:
             continue
-        if not Atts.FUNCTION in sentence.att:
+        if not Atts.UNIT in prod.att:
             continue
-        if not Atts.UNIT in sentence.att:
-            continue
-        res.extend(unit_axioms(sentence))
+        res.extend(unit_axioms(prod))
     return res
 
 
@@ -463,16 +469,14 @@ def _functional_axioms(module: KFlatModule) -> list[Axiom]:
         )
 
     res: list[Axiom] = []
-    for sentence in module.sentences:
-        if not isinstance(sentence, KProduction):
+    for prod in module.productions:
+        if not prod.klabel:
             continue
-        if not sentence.klabel:
+        if prod.klabel.name in BUILTIN_LABELS:
             continue
-        if sentence.klabel.name in BUILTIN_LABELS:
+        if not Atts.FUNCTIONAL in prod.att:
             continue
-        if not Atts.FUNCTIONAL in sentence.att:
-            continue
-        res.append(functional_axiom(sentence))
+        res.append(functional_axiom(prod))
     return res
 
 
@@ -534,21 +538,26 @@ def _no_confusion_axioms(module: KFlatModule) -> list[Axiom]:
         )
 
     prods = [
-        sent
-        for sent in module.sentences
-        if isinstance(sent, KProduction)
-        and sent.klabel
-        and sent.klabel.name not in BUILTIN_LABELS
-        and Atts.CONSTRUCTOR in sent.att
+        prod
+        for prod in module.productions
+        if prod.klabel and prod.klabel.name not in BUILTIN_LABELS and _INTERNAL_CONSTRUCTOR in prod.att
     ]
 
     res: list[Axiom] = []
     res += (axiom_for_same_constr(p) for p in prods if p.non_terminals)
+
+    prods_by_sort: dict[KSort, list[KProduction]] = {}
+    for prod in prods:
+        prods_by_sort.setdefault(prod.sort, []).append(prod)
+
+    for _, prods in prods_by_sort.items():
+        prods.sort(key=lambda p: not_none(p.klabel).name)  # type: ignore [attr-defined]
+
     res += (
-        axiom_for_diff_constr(p1, p2)
-        for p1 in prods
-        for p2 in prods
-        if p1.sort == p2.sort and p1.klabel and p2.klabel and p1.klabel.name < p2.klabel.name
+        axiom_for_diff_constr(prods[i], prods[j])
+        for prods in prods_by_sort.values()
+        for i in range(len(prods))
+        for j in range(i + 1, len(prods))
     )
     return res
 
@@ -606,7 +615,10 @@ def _no_junk_axioms(defn: KDefinition) -> list[Axiom]:
                 (
                     prod
                     for prod in productions_for_sort
-                    if prod.klabel and prod.klabel not in BUILTIN_LABELS and Atts.FUNCTION not in prod.att
+                    if prod.klabel
+                    and prod.klabel not in BUILTIN_LABELS
+                    and Atts.FUNCTION not in prod.att
+                    and Atts.MACRO not in prod.att
                 ),
                 key=key,
             )
@@ -702,6 +714,11 @@ def simplified_module(definition: KDefinition, module_name: str | None = None) -
     pipeline = (
         FlattenDefinition(module_name),
         # sorts
+        DiscardSyntaxSortAtts(
+            [
+                Atts.CELL_COLLECTION,
+            ],
+        ),
         AddSyntaxSorts(),
         AddCollectionAtts(),
         AddDomainValueAtts(),
@@ -709,36 +726,48 @@ def simplified_module(definition: KDefinition, module_name: str | None = None) -
         PullUpRewrites(),
         DiscardSymbolAtts(
             [
-                Atts.ASSOC,
+                Atts.AVOID,
+                Atts.CELL_COLLECTION,
                 Atts.CELL_FRAGMENT,
                 Atts.CELL_NAME,
                 Atts.CELL_OPT_ABSENT,
                 Atts.COLOR,
                 Atts.COLORS,
                 Atts.COMM,
+                Atts.EXIT,
                 Atts.FORMAT,
                 Atts.GROUP,
-                Atts.IMPURE,
                 Atts.INDEX,
                 Atts.INITIALIZER,
                 Atts.LEFT,
                 Atts.MAINCELL,
+                Atts.MULTIPLICITY,
                 Atts.PREDICATE,
                 Atts.PREFER,
                 Atts.PRIVATE,
                 Atts.PRODUCTION,
                 Atts.PROJECTION,
+                Atts.RETURNS_UNIT,
                 Atts.RIGHT,
                 Atts.SEQSTRICT,
                 Atts.STRICT,
+                Atts.TYPE,
+                Atts.TERMINATOR_SYMBOL,
                 Atts.USER_LIST,
+                Atts.WRAP_ELEMENT,
             ],
         ),
         DiscardHookAtts(),
-        AddAnywhereAtts(),
+        AddImpureAtts(),
         AddSymbolAtts(Atts.MACRO(None), _is_macro),
         AddSymbolAtts(Atts.FUNCTIONAL(None), _is_functional),
         AddSymbolAtts(Atts.INJECTIVE(None), _is_injective),
+        AddAnywhereAttsFromRules(),
+        # Mark symbols that require constructor axioms with an internal attribute.
+        # Has to precede `AddAnywhereAttsFromOverloads`: symbols that would be considewred constructors without
+        # the extra `anywhere` require a constructor axiom.
+        AddSymbolAtts(_INTERNAL_CONSTRUCTOR(None), _is_constructor),
+        AddAnywhereAttsFromOverloads(),
         AddSymbolAtts(Atts.CONSTRUCTOR(None), _is_constructor),
     )
     definition = reduce(lambda defn, step: step.execute(defn), pipeline, definition)
@@ -805,6 +834,22 @@ class FlattenDefinition(KompilerPass):
 
 
 @dataclass
+class DiscardSyntaxSortAtts(SingleModulePass):
+    """Remove certain attributes from syntax sorts."""
+
+    keys: frozenset[AttKey]
+
+    def __init__(self, keys: Iterable[AttKey]):
+        self.keys = frozenset(keys)
+
+    def _transform_module(self, module: KFlatModule) -> KFlatModule:
+        return module.map_sentences(self._update, of_type=KSyntaxSort)
+
+    def _update(self, syntax_sort: KSyntaxSort) -> KSyntaxSort:
+        return syntax_sort.let(att=syntax_sort.att.discard(self.keys))
+
+
+@dataclass
 class AddSyntaxSorts(SingleModulePass):
     """Return a definition with explicit syntax declarations: each sort is declared with the union of its attributes."""
 
@@ -816,31 +861,33 @@ class AddSyntaxSorts(SingleModulePass):
     @staticmethod
     def _syntax_sorts(module: KFlatModule) -> list[KSyntaxSort]:
         """Return a declaration for each sort in the module."""
-        declarations: dict[KSort, KAtt] = {}
 
         def is_higher_order(production: KProduction) -> bool:
             # Example: syntax {Sort} Sort ::= Sort "#as" Sort
             return production.sort in production.params
 
+        def merge_atts(atts: list[KAtt]) -> KAtt:
+            grouped: dict[AttKey, set[Any]] = {}
+            for att, value in chain.from_iterable(att.items() for att in atts):
+                grouped.setdefault(att, set()).add(value)
+
+            entries = [att(next(iter(values))) for att, values in grouped.items() if len(values) == 1]
+            return KAtt(entries)
+
+        declarations: dict[KSort, list[KAtt]] = {}
+
         # Merge attributes from KSyntaxSort instances
         for syntax_sort in module.syntax_sorts:
-            sort = syntax_sort.sort
-            if sort not in declarations:
-                declarations[sort] = syntax_sort.att
-            else:
-                assert declarations[sort].keys().isdisjoint(syntax_sort.att)
-                declarations[sort] = declarations[sort].update(syntax_sort.att.entries())
+            declarations.setdefault(syntax_sort.sort, []).append(syntax_sort.att)
 
         # Also consider production sorts
         for production in module.productions:
             if is_higher_order(production):
                 continue
 
-            sort = production.sort
-            if sort not in declarations:
-                declarations[sort] = EMPTY_ATT
+            declarations.setdefault(production.sort, [])
 
-        return [KSyntaxSort(sort, att=att) for sort, att in declarations.items()]
+        return [KSyntaxSort(sort, att=merge_atts(atts)) for sort, atts in declarations.items()]
 
 
 @dataclass
@@ -857,38 +904,36 @@ class AddCollectionAtts(SingleModulePass):
     )
 
     def _transform_module(self, module: KFlatModule) -> KFlatModule:
-        # Example: syntax Map ::= Map Map [..., klabel(_Map_), element(_|->_), unit(.Map), ...]
-        concat_atts = {prod.sort: prod.att for prod in module.productions if Atts.ELEMENT in prod.att}
+        # Example: syntax Map ::= Map Map [..., element(_|->_), unit(.Map), ...]
+        concat_prods = {prod.sort: prod for prod in module.productions if Atts.ELEMENT in prod.att}
 
         assert all(
-            Atts.UNIT in att for _, att in concat_atts.items()
+            Atts.UNIT in prod.att for _, prod in concat_prods.items()
         )  # TODO Could be saved with a different attribute structure: concat(Element, Unit)
 
-        return module.map_sentences(lambda syntax_sort: self._update(syntax_sort, concat_atts), of_type=KSyntaxSort)
+        return module.map_sentences(lambda syntax_sort: self._update(syntax_sort, concat_prods), of_type=KSyntaxSort)
 
     @staticmethod
-    def _update(syntax_sort: KSyntaxSort, concat_atts: Mapping[KSort, KAtt]) -> KSyntaxSort:
+    def _update(syntax_sort: KSyntaxSort, concat_prods: Mapping[KSort, KProduction]) -> KSyntaxSort:
         if syntax_sort.att.get(Atts.HOOK) not in AddCollectionAtts.COLLECTION_HOOKS:
             return syntax_sort
 
-        assert syntax_sort.sort in concat_atts
-        concat_att = concat_atts[syntax_sort.sort]
+        assert syntax_sort.sort in concat_prods
+        concat_prod = concat_prods[syntax_sort.sort]
 
-        # Workaround until zero-argument symbol is removed, rather than
-        # deprecated.
-        symbol = concat_att[Atts.SYMBOL]
-        assert symbol is not None
+        klabel = concat_prod.klabel
+        assert klabel is not None
 
         return syntax_sort.let(
             att=syntax_sort.att.update(
                 [
                     # TODO Here, the attriubte is stored as dict, but ultimately we should parse known attributes in KAtt.from_dict
-                    Atts.CONCAT(KApply(symbol).to_dict()),
+                    Atts.CONCAT(KApply(klabel).to_dict()),
                     # TODO Here, we keep the format from the frontend so that the attributes on SyntaxSort and Production are of the same type.
-                    Atts.ELEMENT(concat_att[Atts.ELEMENT]),
-                    Atts.UNIT(concat_att[Atts.UNIT]),
+                    Atts.ELEMENT(concat_prod.att[Atts.ELEMENT]),
+                    Atts.UNIT(concat_prod.att[Atts.UNIT]),
                 ]
-                + ([Atts.UPDATE(concat_att[Atts.UPDATE])] if Atts.UPDATE in concat_att else [])
+                + ([Atts.UPDATE(concat_prod.att[Atts.UPDATE])] if Atts.UPDATE in concat_prod.att else [])
             )
         )
 
@@ -940,13 +985,80 @@ class PullUpRewrites(RulePass):
 
 
 @dataclass
-class AddAnywhereAtts(KompilerPass):
-    """Add the anywhere attribute to all symbol productions that are overloads or have a corresponding anywhere rule."""
+class AddImpureAtts(SingleModulePass):
+    """Add the `impure` attribute to all function symbol productions whose definition transitively contains `impure`."""
 
-    def execute(self, definition: KDefinition) -> KDefinition:
-        if len(definition.modules) > 1:
-            raise ValueError('Expected a single module')
-        module = definition.modules[0]
+    def _transform_module(self, module: KFlatModule) -> KFlatModule:
+        impurities = AddImpureAtts._impurities(module)
+
+        def update(production: KProduction) -> KProduction:
+            if not production.klabel:
+                return production
+
+            klabel = production.klabel
+
+            if klabel.name in impurities:
+                return production.let(att=production.att.update([Atts.IMPURE(None)]))
+
+            return production
+
+        module = module.map_sentences(update, of_type=KProduction)
+        return module
+
+    @staticmethod
+    def _impurities(module: KFlatModule) -> set[str]:
+        callers = AddImpureAtts._callers(module)
+
+        res: set[str] = set()
+        pending = [
+            prod.klabel.name for prod in module.productions if prod.klabel is not None and Atts.IMPURE in prod.att
+        ]
+        while pending:
+            label = pending.pop()
+            if label in res:
+                continue
+            res.add(label)
+            pending.extend(callers.get(label, []))
+        return res
+
+    @staticmethod
+    def _callers(module: KFlatModule) -> dict[str, set[str]]:
+        function_labels = {prod.klabel.name for prod in module.productions if prod.klabel and Atts.FUNCTION in prod.att}
+
+        res: dict[str, set[str]] = {}
+        for rule in module.rules:
+            assert isinstance(rule.body, KRewrite)
+
+            match rule.body:
+                case KRewrite(KApply(KLabel(label)), rhs):
+                    if label in function_labels:
+                        rhs_labels = AddImpureAtts._labels(rhs)
+                        for called in rhs_labels:
+                            res.setdefault(called, set()).add(label)
+                case _:
+                    pass
+        return res
+
+    @staticmethod
+    def _labels(inner: KInner) -> set[str]:
+        res: set[str] = set()
+
+        def add_label(inner: KInner) -> None:
+            match inner:
+                case KApply(KLabel(label)):
+                    res.add(label)
+                case _:
+                    pass
+
+        collect(add_label, inner)
+        return res
+
+
+@dataclass
+class AddAnywhereAttsFromRules(SingleModulePass):
+    """Add the anywhere attribute to all symbol productions that have a corresponding anywhere rule."""
+
+    def _transform_module(self, module: KFlatModule) -> KFlatModule:
         rules = self._rules_by_klabel(module)
 
         def update(production: KProduction) -> KProduction:
@@ -958,13 +1070,10 @@ class AddAnywhereAtts(KompilerPass):
             if any(Atts.ANYWHERE in rule.att for rule in rules.get(klabel, [])):
                 return production.let(att=production.att.update([Atts.ANYWHERE(None)]))
 
-            if klabel.name in definition.overloads:
-                return production.let(att=production.att.update([Atts.ANYWHERE(None)]))
-
             return production
 
         module = module.map_sentences(update, of_type=KProduction)
-        return KDefinition(module.name, (module,))
+        return module
 
     @staticmethod
     def _rules_by_klabel(module: KFlatModule) -> dict[KLabel, list[KRule]]:
@@ -981,6 +1090,30 @@ class AddAnywhereAtts(KompilerPass):
             label = rule.body.lhs.label
             res.setdefault(label, []).append(rule)
         return res
+
+
+@dataclass
+class AddAnywhereAttsFromOverloads(KompilerPass):
+    """Add the anywhere attribute to all symbol productions that are overloads."""
+
+    def execute(self, definition: KDefinition) -> KDefinition:
+        if len(definition.modules) > 1:
+            raise ValueError('Expected a single module')
+        module = definition.modules[0]
+
+        def update(production: KProduction) -> KProduction:
+            if not production.klabel:
+                return production
+
+            klabel = production.klabel
+
+            if klabel.name in definition.overloads:
+                return production.let(att=production.att.update([Atts.ANYWHERE(None)]))
+
+            return production
+
+        module = module.map_sentences(update, of_type=KProduction)
+        return KDefinition(module.name, (module,))
 
 
 @dataclass
@@ -1063,6 +1196,7 @@ class DiscardHookAtts(SingleModulePass):
         'SET',
         'STRING',
         'SUBSTITUTION',
+        'TIMER',
         'UNIFICATION',
     )
 
