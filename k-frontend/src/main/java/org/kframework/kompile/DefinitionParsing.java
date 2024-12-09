@@ -353,18 +353,26 @@ public class DefinitionParsing {
     Definition definitionWithMapForConfig =
         DefinitionTransformer.from(
                 mod -> {
-                  boolean hasConfigDecl =
+                  long numConfigDecl =
                       stream(mod.localSentences())
-                          .anyMatch(
+                          .filter(
                               s ->
                                   s instanceof Bubble
-                                      && ((Bubble) s).sentenceType().equals(configuration));
-                  if (hasConfigDecl) {
+                                      && ((Bubble) s).sentenceType().equals(configuration))
+                          .count();
+                  if (numConfigDecl == 0) {
                     return Module(
                         mod.name(),
                         mod.imports().$bar(Set(Import(mapModule, true))).toSet(),
                         mod.localSentences(),
                         mod.att());
+                  } else if (numConfigDecl != 1) {
+                    throw KEMException.compilerError(
+                        "Only one configuration declaration may be declared per module. Found "
+                            + numConfigDecl
+                            + " in module "
+                            + mod.name()
+                            + ".");
                   }
                   return mod;
                 },
