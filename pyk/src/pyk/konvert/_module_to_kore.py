@@ -621,7 +621,10 @@ def _no_junk_axioms(defn: KDefinition) -> list[Axiom]:
                 (
                     prod
                     for prod in productions_for_sort
-                    if prod.klabel and prod.klabel not in BUILTIN_LABELS and Atts.FUNCTION not in prod.att
+                    if prod.klabel
+                    and prod.klabel not in BUILTIN_LABELS
+                    and Atts.FUNCTION not in prod.att
+                    and Atts.MACRO not in prod.att
                 ),
                 key=key,
             )
