@@ -1201,6 +1201,7 @@ class DiscardHookAtts(SingleModulePass):
         'SET',
         'STRING',
         'SUBSTITUTION',
+        'TIMER',
         'UNIFICATION',
     )
 
