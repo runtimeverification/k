@@ -360,13 +360,13 @@ public class DefinitionParsing {
                                   s instanceof Bubble
                                       && ((Bubble) s).sentenceType().equals(configuration))
                           .count();
-                  if (numConfigDecl == 0) {
+                  if (numConfigDecl == 1) {
                     return Module(
                         mod.name(),
                         mod.imports().$bar(Set(Import(mapModule, true))).toSet(),
                         mod.localSentences(),
                         mod.att());
-                  } else if (numConfigDecl != 1) {
+                  } else if (numConfigDecl != 0) {
                     throw KEMException.compilerError(
                         "Only one configuration declaration may be declared per module. Found "
                             + numConfigDecl
