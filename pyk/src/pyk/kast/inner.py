@@ -877,20 +877,18 @@ def var_occurrences(term: KInner) -> dict[str, list[KVariable]]:
     return _var_occurrences
 
 
-# TODO replace by method that does not reconstruct the AST
 def collect(callback: Callable[[KInner], None], kinner: KInner) -> None:
-    """Collect information about a given term traversing it bottom-up using a function with side effects.
+    """Collect information about a given term traversing it top-down using a function with side effects.
 
     Args:
         callback: Function with the side effect of collecting desired information at each AST node.
         kinner: The term to traverse.
     """
-
-    def f(kinner: KInner) -> KInner:
-        callback(kinner)
-        return kinner
-
-    bottom_up(f, kinner)
+    subterms = [kinner]
+    while subterms:
+        term = subterms.pop()
+        subterms.extend(reversed(term.terms))
+        callback(term)
 
 
 def build_assoc(unit: KInner, label: str | KLabel, terms: Iterable[KInner]) -> KInner:
