@@ -342,6 +342,13 @@ class Pattern(Kore):
                 stack.append(f(pattern.patterns[idx]))
                 stack.append([])
 
+    def collect(self, f: Callable[[Pattern], None]) -> None:
+        subpatterns = [self]
+        while subpatterns:
+            pattern = subpatterns.pop()
+            subpatterns.extend(reversed(pattern.patterns))
+            f(pattern)
+
 
 class VarPattern(Pattern, WithSort):
     __match_args__ = ('name', 'sort')
