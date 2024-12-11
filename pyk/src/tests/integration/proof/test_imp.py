@@ -591,7 +591,7 @@ APR_PROVE_WITH_KCFG_OPTIMS_TEST_DATA: Iterable[
         [],
         True,
         ProofStatus.PASSED,
-        7,
+        8,
     ),
 )
 
