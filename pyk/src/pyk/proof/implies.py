@@ -72,7 +72,7 @@ class ImpliesProof(Proof[ImpliesProofStep, ImpliesProofResult]):
             return []
         return [ImpliesProofStep(self)]
 
-    def commit(self, result: ImpliesProofResult) -> None:
+    def commit(self, optimize_kcfg: bool, result: ImpliesProofResult) -> None:
         proof_type = type(self).__name__
         if isinstance(result, ImpliesProofResult):
             self.csubst = result.csubst

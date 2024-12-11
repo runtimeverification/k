@@ -213,13 +213,14 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
             )
         return steps
 
-    def commit(self, result: APRProofResult) -> None:
+    def commit(self, optimize_kcfg: bool, result: APRProofResult) -> None:
         self.prior_loops_cache[result.node_id] = result.prior_loops_cache_update
         # Result has been cached, use the cache
         if isinstance(result, APRProofUseCacheResult):
             assert result.cached_node_id in self._next_steps
             self.kcfg.extend(
                 extend_result=self._next_steps.pop(result.cached_node_id),
+                optimize_kcfg=optimize_kcfg,
                 node=self.kcfg.node(result.node_id),
                 logs=self.logs,
             )
@@ -230,6 +231,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
                 self._next_steps[result.node_id] = result.extension_to_cache
             self.kcfg.extend(
                 extend_result=result.extension_to_apply,
+                optimize_kcfg=optimize_kcfg,
                 node=self.kcfg.node(result.node_id),
                 logs=self.logs,
             )
