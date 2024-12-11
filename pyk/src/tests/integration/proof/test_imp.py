@@ -566,6 +566,35 @@ APR_PROVE_TEST_DATA: Iterable[
     ),
 )
 
+APR_PROVE_WITH_OPTIMS_TEST_DATA: Iterable[
+    tuple[str, Path, str, str, int | None, int | None, Iterable[str], bool, ProofStatus, int]
+] = (
+    (
+        'imp-simple-sum-100',
+        K_FILES / 'imp-simple-spec.k',
+        'IMP-SIMPLE-SPEC',
+        'sum-100',
+        None,
+        None,
+        [],
+        True,
+        ProofStatus.PASSED,
+        4,
+    ),
+    (
+        'imp-simple-long-branches',
+        K_FILES / 'imp-simple-spec.k',
+        'IMP-SIMPLE-SPEC',
+        'long-branches',
+        None,
+        None,
+        [],
+        True,
+        ProofStatus.PASSED,
+        7,
+    ),
+)
+
 PATH_CONSTRAINTS_TEST_DATA: Iterable[
     tuple[str, Path, str, str, int | None, int | None, Iterable[str], Iterable[str], str]
 ] = (
@@ -917,6 +946,53 @@ class TestImpProof(KCFGExploreTest, KProveTest):
 
         assert proof.status == proof_status
         assert leaf_number(proof) == expected_leaf_number
+
+    @pytest.mark.parametrize(
+        'test_id,spec_file,spec_module,claim_id,max_iterations,max_depth,cut_rules,admit_deps,proof_status,expected_max_node_number',
+        APR_PROVE_WITH_OPTIMS_TEST_DATA,
+        ids=[test_id for test_id, *_ in APR_PROVE_WITH_OPTIMS_TEST_DATA],
+    )
+    def test_all_path_reachability_prove_with_optims(
+        self,
+        kprove: KProve,
+        kcfg_explore: KCFGExplore,
+        test_id: str,
+        spec_file: str,
+        spec_module: str,
+        claim_id: str,
+        max_iterations: int | None,
+        max_depth: int | None,
+        cut_rules: Iterable[str],
+        admit_deps: bool,
+        proof_status: ProofStatus,
+        expected_max_node_number: int,
+        tmp_path_factory: TempPathFactory,
+    ) -> None:
+        proof_dir = tmp_path_factory.mktemp(f'apr_tmp_proofs-{test_id}')
+        spec_modules = kprove.parse_modules(Path(spec_file), module_name=spec_module)
+        spec_label = f'{spec_module}.{claim_id}'
+        proofs = APRProof.from_spec_modules(
+            kprove.definition,
+            spec_modules,
+            spec_labels=[spec_label],
+            logs={},
+            proof_dir=proof_dir,
+        )
+        proof = single([p for p in proofs if p.id == spec_label])
+        if admit_deps:
+            for subproof in proof.subproofs:
+                subproof.admit()
+                subproof.write_proof_data()
+
+        prover = APRProver(kcfg_explore=kcfg_explore, execute_depth=max_depth, cut_point_rules=cut_rules)
+        prover.advance_proof(proof, max_iterations=max_iterations)
+
+        kcfg_show = KCFGShow(kprove, node_printer=APRProofNodePrinter(proof, kprove, full_printer=True))
+        cfg_lines = kcfg_show.show(proof.kcfg)
+        _LOGGER.info('\n'.join(cfg_lines))
+
+        assert proof.status == proof_status
+        assert proof.kcfg._node_id == expected_max_node_number
 
     def test_terminal_node_subsumption(
         self,
