@@ -22,7 +22,7 @@ from ..kast.manip import (
 )
 from ..kast.outer import KFlatModule
 from ..prelude.kbool import andBool
-from ..utils import ensure_dir_path, not_none
+from ..utils import ensure_dir_path, not_none, single
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping, MutableMapping
@@ -557,6 +557,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
     def extend(
         self,
         extend_result: KCFGExtendResult,
+        optimize_kcfg: bool,
         node: KCFG.Node,
         logs: dict[int, tuple[LogEntry, ...]],
     ) -> None:
@@ -568,6 +569,20 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
                 logging.WARNING if warning else logging.INFO,
                 f'Extending current KCFG with the following: {message}{result_info_message}',
             )
+
+        def optimize_step(
+            cterm: CTerm, depth: int, next_node_logs: tuple[LogEntry, ...], rule_labels: list[str]
+        ) -> bool:
+            in_edges = self.edges(target_id=node.id)
+            if len(in_edges) == 1:
+                in_edge = single(in_edges)
+                self.remove_edge(in_edge.source.id, node.id)
+                self.let_node(node_id=node.id, cterm=cterm)
+                self.create_edge(in_edge.source.id, node.id, in_edge.depth + depth, list(in_edge.rules) + rule_labels)
+                logs[node.id] = logs[node.id] + next_node_logs
+                log(f'basic block at depth {depth}: update: {node.id}')
+                return True
+            return False
 
         match extend_result:
             case Vacuous():
@@ -584,10 +599,11 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
                 log(f'abstraction node: {node.id}')
 
             case Step(cterm, depth, next_node_logs, rule_labels, _):
-                next_node = self.create_node(cterm)
-                logs[next_node.id] = next_node_logs
-                self.create_edge(node.id, next_node.id, depth, rules=rule_labels)
-                log(f'basic block at depth {depth}: {node.id} --> {next_node.id}')
+                if not (optimize_kcfg and optimize_step(cterm, depth, next_node_logs, rule_labels)):
+                    next_node = self.create_node(cterm)
+                    logs[next_node.id] = next_node_logs
+                    self.create_edge(node.id, next_node.id, depth, rules=rule_labels)
+                    log(f'basic block at depth {depth}: {node.id} --> {next_node.id}')
 
             case Branch(branches, _):
                 branch_node_ids = self.split_on_constraints(node.id, branches)
