@@ -78,7 +78,7 @@ class Proof(Generic[PS, SR]):
             ensure_dir_path(self.proof_dir)
 
     @abstractmethod
-    def commit(self, optimize_kcfg: bool, result: SR) -> None:
+    def commit(self, result: SR) -> None:
         """Apply the step result of type `SR` to `self`, modifying `self`."""
         ...
 
@@ -327,7 +327,6 @@ def parallel_advance_proof(
     max_workers: int = 1,
     callback: Callable[[P], None] = (lambda x: None),
     maintenance_rate: int = 1,
-    optimize_kcfg: bool = False,
 ) -> None:
     """Advance proof with multithreaded strategy.
 
@@ -351,7 +350,6 @@ def parallel_advance_proof(
         max_workers: Maximum number of worker threads the pool can spawn.
         callback: Callable to run during proof maintenance, useful for getting real-time information about the proof.
         maintenance_rate: Number of iterations between proof maintenance (writing to disk and executing callback).
-        optimize_kcfg: Optimization of KCFG construction by edge-edge minimization.
     """
     pending: set[Future[Any]] = set()
     explored: set[PS] = set()
@@ -379,7 +377,7 @@ def parallel_advance_proof(
                 future = done.pop()
                 proof_results = future.result()
                 for result in proof_results:
-                    proof.commit(optimize_kcfg, result)
+                    proof.commit(result)
                 iterations += 1
                 if iterations % maintenance_rate == 0:
                     proof.write_proof_data()
@@ -508,7 +506,6 @@ class Prover(ContextManager['Prover'], Generic[P, PS, SR]):
         fail_fast: bool = False,
         callback: Callable[[P], None] = (lambda x: None),
         maintenance_rate: int = 1,
-        optimize_kcfg: bool = False,
     ) -> None:
         """Advance a proof.
 
@@ -521,7 +518,6 @@ class Prover(ContextManager['Prover'], Generic[P, PS, SR]):
               halt execution even if there are still available steps.
             callback: Callable to run in between each completed step, useful for getting real-time information about the proof.
             maintenance_rate: Number of iterations between proof maintenance (writing to disk and executing callback).
-            optimize_kcfg: Optimization of KCFG construction by edge-edge minimization.
         """
         iterations = 0
         _LOGGER.info(f'Initializing proof: {proof.id}')
@@ -541,7 +537,7 @@ class Prover(ContextManager['Prover'], Generic[P, PS, SR]):
                 iterations += 1
                 results = self.step_proof(step)
                 for result in results:
-                    proof.commit(optimize_kcfg, result)
+                    proof.commit(result)
                 if iterations % maintenance_rate == 0:
                     proof.write_proof_data()
                     callback(proof)

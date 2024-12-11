@@ -566,7 +566,7 @@ APR_PROVE_TEST_DATA: Iterable[
     ),
 )
 
-APR_PROVE_WITH_OPTIMS_TEST_DATA: Iterable[
+APR_PROVE_WITH_KCFG_OPTIMS_TEST_DATA: Iterable[
     tuple[str, Path, str, str, int | None, int | None, Iterable[str], bool, ProofStatus, int]
 ] = (
     (
@@ -949,10 +949,10 @@ class TestImpProof(KCFGExploreTest, KProveTest):
 
     @pytest.mark.parametrize(
         'test_id,spec_file,spec_module,claim_id,max_iterations,max_depth,cut_rules,admit_deps,proof_status,expected_max_node_number',
-        APR_PROVE_WITH_OPTIMS_TEST_DATA,
-        ids=[test_id for test_id, *_ in APR_PROVE_WITH_OPTIMS_TEST_DATA],
+        APR_PROVE_WITH_KCFG_OPTIMS_TEST_DATA,
+        ids=[test_id for test_id, *_ in APR_PROVE_WITH_KCFG_OPTIMS_TEST_DATA],
     )
-    def test_all_path_reachability_prove_with_optims(
+    def test_all_path_reachability_prove_with_kcfg_optims(
         self,
         kprove: KProve,
         kcfg_explore: KCFGExplore,
@@ -984,7 +984,9 @@ class TestImpProof(KCFGExploreTest, KProveTest):
                 subproof.admit()
                 subproof.write_proof_data()
 
-        prover = APRProver(kcfg_explore=kcfg_explore, execute_depth=max_depth, cut_point_rules=cut_rules)
+        prover = APRProver(
+            kcfg_explore=kcfg_explore, execute_depth=max_depth, cut_point_rules=cut_rules, optimize_kcfg=True
+        )
         prover.advance_proof(proof, max_iterations=max_iterations)
 
         kcfg_show = KCFGShow(kprove, node_printer=APRProofNodePrinter(proof, kprove, full_printer=True))

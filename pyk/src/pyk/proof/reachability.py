@@ -40,6 +40,7 @@ _LOGGER: Final = logging.getLogger(__name__)
 class APRProofResult:
     node_id: int
     prior_loops_cache_update: tuple[int, ...]
+    optimize_kcfg: bool
 
 
 @dataclass
@@ -213,14 +214,14 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
             )
         return steps
 
-    def commit(self, optimize_kcfg: bool, result: APRProofResult) -> None:
+    def commit(self, result: APRProofResult) -> None:
         self.prior_loops_cache[result.node_id] = result.prior_loops_cache_update
         # Result has been cached, use the cache
         if isinstance(result, APRProofUseCacheResult):
             assert result.cached_node_id in self._next_steps
             self.kcfg.extend(
                 extend_result=self._next_steps.pop(result.cached_node_id),
-                optimize_kcfg=optimize_kcfg,
+                optimize_kcfg=result.optimize_kcfg,
                 node=self.kcfg.node(result.node_id),
                 logs=self.logs,
             )
@@ -231,7 +232,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
                 self._next_steps[result.node_id] = result.extension_to_cache
             self.kcfg.extend(
                 extend_result=result.extension_to_apply,
-                optimize_kcfg=optimize_kcfg,
+                optimize_kcfg=result.optimize_kcfg,
                 node=self.kcfg.node(result.node_id),
                 logs=self.logs,
             )
@@ -717,6 +718,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
     assume_defined: bool
     kcfg_explore: KCFGExplore
     extra_module: KFlatModule | None
+    optimize_kcfg: bool
 
     def __init__(
         self,
@@ -729,6 +731,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         direct_subproof_rules: bool = False,
         assume_defined: bool = False,
         extra_module: KFlatModule | None = None,
+        optimize_kcfg: bool = False,
     ) -> None:
 
         self.kcfg_explore = kcfg_explore
@@ -741,6 +744,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         self.direct_subproof_rules = direct_subproof_rules
         self.assume_defined = assume_defined
         self.extra_module = extra_module
+        self.optimize_kcfg = optimize_kcfg
 
     def close(self) -> None:
         self.kcfg_explore.cterm_symbolic._kore_client.close()
@@ -810,14 +814,24 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
             _LOGGER.info(f'Prior loop heads for node {step.node.id}: {(step.node.id, prior_loops)}')
             if len(prior_loops) > step.bmc_depth:
                 _LOGGER.warning(f'Bounded node {step.proof_id}: {step.node.id} at bmc depth {step.bmc_depth}')
-                return [APRProofBoundedResult(node_id=step.node.id, prior_loops_cache_update=prior_loops)]
+                return [
+                    APRProofBoundedResult(
+                        node_id=step.node.id, optimize_kcfg=self.optimize_kcfg, prior_loops_cache_update=prior_loops
+                    )
+                ]
 
         # Check if the current node and target are terminal
         is_terminal = self.kcfg_explore.kcfg_semantics.is_terminal(step.node.cterm)
         target_is_terminal = self.kcfg_explore.kcfg_semantics.is_terminal(step.target.cterm)
 
         terminal_result: list[APRProofResult] = (
-            [APRProofTerminalResult(node_id=step.node.id, prior_loops_cache_update=prior_loops)] if is_terminal else []
+            [
+                APRProofTerminalResult(
+                    node_id=step.node.id, optimize_kcfg=self.optimize_kcfg, prior_loops_cache_update=prior_loops
+                )
+            ]
+            if is_terminal
+            else []
         )
 
         # Subsumption is checked if and only if the target node
@@ -828,7 +842,12 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
                 # Information about the subsumed node being terminal must be returned
                 # so that the set of terminal nodes is correctly updated
                 return terminal_result + [
-                    APRProofSubsumeResult(csubst=csubst, node_id=step.node.id, prior_loops_cache_update=prior_loops)
+                    APRProofSubsumeResult(
+                        csubst=csubst,
+                        optimize_kcfg=self.optimize_kcfg,
+                        node_id=step.node.id,
+                        prior_loops_cache_update=prior_loops,
+                    )
                 ]
 
         if is_terminal:
@@ -851,6 +870,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
                 APRProofUseCacheResult(
                     node_id=step.node.id,
                     cached_node_id=step.use_cache,
+                    optimize_kcfg=self.optimize_kcfg,
                     prior_loops_cache_update=prior_loops,
                 )
             ]
@@ -878,6 +898,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
                         extension_to_apply=extend_results[0],
                         extension_to_cache=extend_results[1],
                         prior_loops_cache_update=prior_loops,
+                        optimize_kcfg=self.optimize_kcfg,
                     )
                 ]
 
@@ -887,6 +908,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
                 node_id=step.node.id,
                 extension_to_apply=extend_results[0],
                 prior_loops_cache_update=prior_loops,
+                optimize_kcfg=self.optimize_kcfg,
             )
         ]
 
