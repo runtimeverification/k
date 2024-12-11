@@ -579,7 +579,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
                 self.remove_edge(in_edge.source.id, node.id)
                 self.let_node(node_id=node.id, cterm=cterm)
                 self.create_edge(in_edge.source.id, node.id, in_edge.depth + depth, list(in_edge.rules) + rule_labels)
-                logs[node.id] = logs[node.id] + next_node_logs
+                logs[node.id] = logs[node.id] + next_node_logs if node.id in logs else next_node_logs
                 log(f'basic block at depth {depth}: update: {node.id}')
                 return True
             return False
