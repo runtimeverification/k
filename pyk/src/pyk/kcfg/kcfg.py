@@ -601,6 +601,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
                     depth += in_edge.depth
                     rule_labels = list(in_edge.rules) + rule_labels
                     next_node_logs = logs[node.id] + next_node_logs if node.id in logs else next_node_logs
+                    self.remove_node(node.id)
                 self.create_edge(node_id, next_node.id, depth, rule_labels)
                 logs[next_node.id] = next_node_logs
                 log(f'basic block at depth {depth}: {node_id} --> {next_node.id}')
