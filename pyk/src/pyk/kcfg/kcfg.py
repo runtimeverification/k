@@ -22,7 +22,7 @@ from ..kast.manip import (
 )
 from ..kast.outer import KFlatModule
 from ..prelude.kbool import andBool
-from ..utils import ensure_dir_path, not_none, single
+from ..utils import ensure_dir_path, not_none
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping, MutableMapping
@@ -557,9 +557,10 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
     def extend(
         self,
         extend_result: KCFGExtendResult,
-        optimize_kcfg: bool,
         node: KCFG.Node,
         logs: dict[int, tuple[LogEntry, ...]],
+        *,
+        optimize_kcfg: bool,
     ) -> None:
 
         def log(message: str, *, warning: bool = False) -> None:
@@ -575,7 +576,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         ) -> bool:
             in_edges = self.edges(target_id=node.id)
             if len(in_edges) == 1:
-                in_edge = single(in_edges)
+                in_edge = in_edges[0]
                 self.remove_edge(in_edge.source.id, node.id)
                 self.let_node(node_id=node.id, cterm=cterm)
                 self.create_edge(in_edge.source.id, node.id, in_edge.depth + depth, list(in_edge.rules) + rule_labels)
