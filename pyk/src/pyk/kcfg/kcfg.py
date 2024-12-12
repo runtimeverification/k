@@ -586,20 +586,22 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
                 log(f'abstraction node: {node.id}')
 
             case Step(cterm, depth, next_node_logs, rule_labels, _):
-                if optimize_kcfg and (len(edges := self.edges(target_id=node.id)) == 1):
-                    in_edge = edges[0]
+                next_node = self.create_node(cterm)
+                # Optimization for steps consists of on-the-fly merging of consecutive edges and can
+                # be performed only if the current node has a single predecessor connected by an Edge
+                if (
+                    optimize_kcfg
+                    and (len(predecessors := self.predecessors(target_id=node.id)) == 1)
+                    and isinstance(in_edge := predecessors[0], KCFG.Edge)
+                ):
+                    # The existing edge is removed and the step parameters are updated accordingly
                     self.remove_edge(in_edge.source.id, node.id)
-                    self.let_node(node_id=node.id, cterm=cterm)
-                    self.create_edge(
-                        in_edge.source.id, node.id, in_edge.depth + depth, list(in_edge.rules) + rule_labels
-                    )
-                    logs[node.id] = logs[node.id] + next_node_logs if node.id in logs else next_node_logs
-                    log(f'basic block at depth {depth}: update: {node.id}')
-                else:
-                    next_node = self.create_node(cterm)
-                    logs[next_node.id] = next_node_logs
-                    self.create_edge(node.id, next_node.id, depth, rules=rule_labels)
-                    log(f'basic block at depth {depth}: {node.id} --> {next_node.id}')
+                    depth += in_edge.depth
+                    rule_labels = list(in_edge.rules) + rule_labels
+                    next_node_logs = logs[node.id] + next_node_logs if node.id in logs else next_node_logs
+                self.create_edge(in_edge.source.id, next_node.id, depth, rule_labels)
+                logs[next_node.id] = next_node_logs
+                log(f'basic block at depth {depth}: {node.id} --> {next_node.id}')
 
             case Branch(branches, _):
                 branch_node_ids = self.split_on_constraints(node.id, branches)

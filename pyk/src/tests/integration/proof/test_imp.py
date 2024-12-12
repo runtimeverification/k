@@ -579,7 +579,7 @@ APR_PROVE_WITH_KCFG_OPTIMS_TEST_DATA: Iterable[
         [],
         True,
         ProofStatus.PASSED,
-        4,
+        3,
     ),
     (
         'imp-simple-long-branches',
@@ -591,7 +591,7 @@ APR_PROVE_WITH_KCFG_OPTIMS_TEST_DATA: Iterable[
         [],
         True,
         ProofStatus.PASSED,
-        8,
+        5,
     ),
 )
 
@@ -948,7 +948,7 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         assert leaf_number(proof) == expected_leaf_number
 
     @pytest.mark.parametrize(
-        'test_id,spec_file,spec_module,claim_id,max_iterations,max_depth,cut_rules,admit_deps,proof_status,expected_max_node_number',
+        'test_id,spec_file,spec_module,claim_id,max_iterations,max_depth,cut_rules,admit_deps,proof_status,expected_nodes',
         APR_PROVE_WITH_KCFG_OPTIMS_TEST_DATA,
         ids=[test_id for test_id, *_ in APR_PROVE_WITH_KCFG_OPTIMS_TEST_DATA],
     )
@@ -965,7 +965,7 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         cut_rules: Iterable[str],
         admit_deps: bool,
         proof_status: ProofStatus,
-        expected_max_node_number: int,
+        expected_nodes: int,
         tmp_path_factory: TempPathFactory,
     ) -> None:
         proof_dir = tmp_path_factory.mktemp(f'apr_tmp_proofs-{test_id}')
@@ -994,7 +994,7 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         _LOGGER.info('\n'.join(cfg_lines))
 
         assert proof.status == proof_status
-        assert proof.kcfg._node_id == expected_max_node_number
+        assert len(proof.kcfg._nodes) == expected_nodes
 
     def test_terminal_node_subsumption(
         self,
