@@ -103,7 +103,7 @@ class TestProofTrace(ProofTraceTest):
         list_of_events = list(it)
 
         # Test length of the list
-        assert len(list_of_events) == 13
+        assert len(list_of_events) == 17
 
         # Test the type of the events
         for event in list_of_events:
@@ -190,7 +190,7 @@ class TestSingleRewrite(ProofTraceTest):
         assert pt is not None
 
         # 10 initialization events
-        assert len(pt.pre_trace) == 10
+        assert len(pt.pre_trace) == 14
 
         # 2 post-initial-configuration events
         assert len(pt.trace) == 2
@@ -260,7 +260,7 @@ class TestTreeReverse(ProofTraceTest):
         assert pt is not None
 
         # 10 initialization events
-        assert len(pt.pre_trace) == 10
+        assert len(pt.pre_trace) == 14
 
         # 9 post-initial-configuration events
         assert len(pt.trace) == 9
@@ -385,7 +385,7 @@ class TestNonRecFunction(ProofTraceTest):
         assert pt is not None
 
         # 10 initialization events
-        assert len(pt.pre_trace) == 10
+        assert len(pt.pre_trace) == 14
 
         # 6 post-initial-configuration events
         assert len(pt.trace) == 6
@@ -468,7 +468,7 @@ class TestDV(ProofTraceTest):
         assert pt is not None
 
         # 10 initialization events
-        assert len(pt.pre_trace) == 10
+        assert len(pt.pre_trace) == 14
 
         # 3 post-initial-configuration events
         assert len(pt.trace) == 3
@@ -549,7 +549,7 @@ class TestConcurrentCounters(ProofTraceTest):
         assert pt is not None
 
         # 10 initialization events
-        assert len(pt.pre_trace) == 10
+        assert len(pt.pre_trace) == 14
 
         # 37 post-initial-configuration events
         assert len(pt.trace) == 37
@@ -709,7 +709,7 @@ class Test0Decrement(ProofTraceTest):
         assert pt is not None
 
         # 10 initialization events
-        assert len(pt.pre_trace) == 10
+        assert len(pt.pre_trace) == 14
 
         # 1 post-initial-configuration event
         assert len(pt.trace) == 1
@@ -738,7 +738,7 @@ class Test1Decrement(ProofTraceTest):
         assert pt is not None
 
         # 10 initialization events
-        assert len(pt.pre_trace) == 10
+        assert len(pt.pre_trace) == 14
 
         # 2 post-initial-configuration events
         assert len(pt.trace) == 2
@@ -767,7 +767,7 @@ class Test2Decrement(ProofTraceTest):
         assert pt is not None
 
         # 10 initialization events
-        assert len(pt.pre_trace) == 10
+        assert len(pt.pre_trace) == 14
 
         # 3 post-initial-configuration events
         assert len(pt.trace) == 3
@@ -806,7 +806,7 @@ class TestPeano(ProofTraceTest):
         assert pt is not None
 
         # 10 initialization events
-        assert len(pt.pre_trace) == 10
+        assert len(pt.pre_trace) == 14
 
         # 776 post-initial-configuration events
         assert len(pt.trace) == 776
@@ -915,7 +915,7 @@ class TestIMP5(ProofTraceTest):
         assert pt is not None
 
         # 14 initialization events
-        assert len(pt.pre_trace) == 14
+        assert len(pt.pre_trace) == 20
 
         # 2 post-initial-configuration events
         assert len(pt.trace) == 2
@@ -954,7 +954,7 @@ class TestBuiltInHookEvents(ProofTraceTest):
         assert pt is not None
 
         # 10 initialization events
-        assert len(pt.pre_trace) == 10
+        assert len(pt.pre_trace) == 14
 
         # 4 post-initial-configuration events
         assert len(pt.trace) == 4

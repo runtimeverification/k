@@ -68,7 +68,7 @@ config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl0'Unds'D
         assert pt is not None
 
         # 10 initialization events
-        assert len(pt.pre_trace) == 10
+        assert len(pt.pre_trace) == 14
 
         # 1 post-initial-configuration event
         assert len(pt.trace) == 1
