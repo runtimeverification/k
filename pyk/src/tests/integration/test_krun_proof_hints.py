@@ -48,8 +48,12 @@ hook result: kore[Lbl0'Unds'DECREMENT-SYNTAX'Unds'Nat{}()]
 function: Lblproject'Coln'KItem{} (0:0)
 rule: 139 1
   VarK = kore[Lbl0'Unds'DECREMENT-SYNTAX'Unds'Nat{}()]
+function exit: 139 notail
+function exit: 100 notail
 function: LblinitGeneratedCounterCell{} (1)
 rule: 98 0
+function exit: 98 notail
+function exit: 99 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl0'Unds'DECREMENT-SYNTAX'Unds'Nat{}(),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\\dv{SortInt{}}("0")))]
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl0'Unds'DECREMENT-SYNTAX'Unds'Nat{}(),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\\dv{SortInt{}}("0")))]
 """
