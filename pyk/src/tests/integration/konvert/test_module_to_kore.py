@@ -7,7 +7,8 @@ import pytest
 from pyk.kast.outer import read_kast_definition
 from pyk.konvert import module_to_kore
 from pyk.kore.parser import KoreParser
-from pyk.kore.syntax import SortDecl, Symbol, SymbolDecl
+from pyk.kore.rule import Rule
+from pyk.kore.syntax import Axiom, SortDecl, Symbol, SymbolDecl
 from pyk.ktool.kompile import DefinitionInfo
 
 from ..utils import TEST_DATA_DIR
@@ -70,8 +71,8 @@ def test_module_to_kore(kast_defn: KDefinition, kore_module: Module) -> None:
     # Then
 
     # Check module name and attributes
-    assert actual.name == expected.name
-    assert actual.attrs == expected.attrs
+    assert expected.name == actual.name
+    assert expected.attrs == actual.attrs
 
     check_generated_sentences(actual, expected)
     check_missing_sentences(actual, expected)
@@ -120,15 +121,15 @@ def check_generated_sentences(actual: Module, expected: Module) -> None:
             pytest.fail(f'Invalid sentence: {sent.text}')
 
         # Fail with diff
-        assert sent.text == expected_sent.text
+        assert expected_sent.text == sent.text
 
 
 def check_missing_sentences(actual: Module, expected: Module) -> None:
     actual_sentences = set(actual.sentences)
     for sent in expected.sentences:
         # TODO remove
-        # Filter for SortDecl and SymbolDecl for now
-        if not isinstance(sent, (SortDecl, SymbolDecl)):
+        # Do not check rule axioms for now
+        if isinstance(sent, Axiom) and Rule.is_rule(sent):
             continue
         if sent not in actual_sentences:
             pytest.fail(f'Missing sentence: {sent.text}')
