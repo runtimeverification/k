@@ -194,6 +194,7 @@ class KompileOptions(Options):
     llvm_kompile_output: Path | None
     llvm_proof_hint_instrumentation: bool
     llvm_proof_hint_debugging: bool
+    llvm_hidden_visibility: bool
     read_only: bool
     o0: bool
     o1: bool
@@ -220,6 +221,7 @@ class KompileOptions(Options):
             'llvm_kompile_output': None,
             'llvm_proof_hint_instrumentation': False,
             'llvm_proof_hint_debugging': False,
+            'llvm_hidden_visibility': False,
             'read_only': False,
             'o0': False,
             'o1': False,
@@ -478,6 +480,13 @@ class KCLIArgs:
             default=None,
             action='store_true',
             help='Enable additional proof hint debugging information in LLVM backend kompilation.',
+        )
+        args.add_argument(
+            '--llvm-hidden-visibility',
+            dest='llvm_hidden_visibility',
+            default=None,
+            action='store_true',
+            help='Whether to make all symbols hidden by default in LLVM backend kompilation.',
         )
 
         args.add_argument(

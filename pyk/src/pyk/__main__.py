@@ -324,6 +324,7 @@ def exec_kompile(options: KompileCommandOptions) -> None:
         kompile_dict['llvm_kompile_output'] = options.llvm_kompile_output
         kompile_dict['llvm_proof_hint_instrumentation'] = options.llvm_proof_hint_instrumentation
         kompile_dict['llvm_proof_hint_debugging'] = options.llvm_proof_hint_debugging
+        kompile_dict['llvm_hidden_visibility'] = options.llvm_hidden_visibility
     elif len(options.ccopts) > 0:
         raise ValueError(f'Option `-ccopt` requires `--backend llvm`, not: --backend {options.backend.value}')
     elif options.enable_search:
@@ -343,6 +344,10 @@ def exec_kompile(options: KompileCommandOptions) -> None:
     elif options.llvm_proof_hint_debugging:
         raise ValueError(
             f'Option `--llvm-proof-hint-debugging` requires `--backend llvm`, not: --backend {options.backend.value}'
+        )
+    elif options.llvm_hidden_visibility:
+        raise ValueError(
+            f'Option `--llvm-hidden-visibility` requires `--backend llvm`, not: --backend {options.backend.value}'
         )
 
     try:
