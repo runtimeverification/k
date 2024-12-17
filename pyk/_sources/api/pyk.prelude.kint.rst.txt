@@ -1,0 +1,7 @@
+pyk.prelude.kint module
+=======================
+
+.. automodule:: pyk.prelude.kint
+   :members:
+   :undoc-members:
+   :show-inheritance:
