@@ -83,17 +83,7 @@ class KoreDefn:
 
     def project_to_symbols(self) -> KoreDefn:
         """Project definition to symbols present in the definition."""
-
-        def _symbol_sorts() -> set[str]:
-            res = set()
-            for symbol_decl in self.symbols.values():
-                if isinstance(symbol_decl.sort, SortApp):
-                    res.add(symbol_decl.sort.name)
-                res.update(sort.name for sort in symbol_decl.param_sorts if isinstance(sort, SortApp))
-            return res
-
-        symbol_sorts = _symbol_sorts()
-
+        symbol_sorts = {sort for symbol in self.symbols for sort in self._symbol_sorts(symbol)}
         sorts: FrozenDict[str, SortDecl] = FrozenDict(
             (sort, decl) for sort, decl in self.sorts.items() if sort in symbol_sorts
         )
@@ -119,6 +109,14 @@ class KoreDefn:
             (symbol, decl) for symbol, decl in self.symbols.items() if symbol in rewrite_symbols
         )
         return self.let(symbols=symbols).project_to_symbols()
+
+    def _symbol_sorts(self, symbol: str) -> list[str]:
+        decl = self.symbols[symbol]
+        res = []
+        if isinstance(decl.sort, SortApp):
+            res.append(decl.sort.name)
+        res.extend(sort.name for sort in decl.param_sorts if isinstance(sort, SortApp))
+        return res
 
     def _rewrite_symbols(self) -> set[str]:
         """Return the set of symbols reffered to in rewrite rules."""
