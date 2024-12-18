@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from functools import cached_property
 from typing import TYPE_CHECKING, final
 
-from ..utils import FrozenDict, POSet
+from ..utils import FrozenDict, POSet, check_type
 from .manip import collect_symbols
 from .rule import FunctionRule, RewriteRule, Rule
 from .syntax import App, Axiom, SortApp, SortDecl, Symbol, SymbolDecl
@@ -52,6 +53,16 @@ class KoreDefn:
             rewrites=tuple(rewrites),
             functions=FrozenDict((key, tuple(values)) for key, values in functions.items()),
         )
+
+    @cached_property
+    def ctor_symbols(self) -> FrozenDict[str, tuple[str, ...]]:
+        grouped: dict[str, list[str]] = {}
+        for symbol, decl in self.symbols.items():
+            if not 'constructor' in decl.attrs_by_key:
+                continue
+            sort = check_type(decl.sort, SortApp).name  # TODO eliminate by further processing the SortDecl
+            grouped.setdefault(sort, []).append(symbol)
+        return FrozenDict((sort, tuple(symbols)) for sort, symbols in grouped.items())
 
     def let(
         self,
