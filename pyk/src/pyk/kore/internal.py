@@ -118,6 +118,21 @@ class KoreDefn:
         res.extend(sort.name for sort in decl.param_sorts if isinstance(sort, SortApp))
         return res
 
+    def _config_symbols(self) -> set[str]:
+        """Return the set of symbols that constitute a configuration."""
+        res: set[str] = set()
+        done = set()
+        pending = ['SortGeneratedTopCell']
+        while pending:
+            sort = pending.pop()
+            if sort in done:
+                continue
+            done.add(sort)
+            symbols = self.ctor_symbols.get(sort, ())
+            pending.extend(sort for symbol in symbols for sort in self._symbol_sorts(symbol))
+            res.update(symbols)
+        return res
+
     def _rewrite_symbols(self) -> set[str]:
         """Return the set of symbols reffered to in rewrite rules."""
         res = set()
