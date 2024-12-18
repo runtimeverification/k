@@ -103,10 +103,12 @@ class KoreDefn:
         )
 
     def project_to_rewrites(self) -> KoreDefn:
-        """Project definition to symbols that are (transitively) referred to from rewrite axioms."""
-        rewrite_symbols = self._rewrite_symbols()
+        """Project definition to symbols that are part of the configuration or are (transitively) referred to from rewrite axioms."""
+        _symbols = set()
+        _symbols.update(self._config_symbols())
+        _symbols.update(self._rewrite_symbols())
         symbols: FrozenDict[str, SymbolDecl] = FrozenDict(
-            (symbol, decl) for symbol, decl in self.symbols.items() if symbol in rewrite_symbols
+            (symbol, decl) for symbol, decl in self.symbols.items() if symbol in _symbols
         )
         return self.let(symbols=symbols).project_to_symbols()
 
