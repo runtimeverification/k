@@ -103,7 +103,7 @@ class TestProofTrace(ProofTraceTest):
         list_of_events = list(it)
 
         # Test length of the list
-        assert len(list_of_events) == 17
+        assert len(list_of_events) == 13
 
         # Test the type of the events
         for event in list_of_events:
@@ -190,7 +190,7 @@ class TestSingleRewrite(ProofTraceTest):
         assert pt is not None
 
         # 10 initialization events
-        assert len(pt.pre_trace) == 14
+        assert len(pt.pre_trace) == 10
 
         # 2 post-initial-configuration events
         assert len(pt.trace) == 2
@@ -260,10 +260,10 @@ class TestTreeReverse(ProofTraceTest):
         assert pt is not None
 
         # 10 initialization events
-        assert len(pt.pre_trace) == 14
+        assert len(pt.pre_trace) == 10
 
         # 9 post-initial-configuration events
-        assert len(pt.trace) == 12
+        assert len(pt.trace) == 9
 
         # Contents of the k cell in the initial configuration
         kore_pattern = llvm_to_pattern(pt.initial_config.kore_pattern)
@@ -321,14 +321,8 @@ class TestTreeReverse(ProofTraceTest):
         assert axiom == axiom_expected
         assert len(rule_event.substitution) == 1
 
-        # Function exit event (no tail)
-        function_exit_event = pt.trace[6].step_event
-        assert isinstance(function_exit_event, prooftrace.LLVMFunctionExitEvent)
-        assert function_exit_event.rule_ordinal == 158
-        assert function_exit_event.is_tail == False
-
         # Function event
-        rule_event = pt.trace[7].step_event
+        rule_event = pt.trace[6].step_event
         assert isinstance(rule_event, prooftrace.LLVMFunctionEvent)
         assert rule_event.name == "Lblreverse'LParUndsRParUnds'TREE-REVERSE-SYNTAX'Unds'Tree'Unds'Tree{}"
         assert rule_event.relative_position == '1'
@@ -336,28 +330,16 @@ class TestTreeReverse(ProofTraceTest):
         assert len(rule_event.args) == 0
 
         # Simplification rule
-        rule_event = pt.trace[8].step_event
+        rule_event = pt.trace[7].step_event
         assert isinstance(rule_event, prooftrace.LLVMRuleEvent)
         axiom = repr(definition.get_axiom_by_ordinal(rule_event.rule_ordinal))
         axiom_expected = get_pattern_from_ordinal(definition_text, rule_event.rule_ordinal)
         assert axiom == axiom_expected
         assert len(rule_event.substitution) == 1
 
-        # Function exit event (no tail)
-        function_exit_event = pt.trace[9].step_event
-        assert isinstance(function_exit_event, prooftrace.LLVMFunctionExitEvent)
-        assert function_exit_event.rule_ordinal == 157
-        assert function_exit_event.is_tail == False
-
-        # Function exit event (no tail)
-        function_exit_event = pt.trace[10].step_event
-        assert isinstance(function_exit_event, prooftrace.LLVMFunctionExitEvent)
-        assert function_exit_event.rule_ordinal == 160
-        assert function_exit_event.is_tail == False
-
         # Then pattern
-        assert pt.trace[11].is_kore_pattern()
-        kore_pattern = llvm_to_pattern(pt.trace[11].kore_pattern)
+        assert pt.trace[8].is_kore_pattern()
+        kore_pattern = llvm_to_pattern(pt.trace[8].kore_pattern)
         k_cell = kore_pattern.patterns[0].dict['args'][0]
         assert k_cell['name'] == 'kseq'
         assert (
@@ -403,10 +385,10 @@ class TestNonRecFunction(ProofTraceTest):
         assert pt is not None
 
         # 10 initialization events
-        assert len(pt.pre_trace) == 14
+        assert len(pt.pre_trace) == 10
 
         # 6 post-initial-configuration events
-        assert len(pt.trace) == 8
+        assert len(pt.trace) == 6
 
         # Contents of the k cell in the initial configuration
         kore_pattern = llvm_to_pattern(pt.initial_config.kore_pattern)
@@ -433,36 +415,24 @@ class TestNonRecFunction(ProofTraceTest):
         inner_rule_event = pt.trace[2].step_event
         assert isinstance(inner_rule_event, prooftrace.LLVMRuleEvent)
 
-        # Function exit event (no tail)
-        function_exit_event = pt.trace[3].step_event
-        assert isinstance(function_exit_event, prooftrace.LLVMFunctionExitEvent)
-        assert function_exit_event.rule_ordinal == 103
-        assert function_exit_event.is_tail == False
-
         # Functional event
-        fun_event = pt.trace[4].step_event
+        fun_event = pt.trace[3].step_event
         assert isinstance(fun_event, prooftrace.LLVMFunctionEvent)
         assert fun_event.name == "Lblid'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}"
         assert fun_event.relative_position == '0:0:0'
         assert len(fun_event.args) == 0
 
         # Then rule
-        rule_event = pt.trace[5].step_event
+        rule_event = pt.trace[4].step_event
         assert isinstance(rule_event, prooftrace.LLVMRuleEvent)
         axiom = repr(definition.get_axiom_by_ordinal(rule_event.rule_ordinal))
         axiom_expected = get_pattern_from_ordinal(definition_text, rule_event.rule_ordinal)
         assert axiom == axiom_expected
         assert len(rule_event.substitution) == 1
 
-        # Function exit event (no tail)
-        function_exit_event = pt.trace[6].step_event
-        assert isinstance(function_exit_event, prooftrace.LLVMFunctionExitEvent)
-        assert function_exit_event.rule_ordinal == 103
-        assert function_exit_event.is_tail == False
-
         # Then pattern
-        assert pt.trace[7].is_kore_pattern()
-        kore_pattern = llvm_to_pattern(pt.trace[7].kore_pattern)
+        assert pt.trace[5].is_kore_pattern()
+        kore_pattern = llvm_to_pattern(pt.trace[5].kore_pattern)
         k_cell = kore_pattern.patterns[0].dict['args'][0]
         assert k_cell['name'] == 'kseq'
         assert (
@@ -498,7 +468,7 @@ class TestDV(ProofTraceTest):
         assert pt is not None
 
         # 10 initialization events
-        assert len(pt.pre_trace) == 14
+        assert len(pt.pre_trace) == 10
 
         # 3 post-initial-configuration events
         assert len(pt.trace) == 3
@@ -579,7 +549,7 @@ class TestConcurrentCounters(ProofTraceTest):
         assert pt is not None
 
         # 10 initialization events
-        assert len(pt.pre_trace) == 14
+        assert len(pt.pre_trace) == 10
 
         # 37 post-initial-configuration events
         assert len(pt.trace) == 37
@@ -739,7 +709,7 @@ class Test0Decrement(ProofTraceTest):
         assert pt is not None
 
         # 10 initialization events
-        assert len(pt.pre_trace) == 14
+        assert len(pt.pre_trace) == 10
 
         # 1 post-initial-configuration event
         assert len(pt.trace) == 1
@@ -768,7 +738,7 @@ class Test1Decrement(ProofTraceTest):
         assert pt is not None
 
         # 10 initialization events
-        assert len(pt.pre_trace) == 14
+        assert len(pt.pre_trace) == 10
 
         # 2 post-initial-configuration events
         assert len(pt.trace) == 2
@@ -797,7 +767,7 @@ class Test2Decrement(ProofTraceTest):
         assert pt is not None
 
         # 10 initialization events
-        assert len(pt.pre_trace) == 14
+        assert len(pt.pre_trace) == 10
 
         # 3 post-initial-configuration events
         assert len(pt.trace) == 3
@@ -836,14 +806,14 @@ class TestPeano(ProofTraceTest):
         assert pt is not None
 
         # 10 initialization events
-        assert len(pt.pre_trace) == 14
+        assert len(pt.pre_trace) == 10
 
         # 776 post-initial-configuration events
-        assert len(pt.trace) == 916
+        assert len(pt.trace) == 776
 
         # Assert that we have a pattern matching failure as the 135th event
-        assert pt.trace[160].is_step_event() and isinstance(
-            pt.trace[160].step_event, prooftrace.LLVMPatternMatchingFailureEvent
+        assert pt.trace[135].is_step_event() and isinstance(
+            pt.trace[135].step_event, prooftrace.LLVMPatternMatchingFailureEvent
         )
 
 
@@ -945,7 +915,7 @@ class TestIMP5(ProofTraceTest):
         assert pt is not None
 
         # 14 initialization events
-        assert len(pt.pre_trace) == 20
+        assert len(pt.pre_trace) == 14
 
         # 2 post-initial-configuration events
         assert len(pt.trace) == 2
@@ -984,7 +954,7 @@ class TestBuiltInHookEvents(ProofTraceTest):
         assert pt is not None
 
         # 10 initialization events
-        assert len(pt.pre_trace) == 14
+        assert len(pt.pre_trace) == 10
 
         # 4 post-initial-configuration events
         assert len(pt.trace) == 4
