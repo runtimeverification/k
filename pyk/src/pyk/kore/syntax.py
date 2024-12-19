@@ -342,6 +342,13 @@ class Pattern(Kore):
                 stack.append(f(pattern.patterns[idx]))
                 stack.append([])
 
+    def collect(self, f: Callable[[Pattern], None]) -> None:
+        subpatterns = [self]
+        while subpatterns:
+            pattern = subpatterns.pop()
+            subpatterns.extend(reversed(pattern.patterns))
+            f(pattern)
+
 
 class VarPattern(Pattern, WithSort):
     __match_args__ = ('name', 'sort')
@@ -2205,8 +2212,12 @@ class Definition(Kore, WithAttrs, Iterable[Module]):
             module.write(output)
 
     @cached_property
+    def sentences(self) -> tuple[Sentence, ...]:
+        return tuple(sent for module in self.modules for sent in module)
+
+    @cached_property
     def axioms(self) -> tuple[Axiom, ...]:
-        return tuple(sent for module in self.modules for sent in module if isinstance(sent, Axiom))
+        return tuple(sent for sent in self.sentences if isinstance(sent, Axiom))
 
     def get_axiom_by_ordinal(self, ordinal: int) -> Axiom:
         return self.axioms[ordinal]

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from .syntax import And, EVar, MLQuant, Top
+from .syntax import And, App, EVar, MLQuant, Top
 
 if TYPE_CHECKING:
     from collections.abc import Collection
@@ -38,3 +38,20 @@ def free_occs(pattern: Pattern, *, bound_vars: Collection[str] = ()) -> dict[str
 
     collect(pattern, set(bound_vars))
     return occurrences
+
+
+def collect_symbols(pattern: Pattern) -> set[str]:
+    """Return the set of all symbols referred to in a pattern.
+
+    Args:
+        pattern: Pattern to collect symbols from.
+    """
+    res: set[str] = set()
+
+    def add_symbol(pattern: Pattern) -> None:
+        match pattern:
+            case App(symbol):
+                res.add(symbol)
+
+    pattern.collect(add_symbol)
+    return res
