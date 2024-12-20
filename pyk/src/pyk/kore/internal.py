@@ -55,7 +55,7 @@ class KoreDefn:
         )
 
     @cached_property
-    def ctor_symbols(self) -> FrozenDict[str, tuple[str, ...]]:
+    def constructors(self) -> FrozenDict[str, tuple[str, ...]]:
         grouped: dict[str, list[str]] = {}
         for symbol, decl in self.symbols.items():
             if not 'constructor' in decl.attrs_by_key:
@@ -130,7 +130,7 @@ class KoreDefn:
             if sort in done:
                 continue
             done.add(sort)
-            symbols = self.ctor_symbols.get(sort, ())
+            symbols = self.constructors.get(sort, ())
             pending.extend(sort for symbol in symbols for sort in self._symbol_sorts(symbol))
             res.update(symbols)
         return res

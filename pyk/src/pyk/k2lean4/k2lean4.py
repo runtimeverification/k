@@ -31,7 +31,7 @@ class K2Lean4:
 
     def _inductive(self, sort: str) -> Inductive:
         subsorts = sorted(self.defn.subsorts.get(sort, ()))
-        symbols = sorted(self.defn.ctor_symbols.get(sort, ()))
+        symbols = sorted(self.defn.constructors.get(sort, ()))
         ctors: list[Ctor] = []
         ctors.extend(self._inj_ctor(sort, subsort) for subsort in subsorts)
         ctors.extend(self._symbol_ctor(sort, symbol) for symbol in symbols)
