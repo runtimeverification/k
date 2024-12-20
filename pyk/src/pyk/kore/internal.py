@@ -1,16 +1,64 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import Enum
 from functools import cached_property
-from typing import TYPE_CHECKING, final
+from typing import TYPE_CHECKING, NamedTuple, final
 
 from ..utils import FrozenDict, POSet, check_type
 from .manip import collect_symbols
 from .rule import FunctionRule, RewriteRule, Rule
-from .syntax import App, Axiom, SortApp, SortDecl, Symbol, SymbolDecl
+from .syntax import App, Axiom, SortApp, SortDecl, String, Symbol, SymbolDecl
 
 if TYPE_CHECKING:
     from .syntax import Definition
+
+
+class CollectionKind(Enum):
+    LIST = 'List'
+    MAP = 'Map'
+    SET = 'Set'
+
+
+class Collection(NamedTuple):
+    sort: str
+    concat: str
+    element: str
+    unit: str
+    kind: CollectionKind
+
+    @staticmethod
+    def from_decl(decl: SortDecl) -> Collection:
+        if not 'element' in decl.attrs_by_key:
+            raise ValueError(f'Not a sort declaration: {decl.text}')
+        sort = decl.name
+        concat = Collection._extract_label(decl, 'concat')
+        element = Collection._extract_label(decl, 'element')
+        unit = Collection._extract_label(decl, 'unit')
+        kind = CollectionKind(Collection._extract_string(decl, 'hook').split('.')[1])  # 'MAP.Map' -> CollectionKind.MAP
+        return Collection(
+            sort=sort,
+            concat=concat,
+            element=element,
+            unit=unit,
+            kind=kind,
+        )
+
+    @staticmethod
+    def _extract_label(decl: SortDecl, attr: str) -> str:
+        match decl.attrs_by_key[attr]:
+            case App(attr, args=(App(res),)):
+                return res
+            case _:
+                raise AssertionError()
+
+    @staticmethod
+    def _extract_string(decl: SortDecl, attr: str) -> str:
+        match decl.attrs_by_key[attr]:
+            case App(attr, args=(String(res),)):
+                return res
+            case _:
+                raise AssertionError()
 
 
 @final
@@ -63,6 +111,17 @@ class KoreDefn:
             sort = check_type(decl.sort, SortApp).name  # TODO eliminate by further processing the SortDecl
             grouped.setdefault(sort, []).append(symbol)
         return FrozenDict((sort, tuple(symbols)) for sort, symbols in grouped.items())
+
+    @cached_property
+    def collections(self) -> FrozenDict[str, Collection]:
+        colls: dict[str, Collection] = {}
+        for sort, decl in self.sorts.items():
+            if not 'element' in decl.attrs_by_key:
+                continue
+            coll = Collection.from_decl(decl)
+            assert sort == coll.sort
+            colls[sort] = coll
+        return FrozenDict(colls)
 
     def let(
         self,
