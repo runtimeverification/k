@@ -189,7 +189,13 @@ class KoreDefn:
             if sort in done:
                 continue
             done.add(sort)
-            symbols = self.constructors.get(sort, ())
+
+            symbols: list[str] = []
+            if sort in self.collections:
+                coll = self.collections[sort]
+                symbols += (coll.concat, coll.element, coll.unit)
+            symbols += self.constructors.get(sort, ())
+
             pending.extend(sort for symbol in symbols for sort in self._symbol_sorts(symbol))
             res.update(symbols)
         return res

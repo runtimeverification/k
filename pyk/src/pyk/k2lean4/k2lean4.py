@@ -3,9 +3,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from ..kore.internal import CollectionKind
 from ..kore.syntax import SortApp
 from ..utils import check_type
-from .model import Ctor, ExplBinder, Inductive, Module, Signature, Term
+from .model import Abbrev, Ctor, ExplBinder, Inductive, Module, Signature, Term
 
 if TYPE_CHECKING:
     from ..kore.internal import KoreDefn
@@ -19,7 +20,8 @@ class K2Lean4:
     def sort_module(self) -> Module:
         commands = []
         commands += self._inductives()
-        return Module(commands=self._inductives())
+        commands += self._collections()
+        return Module(commands=commands)
 
     def _inductives(self) -> list[Command]:
         def is_inductive(sort: str) -> bool:
@@ -41,7 +43,26 @@ class K2Lean4:
         return Ctor(f'inj_{subsort}', Signature((ExplBinder(('x',), Term(subsort)),), Term(sort)))
 
     def _symbol_ctor(self, sort: str, symbol: str) -> Ctor:
-        param_sorts = (check_type(sort, SortApp).name for sort in self.defn.symbols[symbol].param_sorts)
+        param_sorts = (
+            check_type(sort, SortApp).name for sort in self.defn.symbols[symbol].param_sorts
+        )  # TODO eliminate check_type
         binders = tuple(ExplBinder((f'x{i}',), Term(sort)) for i, sort in enumerate(param_sorts))
         symbol = symbol.replace('-', '_')
         return Ctor(symbol, Signature(binders, Term(sort)))
+
+    def _collections(self) -> list[Command]:
+        return [self._collection(sort) for sort in sorted(self.defn.collections)]
+
+    def _collection(self, sort: str) -> Abbrev:
+        coll = self.defn.collections[sort]
+        elem = self.defn.symbols[coll.element]
+        sorts = ' '.join(check_type(sort, SortApp).name for sort in elem.param_sorts)  # TODO eliminate check_type
+        assert sorts
+        match coll.kind:
+            case CollectionKind.LIST:
+                val = Term(f'ListHook {sorts}')
+            case CollectionKind.MAP:
+                val = Term(f'MapHook {sorts}')
+            case CollectionKind.SET:
+                val = Term(f'SetHook {sorts}')
+        return Abbrev(sort, val, Signature((), Term('Type')))
