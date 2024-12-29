@@ -1,0 +1,7 @@
+pyk.kore.parser module
+======================
+
+.. automodule:: pyk.kore.parser
+   :members:
+   :undoc-members:
+   :show-inheritance:

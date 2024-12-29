@@ -1,0 +1,7 @@
+pyk.prelude.string module
+=========================
+
+.. automodule:: pyk.prelude.string
+   :members:
+   :undoc-members:
+   :show-inheritance:
