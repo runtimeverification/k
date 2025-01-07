@@ -491,6 +491,8 @@ jobs:
 
       - name: Install Poetry
         uses: Gr1N/setup-poetry@v9
+        with:
+          poetry-version: '1.8.5'
 
       - name: Build pyk
         working-directory: pyk
