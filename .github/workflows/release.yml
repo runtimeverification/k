@@ -21,7 +21,7 @@ jobs:
 
   source-tarball:
     name: 'Create source tarball'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment: production
     steps:
       - name: 'Check out code'
@@ -475,7 +475,7 @@ jobs:
 
   pyk-publish:
     name: 'Publish pyk'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment: production
     permissions:
       id-token: write
@@ -514,10 +514,10 @@ jobs:
             fi
             sleep 10
           done
-  
+
   notify-dependents:
     name: 'Notify Dependents'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: pyk-publish
     steps:
       - name: Check out code
