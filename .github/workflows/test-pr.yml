@@ -11,7 +11,7 @@ concurrency:
 jobs:
   format-check:
     name: 'Java: Linting'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v4
@@ -30,7 +30,7 @@ jobs:
 
   pyk-code-quality-checks:
     name: 'Pyk: Code Quality & Unit Tests'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     strategy:
       fail-fast: false
@@ -56,7 +56,7 @@ jobs:
 
   code-quality:
     name: 'Code Quality Checks'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs:
       - format-check
       - pyk-code-quality-checks
@@ -156,7 +156,7 @@ jobs:
     name: 'Pyk: Nix Build'
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-14]
+        os: [ubuntu-24.04, macos-14]
     runs-on: ${{ matrix.os }}
     steps:
       - name: 'Check out code'
@@ -311,7 +311,7 @@ jobs:
   pyk-regression-tests:
     needs: test-frontend-package-ubuntu-jammy
     name: 'Pyk: Regression Tests'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - name: 'Check out code'

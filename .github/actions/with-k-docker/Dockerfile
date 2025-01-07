@@ -38,5 +38,5 @@ USER user
 WORKDIR /home/user
 
 ENV PATH=/home/user/.local/bin:${PATH}
-RUN    curl -sSL https://install.python-poetry.org | python3 - \
+RUN    curl -sSL https://install.python-poetry.org | python3 - --version 1.8.5 \
     && poetry --version
