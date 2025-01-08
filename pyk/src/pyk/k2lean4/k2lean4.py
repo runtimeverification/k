@@ -1,16 +1,25 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from ..konvert import unmunge
 from ..kore.internal import CollectionKind
 from ..kore.syntax import SortApp
 from ..utils import check_type
 from .model import Abbrev, Ctor, ExplBinder, Inductive, Module, Signature, Term
 
 if TYPE_CHECKING:
+    from typing import Final
+
     from ..kore.internal import KoreDefn
     from .model import Command
+
+
+_VALID_LEAN_IDENT: Final = re.compile(
+    "_[a-zA-Z0-9_?!']+|[a-zA-Z][a-zA-Z0-9_?!']*"
+)  # Simplified to characters permitted in KORE in the first place
 
 
 @dataclass(frozen=True)
@@ -52,7 +61,12 @@ class K2Lean4:
 
     @staticmethod
     def _symbol_ident(symbol: str) -> str:
-        return symbol.replace('-', '_')
+        if symbol.startswith('Lbl'):
+            symbol = symbol[3:]
+        symbol = unmunge(symbol)
+        if not _VALID_LEAN_IDENT.fullmatch(symbol):
+            symbol = f'«{symbol}»'
+        return symbol
 
     def _collections(self) -> list[Command]:
         return [self._collection(sort) for sort in sorted(self.defn.collections)]
