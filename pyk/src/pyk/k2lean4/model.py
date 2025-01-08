@@ -73,7 +73,7 @@ class Abbrev(Declaration):
     def __str__(self) -> str:
         modifiers = f'{self.modifiers} ' if self.modifiers else ''
         signature = f' {self.signature}' if self.signature else ''
-        return f'{modifiers} abbrev {self.ident}{signature} := {self.val}'
+        return f'{modifiers}abbrev {self.ident}{signature} := {self.val}'
 
 
 @final
