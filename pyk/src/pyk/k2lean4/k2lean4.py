@@ -46,9 +46,13 @@ class K2Lean4:
         param_sorts = (
             check_type(sort, SortApp).name for sort in self.defn.symbols[symbol].param_sorts
         )  # TODO eliminate check_type
+        symbol = self._symbol_ident(symbol)
         binders = tuple(ExplBinder((f'x{i}',), Term(sort)) for i, sort in enumerate(param_sorts))
-        symbol = symbol.replace('-', '_')
         return Ctor(symbol, Signature(binders, Term(sort)))
+
+    @staticmethod
+    def _symbol_ident(symbol: str) -> str:
+        return symbol.replace('-', '_')
 
     def _collections(self) -> list[Command]:
         return [self._collection(sort) for sort in sorted(self.defn.collections)]
