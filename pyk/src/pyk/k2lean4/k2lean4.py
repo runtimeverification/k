@@ -7,13 +7,13 @@ from typing import TYPE_CHECKING
 from ..konvert import unmunge
 from ..kore.internal import CollectionKind
 from ..kore.syntax import SortApp
-from ..utils import check_type
 from .model import Abbrev, Ctor, ExplBinder, Inductive, Module, Signature, Term
 
 if TYPE_CHECKING:
     from typing import Final
 
     from ..kore.internal import KoreDefn
+    from ..kore.syntax import SymbolDecl
     from .model import Command
 
 
@@ -52,9 +52,8 @@ class K2Lean4:
         return Ctor(f'inj_{subsort}', Signature((ExplBinder(('x',), Term(subsort)),), Term(sort)))
 
     def _symbol_ctor(self, sort: str, symbol: str) -> Ctor:
-        param_sorts = (
-            check_type(sort, SortApp).name for sort in self.defn.symbols[symbol].param_sorts
-        )  # TODO eliminate check_type
+        decl = self.defn.symbols[symbol]
+        param_sorts = _param_sorts(decl)
         symbol = self._symbol_ident(symbol)
         binders = tuple(ExplBinder((f'x{i}',), Term(sort)) for i, sort in enumerate(param_sorts))
         return Ctor(symbol, Signature(binders, Term(sort)))
@@ -74,7 +73,7 @@ class K2Lean4:
     def _collection(self, sort: str) -> Abbrev:
         coll = self.defn.collections[sort]
         elem = self.defn.symbols[coll.element]
-        sorts = ' '.join(check_type(sort, SortApp).name for sort in elem.param_sorts)  # TODO eliminate check_type
+        sorts = ' '.join(_param_sorts(elem))
         assert sorts
         match coll.kind:
             case CollectionKind.LIST:
@@ -84,3 +83,9 @@ class K2Lean4:
             case CollectionKind.SET:
                 val = Term(f'SetHook {sorts}')
         return Abbrev(sort, val, Signature((), Term('Type')))
+
+
+def _param_sorts(decl: SymbolDecl) -> list[str]:
+    from ..utils import check_type
+
+    return [check_type(sort, SortApp).name for sort in decl.param_sorts]  # TODO eliminate check_type
