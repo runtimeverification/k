@@ -119,6 +119,147 @@ class Inductive(Declaration):
 
 @final
 @dataclass(frozen=True)
+class Instance(Declaration):
+    signature: Signature
+    val: DeclVal
+    attr_kind: AttrKind | None
+    priority: int | None
+    ident: DeclId | None
+    modifiers: Modifiers | None
+
+    def __init__(
+        self,
+        signature: Signature,
+        val: DeclVal,
+        attr_kind: AttrKind | None = None,
+        priority: int | None = None,
+        ident: str | DeclId | None = None,
+        modifiers: Modifiers | None = None,
+    ):
+        if not signature.ty:
+            # TODO refine type to avoid this check
+            raise ValueError('Missing type from signature')
+        ident = DeclId(ident) if isinstance(ident, str) else ident
+        object.__setattr__(self, 'signature', signature)
+        object.__setattr__(self, 'val', val)
+        object.__setattr__(self, 'attr_kind', attr_kind)
+        object.__setattr__(self, 'priority', priority)
+        object.__setattr__(self, 'ident', ident)
+        object.__setattr__(self, 'modifiers', modifiers)
+
+    def __str__(self) -> str:
+        modifiers = f'{self.modifiers} ' if self.modifiers else ''
+        attr_kind = f'{self.attr_kind.value} ' if self.attr_kind else ''
+        priority = f' priority := {self.priority}' if self.priority is not None else ''
+        ident = f' {self.ident}' if self.ident else ''
+        signature = f' {self.signature}' if self.signature else ''
+
+        decl = f'{modifiers}{attr_kind}instance{priority}{ident}{signature}'
+
+        match self.val:
+            case SimpleVal():
+                return f'{decl} := {self.val}'
+            case StructVal(fields):
+                lines = []
+                lines.append(f'{decl} where')
+                lines.extend(indent(str(field), 2) for field in fields)
+                return '\n'.join(lines)
+            case _:
+                raise AssertionError()
+
+
+class DeclVal(ABC): ...
+
+
+@final
+@dataclass(frozen=True)
+class SimpleVal(DeclVal):
+    term: Term
+
+    def __str__(self) -> str:
+        return str(self.term)
+
+
+@final
+@dataclass(frozen=True)
+class StructVal(DeclVal):
+    fields: tuple[InstField, ...]
+
+    def __init__(self, fields: Iterable[InstField]):
+        object.__setattr__(self, 'fields', tuple(fields))
+
+    def __str__(self) -> str:
+        return indent('\n'.join(str(field) for field in self.fields), 2)
+
+
+@final
+@dataclass(frozen=True)
+class InstField:
+    lval: str
+    val: FieldVal
+    signature: Signature | None
+
+    def __init__(self, lval: str, val: FieldVal, signature: Signature | None = None):
+        object.__setattr__(self, 'lval', lval)
+        object.__setattr__(self, 'val', val)
+        object.__setattr__(self, 'signature', signature)
+
+    def __str__(self) -> str:
+        signature = f' {self.signature}' if self.signature else ''
+        decl = f'{self.lval}{signature}'
+        match self.val:
+            case SimpleFieldVal():
+                return f'{decl} := {self.val}'
+            case AltsFieldVal(alts):
+                lines = []
+                lines.append(f'{decl}')
+                lines.extend(indent(str(alt), 2) for alt in alts)
+                return '\n'.join(lines)
+            case _:
+                raise AssertionError()
+
+
+class FieldVal(ABC): ...
+
+
+@final
+@dataclass(frozen=True)
+class SimpleFieldVal(FieldVal):
+    term: Term
+
+    def __str__(self) -> str:
+        return str(self.term)
+
+
+@final
+@dataclass(frozen=True)
+class AltsFieldVal(FieldVal):
+    alts: tuple[Alt, ...]
+
+    def __init__(self, alts: Iterable[Alt]):
+        object.__setattr__(self, 'alts', tuple(alts))
+
+    def __str__(self) -> str:
+        return indent('\n'.join(str(alt) for alt in self.alts), 2)
+
+
+@final
+@dataclass(frozen=True)
+class Alt:
+    patterns: tuple[Term, ...]
+    rhs: Term
+
+    def __init__(self, patterns: Iterable[Term], rhs: Term):
+        object.__setattr__(self, 'patterns', tuple(patterns))
+        object.__setattr__(self, 'rhs', rhs)
+
+    def __str__(self) -> str:
+        patterns = ', '.join(str(pattern) for pattern in self.patterns)
+        return f'| {patterns} => {self.rhs}'
+
+
+@final
+@dataclass(frozen=True)
 class DeclId:
     val: str
     uvars: tuple[str, ...]
