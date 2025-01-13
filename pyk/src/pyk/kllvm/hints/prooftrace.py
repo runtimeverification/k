@@ -249,6 +249,7 @@ class LLVMFunctionEvent(LLVMStepEvent):
 @final
 class LLVMFunctionExitEvent(LLVMStepEvent):
     """Represent an LLVM function exit event in a proof trace.
+
     Attributes:
         _function_exit_event (llvm_function_exit_event): The underlying LLVM function exit event object.
     """
@@ -257,6 +258,7 @@ class LLVMFunctionExitEvent(LLVMStepEvent):
 
     def __init__(self, function_exit_event: llvm_function_exit_event) -> None:
         """Initialize a new instance of the LLVMFunctionExitEvent class.
+
         Args:
             function_exit_event (llvm_function_exit_event): The LLVM function exit event object.
         """
@@ -264,6 +266,7 @@ class LLVMFunctionExitEvent(LLVMStepEvent):
 
     def __repr__(self) -> str:
         """Return a string representation of the object.
+
         Returns:
             A string representation of the LLVMFunctionExitEvent object using the AST printing method.
         """
