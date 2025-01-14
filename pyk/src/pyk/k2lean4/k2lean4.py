@@ -10,14 +10,28 @@ from ..konvert import unmunge
 from ..kore.internal import CollectionKind
 from ..kore.syntax import SortApp
 from ..utils import POSet
-from .model import Ctor, ExplBinder, Inductive, Module, Mutual, Signature, Term
+from .model import (
+    Alt,
+    AltsFieldVal,
+    Ctor,
+    ExplBinder,
+    Inductive,
+    Instance,
+    InstField,
+    Module,
+    Mutual,
+    Signature,
+    SimpleFieldVal,
+    StructVal,
+    Term,
+)
 
 if TYPE_CHECKING:
     from typing import Final
 
     from ..kore.internal import KoreDefn
     from ..kore.syntax import SymbolDecl
-    from .model import Command, Declaration
+    from .model import Command, Declaration, FieldVal
 
 
 _VALID_LEAN_IDENT: Final = re.compile(
@@ -112,6 +126,55 @@ class K2Lean4:
                 val = Term(f'List ({key} × {value})')
         ctor = Ctor('mk', Signature((ExplBinder(('coll',), val),), Term(sort)))
         return Inductive(sort, Signature((), Term('Type')), ctors=(ctor,))
+
+    def inj_module(self) -> Module:
+        return Module(commands=self._inj_commands())
+
+    def _inj_commands(self) -> tuple[Command, ...]:
+        return tuple(
+            self._inj_instance(subsort, supersort)
+            for supersort, subsorts in self.defn.subsorts.items()
+            for subsort in subsorts
+            if not supersort.endswith(
+                'CellMap'
+            )  # Strangely, cell collections can be injected from their value sort in KORE
+        )
+
+    def _inj_instance(self, subsort: str, supersort: str) -> Instance:
+        ty = Term(f'Inj {subsort} {supersort}')
+        field = self._inj_field(subsort, supersort)
+        return Instance(Signature((), ty), StructVal((field,)))
+
+    def _inj_field(self, subsort: str, supersort: str) -> InstField:
+        val = self._inj_val(subsort, supersort)
+        return InstField('inj', val)
+
+    def _inj_val(self, subsort: str, supersort: str) -> FieldVal:
+        subsubsorts: list[str]
+        if subsort.endswith('CellMap'):
+            subsubsorts = []  # Disregard injection from value sort to cell map sort
+        else:
+            subsubsorts = sorted(self.defn.subsorts.get(subsort, []))
+
+        if not subsubsorts:
+            return SimpleFieldVal(Term(f'{supersort}.inj_{subsort}'))
+        else:
+            return AltsFieldVal(self._inj_alts(subsort, supersort, subsubsorts))
+
+    def _inj_alts(self, subsort: str, supersort: str, subsubsorts: list[str]) -> list[Alt]:
+        def inj(subsort: str, supersort: str, x: str) -> Term:
+            return Term(f'{supersort}.inj_{subsort} {x}')
+
+        res = []
+        for subsubsort in subsubsorts:
+            res.append(Alt((inj(subsubsort, subsort, 'x'),), inj(subsubsort, supersort, 'x')))
+
+        if self.defn.constructors.get(subsort, []):
+            # Has actual constructors, not only subsorts
+            default = Alt((Term('x'),), inj(subsort, supersort, 'x'))
+            res.append(default)
+
+        return res
 
 
 def _param_sorts(decl: SymbolDecl) -> list[str]:
