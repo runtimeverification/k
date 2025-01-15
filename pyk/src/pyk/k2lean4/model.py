@@ -150,7 +150,7 @@ class Instance(Declaration):
     def __str__(self) -> str:
         modifiers = f'{self.modifiers} ' if self.modifiers else ''
         attr_kind = f'{self.attr_kind.value} ' if self.attr_kind else ''
-        priority = f' priority := {self.priority}' if self.priority is not None else ''
+        priority = f' (priority := {self.priority})' if self.priority is not None else ''
         ident = f' {self.ident}' if self.ident else ''
         signature = f' {self.signature}' if self.signature else ''
 
