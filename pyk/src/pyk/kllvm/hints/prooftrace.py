@@ -9,6 +9,7 @@ from _kllvm.prooftrace import (  # type: ignore  # noqa: F401, TC002
     kore_header,
     llvm_rewrite_event,
     llvm_function_event,
+    llvm_function_exit_event,
     llvm_hook_event,
     llvm_rewrite_trace,
     llvm_rule_event,
@@ -246,6 +247,43 @@ class LLVMFunctionEvent(LLVMStepEvent):
 
 
 @final
+class LLVMFunctionExitEvent(LLVMStepEvent):
+    """Represent an LLVM function exit event in a proof trace.
+
+    Attributes:
+        _function_exit_event (llvm_function_exit_event): The underlying LLVM function exit event object.
+    """
+
+    _function_exit_event: llvm_function_exit_event
+
+    def __init__(self, function_exit_event: llvm_function_exit_event) -> None:
+        """Initialize a new instance of the LLVMFunctionExitEvent class.
+
+        Args:
+            function_exit_event (llvm_function_exit_event): The LLVM function exit event object.
+        """
+        self._function_exit_event = function_exit_event
+
+    def __repr__(self) -> str:
+        """Return a string representation of the object.
+
+        Returns:
+            A string representation of the LLVMFunctionExitEvent object using the AST printing method.
+        """
+        return self._function_exit_event.__repr__()
+
+    @property
+    def rule_ordinal(self) -> int:
+        """Return the axiom ordinal number associated with the function exit event."""
+        return self._function_exit_event.rule_ordinal
+
+    @property
+    def is_tail(self) -> bool:
+        """Return True if the function exit event is a tail call."""
+        return self._function_exit_event.is_tail
+
+
+@final
 class LLVMHookEvent(LLVMStepEvent):
     """Represents a hook event in LLVM execution.
 
@@ -330,6 +368,8 @@ class LLVMArgument:
             return LLVMSideConditionEventExit(self._argument.step_event)
         elif isinstance(self._argument.step_event, llvm_function_event):
             return LLVMFunctionEvent(self._argument.step_event)
+        elif isinstance(self._argument.step_event, llvm_function_exit_event):
+            return LLVMFunctionExitEvent(self._argument.step_event)
         elif isinstance(self._argument.step_event, llvm_hook_event):
             return LLVMHookEvent(self._argument.step_event)
         elif isinstance(self._argument.step_event, llvm_pattern_matching_failure_event):
