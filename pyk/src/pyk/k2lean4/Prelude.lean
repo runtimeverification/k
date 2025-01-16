@@ -82,24 +82,23 @@ axiom nodupAx      : forall m, List.Nodup (keysAx K m)
 
 -- Uninterpreted Map implementation
 noncomputable def mapImpl (K V : Type) : MapHookSig K V :=
-  MapHookSig.mk
-    mapCAx
-    unitAx
-    (consAx K V)
-    (lookupAx K V)
-    (lookupAx? K V)
-    (updateAx K V)
-    (deleteAx K)
-    concatAx
-    differenceAx
-    updateMapAx
-    (removeAllAx K)
-    (keysAx K)
-    (in_keysAx K)
-    (valuesAx V)
-    sizeAx
-    includesAx
-    (choiceAx K)
-    (nodupAx K)
+  { map        := mapCAx,
+    unit       := unitAx,
+    cons       := (consAx K V),
+    lookup     := (lookupAx K V),
+    lookup?    := (lookupAx? K V),
+    update     := (updateAx K V),
+    delete     := (deleteAx K),
+    concat     := concatAx,
+    difference := differenceAx,
+    updateMap  := updateMapAx,
+    removeAll  := (removeAllAx K),
+    keys       := (keysAx K),
+    in_keys    := (in_keysAx K),
+    values     := (valuesAx V),
+    size       := sizeAx,
+    includes   := includesAx,
+    choice     := (choiceAx K),
+    nodup      := (nodupAx K) }
 
 end MapHookDef
