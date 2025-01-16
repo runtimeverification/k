@@ -136,6 +136,8 @@ class Instance(Declaration):
         ident: str | DeclId | None = None,
         modifiers: Modifiers | None = None,
     ):
+        if priority and priority < 0:
+            raise ValueError('Priority must be non-negative')
         if not signature.ty:
             # TODO refine type to avoid this check
             raise ValueError('Missing type from signature')
