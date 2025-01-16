@@ -78,7 +78,7 @@ axiom valuesAx     : mapCAx → List V
 axiom sizeAx       : mapCAx → Nat
 axiom includesAx   : mapCAx → mapCAx → Bool -- map inclusion
 axiom choiceAx     : mapCAx → K -- arbitrary key from a map
-axiom nodupAx      : forall al                              : mapCAx, List.Nodup (keysAx K al)
+axiom nodupAx      : forall m, List.Nodup (keysAx K m)
 
 -- Uninterpreted Map implementation
 noncomputable def mapImpl (K V : Type) : MapHookSig K V :=
