@@ -64,7 +64,7 @@ variable (K V : Type)
 axiom mapCAx       : Type -- Map Carrier
 axiom unitAx       : mapCAx
 axiom consAx       : K → V → mapCAx → mapCAx
-axiom lookupAx     : mapCAx → K → V
+axiom lookupAx     : mapCAx → K → Option V
 axiom lookupAx?    : mapCAx → K → V -- lookup with default
 axiom updateAx     : K → V → mapCAx → mapCAx
 axiom deleteAx     : mapCAx → K → mapCAx
