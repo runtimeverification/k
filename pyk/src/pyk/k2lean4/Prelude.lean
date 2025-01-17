@@ -102,3 +102,8 @@ noncomputable def mapImpl (K V : Type) : MapHookSig K V :=
     nodup      := (nodupAx K) }
 
 end MapHookDef
+
+class Inj (From To : Type) : Type where
+  inj (x : From) : To
+
+def inj {From To : Type} [inst : Inj From To] := inst.inj
