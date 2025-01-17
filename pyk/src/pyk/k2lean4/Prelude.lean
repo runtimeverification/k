@@ -78,7 +78,7 @@ axiom choiceAx     : mapCAx → K -- arbitrary key from a map
 axiom nodupAx      : forall m, List.Nodup (keysAx K m)
 
 -- Uninterpreted Map implementation
-noncomputable def mapImpl (K V : Type) : MapHookSig K V :=
+noncomputable def MapHook (K V : Type) : MapHookSig K V :=
   { map        := mapCAx,
     unit       := unitAx,
     cons       := (consAx K V),
