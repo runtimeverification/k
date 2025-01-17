@@ -27,9 +27,6 @@ abbrev SortInt          : Type := Int
 abbrev SortString       : Type := String
 abbrev SortStringBuffer : Type := String
 
-abbrev ListHook (E : Type) : Type := List E
-abbrev SetHook (E : Type) : Type := List E
-
 namespace MapHookDef
 /-
 The `Map` sort represents a generalized associative array.
