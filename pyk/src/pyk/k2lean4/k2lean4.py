@@ -140,7 +140,7 @@ class K2Lean4:
         fields = tuple(ExplBinder((name,), Term(sort)) for name, sort in zip(param_names, param_sorts, strict=True))
         return Structure(sort, Signature((), Term('Type')), ctor=StructCtor(fields))
 
-    def _collection(self, sort: str) -> Inductive:
+    def _collection(self, sort: str) -> Structure:
         coll = self.defn.collections[sort]
         elem = self.defn.symbols[coll.element]
         sorts = _param_sorts(elem)
@@ -155,8 +155,8 @@ class K2Lean4:
             case CollectionKind.MAP:
                 key, value = sorts
                 val = Term(f'List ({key} × {value})')
-        ctor = Ctor('mk', Signature((ExplBinder(('coll',), val),), Term(sort)))
-        return Inductive(sort, Signature((), Term('Type')), ctors=(ctor,))
+        field = ExplBinder(('coll',), val)
+        return Structure(sort, Signature((), Term('Type')), ctor=StructCtor((field,)))
 
     def inj_module(self) -> Module:
         return Module(commands=self._inj_commands())
