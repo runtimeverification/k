@@ -43,7 +43,7 @@ structure MapHookSig (K V : Type) where
   map        : Type -- Carrier, such as List (KItem × KItem)
   unit       : map
   cons       : K → V → map → map
-  lookup     : map → K → V
+  lookup     : map → K → Option V
   lookup?    : map → K → V -- lookup with default
   update     : K → V → map → map
   delete     : map → K → map
