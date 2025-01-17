@@ -262,6 +262,101 @@ class Alt:
 
 @final
 @dataclass(frozen=True)
+class Structure(Declaration):
+    ident: DeclId
+    signature: Signature | None
+    extends: tuple[Term, ...]
+    ctor: StructCtor | None
+    deriving: tuple[str, ...]
+    modifiers: Modifiers | None
+
+    def __init__(
+        self,
+        ident: str | DeclId,
+        signature: Signature | None = None,
+        extends: Iterable[Term] | None = None,
+        ctor: StructCtor | None = None,
+        deriving: Iterable[str] | None = None,
+        modifiers: Modifiers | None = None,
+    ):
+        ident = DeclId(ident) if isinstance(ident, str) else ident
+        extends = tuple(extends) if extends is not None else ()
+        deriving = tuple(deriving) if deriving is not None else ()
+        object.__setattr__(self, 'ident', ident)
+        object.__setattr__(self, 'signature', signature)
+        object.__setattr__(self, 'extends', extends)
+        object.__setattr__(self, 'ctor', ctor)
+        object.__setattr__(self, 'deriving', deriving)
+        object.__setattr__(self, 'modifiers', modifiers)
+
+    def __str__(self) -> str:
+        lines = []
+
+        modifiers = f'{self.modifiers} ' if self.modifiers else ''
+        binders = (
+            ' '.join(str(binder) for binder in self.signature.binders)
+            if self.signature and self.signature.binders
+            else ''
+        )
+        binders = f' {binders}' if binders else ''
+        extends = ', '.join(str(extend) for extend in self.extends)
+        extends = f' extends {extends}' if extends else ''
+        ty = f' : {self.signature.ty}' if self.signature and self.signature.ty else ''
+        where = ' where' if self.ctor else ''
+        lines.append(f'{modifiers}structure {self.ident}{binders}{extends}{ty}{where}')
+
+        if self.deriving:
+            lines.append(f'  deriving {self.deriving}')
+
+        if self.ctor:
+            lines.extend(f'  {line}' for line in str(self.ctor).splitlines())
+
+        return '\n'.join(lines)
+
+
+@final
+@dataclass(frozen=True)
+class StructCtor:
+    fields: tuple[Binder, ...]  # TODO implement StructField
+    ident: StructIdent | None
+
+    def __init__(
+        self,
+        fields: Iterable[Binder],
+        ident: str | StructIdent | None = None,
+    ):
+        fields = tuple(fields)
+        ident = StructIdent(ident) if isinstance(ident, str) else ident
+        object.__setattr__(self, 'fields', fields)
+        object.__setattr__(self, 'ident', ident)
+
+    def __str__(self) -> str:
+        lines = []
+        if self.ident:
+            lines.append(f'{self.ident} ::')
+        for field in self.fields:
+            if isinstance(field, ExplBinder) and len(field.idents) == 1:
+                (ident,) = field.idents
+                ty = '' if field.ty is None else f' : {field.ty}'
+                lines.append(f'{ident}{ty}')
+            else:
+                lines.append(str(field))
+        return '\n'.join(lines)
+
+
+@final
+@dataclass(frozen=True)
+class StructIdent:
+    ident: str
+    modifiers: Modifiers | None = None
+
+    def __str__(self) -> str:
+        modifiers = f'{self.modifiers} ' if self.modifiers else ''
+        return f'{modifiers}{ self.ident}'
+
+
+@final
+@dataclass(frozen=True)
 class DeclId:
     val: str
     uvars: tuple[str, ...]

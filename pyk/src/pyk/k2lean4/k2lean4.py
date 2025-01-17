@@ -22,6 +22,8 @@ from .model import (
     Mutual,
     Signature,
     SimpleFieldVal,
+    StructCtor,
+    Structure,
     StructVal,
     Term,
 )
@@ -69,13 +71,16 @@ class K2Lean4:
     def _transform_sort(self, sort: str) -> Declaration:
         def is_inductive(sort: str) -> bool:
             decl = self.defn.sorts[sort]
-            return not decl.hooked and 'hasDomainValues' not in decl.attrs_by_key
+            return not decl.hooked and 'hasDomainValues' not in decl.attrs_by_key and not self._is_cell(sort)
 
         def is_collection(sort: str) -> bool:
             return sort in self.defn.collections
 
         if is_inductive(sort):
             return self._inductive(sort)
+
+        if self._is_cell(sort):
+            return self._cell(sort)
 
         if is_collection(sort):
             return self._collection(sort)
@@ -109,7 +114,33 @@ class K2Lean4:
             symbol = f'«{symbol}»'
         return symbol
 
-    def _collection(self, sort: str) -> Inductive:
+    @staticmethod
+    def _is_cell(sort: str) -> bool:
+        return sort.endswith('Cell')
+
+    def _cell(self, sort: str) -> Structure:
+        (cell_ctor,) = self.defn.constructors[sort]
+        decl = self.defn.symbols[cell_ctor]
+        param_sorts = _param_sorts(decl)
+
+        param_names: list[str]
+
+        if all(self._is_cell(sort) for sort in param_sorts):
+            param_names = []
+            for param_sort in param_sorts:
+                assert param_sort.startswith('Sort')
+                assert param_sort.endswith('Cell')
+                name = param_sort[4:-4]
+                name = name[0].lower() + name[1:]
+                param_names.append(name)
+        else:
+            assert len(param_sorts) == 1
+            param_names = ['val']
+
+        fields = tuple(ExplBinder((name,), Term(sort)) for name, sort in zip(param_names, param_sorts, strict=True))
+        return Structure(sort, Signature((), Term('Type')), ctor=StructCtor(fields))
+
+    def _collection(self, sort: str) -> Structure:
         coll = self.defn.collections[sort]
         elem = self.defn.symbols[coll.element]
         sorts = _param_sorts(elem)
@@ -124,8 +155,8 @@ class K2Lean4:
             case CollectionKind.MAP:
                 key, value = sorts
                 val = Term(f'List ({key} × {value})')
-        ctor = Ctor('mk', Signature((ExplBinder(('coll',), val),), Term(sort)))
-        return Inductive(sort, Signature((), Term('Type')), ctors=(ctor,))
+        field = ExplBinder(('coll',), val)
+        return Structure(sort, Signature((), Term('Type')), ctor=StructCtor((field,)))
 
     def inj_module(self) -> Module:
         return Module(commands=self._inj_commands())
