@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, NamedTuple
 
 from ..konvert import unmunge
 from ..kore.internal import CollectionKind
-from ..kore.syntax import SortApp
+from ..kore.syntax import DV, And, App, EVar, SortApp, String, Top
 from ..utils import FrozenDict, POSet
 from .model import (
     Alt,
@@ -32,10 +32,12 @@ from .model import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable, Iterator, Mapping
     from typing import Final
 
     from ..kore.internal import KoreDefn
-    from ..kore.syntax import SymbolDecl
+    from ..kore.rule import RewriteRule
+    from ..kore.syntax import Pattern, SymbolDecl
     from .model import Binder, Command, Declaration, FieldVal
 
 
@@ -270,6 +272,152 @@ class K2Lean4:
             binders.append(ImplBinder(sort_params, Term('Type')))
         binders.extend(ExplBinder((f'x{i}',), Term(sort)) for i, sort in enumerate(param_sorts))
         return Axiom(ident, Signature(binders, Term(f'Option {sort}')))
+
+    def rewrite_module(self) -> Module:
+        commands = (self._rewrite_inductive(),)
+        return Module(commands=commands)
+
+    def _rewrite_inductive(self) -> Inductive:
+        def tran_ctor() -> Ctor:
+            return Ctor(
+                'tran',
+                Signature(
+                    (
+                        ImplBinder(('s1', 's2', 's3'), Term('SortGeneratedTopCell')),
+                        ExplBinder(('t1',), Term('Rewrites s1 s2')),
+                        ExplBinder(('t2',), Term('Rewrites s2 s3')),
+                    ),
+                    Term('Rewrites s1 s3'),
+                ),
+            )
+
+        ctors: list[Ctor] = []
+        ctors.append(tran_ctor())
+        ctors.extend(self._rewrite_ctors())
+        signature = Signature(ty=Term('SortGeneratedTopCell → SortGeneratedTopCell → Prop'))
+        return Inductive('Rewrites', signature, ctors=ctors)
+
+    def _rewrite_ctors(self) -> list[Ctor]:
+        rewrites = sorted(self.defn.rewrites, key=self._rewrite_name)
+        return [self._rewrite_ctor(rule) for rule in rewrites]
+
+    def _rewrite_ctor(self, rule: RewriteRule) -> Ctor:
+        req = rule.req if rule.req else Top(SortApp('Foo'))
+
+        # Step 1: eliminate aliases
+        pattern = self._elim_aliases(And(SortApp('Foo'), (req, rule.lhs, rule.rhs)))
+
+        # Step 2: eliminate function application
+        free = (f'_val{i}' for i in count())
+        pattern, defs = self._elim_fun_apps(pattern, free)
+
+        # Step 3: create binders
+        binders: list[Binder] = []
+        binders.extend(self._free_binders(pattern))  # Binders of the form {x y : SortInt}
+        binders.extend(self._def_binders(defs))  # Binders of the form (def_y : foo x = some y)
+
+        # Step 4: transform patterns
+        assert isinstance(pattern, And)
+        req, lhs, rhs = pattern.ops
+
+        if not isinstance(req, Top):
+            req_term = self._transform_pattern(req)
+            binders.append(ExplBinder(('req',), req_term))
+
+        lhs_term = self._transform_pattern(lhs)
+        rhs_term = self._transform_pattern(rhs)
+        return Ctor(self._rewrite_name(rule), Signature(binders, Term(f'Rewrites {lhs_term} {rhs_term}')))
+
+    @staticmethod
+    def _rewrite_name(rule: RewriteRule) -> str:
+        if rule.label:
+            return rule.label.replace('-', '_').replace('.', '_')
+        return f'_{rule.uid[:7]}'
+
+    @staticmethod
+    def _elim_aliases(pattern: Pattern) -> Pattern:
+        r"""Eliminate subpatterns of the form ``\and{S}(p, X : S)``.
+
+        Both the ``\and`` and instances of ``X : S`` are replaced by the definition ``p``.
+        """
+        # TODO
+        return pattern
+
+    def _elim_fun_apps(self, pattern: Pattern, free: Iterator[str]) -> tuple[Pattern, dict[str, Pattern]]:
+        """Replace ``foo(bar(x))`` with ``z`` and return mapping ``{y: bar(x), z: foo(y)}`` with ``y``, ``z`` fresh variables."""
+        # TODO
+        return pattern, {}
+
+    def _free_binders(self, pattern: Pattern) -> list[Binder]:
+        # TODO
+        return []
+
+    def _def_binders(self, defs: Mapping[str, Pattern]) -> list[Binder]:
+        # TODO
+        return []
+
+    def _transform_pattern(self, pattern: Pattern) -> Term:
+        match pattern:
+            case EVar(name):
+                return self._transform_evar(name)
+            case DV(SortApp(sort), String(value)):
+                return self._transform_dv(sort, value)
+            case App(symbol, _, args):
+                return self._transform_app(symbol, args)
+            case And(_, (p, EVar())):
+                return self._transform_pattern(p)  # TODO remove
+            case _:
+                raise ValueError(f'Unsupported pattern: {pattern.text}')
+
+    def _transform_evar(self, name: str) -> Term:
+        assert name.startswith('Var')
+        return Term(self._symbol_ident(name[3:]))
+
+    def _transform_dv(self, sort: str, value: str) -> Term:
+        match sort:
+            case 'SortBool' | 'SortInt':
+                return Term(value)
+            case 'SortBytes':
+                raise ValueError('TODO')  # TODO
+            case 'SortId' | 'SortString' | 'SortStringBuffer':
+                raise ValueError('TODO')  # TODO
+            case _:
+                raise ValueError(f'Unsupported sort: {sort}')
+
+    def _transform_app(self, symbol: str, args: Iterable[Pattern]) -> Term:
+        if symbol in self.structure_symbols:
+            fields = self.structures[self.structure_symbols[symbol]]
+            return self._transform_structure_app(fields, args)
+
+        decl = self.defn.symbols[symbol]
+        sort = decl.sort.name if isinstance(decl.sort, SortApp) else None
+        return self._transform_basic_app(sort, symbol, args)
+
+    def _transform_structure_app(self, fields: Iterable[Field], args: Iterable[Pattern]) -> Term:
+        fields_str = ', '.join(
+            f'{field.name} := {self._transform_pattern(arg)}' for field, arg in zip(fields, args, strict=True)
+        )
+        lbrace, rbrace = ['{', '}']
+        return Term(f'{lbrace} {fields_str} {rbrace}')
+
+    def _transform_basic_app(self, sort: str | None, symbol: str, args: Iterable[Pattern]) -> Term:
+        chunks = []
+
+        ident: str
+        if sort and symbol in self.defn.constructors.get(sort, ()):
+            # Symbol is a constructor
+            ident = f'{sort}.{self._symbol_ident(symbol)}'
+        else:
+            ident = self._symbol_ident(symbol)
+
+        chunks.append(ident)
+        chunks.extend(
+            f'({term})' if isinstance(arg, App) and arg.args else str(term)
+            for arg in args
+            if (term := self._transform_pattern(arg))
+        )
+
+        return Term(' '.join(chunks))
 
 
 def _param_sorts(decl: SymbolDecl) -> list[str]:
