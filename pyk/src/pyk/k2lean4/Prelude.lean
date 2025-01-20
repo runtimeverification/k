@@ -100,6 +100,57 @@ noncomputable def MapHook (K V : Type) : MapHookSig K V :=
 
 end MapHookDef
 
+namespace SetHookDef
+/-
+implementation of immutable, associative,
+commutative sets of `KItem`.
+The sets are nilpotent, i.e., the concatenation of two sets containing elements
+in common is `#False` (note however, this may be silently allowed during
+concrete execution). If you intend to add an element to a set that might
+already be present in the set, use the `|Set` operator instead.
+ -/
+
+structure SetHookSig (T : Type) where
+  set : Type -- Carrier, such as `T → Prop`
+  unit : set
+  concat : set → set → Option set
+  setItem : T → set
+  union : set → set → set
+  intersection : set → set → set
+  difference : set → set → set
+  inSet : T → set → Bool
+  inclusion : set → set → Bool
+  size : set → Int
+  choice : set → T
+
+variable (T : Type)
+axiom setCAx         : Type
+axiom unitAx         : setCAx
+axiom concatAx       : setCAx → setCAx → Option setCAx
+axiom setItemAx      : T → setCAx
+axiom unionAx        : setCAx → setCAx → setCAx
+axiom intersectionAx : setCAx → setCAx → setCAx
+axiom differenceAx   : setCAx → setCAx → setCAx
+axiom inSetAx        : T → setCAx → Bool
+axiom inclusionAx    : setCAx → setCAx → Bool
+axiom sizeAx         : setCAx → Int
+axiom choiceAx       : setCAx → T
+
+noncomputable def SetHook (T : Type) : SetHookSig T :=
+  { set          := setCAx,
+    unit         := unitAx,
+    concat       := concatAx,
+    setItem      := setItemAx T,
+    union        := unionAx,
+    intersection := intersectionAx,
+    difference   := differenceAx,
+    inSet        := inSetAx T,
+    inclusion    := inclusionAx,
+    size         := sizeAx,
+    choice       := choiceAx T }
+
+end SetHookDef
+
 class Inj (From To : Type) : Type where
   inj (x : From) : To
 
