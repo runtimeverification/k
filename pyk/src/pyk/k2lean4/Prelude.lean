@@ -102,12 +102,9 @@ end MapHookDef
 
 namespace SetHookDef
 /-
-implementation of immutable, associative,
-commutative sets of `KItem`.
-The sets are nilpotent, i.e., the concatenation of two sets containing elements
-in common is `#False` (note however, this may be silently allowed during
-concrete execution). If you intend to add an element to a set that might
-already be present in the set, use the `|Set` operator instead.
+Implementation of immutable, associative, commutative sets of `KItem`.
+The sets are nilpotent, i.e., the concatenation of two sets containing elements in common is `#False` (note however, this may be silently allowed during concrete execution).
+If you intend to add an element to a set that might already be present in the set, use the `|Set` operator instead.
  -/
 
 structure SetHookSig (T : Type) where
