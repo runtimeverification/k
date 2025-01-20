@@ -1,0 +1,412 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyk.k2lean4.k2lean4 &mdash; pyk 7.1.205 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=e6f06810"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            pyk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">pyk</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pyk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pyk.k2lean4.k2lean4</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyk.k2lean4.k2lean4</h1><div class="highlight"><pre>
+<span></span><span class="linenos">  1</span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<span class="linenos">  2</span>
+<span class="linenos">  3</span><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="linenos">  4</span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="linenos">  5</span><span class="kn">from</span><span class="w"> </span><span class="nn">graphlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">TopologicalSorter</span>
+<span class="linenos">  6</span><span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">count</span>
+<span class="linenos">  7</span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="linenos">  8</span>
+<span class="linenos">  9</span><span class="kn">from</span><span class="w"> </span><span class="nn">..konvert</span><span class="w"> </span><span class="kn">import</span> <span class="n">unmunge</span>
+<span class="linenos"> 10</span><span class="kn">from</span><span class="w"> </span><span class="nn">..kore.internal</span><span class="w"> </span><span class="kn">import</span> <span class="n">CollectionKind</span>
+<span class="linenos"> 11</span><span class="kn">from</span><span class="w"> </span><span class="nn">..kore.syntax</span><span class="w"> </span><span class="kn">import</span> <span class="n">SortApp</span>
+<span class="linenos"> 12</span><span class="kn">from</span><span class="w"> </span><span class="nn">..utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">POSet</span>
+<span class="linenos"> 13</span><span class="kn">from</span><span class="w"> </span><span class="nn">.model</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+<span class="linenos"> 14</span>    <span class="n">Alt</span><span class="p">,</span>
+<span class="linenos"> 15</span>    <span class="n">AltsFieldVal</span><span class="p">,</span>
+<span class="linenos"> 16</span>    <span class="n">Axiom</span><span class="p">,</span>
+<span class="linenos"> 17</span>    <span class="n">Ctor</span><span class="p">,</span>
+<span class="linenos"> 18</span>    <span class="n">ExplBinder</span><span class="p">,</span>
+<span class="linenos"> 19</span>    <span class="n">ImplBinder</span><span class="p">,</span>
+<span class="linenos"> 20</span>    <span class="n">Inductive</span><span class="p">,</span>
+<span class="linenos"> 21</span>    <span class="n">Instance</span><span class="p">,</span>
+<span class="linenos"> 22</span>    <span class="n">InstField</span><span class="p">,</span>
+<span class="linenos"> 23</span>    <span class="n">Module</span><span class="p">,</span>
+<span class="linenos"> 24</span>    <span class="n">Mutual</span><span class="p">,</span>
+<span class="linenos"> 25</span>    <span class="n">Signature</span><span class="p">,</span>
+<span class="linenos"> 26</span>    <span class="n">SimpleFieldVal</span><span class="p">,</span>
+<span class="linenos"> 27</span>    <span class="n">StructCtor</span><span class="p">,</span>
+<span class="linenos"> 28</span>    <span class="n">Structure</span><span class="p">,</span>
+<span class="linenos"> 29</span>    <span class="n">StructVal</span><span class="p">,</span>
+<span class="linenos"> 30</span>    <span class="n">Term</span><span class="p">,</span>
+<span class="linenos"> 31</span><span class="p">)</span>
+<span class="linenos"> 32</span>
+<span class="linenos"> 33</span><span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+<span class="linenos"> 34</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Final</span>
+<span class="linenos"> 35</span>
+<span class="linenos"> 36</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">..kore.internal</span><span class="w"> </span><span class="kn">import</span> <span class="n">KoreDefn</span>
+<span class="linenos"> 37</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">..kore.syntax</span><span class="w"> </span><span class="kn">import</span> <span class="n">SymbolDecl</span>
+<span class="linenos"> 38</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Binder</span><span class="p">,</span> <span class="n">Command</span><span class="p">,</span> <span class="n">Declaration</span><span class="p">,</span> <span class="n">FieldVal</span>
+<span class="linenos"> 39</span>
+<span class="linenos"> 40</span>
+<span class="linenos"> 41</span><span class="n">_VALID_LEAN_IDENT</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+<span class="linenos"> 42</span>    <span class="s2">&quot;_[a-zA-Z0-9_?!&#39;]+|[a-zA-Z][a-zA-Z0-9_?!&#39;]*&quot;</span>
+<span class="linenos"> 43</span><span class="p">)</span>  <span class="c1"># Simplified to characters permitted in KORE in the first place</span>
+<span class="linenos"> 44</span>
+<span class="linenos"> 45</span><span class="n">_PRELUDE_SORTS</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;SortBool&#39;</span><span class="p">,</span> <span class="s1">&#39;SortBytes&#39;</span><span class="p">,</span> <span class="s1">&#39;SortId&#39;</span><span class="p">,</span> <span class="s1">&#39;SortInt&#39;</span><span class="p">,</span> <span class="s1">&#39;SortString&#39;</span><span class="p">,</span> <span class="s1">&#39;SortStringBuffer&#39;</span><span class="p">}</span>
+<span class="linenos"> 46</span>
+<span class="linenos"> 47</span>
+<div class="viewcode-block" id="K2Lean4">
+<a class="viewcode-back" href="../../../api/pyk.k2lean4.k2lean4.html#pyk.k2lean4.k2lean4.K2Lean4">[docs]</a>
+<span class="linenos"> 48</span><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos"> 49</span><span class="k">class</span><span class="w"> </span><span class="nc">K2Lean4</span><span class="p">:</span>
+<span class="linenos"> 50</span>    <span class="n">defn</span><span class="p">:</span> <span class="n">KoreDefn</span>
+<span class="linenos"> 51</span>
+<div class="viewcode-block" id="K2Lean4.sort_module">
+<a class="viewcode-back" href="../../../api/pyk.k2lean4.k2lean4.html#pyk.k2lean4.k2lean4.K2Lean4.sort_module">[docs]</a>
+<span class="linenos"> 52</span>    <span class="k">def</span><span class="w"> </span><span class="nf">sort_module</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Module</span><span class="p">:</span>
+<span class="linenos"> 53</span>        <span class="n">commands</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Command</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+<span class="linenos"> 54</span>            <span class="n">block</span> <span class="k">for</span> <span class="n">sorts</span> <span class="ow">in</span> <span class="n">_ordered_sorts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">defn</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="n">block</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sort_block</span><span class="p">(</span><span class="n">sorts</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+<span class="linenos"> 55</span>        <span class="p">)</span>
+<span class="linenos"> 56</span>        <span class="k">return</span> <span class="n">Module</span><span class="p">(</span><span class="n">commands</span><span class="o">=</span><span class="n">commands</span><span class="p">)</span></div>
+
+<span class="linenos"> 57</span>
+<span class="linenos"> 58</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_sort_block</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sorts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Command</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos"> 59</span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Return an optional mutual block or declaration.&quot;&quot;&quot;</span>
+<span class="linenos"> 60</span>        <span class="n">commands</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Command</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+<span class="linenos"> 61</span>            <span class="bp">self</span><span class="o">.</span><span class="n">_transform_sort</span><span class="p">(</span><span class="n">sort</span><span class="p">)</span> <span class="k">for</span> <span class="n">sort</span> <span class="ow">in</span> <span class="n">sorts</span> <span class="k">if</span> <span class="n">sort</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_PRELUDE_SORTS</span>
+<span class="linenos"> 62</span>        <span class="p">)</span>
+<span class="linenos"> 63</span>
+<span class="linenos"> 64</span>        <span class="k">if</span> <span class="ow">not</span> <span class="n">commands</span><span class="p">:</span>
+<span class="linenos"> 65</span>            <span class="k">return</span> <span class="kc">None</span>
+<span class="linenos"> 66</span>
+<span class="linenos"> 67</span>        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">commands</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+<span class="linenos"> 68</span>            <span class="p">(</span><span class="n">command</span><span class="p">,)</span> <span class="o">=</span> <span class="n">commands</span>
+<span class="linenos"> 69</span>            <span class="k">return</span> <span class="n">command</span>
+<span class="linenos"> 70</span>
+<span class="linenos"> 71</span>        <span class="k">return</span> <span class="n">Mutual</span><span class="p">(</span><span class="n">commands</span><span class="o">=</span><span class="n">commands</span><span class="p">)</span>
+<span class="linenos"> 72</span>
+<span class="linenos"> 73</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_transform_sort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sort</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Declaration</span><span class="p">:</span>
+<span class="linenos"> 74</span>        <span class="k">def</span><span class="w"> </span><span class="nf">is_inductive</span><span class="p">(</span><span class="n">sort</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="linenos"> 75</span>            <span class="n">decl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defn</span><span class="o">.</span><span class="n">sorts</span><span class="p">[</span><span class="n">sort</span><span class="p">]</span>
+<span class="linenos"> 76</span>            <span class="k">return</span> <span class="ow">not</span> <span class="n">decl</span><span class="o">.</span><span class="n">hooked</span> <span class="ow">and</span> <span class="s1">&#39;hasDomainValues&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">decl</span><span class="o">.</span><span class="n">attrs_by_key</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_cell</span><span class="p">(</span><span class="n">sort</span><span class="p">)</span>
+<span class="linenos"> 77</span>
+<span class="linenos"> 78</span>        <span class="k">def</span><span class="w"> </span><span class="nf">is_collection</span><span class="p">(</span><span class="n">sort</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="linenos"> 79</span>            <span class="k">return</span> <span class="n">sort</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">defn</span><span class="o">.</span><span class="n">collections</span>
+<span class="linenos"> 80</span>
+<span class="linenos"> 81</span>        <span class="k">if</span> <span class="n">is_inductive</span><span class="p">(</span><span class="n">sort</span><span class="p">):</span>
+<span class="linenos"> 82</span>            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inductive</span><span class="p">(</span><span class="n">sort</span><span class="p">)</span>
+<span class="linenos"> 83</span>
+<span class="linenos"> 84</span>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_cell</span><span class="p">(</span><span class="n">sort</span><span class="p">):</span>
+<span class="linenos"> 85</span>            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cell</span><span class="p">(</span><span class="n">sort</span><span class="p">)</span>
+<span class="linenos"> 86</span>
+<span class="linenos"> 87</span>        <span class="k">if</span> <span class="n">is_collection</span><span class="p">(</span><span class="n">sort</span><span class="p">):</span>
+<span class="linenos"> 88</span>            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="p">(</span><span class="n">sort</span><span class="p">)</span>
+<span class="linenos"> 89</span>
+<span class="linenos"> 90</span>        <span class="k">raise</span> <span class="ne">AssertionError</span>
+<span class="linenos"> 91</span>
+<span class="linenos"> 92</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_inductive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sort</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Inductive</span><span class="p">:</span>
+<span class="linenos"> 93</span>        <span class="n">subsorts</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">defn</span><span class="o">.</span><span class="n">subsorts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sort</span><span class="p">,</span> <span class="p">()))</span>
+<span class="linenos"> 94</span>        <span class="n">symbols</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">defn</span><span class="o">.</span><span class="n">constructors</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sort</span><span class="p">,</span> <span class="p">()))</span>
+<span class="linenos"> 95</span>        <span class="n">ctors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Ctor</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos"> 96</span>        <span class="n">ctors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_inj_ctor</span><span class="p">(</span><span class="n">sort</span><span class="p">,</span> <span class="n">subsort</span><span class="p">)</span> <span class="k">for</span> <span class="n">subsort</span> <span class="ow">in</span> <span class="n">subsorts</span><span class="p">)</span>
+<span class="linenos"> 97</span>        <span class="n">ctors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_symbol_ctor</span><span class="p">(</span><span class="n">sort</span><span class="p">,</span> <span class="n">symbol</span><span class="p">)</span> <span class="k">for</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">symbols</span><span class="p">)</span>
+<span class="linenos"> 98</span>        <span class="k">return</span> <span class="n">Inductive</span><span class="p">(</span><span class="n">sort</span><span class="p">,</span> <span class="n">Signature</span><span class="p">((),</span> <span class="n">Term</span><span class="p">(</span><span class="s1">&#39;Type&#39;</span><span class="p">)),</span> <span class="n">ctors</span><span class="o">=</span><span class="n">ctors</span><span class="p">)</span>
+<span class="linenos"> 99</span>
+<span class="linenos">100</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_inj_ctor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sort</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">subsort</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ctor</span><span class="p">:</span>
+<span class="linenos">101</span>        <span class="k">return</span> <span class="n">Ctor</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;inj_</span><span class="si">{</span><span class="n">subsort</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">Signature</span><span class="p">((</span><span class="n">ExplBinder</span><span class="p">((</span><span class="s1">&#39;x&#39;</span><span class="p">,),</span> <span class="n">Term</span><span class="p">(</span><span class="n">subsort</span><span class="p">)),),</span> <span class="n">Term</span><span class="p">(</span><span class="n">sort</span><span class="p">)))</span>
+<span class="linenos">102</span>
+<span class="linenos">103</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_symbol_ctor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sort</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">symbol</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ctor</span><span class="p">:</span>
+<span class="linenos">104</span>        <span class="n">decl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defn</span><span class="o">.</span><span class="n">symbols</span><span class="p">[</span><span class="n">symbol</span><span class="p">]</span>
+<span class="linenos">105</span>        <span class="n">param_sorts</span> <span class="o">=</span> <span class="n">_param_sorts</span><span class="p">(</span><span class="n">decl</span><span class="p">)</span>
+<span class="linenos">106</span>        <span class="n">symbol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_symbol_ident</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span>
+<span class="linenos">107</span>        <span class="n">binders</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">ExplBinder</span><span class="p">((</span><span class="sa">f</span><span class="s1">&#39;x</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,),</span> <span class="n">Term</span><span class="p">(</span><span class="n">sort</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">sort</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">param_sorts</span><span class="p">))</span>
+<span class="linenos">108</span>        <span class="k">return</span> <span class="n">Ctor</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">Signature</span><span class="p">(</span><span class="n">binders</span><span class="p">,</span> <span class="n">Term</span><span class="p">(</span><span class="n">sort</span><span class="p">)))</span>
+<span class="linenos">109</span>
+<span class="linenos">110</span>    <span class="nd">@staticmethod</span>
+<span class="linenos">111</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_symbol_ident</span><span class="p">(</span><span class="n">symbol</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">112</span>        <span class="k">if</span> <span class="n">symbol</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Lbl&#39;</span><span class="p">):</span>
+<span class="linenos">113</span>            <span class="n">symbol</span> <span class="o">=</span> <span class="n">symbol</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span>
+<span class="linenos">114</span>        <span class="n">symbol</span> <span class="o">=</span> <span class="n">unmunge</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span>
+<span class="linenos">115</span>        <span class="k">if</span> <span class="ow">not</span> <span class="n">_VALID_LEAN_IDENT</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="n">symbol</span><span class="p">):</span>
+<span class="linenos">116</span>            <span class="n">symbol</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;«</span><span class="si">{</span><span class="n">symbol</span><span class="si">}</span><span class="s1">»&#39;</span>
+<span class="linenos">117</span>        <span class="k">return</span> <span class="n">symbol</span>
+<span class="linenos">118</span>
+<span class="linenos">119</span>    <span class="nd">@staticmethod</span>
+<span class="linenos">120</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_is_cell</span><span class="p">(</span><span class="n">sort</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="linenos">121</span>        <span class="k">return</span> <span class="n">sort</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;Cell&#39;</span><span class="p">)</span>
+<span class="linenos">122</span>
+<span class="linenos">123</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_cell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sort</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Structure</span><span class="p">:</span>
+<span class="linenos">124</span>        <span class="p">(</span><span class="n">cell_ctor</span><span class="p">,)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defn</span><span class="o">.</span><span class="n">constructors</span><span class="p">[</span><span class="n">sort</span><span class="p">]</span>
+<span class="linenos">125</span>        <span class="n">decl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defn</span><span class="o">.</span><span class="n">symbols</span><span class="p">[</span><span class="n">cell_ctor</span><span class="p">]</span>
+<span class="linenos">126</span>        <span class="n">param_sorts</span> <span class="o">=</span> <span class="n">_param_sorts</span><span class="p">(</span><span class="n">decl</span><span class="p">)</span>
+<span class="linenos">127</span>
+<span class="linenos">128</span>        <span class="n">param_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+<span class="linenos">129</span>
+<span class="linenos">130</span>        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_is_cell</span><span class="p">(</span><span class="n">sort</span><span class="p">)</span> <span class="k">for</span> <span class="n">sort</span> <span class="ow">in</span> <span class="n">param_sorts</span><span class="p">):</span>
+<span class="linenos">131</span>            <span class="n">param_names</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">132</span>            <span class="k">for</span> <span class="n">param_sort</span> <span class="ow">in</span> <span class="n">param_sorts</span><span class="p">:</span>
+<span class="linenos">133</span>                <span class="k">assert</span> <span class="n">param_sort</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Sort&#39;</span><span class="p">)</span>
+<span class="linenos">134</span>                <span class="k">assert</span> <span class="n">param_sort</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;Cell&#39;</span><span class="p">)</span>
+<span class="linenos">135</span>                <span class="n">name</span> <span class="o">=</span> <span class="n">param_sort</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span>
+<span class="linenos">136</span>                <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">+</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+<span class="linenos">137</span>                <span class="n">param_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+<span class="linenos">138</span>        <span class="k">else</span><span class="p">:</span>
+<span class="linenos">139</span>            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">param_sorts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+<span class="linenos">140</span>            <span class="n">param_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;val&#39;</span><span class="p">]</span>
+<span class="linenos">141</span>
+<span class="linenos">142</span>        <span class="n">fields</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">ExplBinder</span><span class="p">((</span><span class="n">name</span><span class="p">,),</span> <span class="n">Term</span><span class="p">(</span><span class="n">sort</span><span class="p">))</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">sort</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">param_names</span><span class="p">,</span> <span class="n">param_sorts</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+<span class="linenos">143</span>        <span class="k">return</span> <span class="n">Structure</span><span class="p">(</span><span class="n">sort</span><span class="p">,</span> <span class="n">Signature</span><span class="p">((),</span> <span class="n">Term</span><span class="p">(</span><span class="s1">&#39;Type&#39;</span><span class="p">)),</span> <span class="n">ctor</span><span class="o">=</span><span class="n">StructCtor</span><span class="p">(</span><span class="n">fields</span><span class="p">))</span>
+<span class="linenos">144</span>
+<span class="linenos">145</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_collection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sort</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Structure</span><span class="p">:</span>
+<span class="linenos">146</span>        <span class="n">coll</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defn</span><span class="o">.</span><span class="n">collections</span><span class="p">[</span><span class="n">sort</span><span class="p">]</span>
+<span class="linenos">147</span>        <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defn</span><span class="o">.</span><span class="n">symbols</span><span class="p">[</span><span class="n">coll</span><span class="o">.</span><span class="n">element</span><span class="p">]</span>
+<span class="linenos">148</span>        <span class="n">sorts</span> <span class="o">=</span> <span class="n">_param_sorts</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
+<span class="linenos">149</span>        <span class="n">val</span><span class="p">:</span> <span class="n">Term</span>
+<span class="linenos">150</span>        <span class="k">match</span> <span class="n">coll</span><span class="o">.</span><span class="n">kind</span><span class="p">:</span>
+<span class="linenos">151</span>            <span class="k">case</span> <span class="n">CollectionKind</span><span class="o">.</span><span class="n">LIST</span><span class="p">:</span>
+<span class="linenos">152</span>                <span class="p">(</span><span class="n">item</span><span class="p">,)</span> <span class="o">=</span> <span class="n">sorts</span>
+<span class="linenos">153</span>                <span class="n">val</span> <span class="o">=</span> <span class="n">Term</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;List </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos">154</span>            <span class="k">case</span> <span class="n">CollectionKind</span><span class="o">.</span><span class="n">SET</span><span class="p">:</span>
+<span class="linenos">155</span>                <span class="p">(</span><span class="n">item</span><span class="p">,)</span> <span class="o">=</span> <span class="n">sorts</span>
+<span class="linenos">156</span>                <span class="n">val</span> <span class="o">=</span> <span class="n">Term</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;(SetHook </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s1">).set&#39;</span><span class="p">)</span>
+<span class="linenos">157</span>            <span class="k">case</span> <span class="n">CollectionKind</span><span class="o">.</span><span class="n">MAP</span><span class="p">:</span>
+<span class="linenos">158</span>                <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">sorts</span>
+<span class="linenos">159</span>                <span class="n">val</span> <span class="o">=</span> <span class="n">Term</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;(MapHook </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">).map&#39;</span><span class="p">)</span>
+<span class="linenos">160</span>        <span class="n">field</span> <span class="o">=</span> <span class="n">ExplBinder</span><span class="p">((</span><span class="s1">&#39;coll&#39;</span><span class="p">,),</span> <span class="n">val</span><span class="p">)</span>
+<span class="linenos">161</span>        <span class="k">return</span> <span class="n">Structure</span><span class="p">(</span><span class="n">sort</span><span class="p">,</span> <span class="n">Signature</span><span class="p">((),</span> <span class="n">Term</span><span class="p">(</span><span class="s1">&#39;Type&#39;</span><span class="p">)),</span> <span class="n">ctor</span><span class="o">=</span><span class="n">StructCtor</span><span class="p">((</span><span class="n">field</span><span class="p">,)))</span>
+<span class="linenos">162</span>
+<div class="viewcode-block" id="K2Lean4.inj_module">
+<a class="viewcode-back" href="../../../api/pyk.k2lean4.k2lean4.html#pyk.k2lean4.k2lean4.K2Lean4.inj_module">[docs]</a>
+<span class="linenos">163</span>    <span class="k">def</span><span class="w"> </span><span class="nf">inj_module</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Module</span><span class="p">:</span>
+<span class="linenos">164</span>        <span class="k">return</span> <span class="n">Module</span><span class="p">(</span><span class="n">commands</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_inj_commands</span><span class="p">())</span></div>
+
+<span class="linenos">165</span>
+<span class="linenos">166</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_inj_commands</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Command</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<span class="linenos">167</span>        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
+<span class="linenos">168</span>            <span class="bp">self</span><span class="o">.</span><span class="n">_inj_instance</span><span class="p">(</span><span class="n">subsort</span><span class="p">,</span> <span class="n">supersort</span><span class="p">)</span>
+<span class="linenos">169</span>            <span class="k">for</span> <span class="n">supersort</span><span class="p">,</span> <span class="n">subsorts</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">defn</span><span class="o">.</span><span class="n">subsorts</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+<span class="linenos">170</span>            <span class="k">for</span> <span class="n">subsort</span> <span class="ow">in</span> <span class="n">subsorts</span>
+<span class="linenos">171</span>            <span class="k">if</span> <span class="ow">not</span> <span class="n">supersort</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span>
+<span class="linenos">172</span>                <span class="s1">&#39;CellMap&#39;</span>
+<span class="linenos">173</span>            <span class="p">)</span>  <span class="c1"># Strangely, cell collections can be injected from their value sort in KORE</span>
+<span class="linenos">174</span>        <span class="p">)</span>
+<span class="linenos">175</span>
+<span class="linenos">176</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_inj_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subsort</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">supersort</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Instance</span><span class="p">:</span>
+<span class="linenos">177</span>        <span class="n">ty</span> <span class="o">=</span> <span class="n">Term</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Inj </span><span class="si">{</span><span class="n">subsort</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">supersort</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos">178</span>        <span class="n">field</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inj_field</span><span class="p">(</span><span class="n">subsort</span><span class="p">,</span> <span class="n">supersort</span><span class="p">)</span>
+<span class="linenos">179</span>        <span class="k">return</span> <span class="n">Instance</span><span class="p">(</span><span class="n">Signature</span><span class="p">((),</span> <span class="n">ty</span><span class="p">),</span> <span class="n">StructVal</span><span class="p">((</span><span class="n">field</span><span class="p">,)))</span>
+<span class="linenos">180</span>
+<span class="linenos">181</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_inj_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subsort</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">supersort</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InstField</span><span class="p">:</span>
+<span class="linenos">182</span>        <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inj_val</span><span class="p">(</span><span class="n">subsort</span><span class="p">,</span> <span class="n">supersort</span><span class="p">)</span>
+<span class="linenos">183</span>        <span class="k">return</span> <span class="n">InstField</span><span class="p">(</span><span class="s1">&#39;inj&#39;</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+<span class="linenos">184</span>
+<span class="linenos">185</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_inj_val</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subsort</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">supersort</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FieldVal</span><span class="p">:</span>
+<span class="linenos">186</span>        <span class="n">subsubsorts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+<span class="linenos">187</span>        <span class="k">if</span> <span class="n">subsort</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;CellMap&#39;</span><span class="p">):</span>
+<span class="linenos">188</span>            <span class="n">subsubsorts</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Disregard injection from value sort to cell map sort</span>
+<span class="linenos">189</span>        <span class="k">else</span><span class="p">:</span>
+<span class="linenos">190</span>            <span class="n">subsubsorts</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">defn</span><span class="o">.</span><span class="n">subsorts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subsort</span><span class="p">,</span> <span class="p">[]))</span>
+<span class="linenos">191</span>
+<span class="linenos">192</span>        <span class="k">if</span> <span class="ow">not</span> <span class="n">subsubsorts</span><span class="p">:</span>
+<span class="linenos">193</span>            <span class="k">return</span> <span class="n">SimpleFieldVal</span><span class="p">(</span><span class="n">Term</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">supersort</span><span class="si">}</span><span class="s1">.inj_</span><span class="si">{</span><span class="n">subsort</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">))</span>
+<span class="linenos">194</span>        <span class="k">else</span><span class="p">:</span>
+<span class="linenos">195</span>            <span class="k">return</span> <span class="n">AltsFieldVal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_inj_alts</span><span class="p">(</span><span class="n">subsort</span><span class="p">,</span> <span class="n">supersort</span><span class="p">,</span> <span class="n">subsubsorts</span><span class="p">))</span>
+<span class="linenos">196</span>
+<span class="linenos">197</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_inj_alts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subsort</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">supersort</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">subsubsorts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Alt</span><span class="p">]:</span>
+<span class="linenos">198</span>        <span class="k">def</span><span class="w"> </span><span class="nf">inj</span><span class="p">(</span><span class="n">subsort</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">supersort</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Term</span><span class="p">:</span>
+<span class="linenos">199</span>            <span class="k">return</span> <span class="n">Term</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">supersort</span><span class="si">}</span><span class="s1">.inj_</span><span class="si">{</span><span class="n">subsort</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos">200</span>
+<span class="linenos">201</span>        <span class="n">res</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">202</span>        <span class="k">for</span> <span class="n">subsubsort</span> <span class="ow">in</span> <span class="n">subsubsorts</span><span class="p">:</span>
+<span class="linenos">203</span>            <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Alt</span><span class="p">((</span><span class="n">inj</span><span class="p">(</span><span class="n">subsubsort</span><span class="p">,</span> <span class="n">subsort</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">),),</span> <span class="n">inj</span><span class="p">(</span><span class="n">subsubsort</span><span class="p">,</span> <span class="n">supersort</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">)))</span>
+<span class="linenos">204</span>
+<span class="linenos">205</span>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">defn</span><span class="o">.</span><span class="n">constructors</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subsort</span><span class="p">,</span> <span class="p">[]):</span>
+<span class="linenos">206</span>            <span class="c1"># Has actual constructors, not only subsorts</span>
+<span class="linenos">207</span>            <span class="n">default</span> <span class="o">=</span> <span class="n">Alt</span><span class="p">((</span><span class="n">Term</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">),),</span> <span class="n">inj</span><span class="p">(</span><span class="n">subsort</span><span class="p">,</span> <span class="n">supersort</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">))</span>
+<span class="linenos">208</span>            <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">default</span><span class="p">)</span>
+<span class="linenos">209</span>
+<span class="linenos">210</span>        <span class="k">return</span> <span class="n">res</span>
+<span class="linenos">211</span>
+<div class="viewcode-block" id="K2Lean4.func_module">
+<a class="viewcode-back" href="../../../api/pyk.k2lean4.k2lean4.html#pyk.k2lean4.k2lean4.K2Lean4.func_module">[docs]</a>
+<span class="linenos">212</span>    <span class="k">def</span><span class="w"> </span><span class="nf">func_module</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Module</span><span class="p">:</span>
+<span class="linenos">213</span>        <span class="n">commands</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_transform_func</span><span class="p">(</span><span class="n">func</span><span class="p">)</span> <span class="k">for</span> <span class="n">func</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">defn</span><span class="o">.</span><span class="n">functions</span><span class="p">]</span>
+<span class="linenos">214</span>        <span class="k">return</span> <span class="n">Module</span><span class="p">(</span><span class="n">commands</span><span class="o">=</span><span class="n">commands</span><span class="p">)</span></div>
+
+<span class="linenos">215</span>
+<span class="linenos">216</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_transform_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Axiom</span><span class="p">:</span>
+<span class="linenos">217</span>        <span class="n">ident</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_symbol_ident</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+<span class="linenos">218</span>        <span class="n">decl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defn</span><span class="o">.</span><span class="n">symbols</span><span class="p">[</span><span class="n">func</span><span class="p">]</span>
+<span class="linenos">219</span>        <span class="n">sort_params</span> <span class="o">=</span> <span class="p">[</span><span class="n">var</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">decl</span><span class="o">.</span><span class="n">symbol</span><span class="o">.</span><span class="n">vars</span><span class="p">]</span>
+<span class="linenos">220</span>        <span class="n">param_sorts</span> <span class="o">=</span> <span class="p">[</span><span class="n">sort</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">sort</span> <span class="ow">in</span> <span class="n">decl</span><span class="o">.</span><span class="n">param_sorts</span><span class="p">]</span>
+<span class="linenos">221</span>        <span class="n">sort</span> <span class="o">=</span> <span class="n">decl</span><span class="o">.</span><span class="n">sort</span><span class="o">.</span><span class="n">name</span>
+<span class="linenos">222</span>
+<span class="linenos">223</span>        <span class="n">binders</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Binder</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">224</span>        <span class="k">if</span> <span class="n">sort_params</span><span class="p">:</span>
+<span class="linenos">225</span>            <span class="n">binders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ImplBinder</span><span class="p">(</span><span class="n">sort_params</span><span class="p">,</span> <span class="n">Term</span><span class="p">(</span><span class="s1">&#39;Type&#39;</span><span class="p">)))</span>
+<span class="linenos">226</span>        <span class="n">binders</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">ExplBinder</span><span class="p">((</span><span class="sa">f</span><span class="s1">&#39;x</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,),</span> <span class="n">Term</span><span class="p">(</span><span class="n">sort</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">sort</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">param_sorts</span><span class="p">))</span>
+<span class="linenos">227</span>        <span class="k">return</span> <span class="n">Axiom</span><span class="p">(</span><span class="n">ident</span><span class="p">,</span> <span class="n">Signature</span><span class="p">(</span><span class="n">binders</span><span class="p">,</span> <span class="n">Term</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Option </span><span class="si">{</span><span class="n">sort</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)))</span></div>
+
+<span class="linenos">228</span>
+<span class="linenos">229</span>
+<span class="linenos">230</span><span class="k">def</span><span class="w"> </span><span class="nf">_param_sorts</span><span class="p">(</span><span class="n">decl</span><span class="p">:</span> <span class="n">SymbolDecl</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="linenos">231</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">..utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_type</span>
+<span class="linenos">232</span>
+<span class="linenos">233</span>    <span class="k">return</span> <span class="p">[</span><span class="n">check_type</span><span class="p">(</span><span class="n">sort</span><span class="p">,</span> <span class="n">SortApp</span><span class="p">)</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">sort</span> <span class="ow">in</span> <span class="n">decl</span><span class="o">.</span><span class="n">param_sorts</span><span class="p">]</span>  <span class="c1"># TODO eliminate check_type</span>
+<span class="linenos">234</span>
+<span class="linenos">235</span>
+<span class="linenos">236</span><span class="k">def</span><span class="w"> </span><span class="nf">_ordered_sorts</span><span class="p">(</span><span class="n">defn</span><span class="p">:</span> <span class="n">KoreDefn</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="linenos">237</span>    <span class="n">deps</span> <span class="o">=</span> <span class="n">_sort_dependencies</span><span class="p">(</span><span class="n">defn</span><span class="p">)</span>
+<span class="linenos">238</span>    <span class="n">sccs</span> <span class="o">=</span> <span class="n">_sort_sccs</span><span class="p">(</span><span class="n">deps</span><span class="p">)</span>
+<span class="linenos">239</span>
+<span class="linenos">240</span>    <span class="n">sorts_by_scc</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="linenos">241</span>    <span class="k">for</span> <span class="n">sort</span><span class="p">,</span> <span class="n">scc</span> <span class="ow">in</span> <span class="n">sccs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<span class="linenos">242</span>        <span class="n">sorts_by_scc</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">scc</span><span class="p">,</span> <span class="nb">set</span><span class="p">())</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">sort</span><span class="p">)</span>
+<span class="linenos">243</span>
+<span class="linenos">244</span>    <span class="n">scc_deps</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">set</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="linenos">245</span>    <span class="k">for</span> <span class="n">scc</span><span class="p">,</span> <span class="n">sorts</span> <span class="ow">in</span> <span class="n">sorts_by_scc</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<span class="linenos">246</span>        <span class="k">assert</span> <span class="n">sorts</span>
+<span class="linenos">247</span>        <span class="n">sort</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">sorts</span>
+<span class="linenos">248</span>        <span class="n">scc_deps</span><span class="p">[</span><span class="n">scc</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+<span class="linenos">249</span>        <span class="k">for</span> <span class="n">dep</span> <span class="ow">in</span> <span class="n">deps</span><span class="p">[</span><span class="n">sort</span><span class="p">]:</span>
+<span class="linenos">250</span>            <span class="n">dep_scc</span> <span class="o">=</span> <span class="n">sccs</span><span class="p">[</span><span class="n">dep</span><span class="p">]</span>
+<span class="linenos">251</span>            <span class="k">if</span> <span class="n">dep_scc</span> <span class="o">==</span> <span class="n">scc</span><span class="p">:</span>
+<span class="linenos">252</span>                <span class="k">continue</span>
+<span class="linenos">253</span>            <span class="n">scc_deps</span><span class="p">[</span><span class="n">scc</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dep_scc</span><span class="p">)</span>
+<span class="linenos">254</span>
+<span class="linenos">255</span>    <span class="n">ordered_sccs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">TopologicalSorter</span><span class="p">(</span><span class="n">scc_deps</span><span class="p">)</span><span class="o">.</span><span class="n">static_order</span><span class="p">())</span>
+<span class="linenos">256</span>    <span class="k">return</span> <span class="p">[</span><span class="nb">sorted</span><span class="p">(</span><span class="n">sorts_by_scc</span><span class="p">[</span><span class="n">scc</span><span class="p">])</span> <span class="k">for</span> <span class="n">scc</span> <span class="ow">in</span> <span class="n">ordered_sccs</span><span class="p">]</span>
+<span class="linenos">257</span>
+<span class="linenos">258</span>
+<span class="linenos">259</span><span class="k">def</span><span class="w"> </span><span class="nf">_sort_dependencies</span><span class="p">(</span><span class="n">defn</span><span class="p">:</span> <span class="n">KoreDefn</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="linenos">260</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Transitively closed sort dependency graph.&quot;&quot;&quot;</span>
+<span class="linenos">261</span>    <span class="n">sorts</span> <span class="o">=</span> <span class="n">defn</span><span class="o">.</span><span class="n">sorts</span>
+<span class="linenos">262</span>    <span class="n">deps</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">263</span>    <span class="k">for</span> <span class="n">sort</span> <span class="ow">in</span> <span class="n">sorts</span><span class="p">:</span>
+<span class="linenos">264</span>        <span class="c1"># A sort depends on its subsorts (due to inj_{subsort} constructors)</span>
+<span class="linenos">265</span>        <span class="n">deps</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">sort</span><span class="p">,</span> <span class="n">subsort</span><span class="p">)</span> <span class="k">for</span> <span class="n">subsort</span> <span class="ow">in</span> <span class="n">defn</span><span class="o">.</span><span class="n">subsorts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sort</span><span class="p">,</span> <span class="p">[]))</span>
+<span class="linenos">266</span>        <span class="c1"># A sort depends on the parameter sorts of all its constructors</span>
+<span class="linenos">267</span>        <span class="n">deps</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+<span class="linenos">268</span>            <span class="p">(</span><span class="n">sort</span><span class="p">,</span> <span class="n">param_sort</span><span class="p">)</span>
+<span class="linenos">269</span>            <span class="k">for</span> <span class="n">ctor</span> <span class="ow">in</span> <span class="n">defn</span><span class="o">.</span><span class="n">constructors</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sort</span><span class="p">,</span> <span class="p">[])</span>
+<span class="linenos">270</span>            <span class="k">for</span> <span class="n">param_sort</span> <span class="ow">in</span> <span class="n">_param_sorts</span><span class="p">(</span><span class="n">defn</span><span class="o">.</span><span class="n">symbols</span><span class="p">[</span><span class="n">ctor</span><span class="p">])</span>
+<span class="linenos">271</span>        <span class="p">)</span>
+<span class="linenos">272</span>        <span class="c1"># If the sort is a collection, the element function parameters are dependencies</span>
+<span class="linenos">273</span>        <span class="k">if</span> <span class="n">sort</span> <span class="ow">in</span> <span class="n">defn</span><span class="o">.</span><span class="n">collections</span><span class="p">:</span>
+<span class="linenos">274</span>            <span class="n">coll</span> <span class="o">=</span> <span class="n">defn</span><span class="o">.</span><span class="n">collections</span><span class="p">[</span><span class="n">sort</span><span class="p">]</span>
+<span class="linenos">275</span>            <span class="n">elem</span> <span class="o">=</span> <span class="n">defn</span><span class="o">.</span><span class="n">symbols</span><span class="p">[</span><span class="n">coll</span><span class="o">.</span><span class="n">element</span><span class="p">]</span>
+<span class="linenos">276</span>            <span class="n">deps</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">sort</span><span class="p">,</span> <span class="n">param_sort</span><span class="p">)</span> <span class="k">for</span> <span class="n">param_sort</span> <span class="ow">in</span> <span class="n">_param_sorts</span><span class="p">(</span><span class="n">elem</span><span class="p">))</span>
+<span class="linenos">277</span>
+<span class="linenos">278</span>    <span class="n">closed</span> <span class="o">=</span> <span class="n">POSet</span><span class="p">(</span><span class="n">deps</span><span class="p">)</span><span class="o">.</span><span class="n">image</span>  <span class="c1"># TODO POSet should be called &quot;transitively closed relation&quot; or similar</span>
+<span class="linenos">279</span>    <span class="n">res</span> <span class="o">=</span> <span class="p">{</span>
+<span class="linenos">280</span>        <span class="n">sort</span><span class="p">:</span> <span class="nb">set</span><span class="p">(</span><span class="n">closed</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sort</span><span class="p">,</span> <span class="p">[]))</span> <span class="k">for</span> <span class="n">sort</span> <span class="ow">in</span> <span class="n">sorts</span>
+<span class="linenos">281</span>    <span class="p">}</span>  <span class="c1"># Ensure that sorts without dependencies are also represented</span>
+<span class="linenos">282</span>    <span class="k">return</span> <span class="n">res</span>
+<span class="linenos">283</span>
+<span class="linenos">284</span>
+<span class="linenos">285</span><span class="c1"># TODO Implement a more efficient algorithm, e.g. Tarjan&#39;s algorithm</span>
+<span class="linenos">286</span><span class="k">def</span><span class="w"> </span><span class="nf">_sort_sccs</span><span class="p">(</span><span class="n">deps</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="linenos">287</span>    <span class="n">res</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="linenos">288</span>
+<span class="linenos">289</span>    <span class="n">scc</span> <span class="o">=</span> <span class="n">count</span><span class="p">()</span>
+<span class="linenos">290</span>    <span class="k">for</span> <span class="n">sort</span><span class="p">,</span> <span class="n">dep_sorts</span> <span class="ow">in</span> <span class="n">deps</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<span class="linenos">291</span>        <span class="k">if</span> <span class="n">sort</span> <span class="ow">in</span> <span class="n">res</span><span class="p">:</span>
+<span class="linenos">292</span>            <span class="k">continue</span>
+<span class="linenos">293</span>        <span class="n">idx</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">scc</span><span class="p">)</span>
+<span class="linenos">294</span>        <span class="n">res</span><span class="p">[</span><span class="n">sort</span><span class="p">]</span> <span class="o">=</span> <span class="n">idx</span>
+<span class="linenos">295</span>        <span class="k">for</span> <span class="n">dep</span> <span class="ow">in</span> <span class="n">dep_sorts</span><span class="p">:</span>
+<span class="linenos">296</span>            <span class="k">if</span> <span class="n">sort</span> <span class="ow">in</span> <span class="n">deps</span><span class="p">[</span><span class="n">dep</span><span class="p">]:</span>
+<span class="linenos">297</span>                <span class="n">res</span><span class="p">[</span><span class="n">dep</span><span class="p">]</span> <span class="o">=</span> <span class="n">idx</span>
+<span class="linenos">298</span>
+<span class="linenos">299</span>    <span class="k">return</span> <span class="n">res</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Runtime Verification, Inc.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

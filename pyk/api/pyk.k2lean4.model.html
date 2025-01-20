@@ -1,0 +1,682 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyk.k2lean4.model module &mdash; pyk 7.1.205 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=e6f06810"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyk.kast package" href="pyk.kast.html" />
+    <link rel="prev" title="pyk.k2lean4.k2lean4 module" href="pyk.k2lean4.k2lean4.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            pyk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">pyk</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pyk.html">pyk package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="pyk.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="pyk.cterm.html">pyk.cterm package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="pyk.k2lean4.html">pyk.k2lean4 package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kast.html">pyk.kast package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kbuild.html">pyk.kbuild package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.html">pyk.kcfg package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kdist.html">pyk.kdist package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kllvm.html">pyk.kllvm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.konvert.html">pyk.konvert package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kore.html">pyk.kore package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kore_exec_covr.html">pyk.kore_exec_covr package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.krepl.html">pyk.krepl package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.ktool.html">pyk.ktool package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.prelude.html">pyk.prelude package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.proof.html">pyk.proof package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.testing.html">pyk.testing package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">pyk</a></li>
+          <li class="breadcrumb-item"><a href="pyk.html">pyk package</a></li>
+          <li class="breadcrumb-item"><a href="pyk.k2lean4.html">pyk.k2lean4 package</a></li>
+      <li class="breadcrumb-item active">pyk.k2lean4.model module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/pyk.k2lean4.model.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pyk.k2lean4.model">
+<span id="pyk-k2lean4-model-module"></span><h1>pyk.k2lean4.model module<a class="headerlink" href="#module-pyk.k2lean4.model" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Abbrev">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Abbrev</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ident</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str</span> <span class="pre">|</span> <span class="pre">DeclId'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Term'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Signature</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modifiers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Modifiers</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#Abbrev"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.Abbrev" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.k2lean4.model.Declaration" title="pyk.k2lean4.model.Declaration"><code class="xref py py-class docutils literal notranslate"><span class="pre">Declaration</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Abbrev.ident">
+<span class="sig-name descname"><span class="pre">ident</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.DeclId" title="pyk.k2lean4.model.DeclId"><span class="pre">DeclId</span></a></em><a class="headerlink" href="#pyk.k2lean4.model.Abbrev.ident" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Abbrev.modifiers">
+<span class="sig-name descname"><span class="pre">modifiers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.Modifiers" title="pyk.k2lean4.model.Modifiers"><span class="pre">Modifiers</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.k2lean4.model.Abbrev.modifiers" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Abbrev.signature">
+<span class="sig-name descname"><span class="pre">signature</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.Signature" title="pyk.k2lean4.model.Signature"><span class="pre">Signature</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.k2lean4.model.Abbrev.signature" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Abbrev.val">
+<span class="sig-name descname"><span class="pre">val</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.Term" title="pyk.k2lean4.model.Term"><span class="pre">Term</span></a></em><a class="headerlink" href="#pyk.k2lean4.model.Abbrev.val" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Alt">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Alt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">patterns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Iterable[Term]'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rhs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Term'</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#Alt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.Alt" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Alt.patterns">
+<span class="sig-name descname"><span class="pre">patterns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pyk.k2lean4.model.Term" title="pyk.k2lean4.model.Term"><span class="pre">Term</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.k2lean4.model.Alt.patterns" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Alt.rhs">
+<span class="sig-name descname"><span class="pre">rhs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.Term" title="pyk.k2lean4.model.Term"><span class="pre">Term</span></a></em><a class="headerlink" href="#pyk.k2lean4.model.Alt.rhs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.AltsFieldVal">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AltsFieldVal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Iterable[Alt]'</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#AltsFieldVal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.AltsFieldVal" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.k2lean4.model.FieldVal" title="pyk.k2lean4.model.FieldVal"><code class="xref py py-class docutils literal notranslate"><span class="pre">FieldVal</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.AltsFieldVal.alts">
+<span class="sig-name descname"><span class="pre">alts</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pyk.k2lean4.model.Alt" title="pyk.k2lean4.model.Alt"><span class="pre">Alt</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.k2lean4.model.AltsFieldVal.alts" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Attr">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Attr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'AttrKind</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#Attr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.Attr" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Attr.attr">
+<span class="sig-name descname"><span class="pre">attr</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.k2lean4.model.Attr.attr" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Attr.kind">
+<span class="sig-name descname"><span class="pre">kind</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.AttrKind" title="pyk.k2lean4.model.AttrKind"><span class="pre">AttrKind</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.k2lean4.model.Attr.kind" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.AttrKind">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AttrKind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#AttrKind"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.AttrKind" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.AttrKind.LOCAL">
+<span class="sig-name descname"><span class="pre">LOCAL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'local'</span></em><a class="headerlink" href="#pyk.k2lean4.model.AttrKind.LOCAL" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.AttrKind.SCOPED">
+<span class="sig-name descname"><span class="pre">SCOPED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scoped'</span></em><a class="headerlink" href="#pyk.k2lean4.model.AttrKind.SCOPED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Axiom">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Axiom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ident</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str</span> <span class="pre">|</span> <span class="pre">DeclId'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Signature'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modifiers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Modifiers</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#Axiom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.Axiom" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.k2lean4.model.Declaration" title="pyk.k2lean4.model.Declaration"><code class="xref py py-class docutils literal notranslate"><span class="pre">Declaration</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Axiom.ident">
+<span class="sig-name descname"><span class="pre">ident</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.DeclId" title="pyk.k2lean4.model.DeclId"><span class="pre">DeclId</span></a></em><a class="headerlink" href="#pyk.k2lean4.model.Axiom.ident" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Axiom.modifiers">
+<span class="sig-name descname"><span class="pre">modifiers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.Modifiers" title="pyk.k2lean4.model.Modifiers"><span class="pre">Modifiers</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.k2lean4.model.Axiom.modifiers" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Axiom.signature">
+<span class="sig-name descname"><span class="pre">signature</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.Signature" title="pyk.k2lean4.model.Signature"><span class="pre">Signature</span></a></em><a class="headerlink" href="#pyk.k2lean4.model.Axiom.signature" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Binder">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Binder</span></span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#Binder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.Binder" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.BracketBinder">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BracketBinder</span></span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#BracketBinder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.BracketBinder" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.k2lean4.model.Binder" title="pyk.k2lean4.model.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Command">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Command</span></span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#Command"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.Command" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Ctor">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Ctor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ident</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Signature</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modifiers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Modifiers</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#Ctor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.Ctor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Ctor.ident">
+<span class="sig-name descname"><span class="pre">ident</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.k2lean4.model.Ctor.ident" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Ctor.modifiers">
+<span class="sig-name descname"><span class="pre">modifiers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.Modifiers" title="pyk.k2lean4.model.Modifiers"><span class="pre">Modifiers</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.k2lean4.model.Ctor.modifiers" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Ctor.signature">
+<span class="sig-name descname"><span class="pre">signature</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.Signature" title="pyk.k2lean4.model.Signature"><span class="pre">Signature</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.k2lean4.model.Ctor.signature" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.DeclId">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DeclId</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uvars</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Iterable[str]</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#DeclId"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.DeclId" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.DeclId.uvars">
+<span class="sig-name descname"><span class="pre">uvars</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.k2lean4.model.DeclId.uvars" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.DeclId.val">
+<span class="sig-name descname"><span class="pre">val</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.k2lean4.model.DeclId.val" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.DeclVal">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DeclVal</span></span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#DeclVal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.DeclVal" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Declaration">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Declaration</span></span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#Declaration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.Declaration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.k2lean4.model.Command" title="pyk.k2lean4.model.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Declaration.modifiers">
+<span class="sig-name descname"><span class="pre">modifiers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.Modifiers" title="pyk.k2lean4.model.Modifiers"><span class="pre">Modifiers</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.k2lean4.model.Declaration.modifiers" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.ExplBinder">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ExplBinder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idents</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Iterable[str]'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Term</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#ExplBinder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.ExplBinder" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.k2lean4.model.BracketBinder" title="pyk.k2lean4.model.BracketBinder"><code class="xref py py-class docutils literal notranslate"><span class="pre">BracketBinder</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.ExplBinder.idents">
+<span class="sig-name descname"><span class="pre">idents</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.k2lean4.model.ExplBinder.idents" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.ExplBinder.ty">
+<span class="sig-name descname"><span class="pre">ty</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.Term" title="pyk.k2lean4.model.Term"><span class="pre">Term</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.k2lean4.model.ExplBinder.ty" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.FieldVal">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FieldVal</span></span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#FieldVal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.FieldVal" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.ImplBinder">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ImplBinder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idents</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Iterable[str]'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Term</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'bool</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#ImplBinder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.ImplBinder" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.k2lean4.model.BracketBinder" title="pyk.k2lean4.model.BracketBinder"><code class="xref py py-class docutils literal notranslate"><span class="pre">BracketBinder</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.ImplBinder.idents">
+<span class="sig-name descname"><span class="pre">idents</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.k2lean4.model.ImplBinder.idents" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.ImplBinder.strict">
+<span class="sig-name descname"><span class="pre">strict</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyk.k2lean4.model.ImplBinder.strict" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.ImplBinder.ty">
+<span class="sig-name descname"><span class="pre">ty</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.Term" title="pyk.k2lean4.model.Term"><span class="pre">Term</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.k2lean4.model.ImplBinder.ty" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Inductive">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Inductive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ident</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str</span> <span class="pre">|</span> <span class="pre">DeclId'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Signature</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Iterable[Ctor]</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deriving</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Iterable[str]</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modifiers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Modifiers</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#Inductive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.Inductive" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.k2lean4.model.Declaration" title="pyk.k2lean4.model.Declaration"><code class="xref py py-class docutils literal notranslate"><span class="pre">Declaration</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Inductive.ctors">
+<span class="sig-name descname"><span class="pre">ctors</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pyk.k2lean4.model.Ctor" title="pyk.k2lean4.model.Ctor"><span class="pre">Ctor</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.k2lean4.model.Inductive.ctors" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Inductive.deriving">
+<span class="sig-name descname"><span class="pre">deriving</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.k2lean4.model.Inductive.deriving" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Inductive.ident">
+<span class="sig-name descname"><span class="pre">ident</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.DeclId" title="pyk.k2lean4.model.DeclId"><span class="pre">DeclId</span></a></em><a class="headerlink" href="#pyk.k2lean4.model.Inductive.ident" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Inductive.modifiers">
+<span class="sig-name descname"><span class="pre">modifiers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.Modifiers" title="pyk.k2lean4.model.Modifiers"><span class="pre">Modifiers</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.k2lean4.model.Inductive.modifiers" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Inductive.signature">
+<span class="sig-name descname"><span class="pre">signature</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.Signature" title="pyk.k2lean4.model.Signature"><span class="pre">Signature</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.k2lean4.model.Inductive.signature" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.InstBinder">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InstBinder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Term'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ident</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#InstBinder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.InstBinder" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.k2lean4.model.BracketBinder" title="pyk.k2lean4.model.BracketBinder"><code class="xref py py-class docutils literal notranslate"><span class="pre">BracketBinder</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.InstBinder.ident">
+<span class="sig-name descname"><span class="pre">ident</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.k2lean4.model.InstBinder.ident" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.InstBinder.ty">
+<span class="sig-name descname"><span class="pre">ty</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.Term" title="pyk.k2lean4.model.Term"><span class="pre">Term</span></a></em><a class="headerlink" href="#pyk.k2lean4.model.InstBinder.ty" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.InstField">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InstField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'FieldVal'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Signature</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#InstField"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.InstField" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.InstField.lval">
+<span class="sig-name descname"><span class="pre">lval</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.k2lean4.model.InstField.lval" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.InstField.signature">
+<span class="sig-name descname"><span class="pre">signature</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.Signature" title="pyk.k2lean4.model.Signature"><span class="pre">Signature</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.k2lean4.model.InstField.signature" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.InstField.val">
+<span class="sig-name descname"><span class="pre">val</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.FieldVal" title="pyk.k2lean4.model.FieldVal"><span class="pre">FieldVal</span></a></em><a class="headerlink" href="#pyk.k2lean4.model.InstField.val" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Instance">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Instance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">signature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Signature'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'DeclVal'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr_kind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'AttrKind</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'int</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ident</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str</span> <span class="pre">|</span> <span class="pre">DeclId</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modifiers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Modifiers</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#Instance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.Instance" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.k2lean4.model.Declaration" title="pyk.k2lean4.model.Declaration"><code class="xref py py-class docutils literal notranslate"><span class="pre">Declaration</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Instance.attr_kind">
+<span class="sig-name descname"><span class="pre">attr_kind</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.AttrKind" title="pyk.k2lean4.model.AttrKind"><span class="pre">AttrKind</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.k2lean4.model.Instance.attr_kind" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Instance.ident">
+<span class="sig-name descname"><span class="pre">ident</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.DeclId" title="pyk.k2lean4.model.DeclId"><span class="pre">DeclId</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.k2lean4.model.Instance.ident" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Instance.modifiers">
+<span class="sig-name descname"><span class="pre">modifiers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.Modifiers" title="pyk.k2lean4.model.Modifiers"><span class="pre">Modifiers</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.k2lean4.model.Instance.modifiers" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Instance.priority">
+<span class="sig-name descname"><span class="pre">priority</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.k2lean4.model.Instance.priority" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Instance.signature">
+<span class="sig-name descname"><span class="pre">signature</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.Signature" title="pyk.k2lean4.model.Signature"><span class="pre">Signature</span></a></em><a class="headerlink" href="#pyk.k2lean4.model.Instance.signature" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Instance.val">
+<span class="sig-name descname"><span class="pre">val</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.DeclVal" title="pyk.k2lean4.model.DeclVal"><span class="pre">DeclVal</span></a></em><a class="headerlink" href="#pyk.k2lean4.model.Instance.val" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Modifiers">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Modifiers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Iterable[str</span> <span class="pre">|</span> <span class="pre">Attr]</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visibility</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str</span> <span class="pre">|</span> <span class="pre">Visibility</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noncomputable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'bool</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unsafe</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'bool</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">totality</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str</span> <span class="pre">|</span> <span class="pre">Totality</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#Modifiers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.Modifiers" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Modifiers.attrs">
+<span class="sig-name descname"><span class="pre">attrs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pyk.k2lean4.model.Attr" title="pyk.k2lean4.model.Attr"><span class="pre">Attr</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.k2lean4.model.Modifiers.attrs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Modifiers.noncomputable">
+<span class="sig-name descname"><span class="pre">noncomputable</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyk.k2lean4.model.Modifiers.noncomputable" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Modifiers.totality">
+<span class="sig-name descname"><span class="pre">totality</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.Totality" title="pyk.k2lean4.model.Totality"><span class="pre">Totality</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.k2lean4.model.Modifiers.totality" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Modifiers.unsafe">
+<span class="sig-name descname"><span class="pre">unsafe</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyk.k2lean4.model.Modifiers.unsafe" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Modifiers.visibility">
+<span class="sig-name descname"><span class="pre">visibility</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.Visibility" title="pyk.k2lean4.model.Visibility"><span class="pre">Visibility</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.k2lean4.model.Modifiers.visibility" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Module">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Module</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">commands</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Iterable[Command]</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#Module"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.Module" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Module.commands">
+<span class="sig-name descname"><span class="pre">commands</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pyk.k2lean4.model.Command" title="pyk.k2lean4.model.Command"><span class="pre">Command</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.k2lean4.model.Module.commands" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Mutual">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Mutual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">commands</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pyk.k2lean4.model.Command" title="pyk.k2lean4.model.Command"><span class="pre">Command</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#Mutual"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.Mutual" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.k2lean4.model.Command" title="pyk.k2lean4.model.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Mutual.commands">
+<span class="sig-name descname"><span class="pre">commands</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pyk.k2lean4.model.Command" title="pyk.k2lean4.model.Command"><span class="pre">Command</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.k2lean4.model.Mutual.commands" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Signature">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Signature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">binders</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Iterable[Binder]</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Term</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#Signature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.Signature" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Signature.binders">
+<span class="sig-name descname"><span class="pre">binders</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pyk.k2lean4.model.Binder" title="pyk.k2lean4.model.Binder"><span class="pre">Binder</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.k2lean4.model.Signature.binders" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Signature.ty">
+<span class="sig-name descname"><span class="pre">ty</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.Term" title="pyk.k2lean4.model.Term"><span class="pre">Term</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.k2lean4.model.Signature.ty" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.SimpleFieldVal">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SimpleFieldVal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Term'</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#SimpleFieldVal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.SimpleFieldVal" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.k2lean4.model.FieldVal" title="pyk.k2lean4.model.FieldVal"><code class="xref py py-class docutils literal notranslate"><span class="pre">FieldVal</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.SimpleFieldVal.term">
+<span class="sig-name descname"><span class="pre">term</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.Term" title="pyk.k2lean4.model.Term"><span class="pre">Term</span></a></em><a class="headerlink" href="#pyk.k2lean4.model.SimpleFieldVal.term" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.SimpleVal">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SimpleVal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Term'</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#SimpleVal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.SimpleVal" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.k2lean4.model.DeclVal" title="pyk.k2lean4.model.DeclVal"><code class="xref py py-class docutils literal notranslate"><span class="pre">DeclVal</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.SimpleVal.term">
+<span class="sig-name descname"><span class="pre">term</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.Term" title="pyk.k2lean4.model.Term"><span class="pre">Term</span></a></em><a class="headerlink" href="#pyk.k2lean4.model.SimpleVal.term" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.StructCtor">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">StructCtor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fields</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Iterable[Binder]'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ident</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str</span> <span class="pre">|</span> <span class="pre">StructIdent</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#StructCtor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.StructCtor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.StructCtor.fields">
+<span class="sig-name descname"><span class="pre">fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pyk.k2lean4.model.Binder" title="pyk.k2lean4.model.Binder"><span class="pre">Binder</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.k2lean4.model.StructCtor.fields" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.StructCtor.ident">
+<span class="sig-name descname"><span class="pre">ident</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.StructIdent" title="pyk.k2lean4.model.StructIdent"><span class="pre">StructIdent</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.k2lean4.model.StructCtor.ident" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.StructIdent">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">StructIdent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ident</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modifiers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Modifiers</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#StructIdent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.StructIdent" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.StructIdent.ident">
+<span class="sig-name descname"><span class="pre">ident</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.k2lean4.model.StructIdent.ident" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.StructIdent.modifiers">
+<span class="sig-name descname"><span class="pre">modifiers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.Modifiers" title="pyk.k2lean4.model.Modifiers"><span class="pre">Modifiers</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.k2lean4.model.StructIdent.modifiers" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.StructVal">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">StructVal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fields</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Iterable[InstField]'</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#StructVal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.StructVal" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.k2lean4.model.DeclVal" title="pyk.k2lean4.model.DeclVal"><code class="xref py py-class docutils literal notranslate"><span class="pre">DeclVal</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.StructVal.fields">
+<span class="sig-name descname"><span class="pre">fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pyk.k2lean4.model.InstField" title="pyk.k2lean4.model.InstField"><span class="pre">InstField</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.k2lean4.model.StructVal.fields" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Structure">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Structure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ident</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str</span> <span class="pre">|</span> <span class="pre">DeclId'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Signature</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extends</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Iterable[Term]</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'StructCtor</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deriving</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Iterable[str]</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modifiers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Modifiers</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#Structure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.Structure" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.k2lean4.model.Declaration" title="pyk.k2lean4.model.Declaration"><code class="xref py py-class docutils literal notranslate"><span class="pre">Declaration</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Structure.ctor">
+<span class="sig-name descname"><span class="pre">ctor</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.StructCtor" title="pyk.k2lean4.model.StructCtor"><span class="pre">StructCtor</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.k2lean4.model.Structure.ctor" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Structure.deriving">
+<span class="sig-name descname"><span class="pre">deriving</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.k2lean4.model.Structure.deriving" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Structure.extends">
+<span class="sig-name descname"><span class="pre">extends</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pyk.k2lean4.model.Term" title="pyk.k2lean4.model.Term"><span class="pre">Term</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.k2lean4.model.Structure.extends" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Structure.ident">
+<span class="sig-name descname"><span class="pre">ident</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.DeclId" title="pyk.k2lean4.model.DeclId"><span class="pre">DeclId</span></a></em><a class="headerlink" href="#pyk.k2lean4.model.Structure.ident" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Structure.modifiers">
+<span class="sig-name descname"><span class="pre">modifiers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.Modifiers" title="pyk.k2lean4.model.Modifiers"><span class="pre">Modifiers</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.k2lean4.model.Structure.modifiers" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Structure.signature">
+<span class="sig-name descname"><span class="pre">signature</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.k2lean4.model.Signature" title="pyk.k2lean4.model.Signature"><span class="pre">Signature</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.k2lean4.model.Structure.signature" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Term">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Term</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str'</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#Term"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.Term" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Term.term">
+<span class="sig-name descname"><span class="pre">term</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.k2lean4.model.Term.term" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Totality">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Totality</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#Totality"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.Totality" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Totality.NONREC">
+<span class="sig-name descname"><span class="pre">NONREC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'nonrec'</span></em><a class="headerlink" href="#pyk.k2lean4.model.Totality.NONREC" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Totality.PARTIAL">
+<span class="sig-name descname"><span class="pre">PARTIAL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'partial'</span></em><a class="headerlink" href="#pyk.k2lean4.model.Totality.PARTIAL" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Visibility">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Visibility</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#Visibility"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.Visibility" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Visibility.PRIVATE">
+<span class="sig-name descname"><span class="pre">PRIVATE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'private'</span></em><a class="headerlink" href="#pyk.k2lean4.model.Visibility.PRIVATE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.Visibility.PROTECTED">
+<span class="sig-name descname"><span class="pre">PROTECTED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'protected'</span></em><a class="headerlink" href="#pyk.k2lean4.model.Visibility.PROTECTED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.k2lean4.model.indent">
+<span class="sig-name descname"><span class="pre">indent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/pyk/k2lean4/model.html#indent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.k2lean4.model.indent" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pyk.k2lean4.k2lean4.html" class="btn btn-neutral float-left" title="pyk.k2lean4.k2lean4 module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pyk.kast.html" class="btn btn-neutral float-right" title="pyk.kast package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Runtime Verification, Inc.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,7 @@
+pyk.k2lean4.model module
+========================
+
+.. automodule:: pyk.k2lean4.model
+   :members:
+   :undoc-members:
+   :show-inheritance:
