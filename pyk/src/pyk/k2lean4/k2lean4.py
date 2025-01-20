@@ -153,7 +153,7 @@ class K2Lean4:
                 val = Term(f'List {item}')
             case CollectionKind.SET:
                 (item,) = sorts
-                val = Term(f'List {item}')
+                val = Term(f'(SetHook {item}).set')
             case CollectionKind.MAP:
                 key, value = sorts
                 val = Term(f'(MapHook {key} {value}).map')
