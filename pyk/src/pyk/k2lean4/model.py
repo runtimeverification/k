@@ -51,6 +51,24 @@ class Declaration(Command, ABC):
 
 @final
 @dataclass
+class Axiom(Declaration):
+    ident: DeclId
+    signature: Signature
+    modifiers: Modifiers | None
+
+    def __init__(self, ident: str | DeclId, signature: Signature, modifiers: Modifiers | None = None):
+        ident = DeclId(ident) if isinstance(ident, str) else ident
+        object.__setattr__(self, 'ident', ident)
+        object.__setattr__(self, 'signature', signature)
+        object.__setattr__(self, 'modifiers', modifiers)
+
+    def __str__(self) -> str:
+        modifiers = f'{self.modifiers} ' if self.modifiers else ''
+        return f'{modifiers}axiom {self.ident} {self.signature}'
+
+
+@final
+@dataclass
 class Abbrev(Declaration):
     ident: DeclId
     val: Term  # declVal
