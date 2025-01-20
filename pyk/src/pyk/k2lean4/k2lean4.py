@@ -156,7 +156,7 @@ class K2Lean4:
                 val = Term(f'List {item}')
             case CollectionKind.MAP:
                 key, value = sorts
-                val = Term(f'List ({key} × {value})')
+                val = Term(f'(MapHook {key} {value}).map')
         field = ExplBinder(('coll',), val)
         return Structure(sort, Signature((), Term('Type')), ctor=StructCtor((field,)))
 
