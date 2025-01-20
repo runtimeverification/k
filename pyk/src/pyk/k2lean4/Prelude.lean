@@ -81,22 +81,22 @@ axiom nodupAx      : forall m, List.Nodup (keysAx K m)
 noncomputable def MapHook (K V : Type) : MapHookSig K V :=
   { map        := mapCAx,
     unit       := unitAx,
-    cons       := (consAx K V),
-    lookup     := (lookupAx K V),
-    lookup?    := (lookupAx? K V),
-    update     := (updateAx K V),
-    delete     := (deleteAx K),
+    cons       := consAx K V,
+    lookup     := lookupAx K V,
+    lookup?    := lookupAx? K V,
+    update     := updateAx K V,
+    delete     := deleteAx K,
     concat     := concatAx,
     difference := differenceAx,
     updateMap  := updateMapAx,
-    removeAll  := (removeAllAx K),
-    keys       := (keysAx K),
-    in_keys    := (in_keysAx K),
-    values     := (valuesAx V),
+    removeAll  := removeAllAx K,
+    keys       := keysAx K,
+    in_keys    := in_keysAx K,
+    values     := valuesAx V,
     size       := sizeAx,
     includes   := includesAx,
-    choice     := (choiceAx K),
-    nodup      := (nodupAx K) }
+    choice     := choiceAx K,
+    nodup      := nodupAx K }
 
 end MapHookDef
 
