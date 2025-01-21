@@ -148,6 +148,67 @@ noncomputable def SetHook (T : Type) : SetHookSig T :=
 
 end SetHookDef
 
+namespace ListHookDef
+/-
+The `List` sort is an ordered collection that may contain duplicate elements.
+ -/
+
+structure listHookSig (T : Type) where
+  list      : Type -- Carrier, such as `T → Prop`
+  unit      : list
+  concat    : list → list → Option list
+  element   : T → list
+  push      : T → list → list
+  get       : Int → list → Option T
+  updte     : Int → T → list → Option list
+  -- create a list with `length` elements, each containing  `value`. `Option` return type from `Int` parameter
+  make      : Int → T → Option list
+  -- create a new `List` which is equal to `dest` except the  `N` elements starting at `index` are replaced with the   contents of `src`
+  -- Having `index + size(src) > size(dest)` is undefined
+  -- updateList(dest: List, index: Int, src: List)
+  updateAll : list → Int → list → Option list
+  -- create a new `List` where the `length` elements starting   at `index` are replaced with `value`
+  fill      : list → Int → T → Option list
+  -- compute a new `List` by removing `fromFront` elements from   the front of the list and `fromBack` elements from the back   of the list
+  -- range(List, fromFront: Int, fromBack: Int)
+  range     : list → Int → Int → Option list
+  -- compute whether an element is in a list
+  -- the hook is `in`, but clashes with Lean syntax
+  inList    : T → list → Bool
+  size      : list → Int
+
+variable (T : Type)
+axiom listCAx     : Type
+axiom unitAx      : listCAx
+axiom concatAx    : listCAx → listCAx → Option listCAx
+axiom elementAx   : T → listCAx
+axiom pushAx      : T → listCAx → listCAx
+axiom getAx       : Int → listCAx → Option T
+axiom updteAx     : Int → T → listCAx → Option listCAx
+axiom makeAx      : Int → T → Option listCAx
+axiom updateAllAx : listCAx → Int → listCAx → Option listCAx
+axiom fillAx      : listCAx → Int → T → Option listCAx
+axiom rangeAx     : listCAx → Int → Int → Option listCAx
+axiom inListAx    : T → listCAx → Bool
+axiom sizeAx      : listCAx → Int
+
+noncomputable def ListHook (T : Type) : listHookSig T :=
+  { list      := listCAx,
+    unit      := unitAx,
+    concat    := concatAx,
+    element   := elementAx T,
+    push      := pushAx T,
+    get       := getAx T,
+    updte     := updteAx T,
+    make      := makeAx T,
+    updateAll := updateAllAx,
+    fill      := fillAx T,
+    range     := rangeAx,
+    inList    := inListAx T,
+    size      := sizeAx }
+
+end ListHookDef
+
 class Inj (From To : Type) : Type where
   inj (x : From) : To
 
