@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
     from typing import Final
 
-_LEAN_KEYWORDS: Final = {'ite', 'end', 'where'}  # Words that cannot be a the name of a definition
+_LEAN_KEYWORDS: Final = {'ite', 'end', 'where'}  # Words that cannot be a the name of a declaration
 
 
 def indent(text: str, n: int) -> str:
@@ -27,7 +27,7 @@ def mask_name(name: str, mask: str | None) -> str:
     elif name not in _LEAN_KEYWORDS:
         return name
     else:
-        return f'{name}{mask}' if mask is not None else f'{name}Mask'
+        return f'{name}{mask}' if mask is not None and is not '' else f'{name}Mask'
 
 
 @final
