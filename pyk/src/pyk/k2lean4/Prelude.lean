@@ -124,7 +124,7 @@ variable (T : Type)
 axiom setCAx         : Type
 axiom unitAx         : setCAx
 axiom concatAx       : setCAx → setCAx → Option setCAx
-axiom setItemAx      : T → setCAx
+axiom elementAx      : T → setCAx
 axiom unionAx        : setCAx → setCAx → setCAx
 axiom intersectionAx : setCAx → setCAx → setCAx
 axiom differenceAx   : setCAx → setCAx → setCAx
@@ -137,7 +137,7 @@ noncomputable def SetHook (T : Type) : SetHookSig T :=
   { set          := setCAx,
     unit         := unitAx,
     concat       := concatAx,
-    setItem      := setItemAx T,
+    element      := elementAx T,
     union        := unionAx,
     intersection := intersectionAx,
     difference   := differenceAx,
