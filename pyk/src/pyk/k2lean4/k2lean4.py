@@ -150,7 +150,7 @@ class K2Lean4:
         match coll.kind:
             case CollectionKind.LIST:
                 (item,) = sorts
-                val = Term(f'List {item}')
+                val = Term(f'(ListHook {item}).list')
             case CollectionKind.SET:
                 (item,) = sorts
                 val = Term(f'(SetHook {item}).set')
