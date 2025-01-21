@@ -108,17 +108,17 @@ If you intend to add an element to a set that might already be present in the se
  -/
 
 structure SetHookSig (T : Type) where
-  set : Type -- Carrier, such as `T → Prop`
-  unit : set
-  concat : set → set → Option set
-  setItem : T → set
-  union : set → set → set
+  set          : Type -- Carrier, such as `T → Prop`
+  unit         : set
+  concat       : set → set → Option set
+  element      : T → set
+  union        : set → set → set
   intersection : set → set → set
-  difference : set → set → set
-  inSet : T → set → Bool
-  inclusion : set → set → Bool
-  size : set → Int
-  choice : set → T
+  difference   : set → set → set
+  inSet        : T → set → Bool
+  inclusion    : set → set → Bool
+  size         : set → Int
+  choice       : set → T
 
 variable (T : Type)
 axiom setCAx         : Type
