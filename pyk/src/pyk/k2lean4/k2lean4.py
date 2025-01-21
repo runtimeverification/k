@@ -219,12 +219,13 @@ class K2Lean4:
         sort_params = [var.name for var in decl.symbol.vars]
         param_sorts = [sort.name for sort in decl.param_sorts]
         sort = decl.sort.name
+        option_type = '' if 'total' in decl.attrs_by_key else 'Option '
 
         binders: list[Binder] = []
         if sort_params:
             binders.append(ImplBinder(sort_params, Term('Type')))
         binders.extend(ExplBinder((f'x{i}',), Term(sort)) for i, sort in enumerate(param_sorts))
-        return Axiom(ident, Signature(binders, Term(f'Option {sort}')))
+        return Axiom(ident, Signature(binders, Term(f'{option_type}{sort}')))
 
 
 def _param_sorts(decl: SymbolDecl) -> list[str]:
