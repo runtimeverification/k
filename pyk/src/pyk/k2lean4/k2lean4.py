@@ -2,14 +2,15 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
+from functools import cached_property
 from graphlib import TopologicalSorter
 from itertools import count
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, NamedTuple
 
 from ..konvert import unmunge
 from ..kore.internal import CollectionKind
 from ..kore.syntax import SortApp
-from ..utils import POSet
+from ..utils import FrozenDict, POSet
 from .model import (
     Alt,
     AltsFieldVal,
@@ -45,9 +46,71 @@ _VALID_LEAN_IDENT: Final = re.compile(
 _PRELUDE_SORTS: Final = {'SortBool', 'SortBytes', 'SortId', 'SortInt', 'SortString', 'SortStringBuffer'}
 
 
+class Field(NamedTuple):
+    name: str
+    ty: Term
+
+
 @dataclass(frozen=True)
 class K2Lean4:
     defn: KoreDefn
+
+    @cached_property
+    def structures(self) -> FrozenDict[str, tuple[Field, ...]]:
+        def fields_of(sort: str) -> tuple[Field, ...] | None:
+            if self._is_cell(sort):
+                return self._cell_fields(sort)
+
+            if self._is_collection(sort):
+                return (self._collection_field(sort),)
+
+            return None
+
+        return FrozenDict((sort, fields) for sort in self.defn.sorts if (fields := fields_of(sort)) is not None)
+
+    @staticmethod
+    def _is_cell(sort: str) -> bool:
+        return sort.endswith('Cell')
+
+    def _cell_fields(self, sort: str) -> tuple[Field, ...]:
+        (ctor,) = self.defn.constructors[sort]
+        decl = self.defn.symbols[ctor]
+        sorts = _param_sorts(decl)
+
+        names: list[str]
+        if all(self._is_cell(sort) for sort in sorts):
+            names = []
+            for sort in sorts:
+                assert sort.startswith('Sort')
+                assert sort.endswith('Cell')
+                name = sort[4:-4]
+                name = name[0].lower() + name[1:]
+                names.append(name)
+        else:
+            assert len(sorts) == 1
+            names = ['val']
+
+        return tuple(Field(name, Term(sort)) for name, sort in zip(names, sorts, strict=True))
+
+    def _is_collection(self, sort: str) -> bool:
+        return sort in self.defn.collections
+
+    def _collection_field(self, sort: str) -> Field:
+        coll = self.defn.collections[sort]
+        elem = self.defn.symbols[coll.element]
+        sorts = _param_sorts(elem)
+        term: Term
+        match coll.kind:
+            case CollectionKind.LIST:
+                (item,) = sorts
+                term = Term(f'(ListHook {item}).list')
+            case CollectionKind.SET:
+                (item,) = sorts
+                term = Term(f'(SetHook {item}).set')
+            case CollectionKind.MAP:
+                key, value = sorts
+                term = Term(f'(MapHook {key} {value}).map')
+        return Field('coll', term)
 
     def sort_module(self) -> Module:
         commands: tuple[Command, ...] = tuple(
@@ -75,17 +138,11 @@ class K2Lean4:
             decl = self.defn.sorts[sort]
             return not decl.hooked and 'hasDomainValues' not in decl.attrs_by_key and not self._is_cell(sort)
 
-        def is_collection(sort: str) -> bool:
-            return sort in self.defn.collections
-
         if is_inductive(sort):
             return self._inductive(sort)
 
-        if self._is_cell(sort):
-            return self._cell(sort)
-
-        if is_collection(sort):
-            return self._collection(sort)
+        if sort in self.structures:
+            return self._structure(sort)
 
         raise AssertionError
 
@@ -116,49 +173,10 @@ class K2Lean4:
             symbol = f'«{symbol}»'
         return symbol
 
-    @staticmethod
-    def _is_cell(sort: str) -> bool:
-        return sort.endswith('Cell')
-
-    def _cell(self, sort: str) -> Structure:
-        (cell_ctor,) = self.defn.constructors[sort]
-        decl = self.defn.symbols[cell_ctor]
-        param_sorts = _param_sorts(decl)
-
-        param_names: list[str]
-
-        if all(self._is_cell(sort) for sort in param_sorts):
-            param_names = []
-            for param_sort in param_sorts:
-                assert param_sort.startswith('Sort')
-                assert param_sort.endswith('Cell')
-                name = param_sort[4:-4]
-                name = name[0].lower() + name[1:]
-                param_names.append(name)
-        else:
-            assert len(param_sorts) == 1
-            param_names = ['val']
-
-        fields = tuple(ExplBinder((name,), Term(sort)) for name, sort in zip(param_names, param_sorts, strict=True))
-        return Structure(sort, Signature((), Term('Type')), ctor=StructCtor(fields))
-
-    def _collection(self, sort: str) -> Structure:
-        coll = self.defn.collections[sort]
-        elem = self.defn.symbols[coll.element]
-        sorts = _param_sorts(elem)
-        val: Term
-        match coll.kind:
-            case CollectionKind.LIST:
-                (item,) = sorts
-                val = Term(f'(ListHook {item}).list')
-            case CollectionKind.SET:
-                (item,) = sorts
-                val = Term(f'(SetHook {item}).set')
-            case CollectionKind.MAP:
-                key, value = sorts
-                val = Term(f'(MapHook {key} {value}).map')
-        field = ExplBinder(('coll',), val)
-        return Structure(sort, Signature((), Term('Type')), ctor=StructCtor((field,)))
+    def _structure(self, sort: str) -> Structure:
+        fields = self.structures[sort]
+        binders = tuple(ExplBinder((name,), ty) for name, ty in fields)
+        return Structure(sort, Signature((), Term('Type')), ctor=StructCtor(binders))
 
     def inj_module(self) -> Module:
         return Module(commands=self._inj_commands())
