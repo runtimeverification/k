@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, NamedTuple
 
 from ..konvert import unmunge
 from ..kore.internal import CollectionKind
+from ..kore.kompiled import KoreSymbolTable
 from ..kore.manip import elim_aliases, free_occs
 from ..kore.syntax import DV, And, App, EVar, SortApp, String, Top
 from ..utils import FrozenDict, POSet
@@ -309,7 +310,7 @@ class K2Lean4:
         pattern = elim_aliases(And(SortApp('Foo'), (req, rule.lhs, rule.rhs)))
 
         # Step 2: eliminate function application
-        free = (f'_val{i}' for i in count())
+        free = (f"Var'Unds'val{i}" for i in count())
         pattern, defs = self._elim_fun_apps(pattern, free)
 
         # Step 3: create binders
@@ -323,7 +324,7 @@ class K2Lean4:
 
         if not isinstance(req, Top):
             req_term = self._transform_pattern(req)
-            binders.append(ExplBinder(('req',), req_term))
+            binders.append(ExplBinder(('req',), Term(f'{req_term} = true')))
 
         lhs_term = self._transform_pattern(lhs)
         rhs_term = self._transform_pattern(rhs)
@@ -337,8 +338,18 @@ class K2Lean4:
 
     def _elim_fun_apps(self, pattern: Pattern, free: Iterator[str]) -> tuple[Pattern, dict[str, Pattern]]:
         """Replace ``foo(bar(x))`` with ``z`` and return mapping ``{y: bar(x), z: foo(y)}`` with ``y``, ``z`` fresh variables."""
-        # TODO
-        return pattern, {}
+        defs: dict[str, Pattern] = {}
+
+        def abstract_funcs(pattern: Pattern) -> Pattern:
+            if isinstance(pattern, App) and pattern.symbol in self.defn.functions:
+                name = next(free)
+                sort = self.symbol_table.infer_sort(pattern)
+                var = EVar(name, sort)
+                defs[name] = pattern
+                return var
+            return pattern
+
+        return pattern.bottom_up(abstract_funcs), defs
 
     def _free_binders(self, pattern: Pattern) -> list[Binder]:
         free_vars = {occ for _, occs in free_occs(pattern).items() for occ in occs}
