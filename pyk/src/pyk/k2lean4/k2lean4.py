@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, NamedTuple
 
 from ..konvert import unmunge
 from ..kore.internal import CollectionKind
-from ..kore.manip import elim_aliases
+from ..kore.manip import elim_aliases, free_occs
 from ..kore.syntax import DV, And, App, EVar, SortApp, String, Top
 from ..utils import FrozenDict, POSet
 from .model import (
@@ -341,8 +341,25 @@ class K2Lean4:
         return pattern, {}
 
     def _free_binders(self, pattern: Pattern) -> list[Binder]:
-        # TODO
-        return []
+        free_vars = {occ for _, occs in free_occs(pattern).items() for occ in occs}
+        grouped_vars: dict[str, set[str]] = {}
+        for var in free_vars:
+            match var:
+                case EVar(name, SortApp(sort)):
+                    ident = self._var_ident(name)
+                    assert ident not in grouped_vars.get(sort, ())
+                    grouped_vars.setdefault(sort, set()).add(ident)
+                case _:
+                    raise AssertionError()
+        sorted_vars: dict[str, list[str]] = dict(
+            sorted(((sort, sorted(idents)) for sort, idents in grouped_vars.items()), key=lambda item: item[1][0])
+        )
+        return [ImplBinder(idents, Term(sort)) for sort, idents in sorted_vars.items()]
+
+    @staticmethod
+    def _var_ident(name: str) -> str:
+        assert name.startswith('Var')
+        return K2Lean4._symbol_ident(name[3:])
 
     def _def_binders(self, defs: Mapping[str, Pattern]) -> list[Binder]:
         # TODO
@@ -360,8 +377,7 @@ class K2Lean4:
                 raise ValueError(f'Unsupported pattern: {pattern.text}')
 
     def _transform_evar(self, name: str) -> Term:
-        assert name.startswith('Var')
-        return Term(self._symbol_ident(name[3:]))
+        return Term(self._var_ident(name))
 
     def _transform_dv(self, sort: str, value: str) -> Term:
         match sort:
