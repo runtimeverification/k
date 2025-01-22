@@ -340,7 +340,25 @@ class K2Lean4:
 
         Both the ``\and`` and instances of ``X : S`` are replaced by the definition ``p``.
         """
-        # TODO
+        aliases = {}
+
+        def inline_aliases(pattern: Pattern) -> Pattern:
+            match pattern:
+                case And(_, (p, EVar(name))):
+                    aliases[name] = p
+                    return p
+                case _:
+                    return pattern
+
+        def substitute_vars(pattern: Pattern) -> Pattern:
+            match pattern:
+                case EVar(name) as var:
+                    return aliases.get(name, var)
+                case _:
+                    return pattern
+
+        pattern = pattern.bottom_up(inline_aliases)
+        pattern = pattern.bottom_up(substitute_vars)
         return pattern
 
     def _elim_fun_apps(self, pattern: Pattern, free: Iterator[str]) -> tuple[Pattern, dict[str, Pattern]]:
@@ -364,8 +382,6 @@ class K2Lean4:
                 return self._transform_dv(sort, value)
             case App(symbol, _, args):
                 return self._transform_app(symbol, args)
-            case And(_, (p, EVar())):
-                return self._transform_pattern(p)  # TODO remove
             case _:
                 raise ValueError(f'Unsupported pattern: {pattern.text}')
 
