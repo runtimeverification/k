@@ -310,7 +310,7 @@ class K2Lean4:
         pattern = elim_aliases(And(SortApp('Foo'), (req, rule.lhs, rule.rhs)))
 
         # Step 2: eliminate function application
-        free = (f"Var'Unds'val{i}" for i in count())
+        free = (f"Var'Unds'Val{i}" for i in count())
         pattern, defs = self._elim_fun_apps(pattern, free)
 
         # Step 3: create binders
@@ -336,6 +336,11 @@ class K2Lean4:
             return rule.label.replace('-', '_').replace('.', '_')
         return f'_{rule.uid[:7]}'
 
+    @staticmethod
+    def _var_ident(name: str) -> str:
+        assert name.startswith('Var')
+        return K2Lean4._symbol_ident(name[3:])
+
     def _elim_fun_apps(self, pattern: Pattern, free: Iterator[str]) -> tuple[Pattern, dict[str, Pattern]]:
         """Replace ``foo(bar(x))`` with ``z`` and return mapping ``{y: bar(x), z: foo(y)}`` with ``y``, ``z`` fresh variables."""
         defs: dict[str, Pattern] = {}
@@ -343,10 +348,10 @@ class K2Lean4:
         def abstract_funcs(pattern: Pattern) -> Pattern:
             if isinstance(pattern, App) and pattern.symbol in self.defn.functions:
                 name = next(free)
+                ident = self._var_ident(name)
+                defs[ident] = pattern
                 sort = self.symbol_table.infer_sort(pattern)
-                var = EVar(name, sort)
-                defs[name] = pattern
-                return var
+                return EVar(name, sort)
             return pattern
 
         return pattern.bottom_up(abstract_funcs), defs
@@ -367,14 +372,11 @@ class K2Lean4:
         )
         return [ImplBinder(idents, Term(sort)) for sort, idents in sorted_vars.items()]
 
-    @staticmethod
-    def _var_ident(name: str) -> str:
-        assert name.startswith('Var')
-        return K2Lean4._symbol_ident(name[3:])
-
     def _def_binders(self, defs: Mapping[str, Pattern]) -> list[Binder]:
-        # TODO
-        return []
+        return [
+            ExplBinder((f'def{ident}',), Term(f'{self._transform_pattern(pattern)} = some {ident}'))
+            for ident, pattern in defs.items()
+        ]
 
     def _transform_pattern(self, pattern: Pattern) -> Term:
         match pattern:
