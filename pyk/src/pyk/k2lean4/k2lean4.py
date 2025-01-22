@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, NamedTuple
 
 from ..konvert import unmunge
 from ..kore.internal import CollectionKind
+from ..kore.manip import elim_aliases
 from ..kore.syntax import DV, And, App, EVar, SortApp, String, Top
 from ..utils import FrozenDict, POSet
 from .model import (
@@ -305,7 +306,7 @@ class K2Lean4:
         req = rule.req if rule.req else Top(SortApp('Foo'))
 
         # Step 1: eliminate aliases
-        pattern = self._elim_aliases(And(SortApp('Foo'), (req, rule.lhs, rule.rhs)))
+        pattern = elim_aliases(And(SortApp('Foo'), (req, rule.lhs, rule.rhs)))
 
         # Step 2: eliminate function application
         free = (f'_val{i}' for i in count())
@@ -333,33 +334,6 @@ class K2Lean4:
         if rule.label:
             return rule.label.replace('-', '_').replace('.', '_')
         return f'_{rule.uid[:7]}'
-
-    @staticmethod
-    def _elim_aliases(pattern: Pattern) -> Pattern:
-        r"""Eliminate subpatterns of the form ``\and{S}(p, X : S)``.
-
-        Both the ``\and`` and instances of ``X : S`` are replaced by the definition ``p``.
-        """
-        aliases = {}
-
-        def inline_aliases(pattern: Pattern) -> Pattern:
-            match pattern:
-                case And(_, (p, EVar(name))):
-                    aliases[name] = p
-                    return p
-                case _:
-                    return pattern
-
-        def substitute_vars(pattern: Pattern) -> Pattern:
-            match pattern:
-                case EVar(name) as var:
-                    return aliases.get(name, var)
-                case _:
-                    return pattern
-
-        pattern = pattern.bottom_up(inline_aliases)
-        pattern = pattern.bottom_up(substitute_vars)
-        return pattern
 
     def _elim_fun_apps(self, pattern: Pattern, free: Iterator[str]) -> tuple[Pattern, dict[str, Pattern]]:
         """Replace ``foo(bar(x))`` with ``z`` and return mapping ``{y: bar(x), z: foo(y)}`` with ``y``, ``z`` fresh variables."""
