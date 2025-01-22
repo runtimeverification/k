@@ -86,6 +86,8 @@ class KoreDefn:
                     sorts[name] = sent
                 case SymbolDecl(Symbol(name)):
                     symbols[name] = sent
+                    if 'function' in sent.attrs_by_key:
+                        functions.setdefault(name, [])
                 case Axiom(attrs=(App('subsort', (SortApp(subsort), SortApp(supersort))),)):
                     subsorts.append((subsort, supersort))
                 case Axiom():
