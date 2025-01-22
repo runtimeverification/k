@@ -11,6 +11,8 @@ from .rule import FunctionRule, RewriteRule, Rule
 from .syntax import App, Axiom, SortApp, SortDecl, String, Symbol, SymbolDecl
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from .syntax import Definition
 
 
@@ -139,6 +141,11 @@ class KoreDefn:
             rewrites=self.rewrites if rewrites is None else rewrites,
             functions=self.functions if functions is None else functions,
         )
+
+    def filter_rewrites(self, labels: Iterable[str]) -> KoreDefn:
+        """Keep only rewrite rules with certain labels in the definition."""
+        should_keep = set(labels)
+        return self.let(rewrites=tuple(rewrite for rewrite in self.rewrites if rewrite.label in should_keep))
 
     def project_to_symbols(self) -> KoreDefn:
         """Project definition to symbols present in the definition."""

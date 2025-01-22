@@ -13,8 +13,10 @@ from ..utils import POSet
 from .model import (
     Alt,
     AltsFieldVal,
+    Axiom,
     Ctor,
     ExplBinder,
+    ImplBinder,
     Inductive,
     Instance,
     InstField,
@@ -33,7 +35,7 @@ if TYPE_CHECKING:
 
     from ..kore.internal import KoreDefn
     from ..kore.syntax import SymbolDecl
-    from .model import Command, Declaration, FieldVal
+    from .model import Binder, Command, Declaration, FieldVal
 
 
 _VALID_LEAN_IDENT: Final = re.compile(
@@ -148,13 +150,13 @@ class K2Lean4:
         match coll.kind:
             case CollectionKind.LIST:
                 (item,) = sorts
-                val = Term(f'List {item}')
+                val = Term(f'(ListHook {item}).list')
             case CollectionKind.SET:
                 (item,) = sorts
-                val = Term(f'List {item}')
+                val = Term(f'(SetHook {item}).set')
             case CollectionKind.MAP:
                 key, value = sorts
-                val = Term(f'List ({key} × {value})')
+                val = Term(f'(MapHook {key} {value}).map')
         field = ExplBinder(('coll',), val)
         return Structure(sort, Signature((), Term('Type')), ctor=StructCtor((field,)))
 
@@ -206,6 +208,23 @@ class K2Lean4:
             res.append(default)
 
         return res
+
+    def func_module(self) -> Module:
+        commands = [self._transform_func(func) for func in self.defn.functions]
+        return Module(commands=commands)
+
+    def _transform_func(self, func: str) -> Axiom:
+        ident = self._symbol_ident(func)
+        decl = self.defn.symbols[func]
+        sort_params = [var.name for var in decl.symbol.vars]
+        param_sorts = [sort.name for sort in decl.param_sorts]
+        sort = decl.sort.name
+
+        binders: list[Binder] = []
+        if sort_params:
+            binders.append(ImplBinder(sort_params, Term('Type')))
+        binders.extend(ExplBinder((f'x{i}',), Term(sort)) for i, sort in enumerate(param_sorts))
+        return Axiom(ident, Signature(binders, Term(f'Option {sort}')))
 
 
 def _param_sorts(decl: SymbolDecl) -> list[str]:
