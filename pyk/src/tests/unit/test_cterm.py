@@ -103,14 +103,14 @@ def test_cterm_match_with_constraint(t1: CTerm, t2: CTerm) -> None:
 
 BUILD_RULE_TEST_DATA: Final = (
     (
-        T(k(KVariable('K_CELL')), mem(KVariable('MEM_CELL'))),
+        T(k(KVariable('K_CELL', 'K')), mem(KVariable('MEM_CELL'))),
         T(
             k(KVariable('K_CELL')),
             mem(KApply('_[_<-_]', [KVariable('MEM_CELL'), KVariable('KEY'), KVariable('VALUE')])),
         ),
         ['K_CELL'],
         T(
-            k(KVariable('_K_CELL')),
+            k(KVariable('_K_CELL', 'K')),
             mem(
                 KRewrite(
                     KVariable('MEM_CELL'),
