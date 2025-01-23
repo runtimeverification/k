@@ -56,6 +56,33 @@ class K2Lean4:
     defn: KoreDefn
 
     @cached_property
+    def symbol_table(self) -> KoreSymbolTable:
+        return KoreSymbolTable(self.defn.symbols.values())
+
+    @cached_property
+    def structure_symbols(self) -> FrozenDict[str, str]:
+        def constructed_by(symbol: str) -> str | None:
+            decl = self.defn.symbols[symbol]
+            _sort = decl.sort
+
+            if not isinstance(_sort, SortApp):
+                return None
+
+            sort = _sort.name
+
+            if not self._is_cell(sort) and not self._is_collection(sort):
+                return None
+
+            if symbol not in self.defn.constructors.get(sort, ()):
+                return None
+
+            return sort
+
+        return FrozenDict(
+            (symbol, sort) for symbol in self.defn.symbols if (sort := constructed_by(symbol)) is not None
+        )
+
+    @cached_property
     def structures(self) -> FrozenDict[str, tuple[Field, ...]]:
         def fields_of(sort: str) -> tuple[Field, ...] | None:
             if self._is_cell(sort):
