@@ -7,6 +7,7 @@ from graphlib import TopologicalSorter
 from itertools import count
 from typing import TYPE_CHECKING, NamedTuple
 
+from ..dequote import bytes_encode
 from ..konvert import unmunge
 from ..kore.internal import CollectionKind
 from ..kore.kompiled import KoreSymbolTable
@@ -397,11 +398,15 @@ class K2Lean4:
             case 'SortBool' | 'SortInt':
                 return Term(value)
             case 'SortBytes':
-                raise ValueError('TODO')  # TODO
+                return self._transform_bytes_dv(value)
             case 'SortId' | 'SortString' | 'SortStringBuffer':
                 raise ValueError('TODO')  # TODO
             case _:
                 raise ValueError(f'Unsupported sort: {sort}')
+
+    def _transform_bytes_dv(self, value: str) -> Term:
+        bytes_str = ', '.join(f'0x{byte:02X}' for byte in bytes_encode(value))
+        return Term(f'⟨#[{bytes_str}⟩]')
 
     def _transform_app(self, symbol: str, args: Iterable[Pattern]) -> Term:
         if symbol in self.structure_symbols:
