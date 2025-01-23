@@ -21,6 +21,7 @@ from .inner import (
     bottom_up,
     collect,
     flatten_label,
+    keep_vars_sorted,
     top_down,
     var_occurrences,
 )
@@ -780,23 +781,24 @@ def build_rule(
 
     lhs_vars = free_vars(init_term)
     rhs_vars = free_vars(final_term)
-    var_occurrences = count_vars(
+    occurrences = var_occurrences(
         mlAnd(
             [push_down_rewrites(KRewrite(init_config, final_config))] + init_constraints + final_constraints,
             GENERATED_TOP_CELL,
         )
     )
+    sorted_vars = keep_vars_sorted(occurrences)
     v_subst: dict[str, KVariable] = {}
     vremap_subst: dict[str, KVariable] = {}
-    for v in var_occurrences:
+    for v in occurrences:
         new_v = v
-        if var_occurrences[v] == 1:
+        if len(occurrences[v]) == 1:
             new_v = '_' + new_v
         if v in rhs_vars and v not in lhs_vars:
             new_v = '?' + new_v
         if new_v != v:
-            v_subst[v] = KVariable(new_v)
-            vremap_subst[new_v] = KVariable(v)
+            v_subst[v] = KVariable(new_v, sorted_vars[v].sort)
+            vremap_subst[new_v] = sorted_vars[v]
 
     new_init_config = Subst(v_subst)(init_config)
     new_init_constraints = [Subst(v_subst)(c) for c in init_constraints]
