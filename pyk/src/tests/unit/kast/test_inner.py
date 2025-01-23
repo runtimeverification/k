@@ -55,6 +55,10 @@ KEEP_VARS_SORTED_DATA: Final[tuple[tuple[dict[str, list[KVariable]], dict[str, K
         {'a': [KVariable('a', 'K'), KVariable('a')], 'b': [KVariable('b', 'K'), KVariable('b', 'K')]},
         {'a': KVariable('a', 'K'), 'b': KVariable('b', 'K')},
     ),
+    (
+        {'a': [KVariable('a', 'A'), KVariable('a'), KVariable('a', 'B')]},
+        {'a': KVariable('a')},
+    ),
 )
 
 
