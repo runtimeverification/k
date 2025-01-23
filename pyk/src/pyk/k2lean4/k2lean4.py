@@ -400,13 +400,39 @@ class K2Lean4:
             case 'SortBytes':
                 return self._transform_bytes_dv(value)
             case 'SortId' | 'SortString' | 'SortStringBuffer':
-                raise ValueError('TODO')  # TODO
+                return self._transform_string_dv(value)
             case _:
                 raise ValueError(f'Unsupported sort: {sort}')
 
     def _transform_bytes_dv(self, value: str) -> Term:
         bytes_str = ', '.join(f'0x{byte:02X}' for byte in bytes_encode(value))
         return Term(f'⟨#[{bytes_str}⟩]')
+
+    def _transform_string_dv(self, value: str) -> Term:
+        escapes = {
+            ord('\r'): r'\r',
+            ord('\n'): r'\n',
+            ord('\t'): r'\t',
+            ord('\\'): r'\\',
+            ord('"'): r'\"',
+            ord("'"): r"\'",
+        }
+
+        def encode(c: str) -> str:
+            code = ord(c)
+            if code in escapes:
+                return escapes[code]
+            elif 32 <= code < 127:
+                return c
+            elif code <= 0xFF:
+                return fr'\x{code:02x}'
+            elif code <= 0xFFFF:
+                return fr'\u{code:04x}'
+            else:
+                raise ValueError(f"Unsupported character: '{c}' ({code})")
+
+        encoded = ''.join(encode(c) for c in value)
+        return Term(f'"{encoded}"')
 
     def _transform_app(self, symbol: str, args: Iterable[Pattern]) -> Term:
         if symbol in self.structure_symbols:
