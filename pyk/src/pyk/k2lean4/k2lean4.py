@@ -375,7 +375,7 @@ class K2Lean4:
 
     def _def_binders(self, defs: Mapping[str, Pattern]) -> list[Binder]:
         return [
-            ExplBinder((f'def{ident}',), Term(f'{self._transform_pattern(pattern)} = some {ident}'))
+            ExplBinder((f'defn{ident}',), Term(f'{self._transform_pattern(pattern)} = some {ident}'))
             for ident, pattern in defs.items()
         ]
 
