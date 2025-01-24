@@ -454,8 +454,13 @@ class K2Lean4:
 
     def _transform_arg(self, pattern: Pattern) -> Term:
         term = self._transform_pattern(pattern)
+
         if not isinstance(pattern, App):
             return term
+
+        if pattern.symbol in self.structure_symbols:
+            return term
+
         return Term(f'({term})')
 
     def _transform_inj_app(self, sorts: tuple[Sort, ...], args: tuple[Pattern, ...]) -> Term:
