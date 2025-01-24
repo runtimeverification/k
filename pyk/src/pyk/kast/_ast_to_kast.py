@@ -2,17 +2,15 @@ from __future__ import annotations
 
 import logging
 from functools import singledispatch
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from .att import EMPTY_ATT, Atts
-from .outer import KAtt, KDefinition, KFlatModule, KImport, KRequire, KSentence  # noqa: TC002
-from .outer_syntax import Att, Definition, Import, Module, Require, Sentence  # noqa: TC002
+from .outer import KAst, KAtt, KDefinition, KFlatModule, KImport, KRequire, KSentence
+from .outer_syntax import AST, Att, Definition, Import, Module, Require, Sentence  # noqa: TC001
 
 if TYPE_CHECKING:
-    from typing import Any, Final
+    from typing import Final
 
-    from .outer import KAst
-    from .outer_syntax import AST
 
 _LOGGER: Final = logging.getLogger(__name__)
 

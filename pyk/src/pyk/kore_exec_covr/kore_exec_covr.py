@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
-from collections import defaultdict
+from collections import Counter
 from enum import Enum
 from typing import TYPE_CHECKING
 
@@ -39,8 +39,8 @@ def parse_rule_applications(haskell_backend_oneline_log_file: Path) -> dict[Hask
         It seems likely that those are generated projection rules.
         We report their applications in bulk with UNKNOWN location.
     """
-    rewrites: dict[str, int] = defaultdict(int)
-    simplifications: dict[str, int] = defaultdict(int)
+    rewrites: dict[str, int] = Counter()
+    simplifications: dict[str, int] = Counter()
 
     log_entries = haskell_backend_oneline_log_file.read_text().splitlines()
     for log_entry in log_entries:
