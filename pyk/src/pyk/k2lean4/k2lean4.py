@@ -395,14 +395,20 @@ class K2Lean4:
 
     def _transform_dv(self, sort: str, value: str) -> Term:
         match sort:
-            case 'SortBool' | 'SortInt':
+            case 'SortBool':
                 return Term(value)
+            case 'SortInt':
+                return self._transform_int_dv(value)
             case 'SortBytes':
                 return self._transform_bytes_dv(value)
             case 'SortId' | 'SortString' | 'SortStringBuffer':
                 return self._transform_string_dv(value)
             case _:
                 raise ValueError(f'Unsupported sort: {sort}')
+
+    def _transform_int_dv(self, value: str) -> Term:
+        val = int(value)
+        return Term(str(val)) if val >= 0 else Term(f'({val})')
 
     def _transform_bytes_dv(self, value: str) -> Term:
         bytes_str = ', '.join(f'0x{byte:02X}' for byte in bytes_encode(value))
