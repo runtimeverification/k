@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from functools import reduce
 from typing import TYPE_CHECKING, Generic, TypeVar, cast, final
 
-from .prelude import BOOL, SORT_GENERATED_TOP_CELL, TRUE, inj
+from .prelude import BOOL, DOTK, SORT_GENERATED_TOP_CELL, SORT_K, SORT_K_ITEM, TRUE, inj
 from .syntax import (
     DV,
     And,
@@ -40,10 +40,54 @@ P = TypeVar('P', bound=Pattern)
 _LOGGER: Final = logging.getLogger(__name__)
 
 
+_S1, _S2, _S3, _R = (SortVar(name) for name in ['S1', 'S2', 'S3', 'R'])
+_X0, _X1, _TAIL, _KS = (EVar(name, SORT_K) for name in ['X0', 'X1', 'TAIL', 'KS'])
+_K: Final = EVar('K', SORT_K_ITEM)
+_T: Final = EVar('T', _S1)
+
+
+# The following two function rules from prelude module KSEQ do not have a UNIQUE_ID.
+# They are skipped in Rule.extract_all for now.
+
+_APPEND_DOTK_AXIOM: Final = Axiom(
+    vars=(_R,),
+    pattern=Implies(
+        _R,
+        And(_R, (Top(_R), And(_R, (In(SORT_K, _R, _X0, DOTK), And(_R, (In(SORT_K, _R, _X1, _TAIL), Top(_R))))))),
+        Equals(SORT_K, _R, App('append', (), (_X0, _X1)), And(SORT_K, (_TAIL, Top(SORT_K)))),
+    ),
+    attrs=(),
+)
+
+_APPEND_KSEQ_AXIOM: Final = Axiom(
+    vars=(_R,),
+    pattern=Implies(
+        _R,
+        And(
+            _R,
+            (
+                Top(_R),
+                And(
+                    _R,
+                    (
+                        In(SORT_K, _R, _X0, App('kseq', (), (_K, _KS))),
+                        And(_R, (In(SORT_K, _R, _X1, _TAIL), Top(_R))),
+                    ),
+                ),
+            ),
+        ),
+        Equals(
+            SORT_K,
+            _R,
+            App('append', (), (_X0, _X1)),
+            And(SORT_K, (App('kseq', (), (_K, App('append', (), (_KS, _TAIL)))), Top(SORT_K))),
+        ),
+    ),
+    attrs=(),
+)
+
 # There's a simplification rule with irregular form in the prelude module INJ.
 # This rule is skipped in Rule.extract_all.
-_S1, _S2, _S3, _R = (SortVar(name) for name in ['S1', 'S2', 'S3', 'R'])
-_T: Final = EVar('T', _S1)
 # axiom {S1, S2, S3, R} \equals{S3, R}(inj{S2, S3}(inj{S1, S2}(T:S1)), inj{S1, S3}(T:S1)) [simplification{}()]
 _INJ_AXIOM: Final = Axiom(
     vars=(_S1, _S2, _S3, _R),
@@ -71,6 +115,8 @@ class Rule(ABC):
     ens: Pattern | None
     sort: Sort
     priority: int
+    uid: str
+    label: str | None
 
     @abstractmethod
     def to_axiom(self) -> Axiom: ...
@@ -96,6 +142,12 @@ class Rule(ABC):
     @staticmethod
     def is_rule(axiom: Axiom) -> bool:
         if axiom == _INJ_AXIOM:
+            return False
+
+        if axiom == _APPEND_DOTK_AXIOM:
+            return False
+
+        if axiom == _APPEND_KSEQ_AXIOM:
             return False
 
         if any(attr in axiom.attrs_by_key for attr in _SKIPPED_ATTRS):
@@ -191,6 +243,8 @@ class FunctionRule(Rule):
     arg_sorts: tuple[Sort, ...]
     anti_left: Pattern | None
     priority: int
+    uid: str
+    label: str | None
 
     def to_axiom(self) -> Axiom:
         R = SortVar('R')  # noqa N806
@@ -248,6 +302,8 @@ class FunctionRule(Rule):
         rhs, ens = _extract_rhs(_rhs)
 
         priority = _extract_priority(axiom)
+        uid = _extract_uid(axiom)
+        label = _extract_label(axiom)
         return FunctionRule(
             lhs=lhs,
             rhs=rhs,
@@ -257,6 +313,8 @@ class FunctionRule(Rule):
             arg_sorts=arg_sorts,
             anti_left=anti_left,
             priority=priority,
+            uid=uid,
+            label=label,
         )
 
     @staticmethod
@@ -319,11 +377,15 @@ class AppRule(SimpliRule[App]):
     ens: Pattern | None
     sort: Sort
     priority: int
+    uid: str
+    label: str | None
 
     @staticmethod
     def from_axiom(axiom: Axiom) -> AppRule:
         lhs, rhs, req, ens, sort = SimpliRule._extract(axiom, App)
         priority = _extract_simpl_priority(axiom)
+        uid = _extract_uid(axiom)
+        label = _extract_label(axiom)
         return AppRule(
             lhs=lhs,
             rhs=rhs,
@@ -331,6 +393,8 @@ class AppRule(SimpliRule[App]):
             ens=ens,
             sort=sort,
             priority=priority,
+            uid=uid,
+            label=label,
         )
 
 
@@ -343,11 +407,15 @@ class CeilRule(SimpliRule[Ceil]):
     ens: Pattern | None
     sort: Sort
     priority: int
+    uid: str
+    label: str | None
 
     @staticmethod
     def from_axiom(axiom: Axiom) -> CeilRule:
         lhs, rhs, req, ens, sort = SimpliRule._extract(axiom, Ceil)
         priority = _extract_simpl_priority(axiom)
+        uid = _extract_uid(axiom)
+        label = _extract_label(axiom)
         return CeilRule(
             lhs=lhs,
             rhs=rhs,
@@ -355,6 +423,8 @@ class CeilRule(SimpliRule[Ceil]):
             ens=ens,
             sort=sort,
             priority=priority,
+            uid=uid,
+            label=label,
         )
 
 
@@ -367,11 +437,15 @@ class EqualsRule(SimpliRule[Equals]):
     ens: Pattern | None
     sort: Sort
     priority: int
+    uid: str
+    label: str | None
 
     @staticmethod
     def from_axiom(axiom: Axiom) -> EqualsRule:
         lhs, rhs, req, ens, sort = SimpliRule._extract(axiom, Equals)
         priority = _extract_simpl_priority(axiom)
+        uid = _extract_uid(axiom)
+        label = _extract_label(axiom)
         return EqualsRule(
             lhs=lhs,
             rhs=rhs,
@@ -379,6 +453,8 @@ class EqualsRule(SimpliRule[Equals]):
             ens=ens,
             sort=sort,
             priority=priority,
+            uid=uid,
+            label=label,
         )
 
 
