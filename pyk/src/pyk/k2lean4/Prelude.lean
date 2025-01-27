@@ -20,7 +20,7 @@ These theorems should be provable directly from the function rules and the seman
  -/
 
 -- Basic K types
-abbrev SortBool         : Type := Int
+abbrev SortBool         : Type := Bool
 abbrev SortBytes        : Type := ByteArray
 abbrev SortId           : Type := String
 abbrev SortInt          : Type := Int
