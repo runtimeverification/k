@@ -39,7 +39,7 @@ if TYPE_CHECKING:
     from typing import Final
 
     from ..kore.internal import KoreDefn
-    from ..kore.rule import RewriteRule
+    from ..kore.rule import RewriteRule, Rule
     from ..kore.syntax import Pattern, Sort, SymbolDecl
     from .model import Binder, Command, Declaration, FieldVal
 
@@ -201,6 +201,13 @@ class K2Lean4:
         return Ctor(symbol, Signature(binders, Term(sort)))
 
     @staticmethod
+    def _rule_name(rule: Rule) -> str:
+        if rule.label:
+            label = rule.label.replace('-', '_').replace('.', '_')
+            return K2Lean4._escape_ident(label)
+        return f'_{rule.uid[:7]}'
+
+    @staticmethod
     def _symbol_ident(symbol: str) -> str:
         if symbol in _SYMBOL_OVERRIDES:
             return _SYMBOL_OVERRIDES[symbol]
@@ -317,7 +324,7 @@ class K2Lean4:
         return Inductive('Rewrites', signature, ctors=ctors)
 
     def _rewrite_ctors(self) -> list[Ctor]:
-        rewrites = sorted(self.defn.rewrites, key=self._rewrite_name)
+        rewrites = sorted(self.defn.rewrites, key=self._rule_name)
         return [self._rewrite_ctor(rule) for rule in rewrites]
 
     def _rewrite_ctor(self, rule: RewriteRule) -> Ctor:
@@ -347,14 +354,7 @@ class K2Lean4:
 
         lhs_term = self._transform_pattern(lhs)
         rhs_term = self._transform_pattern(rhs)
-        return Ctor(self._rewrite_name(rule), Signature(binders, Term(f'Rewrites {lhs_term} {rhs_term}')))
-
-    @staticmethod
-    def _rewrite_name(rule: RewriteRule) -> str:
-        if rule.label:
-            label = rule.label.replace('-', '_').replace('.', '_')
-            return K2Lean4._escape_ident(label)
-        return f'_{rule.uid[:7]}'
+        return Ctor(self._rule_name(rule), Signature(binders, Term(f'Rewrites {lhs_term} {rhs_term}')))
 
     def _elim_fun_apps(self, pattern: Pattern, free: Iterator[str]) -> tuple[Pattern, dict[str, Pattern]]:
         """Replace ``foo(bar(x))`` with ``z`` and return mapping ``{y: bar(x), z: foo(y)}`` with ``y``, ``z`` fresh variables."""
