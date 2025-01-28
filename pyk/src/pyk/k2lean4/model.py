@@ -51,6 +51,24 @@ class Declaration(Command, ABC):
 
 @final
 @dataclass
+class Axiom(Declaration):
+    ident: DeclId
+    signature: Signature
+    modifiers: Modifiers | None
+
+    def __init__(self, ident: str | DeclId, signature: Signature, modifiers: Modifiers | None = None):
+        ident = DeclId(ident) if isinstance(ident, str) else ident
+        object.__setattr__(self, 'ident', ident)
+        object.__setattr__(self, 'signature', signature)
+        object.__setattr__(self, 'modifiers', modifiers)
+
+    def __str__(self) -> str:
+        modifiers = f'{self.modifiers} ' if self.modifiers else ''
+        return f'{modifiers}axiom {self.ident} {self.signature}'
+
+
+@final
+@dataclass
 class Abbrev(Declaration):
     ident: DeclId
     val: Term  # declVal
@@ -115,6 +133,244 @@ class Inductive(Declaration):
         if deriving:
             lines.append(f'  deriving {deriving}')
         return '\n'.join(lines)
+
+
+@final
+@dataclass(frozen=True)
+class Instance(Declaration):
+    signature: Signature
+    val: DeclVal
+    attr_kind: AttrKind | None
+    priority: int | None
+    ident: DeclId | None
+    modifiers: Modifiers | None
+
+    def __init__(
+        self,
+        signature: Signature,
+        val: DeclVal,
+        attr_kind: AttrKind | None = None,
+        priority: int | None = None,
+        ident: str | DeclId | None = None,
+        modifiers: Modifiers | None = None,
+    ):
+        if priority and priority < 0:
+            raise ValueError('Priority must be non-negative')
+        if not signature.ty:
+            # TODO refine type to avoid this check
+            raise ValueError('Missing type from signature')
+        ident = DeclId(ident) if isinstance(ident, str) else ident
+        object.__setattr__(self, 'signature', signature)
+        object.__setattr__(self, 'val', val)
+        object.__setattr__(self, 'attr_kind', attr_kind)
+        object.__setattr__(self, 'priority', priority)
+        object.__setattr__(self, 'ident', ident)
+        object.__setattr__(self, 'modifiers', modifiers)
+
+    def __str__(self) -> str:
+        modifiers = f'{self.modifiers} ' if self.modifiers else ''
+        attr_kind = f'{self.attr_kind.value} ' if self.attr_kind else ''
+        priority = f' (priority := {self.priority})' if self.priority is not None else ''
+        ident = f' {self.ident}' if self.ident else ''
+        signature = f' {self.signature}' if self.signature else ''
+
+        decl = f'{modifiers}{attr_kind}instance{priority}{ident}{signature}'
+
+        match self.val:
+            case SimpleVal():
+                return f'{decl} := {self.val}'
+            case StructVal(fields):
+                lines = []
+                lines.append(f'{decl} where')
+                lines.extend(indent(str(field), 2) for field in fields)
+                return '\n'.join(lines)
+            case _:
+                raise AssertionError()
+
+
+class DeclVal(ABC): ...
+
+
+@final
+@dataclass(frozen=True)
+class SimpleVal(DeclVal):
+    term: Term
+
+    def __str__(self) -> str:
+        return str(self.term)
+
+
+@final
+@dataclass(frozen=True)
+class StructVal(DeclVal):
+    fields: tuple[InstField, ...]
+
+    def __init__(self, fields: Iterable[InstField]):
+        object.__setattr__(self, 'fields', tuple(fields))
+
+    def __str__(self) -> str:
+        return indent('\n'.join(str(field) for field in self.fields), 2)
+
+
+@final
+@dataclass(frozen=True)
+class InstField:
+    lval: str
+    val: FieldVal
+    signature: Signature | None
+
+    def __init__(self, lval: str, val: FieldVal, signature: Signature | None = None):
+        object.__setattr__(self, 'lval', lval)
+        object.__setattr__(self, 'val', val)
+        object.__setattr__(self, 'signature', signature)
+
+    def __str__(self) -> str:
+        signature = f' {self.signature}' if self.signature else ''
+        decl = f'{self.lval}{signature}'
+        match self.val:
+            case SimpleFieldVal():
+                return f'{decl} := {self.val}'
+            case AltsFieldVal(alts):
+                lines = []
+                lines.append(f'{decl}')
+                lines.extend(indent(str(alt), 2) for alt in alts)
+                return '\n'.join(lines)
+            case _:
+                raise AssertionError()
+
+
+class FieldVal(ABC): ...
+
+
+@final
+@dataclass(frozen=True)
+class SimpleFieldVal(FieldVal):
+    term: Term
+
+    def __str__(self) -> str:
+        return str(self.term)
+
+
+@final
+@dataclass(frozen=True)
+class AltsFieldVal(FieldVal):
+    alts: tuple[Alt, ...]
+
+    def __init__(self, alts: Iterable[Alt]):
+        object.__setattr__(self, 'alts', tuple(alts))
+
+    def __str__(self) -> str:
+        return indent('\n'.join(str(alt) for alt in self.alts), 2)
+
+
+@final
+@dataclass(frozen=True)
+class Alt:
+    patterns: tuple[Term, ...]
+    rhs: Term
+
+    def __init__(self, patterns: Iterable[Term], rhs: Term):
+        object.__setattr__(self, 'patterns', tuple(patterns))
+        object.__setattr__(self, 'rhs', rhs)
+
+    def __str__(self) -> str:
+        patterns = ', '.join(str(pattern) for pattern in self.patterns)
+        return f'| {patterns} => {self.rhs}'
+
+
+@final
+@dataclass(frozen=True)
+class Structure(Declaration):
+    ident: DeclId
+    signature: Signature | None
+    extends: tuple[Term, ...]
+    ctor: StructCtor | None
+    deriving: tuple[str, ...]
+    modifiers: Modifiers | None
+
+    def __init__(
+        self,
+        ident: str | DeclId,
+        signature: Signature | None = None,
+        extends: Iterable[Term] | None = None,
+        ctor: StructCtor | None = None,
+        deriving: Iterable[str] | None = None,
+        modifiers: Modifiers | None = None,
+    ):
+        ident = DeclId(ident) if isinstance(ident, str) else ident
+        extends = tuple(extends) if extends is not None else ()
+        deriving = tuple(deriving) if deriving is not None else ()
+        object.__setattr__(self, 'ident', ident)
+        object.__setattr__(self, 'signature', signature)
+        object.__setattr__(self, 'extends', extends)
+        object.__setattr__(self, 'ctor', ctor)
+        object.__setattr__(self, 'deriving', deriving)
+        object.__setattr__(self, 'modifiers', modifiers)
+
+    def __str__(self) -> str:
+        lines = []
+
+        modifiers = f'{self.modifiers} ' if self.modifiers else ''
+        binders = (
+            ' '.join(str(binder) for binder in self.signature.binders)
+            if self.signature and self.signature.binders
+            else ''
+        )
+        binders = f' {binders}' if binders else ''
+        extends = ', '.join(str(extend) for extend in self.extends)
+        extends = f' extends {extends}' if extends else ''
+        ty = f' : {self.signature.ty}' if self.signature and self.signature.ty else ''
+        where = ' where' if self.ctor else ''
+        lines.append(f'{modifiers}structure {self.ident}{binders}{extends}{ty}{where}')
+
+        if self.deriving:
+            lines.append(f'  deriving {self.deriving}')
+
+        if self.ctor:
+            lines.extend(f'  {line}' for line in str(self.ctor).splitlines())
+
+        return '\n'.join(lines)
+
+
+@final
+@dataclass(frozen=True)
+class StructCtor:
+    fields: tuple[Binder, ...]  # TODO implement StructField
+    ident: StructIdent | None
+
+    def __init__(
+        self,
+        fields: Iterable[Binder],
+        ident: str | StructIdent | None = None,
+    ):
+        fields = tuple(fields)
+        ident = StructIdent(ident) if isinstance(ident, str) else ident
+        object.__setattr__(self, 'fields', fields)
+        object.__setattr__(self, 'ident', ident)
+
+    def __str__(self) -> str:
+        lines = []
+        if self.ident:
+            lines.append(f'{self.ident} ::')
+        for field in self.fields:
+            if isinstance(field, ExplBinder) and len(field.idents) == 1:
+                (ident,) = field.idents
+                ty = '' if field.ty is None else f' : {field.ty}'
+                lines.append(f'{ident}{ty}')
+            else:
+                lines.append(str(field))
+        return '\n'.join(lines)
+
+
+@final
+@dataclass(frozen=True)
+class StructIdent:
+    ident: str
+    modifiers: Modifiers | None = None
+
+    def __str__(self) -> str:
+        modifiers = f'{self.modifiers} ' if self.modifiers else ''
+        return f'{modifiers}{ self.ident}'
 
 
 @final

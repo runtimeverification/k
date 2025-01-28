@@ -55,3 +55,30 @@ def collect_symbols(pattern: Pattern) -> set[str]:
 
     pattern.collect(add_symbol)
     return res
+
+
+def elim_aliases(pattern: Pattern) -> Pattern:
+    r"""Eliminate subpatterns of the form ``\and{S}(p, X : S)``.
+
+    Both the ``\and`` and instances of ``X : S`` are replaced by the definition ``p``.
+    """
+    aliases = {}
+
+    def inline_aliases(pattern: Pattern) -> Pattern:
+        match pattern:
+            case And(_, (p, EVar(name))):
+                aliases[name] = p
+                return p
+            case _:
+                return pattern
+
+    def substitute_vars(pattern: Pattern) -> Pattern:
+        match pattern:
+            case EVar(name) as var:
+                return aliases.get(name, var)
+            case _:
+                return pattern
+
+    pattern = pattern.bottom_up(inline_aliases)
+    pattern = pattern.bottom_up(substitute_vars)
+    return pattern
