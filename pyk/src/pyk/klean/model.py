@@ -20,14 +20,23 @@ def indent(text: str, n: int) -> str:
 @final
 @dataclass(frozen=True)
 class Module:
+    imports: tuple[str, ...]
     commands: tuple[Command, ...]
 
-    def __init__(self, commands: Iterable[Command] | None = None):
+    def __init__(
+        self,
+        imports: Iterable[str] | None = None,
+        commands: Iterable[Command] | None = None,
+    ):
+        imports = tuple(imports) if imports is not None else ()
         commands = tuple(commands) if commands is not None else ()
+        object.__setattr__(self, 'imports', imports)
         object.__setattr__(self, 'commands', commands)
 
     def __str__(self) -> str:
-        return '\n\n'.join(str(command) for command in self.commands)
+        imports = '\n'.join(f'import {importt}' for importt in self.imports)
+        commands = '\n\n'.join(str(command) for command in self.commands)
+        return '\n\n'.join(section for section in [imports, commands] if section)
 
 
 class Command(ABC): ...
