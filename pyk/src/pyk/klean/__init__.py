@@ -1,1 +1,1 @@
-from .k2lean4 import K2Lean4
+from .generate import GenContext, generate
