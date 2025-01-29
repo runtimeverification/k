@@ -12,10 +12,10 @@
         checkGroups = [ ];
         overrides = p2n.defaultPoetryOverrides.extend
           (self: super: {
-            pygments = super.pygments.overridePythonAttrs
+            urllib3 = super.urllib3.overridePythonAttrs
             (
               old: {
-                buildInputs = (old.buildInputs or [ ]) ++ [ super.hatchling ];
+                buildInputs = (old.buildInputs or [ ]) ++ [ super.hatch-vcs ];
               }
             );
           });
