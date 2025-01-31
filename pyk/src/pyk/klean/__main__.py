@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from pyk.cli.utils import dir_path
+from pyk.kore.internal import KoreDefn
 
 if TYPE_CHECKING:
     from argparse import Namespace
@@ -38,8 +39,9 @@ def klean(args: Iterable[str]) -> None:
     from .generate import generate
 
     ns = _parse_args(args)
+    defn = _load_defn(ns.definition_dir)
     generate(
-        definition_dir=ns.definition_dir,
+        defn=defn,
         output_dir=ns.output_dir,
         context={
             'package_name': ns.package_name,
@@ -77,6 +79,17 @@ def _parser() -> ArgumentParser:
         help='name of the generated Lean library (default: package name in PascalCase)',
     )
     return parser
+
+
+def _load_defn(definition_dir: Path) -> KoreDefn:
+    from ..kore.parser import KoreParser
+
+    kore_text = (definition_dir / 'definition.kore').read_text()
+    definition = KoreParser(kore_text).definition()
+
+    defn = KoreDefn.from_definition(definition)
+    defn = defn.project_to_rewrites()
+    return defn
 
 
 if __name__ == '__main__':
