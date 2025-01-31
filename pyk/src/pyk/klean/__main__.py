@@ -40,6 +40,8 @@ def klean(args: Iterable[str]) -> None:
 
     ns = _parse_args(args)
     defn = _load_defn(ns.definition_dir)
+    defn = defn.filter_rewrites(ns.rules)
+    defn = defn.project_to_rewrites()
     generate(
         defn=defn,
         output_dir=ns.output_dir,
@@ -69,7 +71,12 @@ def _parser() -> ArgumentParser:
     parser.add_argument('definition_dir', metavar='DEFN_DIR', type=dir_path, help='definition directory')
     parser.add_argument('package_name', metavar='PKG_NAME', help='name of the generated Lean 4 package (in kebab-case)')
     parser.add_argument(
-        '-o', '--output', dest='output_dir', metavar='DIR', type=dir_path, help='output directory (default: .)'
+        '-o',
+        '--output',
+        dest='output_dir',
+        metavar='DIR',
+        type=dir_path,
+        help='output directory (default: .)',
     )
     parser.add_argument(
         '-l',
@@ -77,6 +84,14 @@ def _parser() -> ArgumentParser:
         dest='library_name',
         metavar='NAME',
         help='name of the generated Lean library (default: package name in PascalCase)',
+    )
+    parser.add_argument(
+        '-r',
+        '--rule',
+        dest='rules',
+        metavar='LABEL',
+        action='append',
+        help='labels of rules to include (default: all)',
     )
     return parser
 
@@ -86,10 +101,7 @@ def _load_defn(definition_dir: Path) -> KoreDefn:
 
     kore_text = (definition_dir / 'definition.kore').read_text()
     definition = KoreParser(kore_text).definition()
-
-    defn = KoreDefn.from_definition(definition)
-    defn = defn.project_to_rewrites()
-    return defn
+    return KoreDefn.from_definition(definition)
 
 
 if __name__ == '__main__':
