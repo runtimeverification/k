@@ -55,6 +55,7 @@ pyk = "pyk.__main__:main"
 pyk-covr = "pyk.kcovr:main"
 kbuild = "pyk.kbuild.__main__:main"
 kdist = "pyk.kdist.__main__:main"
+klean = "pyk.klean.__main__:main"
 krepl = "pyk.krepl.__main__:main"
 kore-exec-covr = "pyk.kore_exec_covr.__main__:main"
 
