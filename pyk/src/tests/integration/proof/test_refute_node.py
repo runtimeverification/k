@@ -295,7 +295,7 @@ class TestAPRProof(KCFGExploreTest, KProveTest):
         expected = KClaim(
             body=KRewrite(KApply('_<=Int_', KVariable('N', 'Int'), KToken('0', 'Int')), KToken('false', 'Bool')),
             requires=KApply(
-                '_<=Int_', KApply('_+Int_', KVariable('_L', None), KVariable('N', 'Int')), KToken('0', 'Int')
+                '_<=Int_', KApply('_+Int_', KVariable('_L', 'Int'), KVariable('N', 'Int')), KToken('0', 'Int')
             ),
             att=KAtt(entries=[Atts.LABEL('refute-node-claim')]),
         )

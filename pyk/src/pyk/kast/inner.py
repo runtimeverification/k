@@ -877,6 +877,22 @@ def var_occurrences(term: KInner) -> dict[str, list[KVariable]]:
     return _var_occurrences
 
 
+def keep_vars_sorted(occurrences: dict[str, list[KVariable]]) -> dict[str, KVariable]:
+    """Keep the sort of variables from the occurrences dictionary."""
+    occurrences_sorted: dict[str, KVariable] = {}
+    for k, vs in occurrences.items():
+        sort = None
+        for v in vs:
+            if v.sort is not None:
+                if sort is None:
+                    sort = v.sort
+                elif sort != v.sort:
+                    sort = None
+                    break
+        occurrences_sorted[k] = KVariable(k, sort)
+    return occurrences_sorted
+
+
 def collect(callback: Callable[[KInner], None], kinner: KInner) -> None:
     """Collect information about a given term traversing it top-down using a function with side effects.
 

@@ -20,14 +20,13 @@ These theorems should be provable directly from the function rules and the seman
  -/
 
 -- Basic K types
-abbrev SortBool         : Type := Int
+abbrev SortBool         : Type := Bool
 abbrev SortBytes        : Type := ByteArray
 abbrev SortId           : Type := String
 abbrev SortInt          : Type := Int
 abbrev SortString       : Type := String
 abbrev SortStringBuffer : Type := String
 
-namespace MapHookDef
 /-
 The `Map` sort represents a generalized associative array.
 Each key can be paired with an arbitrary value, and can be used to reference its associated value.
@@ -57,50 +56,49 @@ structure MapHookSig (K V : Type) where
   nodup      : forall al : map, List.Nodup (keys al)
 
 -- We use axioms to have uninterpreted functions
-variable (K V : Type)
-axiom mapCAx       : Type -- Map Carrier
-axiom unitAx       : mapCAx
-axiom consAx       : K → V → mapCAx → mapCAx
-axiom lookupAx     : mapCAx → K → Option V
-axiom lookupAx?    : mapCAx → K → V -- lookup with default
-axiom updateAx     : K → V → mapCAx → mapCAx
-axiom deleteAx     : mapCAx → K → mapCAx
-axiom concatAx     : mapCAx → mapCAx → Option mapCAx
-axiom differenceAx : mapCAx → mapCAx → mapCAx
-axiom updateMapAx  : mapCAx → mapCAx → mapCAx
-axiom removeAllAx  : mapCAx → List K → mapCAx
-axiom keysAx       : mapCAx → List K
-axiom in_keysAx    : mapCAx → K → Bool
-axiom valuesAx     : mapCAx → List V
-axiom sizeAx       : mapCAx → Nat
-axiom includesAx   : mapCAx → mapCAx → Bool -- map inclusion
-axiom choiceAx     : mapCAx → K -- arbitrary key from a map
-axiom nodupAx      : forall m, List.Nodup (keysAx K m)
+namespace MapHookDef
+  variable (K V : Type)
+  axiom mapCAx       : Type -- Map Carrier
+  axiom unitAx       : mapCAx
+  axiom consAx       : K → V → mapCAx → mapCAx
+  axiom lookupAx     : mapCAx → K → Option V
+  axiom lookupAx?    : mapCAx → K → V -- lookup with default
+  axiom updateAx     : K → V → mapCAx → mapCAx
+  axiom deleteAx     : mapCAx → K → mapCAx
+  axiom concatAx     : mapCAx → mapCAx → Option mapCAx
+  axiom differenceAx : mapCAx → mapCAx → mapCAx
+  axiom updateMapAx  : mapCAx → mapCAx → mapCAx
+  axiom removeAllAx  : mapCAx → List K → mapCAx
+  axiom keysAx       : mapCAx → List K
+  axiom in_keysAx    : mapCAx → K → Bool
+  axiom valuesAx     : mapCAx → List V
+  axiom sizeAx       : mapCAx → Nat
+  axiom includesAx   : mapCAx → mapCAx → Bool -- map inclusion
+  axiom choiceAx     : mapCAx → K -- arbitrary key from a map
+  axiom nodupAx      : forall m, List.Nodup (keysAx K m)
+end MapHookDef
 
 -- Uninterpreted Map implementation
 noncomputable def MapHook (K V : Type) : MapHookSig K V :=
-  { map        := mapCAx,
-    unit       := unitAx,
-    cons       := consAx K V,
-    lookup     := lookupAx K V,
-    lookup?    := lookupAx? K V,
-    update     := updateAx K V,
-    delete     := deleteAx K,
-    concat     := concatAx,
-    difference := differenceAx,
-    updateMap  := updateMapAx,
-    removeAll  := removeAllAx K,
-    keys       := keysAx K,
-    in_keys    := in_keysAx K,
-    values     := valuesAx V,
-    size       := sizeAx,
-    includes   := includesAx,
-    choice     := choiceAx K,
-    nodup      := nodupAx K }
+  { map        := MapHookDef.mapCAx,
+    unit       := MapHookDef.unitAx,
+    cons       := MapHookDef.consAx K V,
+    lookup     := MapHookDef.lookupAx K V,
+    lookup?    := MapHookDef.lookupAx? K V,
+    update     := MapHookDef.updateAx K V,
+    delete     := MapHookDef.deleteAx K,
+    concat     := MapHookDef.concatAx,
+    difference := MapHookDef.differenceAx,
+    updateMap  := MapHookDef.updateMapAx,
+    removeAll  := MapHookDef.removeAllAx K,
+    keys       := MapHookDef.keysAx K,
+    in_keys    := MapHookDef.in_keysAx K,
+    values     := MapHookDef.valuesAx V,
+    size       := MapHookDef.sizeAx,
+    includes   := MapHookDef.includesAx,
+    choice     := MapHookDef.choiceAx K,
+    nodup      := MapHookDef.nodupAx K }
 
-end MapHookDef
-
-namespace SetHookDef
 /-
 Implementation of immutable, associative, commutative sets of `KItem`.
 The sets are nilpotent, i.e., the concatenation of two sets containing elements in common is `#False` (note however, this may be silently allowed during concrete execution).
@@ -120,35 +118,34 @@ structure SetHookSig (T : Type) where
   size         : set → Int
   choice       : set → T
 
-variable (T : Type)
-axiom setCAx         : Type
-axiom unitAx         : setCAx
-axiom concatAx       : setCAx → setCAx → Option setCAx
-axiom elementAx      : T → setCAx
-axiom unionAx        : setCAx → setCAx → setCAx
-axiom intersectionAx : setCAx → setCAx → setCAx
-axiom differenceAx   : setCAx → setCAx → setCAx
-axiom inSetAx        : T → setCAx → Bool
-axiom inclusionAx    : setCAx → setCAx → Bool
-axiom sizeAx         : setCAx → Int
-axiom choiceAx       : setCAx → T
-
-noncomputable def SetHook (T : Type) : SetHookSig T :=
-  { set          := setCAx,
-    unit         := unitAx,
-    concat       := concatAx,
-    element      := elementAx T,
-    union        := unionAx,
-    intersection := intersectionAx,
-    difference   := differenceAx,
-    inSet        := inSetAx T,
-    inclusion    := inclusionAx,
-    size         := sizeAx,
-    choice       := choiceAx T }
-
+namespace SetHookDef
+  variable (T : Type)
+  axiom setCAx         : Type
+  axiom unitAx         : setCAx
+  axiom concatAx       : setCAx → setCAx → Option setCAx
+  axiom elementAx      : T → setCAx
+  axiom unionAx        : setCAx → setCAx → setCAx
+  axiom intersectionAx : setCAx → setCAx → setCAx
+  axiom differenceAx   : setCAx → setCAx → setCAx
+  axiom inSetAx        : T → setCAx → Bool
+  axiom inclusionAx    : setCAx → setCAx → Bool
+  axiom sizeAx         : setCAx → Int
+  axiom choiceAx       : setCAx → T
 end SetHookDef
 
-namespace ListHookDef
+noncomputable def SetHook (T : Type) : SetHookSig T :=
+  { set          := SetHookDef.setCAx,
+    unit         := SetHookDef.unitAx,
+    concat       := SetHookDef.concatAx,
+    element      := SetHookDef.elementAx T,
+    union        := SetHookDef.unionAx,
+    intersection := SetHookDef.intersectionAx,
+    difference   := SetHookDef.differenceAx,
+    inSet        := SetHookDef.inSetAx T,
+    inclusion    := SetHookDef.inclusionAx,
+    size         := SetHookDef.sizeAx,
+    choice       := SetHookDef.choiceAx T }
+
 /-
 The `List` sort is an ordered collection that may contain duplicate elements.
  -/
@@ -177,37 +174,37 @@ structure listHookSig (T : Type) where
   inList    : T → list → Bool
   size      : list → Int
 
-variable (T : Type)
-axiom listCAx     : Type
-axiom unitAx      : listCAx
-axiom concatAx    : listCAx → listCAx → Option listCAx
-axiom elementAx   : T → listCAx
-axiom pushAx      : T → listCAx → listCAx
-axiom getAx       : Int → listCAx → Option T
-axiom updteAx     : Int → T → listCAx → Option listCAx
-axiom makeAx      : Int → T → Option listCAx
-axiom updateAllAx : listCAx → Int → listCAx → Option listCAx
-axiom fillAx      : listCAx → Int → T → Option listCAx
-axiom rangeAx     : listCAx → Int → Int → Option listCAx
-axiom inListAx    : T → listCAx → Bool
-axiom sizeAx      : listCAx → Int
+namespace ListHookDef
+  variable (T : Type)
+  axiom listCAx     : Type
+  axiom unitAx      : listCAx
+  axiom concatAx    : listCAx → listCAx → Option listCAx
+  axiom elementAx   : T → listCAx
+  axiom pushAx      : T → listCAx → listCAx
+  axiom getAx       : Int → listCAx → Option T
+  axiom updteAx     : Int → T → listCAx → Option listCAx
+  axiom makeAx      : Int → T → Option listCAx
+  axiom updateAllAx : listCAx → Int → listCAx → Option listCAx
+  axiom fillAx      : listCAx → Int → T → Option listCAx
+  axiom rangeAx     : listCAx → Int → Int → Option listCAx
+  axiom inListAx    : T → listCAx → Bool
+  axiom sizeAx      : listCAx → Int
+end ListHookDef
 
 noncomputable def ListHook (T : Type) : listHookSig T :=
-  { list      := listCAx,
-    unit      := unitAx,
-    concat    := concatAx,
-    element   := elementAx T,
-    push      := pushAx T,
-    get       := getAx T,
-    updte     := updteAx T,
-    make      := makeAx T,
-    updateAll := updateAllAx,
-    fill      := fillAx T,
-    range     := rangeAx,
-    inList    := inListAx T,
-    size      := sizeAx }
-
-end ListHookDef
+  { list      := ListHookDef.listCAx,
+    unit      := ListHookDef.unitAx,
+    concat    := ListHookDef.concatAx,
+    element   := ListHookDef.elementAx T,
+    push      := ListHookDef.pushAx T,
+    get       := ListHookDef.getAx T,
+    updte     := ListHookDef.updteAx T,
+    make      := ListHookDef.makeAx T,
+    updateAll := ListHookDef.updateAllAx,
+    fill      := ListHookDef.fillAx T,
+    range     := ListHookDef.rangeAx,
+    inList    := ListHookDef.inListAx T,
+    size      := ListHookDef.sizeAx }
 
 class Inj (From To : Type) : Type where
   inj (x : From) : To

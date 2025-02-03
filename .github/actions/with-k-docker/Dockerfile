@@ -31,7 +31,7 @@ RUN rm /kframework.deb
 
 ARG USER_ID=9876
 ARG GROUP_ID=9876
-RUN    groupadd -g ${GROUP_ID} user                     \
+RUN    groupadd -g ${GROUP_ID} user \
     && useradd -m -u ${USER_ID} -s /bin/sh -g user user
 
 USER user
@@ -40,3 +40,8 @@ WORKDIR /home/user
 ENV PATH=/home/user/.local/bin:${PATH}
 RUN    curl -sSL https://install.python-poetry.org | python3 - --version 1.8.5 \
     && poetry --version
+
+ENV PATH=/home/user/.elan/bin:${PATH}
+RUN    curl -O https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+    && sh elan-init.sh -y \
+    && rm elan-init.sh

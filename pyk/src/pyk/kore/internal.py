@@ -86,6 +86,8 @@ class KoreDefn:
                     sorts[name] = sent
                 case SymbolDecl(Symbol(name)):
                     symbols[name] = sent
+                    if 'function' in sent.attrs_by_key:
+                        functions.setdefault(name, [])
                 case Axiom(attrs=(App('subsort', (SortApp(subsort), SortApp(supersort))),)):
                     subsorts.append((subsort, supersort))
                 case Axiom():
@@ -200,7 +202,7 @@ class KoreDefn:
             symbols: list[str] = []
             if sort in self.collections:
                 coll = self.collections[sort]
-                symbols += (coll.concat, coll.element, coll.unit)
+                symbols += [coll.concat, coll.element, coll.unit]
             symbols += self.constructors.get(sort, ())
 
             pending.extend(sort for symbol in symbols for sort in self._symbol_sorts(symbol))
@@ -228,5 +230,11 @@ class KoreDefn:
                 for function_rule in self.functions.get(symbol, ())
                 for symbol in collect_symbols(function_rule.to_axiom().pattern)
             )
+
+            # If the symbol consumes or produces a collection, collection function symbols are relevant
+            for sort in self._symbol_sorts(symbol):
+                if sort in self.collections:
+                    coll = self.collections[sort]
+                    pending.update([coll.concat, coll.element, coll.unit])
 
         return res
