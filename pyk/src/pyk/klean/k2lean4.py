@@ -251,10 +251,10 @@ class K2Lean4:
         return res
 
     def func_module(self) -> Module:
-        commands = [self._transform_func(func) for func in self.defn.functions]
+        commands = [self._func_axiom(func) for func in self.defn.functions]
         return Module(commands=commands)
 
-    def _transform_func(self, func: str) -> Axiom:
+    def _func_axiom(self, func: str) -> Axiom:
         ident = _symbol_ident(func)
         decl = self.defn.symbols[func]
         sort_params = [var.name for var in decl.symbol.vars]
