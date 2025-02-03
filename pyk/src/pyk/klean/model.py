@@ -233,8 +233,9 @@ class Definition(Declaration):
             case StructVal(fields):
                 lines.append(f'{decl} where')
                 lines.extend(indent(str(field), 2) for field in fields)
-            case _:
-                raise AssertionError()
+            case AltsVal(alts):
+                lines.append(f'{decl}')
+                lines.extend(indent(str(alt), 2) for alt in alts)
 
         if self.deriving:
             deriving = ', '.join(self.deriving)
@@ -265,6 +266,18 @@ class StructVal(DeclVal):
 
     def __str__(self) -> str:
         return indent('\n'.join(str(field) for field in self.fields), 2)
+
+
+@final
+@dataclass(frozen=True)
+class AltsVal(DeclVal):
+    alts: tuple[Alt, ...]
+
+    def __init__(self, alts: Iterable[Alt]):
+        object.__setattr__(self, 'alts', tuple(alts))
+
+    def __str__(self) -> str:
+        return indent('\n'.join(str(alt) for alt in self.alts), 2)
 
 
 @final
