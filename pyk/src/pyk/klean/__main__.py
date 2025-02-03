@@ -40,7 +40,8 @@ def klean(args: Iterable[str]) -> None:
 
     ns = _parse_args(args)
     defn = _load_defn(ns.definition_dir)
-    defn = defn.filter_rewrites(ns.rules)
+    if ns.rules:
+        defn = defn.filter_rewrites(ns.rules)
     defn = defn.project_to_rewrites()
     generate(
         defn=defn,
