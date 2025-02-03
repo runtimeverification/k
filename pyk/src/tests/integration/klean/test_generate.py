@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk import klean
+from pyk.kore.internal import KoreDefn
+from pyk.kore.parser import KoreParser
 from pyk.utils import run_process_2
 
 if TYPE_CHECKING:
@@ -15,10 +17,15 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture
-def imp_definition(kompile: Kompiler) -> Path:
+def imp_defn(kompile: Kompiler) -> KoreDefn:
     from ..utils import K_FILES
 
-    return kompile(main_file=K_FILES / 'imp.k')
+    definition_dir = kompile(main_file=K_FILES / 'imp.k')
+    kore_text = (definition_dir / 'definition.kore').read_text()
+    definition = KoreParser(kore_text).definition()
+    defn = KoreDefn.from_definition(definition)
+    defn = defn.project_to_rewrites()
+    return defn
 
 
 @pytest.fixture
@@ -31,11 +38,11 @@ def skip_if_no_lake() -> None:
 
 def test_generate(
     skip_if_no_lake: None,
-    imp_definition: Path,
+    imp_defn: KoreDefn,
     tmp_path: Path,
 ) -> None:
     project_dir = klean.generate(
-        definition_dir=imp_definition,
+        defn=imp_defn,
         output_dir=tmp_path,
         context={
             'package_name': 'klean-imp',

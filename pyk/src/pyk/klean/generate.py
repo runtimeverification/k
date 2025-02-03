@@ -3,12 +3,13 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, TypedDict
 
-from ..kore.internal import KoreDefn
 from .k2lean4 import K2Lean4
 from .model import Module
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
+
+    from ..kore.internal import KoreDefn
 
 
 class GenContext(TypedDict):
@@ -17,15 +18,13 @@ class GenContext(TypedDict):
 
 
 def generate(
-    definition_dir: str | Path,
+    defn: KoreDefn,
     context: GenContext,
     *,
     output_dir: str | Path | None = None,
 ) -> Path:
-    definition_dir = Path(definition_dir)
     output_dir = Path(output_dir) if output_dir is not None else Path('.')
 
-    defn = _load_defn(definition_dir)
     k2lean4 = K2Lean4(defn)
     genmodel = {
         'Sorts': (k2lean4.sort_module, ['Prelude']),
@@ -53,17 +52,6 @@ def _gen_template(output_dir: Path, context: GenContext) -> Path:
     res = Path(gen_res)
     assert res.is_dir()
     return res
-
-
-def _load_defn(definition_dir: Path) -> KoreDefn:
-    from ..kore.parser import KoreParser
-
-    kore_text = (definition_dir / 'definition.kore').read_text()
-    definition = KoreParser(kore_text).definition()
-
-    defn = KoreDefn.from_definition(definition)
-    defn = defn.project_to_rewrites()
-    return defn
 
 
 def _gen_modules(
