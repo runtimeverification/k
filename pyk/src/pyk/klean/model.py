@@ -197,6 +197,52 @@ class Instance(Declaration):
                 raise AssertionError()
 
 
+class Definition(Declaration):
+    ident: DeclId
+    val: DeclVal
+    signature: Signature | None
+    deriving: tuple[str, ...]
+    modifiers: Modifiers | None
+
+    def __init__(
+        self,
+        ident: str | DeclId,
+        val: DeclVal,
+        signature: Signature | None = None,
+        deriving: Iterable[str] | None = None,
+        modifiers: Modifiers | None = None,
+    ):
+        ident = DeclId(ident) if isinstance(ident, str) else ident
+        deriving = tuple(deriving) if deriving is not None else ()
+        object.__setattr__(self, 'ident', ident)
+        object.__setattr__(self, 'val', val)
+        object.__setattr__(self, 'signature', signature)
+        object.__setattr__(self, 'deriving', deriving)
+        object.__setattr__(self, 'modifiers', modifiers)
+
+    def __str__(self) -> str:
+        modifiers = f'{self.modifiers} ' if self.modifiers else ''
+        signature = f' {self.signature}' if self.signature else ''
+
+        decl = f'{modifiers}def {self.ident}{signature}'
+
+        lines = []
+        match self.val:
+            case SimpleVal():
+                lines.append(f'{decl} := {self.val}')
+            case StructVal(fields):
+                lines.append(f'{decl} where')
+                lines.extend(indent(str(field), 2) for field in fields)
+            case _:
+                raise AssertionError()
+
+        if self.deriving:
+            deriving = ', '.join(self.deriving)
+            lines.append(f'  deriving {deriving}')
+
+        return '\n'.join(lines)
+
+
 class DeclVal(ABC): ...
 
 
