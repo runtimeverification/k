@@ -200,10 +200,20 @@ class K2Lean4:
     def _symbol_ident(symbol: str) -> str:
         if symbol.startswith('Lbl'):
             symbol = symbol[3:]
-        symbol = unmunge(symbol)
-        if not _VALID_LEAN_IDENT.fullmatch(symbol):
-            symbol = f'«{symbol}»'
-        return symbol
+        return K2Lean4._escape_ident(symbol, kore=True)
+
+    @staticmethod
+    def _var_ident(var: str) -> str:
+        assert var.startswith('Var')
+        return K2Lean4._escape_ident(var[3:], kore=True)
+
+    @staticmethod
+    def _escape_ident(ident: str, *, kore: bool = False) -> str:
+        if kore:
+            ident = unmunge(ident)
+        if not _VALID_LEAN_IDENT.fullmatch(ident):
+            ident = f'«{ident}»'
+        return ident
 
     def _structure(self, sort: str) -> Structure:
         fields = self.structures[sort]
@@ -316,7 +326,9 @@ class K2Lean4:
 
         # Step 3: create binders
         binders: list[Binder] = []
-        binders.extend(self._free_binders(pattern))  # Binders of the form {x y : SortInt}
+        binders.extend(
+            self._free_binders(And(SortApp('Foo'), (pattern,) + tuple(defs.values())))
+        )  # Binders of the form {x y : SortInt}
         binders.extend(self._def_binders(defs))  # Binders of the form (def_y : foo x = some y)
 
         # Step 4: transform patterns
@@ -334,13 +346,9 @@ class K2Lean4:
     @staticmethod
     def _rewrite_name(rule: RewriteRule) -> str:
         if rule.label:
-            return rule.label.replace('-', '_').replace('.', '_')
+            label = rule.label.replace('-', '_').replace('.', '_')
+            return K2Lean4._escape_ident(label)
         return f'_{rule.uid[:7]}'
-
-    @staticmethod
-    def _var_ident(name: str) -> str:
-        assert name.startswith('Var')
-        return K2Lean4._symbol_ident(name[3:])
 
     def _elim_fun_apps(self, pattern: Pattern, free: Iterator[str]) -> tuple[Pattern, dict[str, Pattern]]:
         """Replace ``foo(bar(x))`` with ``z`` and return mapping ``{y: bar(x), z: foo(y)}`` with ``y``, ``z`` fresh variables."""
