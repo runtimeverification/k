@@ -326,7 +326,9 @@ class K2Lean4:
 
         # Step 3: create binders
         binders: list[Binder] = []
-        binders.extend(self._free_binders(pattern))  # Binders of the form {x y : SortInt}
+        binders.extend(
+            self._free_binders(And(SortApp('Foo'), (pattern,) + tuple(defs.values())))
+        )  # Binders of the form {x y : SortInt}
         binders.extend(self._def_binders(defs))  # Binders of the form (def_y : foo x = some y)
 
         # Step 4: transform patterns
