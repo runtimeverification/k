@@ -78,6 +78,8 @@ class KRun(KPrint):
         pipe_stderr: bool = True,
         bug_report: BugReport | None = None,
         debugger: bool = False,
+        save_temps: bool = False,
+        statistics: bool = False,
     ) -> CompletedProcess:
         with self._temp_file() as ntf:
             pgm.write(ntf)
@@ -94,6 +96,8 @@ class KRun(KPrint):
                 pmap=pmap,
                 term=term,
                 temp_dir=self.use_directory,
+                save_temps=save_temps,
+                statistics=statistics,
                 no_expand_macros=not expand_macros,
                 search_final=search_final,
                 no_pattern=no_pattern,
@@ -113,6 +117,8 @@ class KRun(KPrint):
         parser: str | None = None,
         term: bool = False,
         temp_dir: Path | None = None,
+        save_temps: bool = False,
+        statistics: bool = False,
         depth: int | None = None,
         expand_macros: bool = True,
         search_final: bool = False,
@@ -137,6 +143,8 @@ class KRun(KPrint):
                 cmap=cmap,
                 term=term,
                 temp_dir=temp_dir,
+                save_temps=save_temps,
+                statistics=statistics,
                 no_expand_macros=not expand_macros,
                 search_final=search_final,
                 no_pattern=no_pattern,
@@ -216,6 +224,8 @@ class KRun(KPrint):
         check: bool = False,
         pipe_stderr: bool = True,
         bug_report: BugReport | None = None,
+        save_temps: bool = False,
+        statistics: bool = False,
         debugger: bool = False,
     ) -> None:
         result = self.run_process(
@@ -230,6 +240,8 @@ class KRun(KPrint):
             output=output,
             pipe_stderr=pipe_stderr,
             bug_report=bug_report,
+            save_temps=save_temps,
+            statistics=statistics,
             debugger=debugger,
         )
 
@@ -301,6 +313,8 @@ def _krun(
     pmap: Mapping[str, str] | None = None,
     term: bool = False,
     temp_dir: Path | None = None,
+    save_temps: bool = False,
+    statistics: bool = False,
     no_expand_macros: bool = False,
     search_final: bool = False,
     no_pattern: bool = False,
@@ -334,6 +348,8 @@ def _krun(
         cmap=cmap,
         term=term,
         temp_dir=temp_dir,
+        save_temps=save_temps,
+        statistics=statistics,
         no_expand_macros=no_expand_macros,
         search_final=search_final,
         no_pattern=no_pattern,
@@ -364,6 +380,8 @@ def _build_arg_list(
     cmap: Mapping[str, str] | None,
     term: bool,
     temp_dir: Path | None,
+    save_temps: bool,
+    statistics: bool,
     no_expand_macros: bool,
     search_final: bool,
     no_pattern: bool,
@@ -389,6 +407,10 @@ def _build_arg_list(
         args += ['--term']
     if temp_dir:
         args += ['--temp-dir', str(temp_dir)]
+    if save_temps:
+        args += ['--save-temps']
+    if statistics:
+        args += ['--statistics']
     if no_expand_macros:
         args += ['--no-expand-macros']
     if search_final:
