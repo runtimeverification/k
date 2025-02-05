@@ -517,7 +517,7 @@ def _param_sorts(decl: SymbolDecl) -> list[str]:
 
 def _ordered_sorts(defn: KoreDefn) -> list[list[str]]:
     deps = _sort_dependencies(defn)
-    sccs = _sort_sccs(deps)
+    sccs = _sccs(deps)
 
     sorts_by_scc: dict[int, set[str]] = {}
     for sort, scc in sccs.items():
@@ -565,17 +565,17 @@ def _sort_dependencies(defn: KoreDefn) -> dict[str, set[str]]:
 
 
 # TODO Implement a more efficient algorithm, e.g. Tarjan's algorithm
-def _sort_sccs(deps: dict[str, set[str]]) -> dict[str, int]:
+def _sccs(deps: dict[str, set[str]]) -> dict[str, int]:
     res: dict[str, int] = {}
 
     scc = count()
-    for sort, dep_sorts in deps.items():
-        if sort in res:
+    for elem, dep_elems in deps.items():
+        if elem in res:
             continue
         idx = next(scc)
-        res[sort] = idx
-        for dep in dep_sorts:
-            if sort in deps[dep]:
+        res[elem] = idx
+        for dep in dep_elems:
+            if elem in deps[dep]:
                 res[dep] = idx
 
     return res
