@@ -516,26 +516,7 @@ def _param_sorts(decl: SymbolDecl) -> list[str]:
 
 
 def _ordered_sorts(defn: KoreDefn) -> list[list[str]]:
-    deps = _sort_dependencies(defn)
-    sccs = _sccs(deps)
-
-    sorts_by_scc: dict[int, set[str]] = {}
-    for sort, scc in sccs.items():
-        sorts_by_scc.setdefault(scc, set()).add(sort)
-
-    scc_deps: dict[int, set[int]] = {}
-    for scc, sorts in sorts_by_scc.items():
-        assert sorts
-        sort, *_ = sorts
-        scc_deps[scc] = set()
-        for dep in deps[sort]:
-            dep_scc = sccs[dep]
-            if dep_scc == scc:
-                continue
-            scc_deps[scc].add(dep_scc)
-
-    ordered_sccs = list(TopologicalSorter(scc_deps).static_order())
-    return [sorted(sorts_by_scc[scc]) for scc in ordered_sccs]
+    return _ordered_sccs(_sort_dependencies(defn))
 
 
 def _sort_dependencies(defn: KoreDefn) -> dict[str, set[str]]:
@@ -558,10 +539,31 @@ def _sort_dependencies(defn: KoreDefn) -> dict[str, set[str]]:
             deps.extend((sort, param_sort) for param_sort in _param_sorts(elem))
 
     closed = POSet(deps).image  # TODO POSet should be called "transitively closed relation" or similar
-    res = {
+    return {
         sort: set(closed.get(sort, [])) for sort in sorts
     }  # Ensure that sorts without dependencies are also represented
-    return res
+
+
+def _ordered_sccs(deps: dict[str, set[str]]) -> list[list[str]]:
+    sccs = _sccs(deps)
+
+    elems_by_scc: dict[int, set[str]] = {}
+    for elem, scc in sccs.items():
+        elems_by_scc.setdefault(scc, set()).add(elem)
+
+    scc_deps: dict[int, set[int]] = {}
+    for scc, elems in elems_by_scc.items():
+        assert elems
+        elem, *_ = elems
+        scc_deps[scc] = set()
+        for dep in deps[elem]:
+            dep_scc = sccs[dep]
+            if dep_scc == scc:
+                continue
+            scc_deps[scc].add(dep_scc)
+
+    ordered_sccs = list(TopologicalSorter(scc_deps).static_order())
+    return [sorted(elems_by_scc[scc]) for scc in ordered_sccs]
 
 
 # TODO Implement a more efficient algorithm, e.g. Tarjan's algorithm
