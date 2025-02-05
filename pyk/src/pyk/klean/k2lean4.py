@@ -11,23 +11,27 @@ from ..dequote import bytes_encode
 from ..konvert import unmunge
 from ..kore.internal import CollectionKind
 from ..kore.kompiled import KoreSymbolTable
-from ..kore.manip import elim_aliases, free_occs
+from ..kore.manip import collect_symbols, elim_aliases, free_occs
 from ..kore.syntax import DV, And, App, EVar, SortApp, String, Top
 from ..utils import FrozenDict, POSet
 from .model import (
     Alt,
     AltsFieldVal,
+    AltsVal,
     Axiom,
     Ctor,
+    Definition,
     ExplBinder,
     ImplBinder,
     Inductive,
     Instance,
     InstField,
+    Modifiers,
     Module,
     Mutual,
     Signature,
     SimpleFieldVal,
+    SimpleVal,
     StructCtor,
     Structure,
     StructVal,
@@ -35,16 +39,22 @@ from .model import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Iterator, Mapping
+    from collections.abc import Collection, Iterable, Iterator, Mapping
     from typing import Final
 
     from ..kore.internal import KoreDefn
-    from ..kore.rule import RewriteRule, Rule
+    from ..kore.rule import FunctionRule, RewriteRule, Rule
     from ..kore.syntax import Pattern, Sort, SymbolDecl
-    from .model import Binder, Command, Declaration, FieldVal
+    from .model import Binder, Command, Declaration, DeclVal, FieldVal
 
 
 _PRELUDE_SORTS: Final = {'SortBool', 'SortBytes', 'SortId', 'SortInt', 'SortString', 'SortStringBuffer'}
+_PRELUDE_FUNCS: Final = {
+    "Lbl'UndsPlus'Int'Unds'",
+    "Lbl'Unds'-Int'Unds'",
+    "Lbl'UndsStar'Int'Unds'",
+    "Lbl'Unds-LT-Eqls'Int'Unds'",
+}
 
 _SYMBOL_OVERRIDES: Final = {
     'Lblite': 'kite',
@@ -99,6 +109,51 @@ class K2Lean4:
             return None
 
         return FrozenDict((sort, fields) for sort in self.defn.sorts if (fields := fields_of(sort)) is not None)
+
+    @cached_property
+    def _func_rules_by_uid(self) -> FrozenDict[str, FunctionRule]:
+        return FrozenDict((rule.uid, rule) for rules in self.defn.functions.values() for rule in rules)
+
+    @cached_property
+    def _func_deps(self) -> FrozenDict[str, frozenset[str]]:
+        deps: list[tuple[str, str]] = []
+        elems: set[str] = set()
+        for func, rules in self.defn.functions.items():
+            elems.add(func)
+            for rule in rules:
+                elems.add(rule.uid)
+                # A function depends on the rules that define it
+                deps.append((func, rule.uid))
+                # A rule depends on all the functions that it applies
+                symbols = collect_symbols(
+                    And(SortApp('SortFoo'), (rule.req or Top(SortApp('SortFoo')), *rule.lhs.args, rule.rhs))
+                )  # Collection functions like `_List_` can occur on the LHS
+                deps.extend((rule.uid, symbol) for symbol in symbols if symbol in self.defn.functions)
+
+        closed = POSet(deps).image
+        return FrozenDict((elem, frozenset(closed.get(elem, []))) for elem in elems)
+
+    @cached_property
+    def _func_sccs(self) -> tuple[tuple[str, ...], ...]:
+        sccs = _ordered_sccs(self._func_deps)
+        return tuple(tuple(scc) for scc in sccs)
+
+    @cached_property
+    def noncomputable(self) -> frozenset[str]:
+        res: set[str] = set()
+
+        for scc in self._func_sccs:
+            assert scc
+            elem = scc[0]
+
+            if elem in self.defn.functions and elem not in _PRELUDE_FUNCS and not self.defn.functions[elem]:
+                assert len(scc) == 1
+                res.add(elem)
+
+            if any(dep in res for dep in self._func_deps[elem]):
+                res.update(scc)
+
+        return frozenset(res)
 
     @staticmethod
     def _is_cell(sort: str) -> bool:
@@ -251,12 +306,154 @@ class K2Lean4:
         return res
 
     def func_module(self) -> Module:
-        commands = [self._func_axiom(func) for func in self.defn.functions]
-        return Module(commands=commands)
+        sccs = self._func_sccs
+        return Module(commands=tuple(command for elems in sccs if (command := self._func_block(elems))))
 
-    def _func_axiom(self, func: str) -> Axiom:
+    def _func_block(self, elems: Iterable[str]) -> Command | None:
+        assert elems
+        elems = [elem for elem in elems if elem not in _PRELUDE_FUNCS]
+
+        if not elems:
+            return None
+
+        if len(elems) == 1:
+            (elem,) = elems
+            return self._func_command(elem)
+
+        return Mutual(commands=tuple(self._func_command(elem) for elem in elems))
+
+    def _func_command(self, elem: str) -> Command:
+        if elem in self.defn.functions:
+            decl = self.defn.symbols[elem]
+            rules = self.defn.functions[elem]
+            if rules:
+                return self._func_def(decl, rules)
+            return self._func_axiom(decl)
+        rule = self._func_rules_by_uid[elem]
+        return self._func_rule_def(rule)
+
+    def _func_def(self, decl: SymbolDecl, rules: tuple[FunctionRule, ...]) -> Definition:
+        def sort_rules_by_priority(rules: tuple[FunctionRule, ...]) -> list[str]:
+            grouped: dict[int, list[str]] = {}
+            for rule in rules:
+                grouped.setdefault(rule.priority, []).append(_rule_name(rule))
+            groups = [sorted(grouped[priority]) for priority in sorted(grouped)]
+            return [rule for group in groups for rule in group]
+
+        assert rules
+
+        sorted_rules = sort_rules_by_priority(rules)
+        params = [f'x{i}' for i in range(len(decl.param_sorts))]
+        arg_str = ' ' + ' '.join(params) if params else ''
+        term: Term
+        if len(sorted_rules) == 1:
+            rule_str = sorted_rules[0]
+            term = Term(f'{rule_str}{arg_str}')
+        else:
+            rules_str = f'[{", ".join(sorted_rules)}]'
+            term = Term(f'{rules_str}.findSome? (·{arg_str})')
+
+        val = SimpleVal(term)
+        func = decl.symbol.name
         ident = _symbol_ident(func)
-        decl = self.defn.symbols[func]
+        signature = self._func_signature(decl)
+        modifiers = Modifiers(noncomputable=True) if func in self.noncomputable else None
+
+        return Definition(ident, val, signature, modifiers=modifiers)
+
+    def _func_rule_def(self, rule: FunctionRule) -> Definition:
+        decl = self.defn.symbols[rule.lhs.symbol]
+        sort_params = [var.name for var in decl.symbol.vars]
+        param_sorts = [sort.name for sort in decl.param_sorts]
+        sort = decl.sort.name
+
+        ident = _rule_name(rule)
+        binders = (ImplBinder(sort_params, Term('Type')),) if sort_params else ()
+        ty = Term(' → '.join(param_sorts + [f'Option {sort}']))
+        modifiers = Modifiers(noncomputable=True) if rule.uid in self.noncomputable else None
+        signature = Signature(binders, ty)
+
+        req, lhs, rhs, defs = self._extract_func_rule(rule)
+        val = self._func_rule_val(lhs.args, req, rhs, defs)
+
+        return Definition(ident, val, signature, modifiers=modifiers)
+
+    def _extract_func_rule(self, rule: FunctionRule) -> tuple[Pattern, App, Pattern, dict[str, Pattern]]:
+        req = rule.req if rule.req else Top(SortApp('Foo'))
+
+        pattern = elim_aliases(And(SortApp('Foo'), (req, rule.lhs, rule.rhs)))
+        assert isinstance(pattern, And)
+        req, lhs, rhs = pattern.ops
+        assert isinstance(lhs, App)
+
+        free = (f"Var'Unds'Val{i}" for i in count())
+        pattern, defs = self._elim_fun_apps(And(SortApp('Foo'), (req, rhs)), free)
+        assert isinstance(pattern, And)
+        req, rhs = pattern.ops
+
+        return req, lhs, rhs, defs
+
+    def _func_rule_val(
+        self,
+        args: tuple[Pattern, ...],
+        req: Pattern,
+        rhs: Pattern,
+        defs: dict[str, Pattern],
+    ) -> DeclVal:
+        term = self._func_rule_term(req, rhs, defs)
+
+        if not args:
+            return SimpleVal(term)
+
+        alts: list[Alt] = []
+
+        match_alt = Alt(tuple(self._transform_pattern(arg, concrete=True) for arg in args), term)
+        alts.append(match_alt)
+
+        if not all(self._is_exhaustive(arg) for arg in args):
+            nomatch_alt = Alt((Term('_'),) * len(args), Term('none'))
+            alts.append(nomatch_alt)
+
+        return AltsVal(alts)
+
+    def _func_rule_term(self, req: Pattern, rhs: Pattern, defs: dict[str, Pattern]) -> Term:
+        if not defs and isinstance(req, Top):
+            return Term(f'some {self._transform_arg(rhs)}')
+
+        seq_strs: list[str] = []
+        seq_strs.extend(f'let {var} <- {self._transform_pattern(pattern)}' for var, pattern in defs.items())
+        if not isinstance(req, Top):
+            seq_strs.append(f'guard {self._transform_arg(req)}')
+        seq_strs.append(f'return {self._transform_arg(rhs)}')
+        do_str = '\n'.join('  ' + seq_str for seq_str in seq_strs)
+        return Term(f'do\n{do_str}')
+
+    def _is_exhaustive(self, pattern: Pattern) -> bool:
+        match pattern:
+            case DV():
+                return False
+            case EVar():
+                return True
+            case App(symbol, _, args) as app:
+                if symbol in self.defn.functions:
+                    # Collection function
+                    return False
+
+                _sort = self.symbol_table.infer_sort(app)
+                assert isinstance(_sort, SortApp)
+                sort = _sort.name
+                n_ctors = len(self.defn.constructors.get(sort, ())) + len(self.defn.subsorts.get(sort, ()))
+                assert n_ctors
+                return n_ctors == 1 and all(self._is_exhaustive(arg) for arg in args)
+            case _:
+                raise AssertionError()
+
+    def _func_axiom(self, decl: SymbolDecl) -> Axiom:
+        ident = _symbol_ident(decl.symbol.name)
+        signature = self._func_signature(decl)
+        return Axiom(ident, signature)
+
+    def _func_signature(self, decl: SymbolDecl) -> Signature:
         sort_params = [var.name for var in decl.symbol.vars]
         param_sorts = [sort.name for sort in decl.param_sorts]
         sort = decl.sort.name
@@ -265,7 +462,8 @@ class K2Lean4:
         if sort_params:
             binders.append(ImplBinder(sort_params, Term('Type')))
         binders.extend(ExplBinder((f'x{i}',), Term(sort)) for i, sort in enumerate(param_sorts))
-        return Axiom(ident, Signature(binders, Term(f'Option {sort}')))
+
+        return Signature(binders, Term(f'Option {sort}'))
 
     def rewrite_module(self) -> Module:
         commands = (self._rewrite_inductive(),)
@@ -559,7 +757,7 @@ def _sort_dependencies(defn: KoreDefn) -> dict[str, set[str]]:
     }  # Ensure that sorts without dependencies are also represented
 
 
-def _ordered_sccs(deps: dict[str, set[str]]) -> list[list[str]]:
+def _ordered_sccs(deps: Mapping[str, Collection[str]]) -> list[list[str]]:
     sccs = _sccs(deps)
 
     elems_by_scc: dict[int, set[str]] = {}
@@ -582,7 +780,7 @@ def _ordered_sccs(deps: dict[str, set[str]]) -> list[list[str]]:
 
 
 # TODO Implement a more efficient algorithm, e.g. Tarjan's algorithm
-def _sccs(deps: dict[str, set[str]]) -> dict[str, int]:
+def _sccs(deps: Mapping[str, Iterable[str]]) -> dict[str, int]:
     res: dict[str, int] = {}
 
     scc = count()

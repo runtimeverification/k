@@ -210,3 +210,8 @@ class Inj (From To : Type) : Type where
   inj (x : From) : To
 
 def inj {From To : Type} [inst : Inj From To] := inst.inj
+
+def «_+Int_» (x0 : SortInt) (x1 : SortInt) : Option SortInt := some (x0 + x1)
+def «_-Int_» (x0 : SortInt) (x1 : SortInt) : Option SortInt := some (x0 - x1)
+def «_*Int_» (x0 : SortInt) (x1 : SortInt) : Option SortInt := some (x0 * x1)
+def «_<=Int_» (x0 : SortInt) (x1 : SortInt) : Option SortBool := some (x0 <= x1)
