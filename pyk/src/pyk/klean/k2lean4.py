@@ -361,16 +361,27 @@ class K2Lean4:
             for ident, pattern in defs.items()
         ]
 
-    def _transform_pattern(self, pattern: Pattern) -> Term:
+    def _transform_pattern(self, pattern: Pattern, *, concrete: bool = False) -> Term:
         match pattern:
             case EVar(name):
                 return self._transform_evar(name)
             case DV(SortApp(sort), String(value)):
                 return self._transform_dv(sort, value)
             case App(symbol, sorts, args):
-                return self._transform_app(symbol, sorts, args)
+                return self._transform_app(symbol, sorts, args, concrete=concrete)
             case _:
                 raise ValueError(f'Unsupported pattern: {pattern.text}')
+
+    def _transform_arg(self, pattern: Pattern, *, concrete: bool = False) -> Term:
+        term = self._transform_pattern(pattern, concrete=concrete)
+
+        if not isinstance(pattern, App):
+            return term
+
+        if pattern.symbol in self.structure_symbols:
+            return term
+
+        return Term(f'({term})')
 
     def _transform_evar(self, name: str) -> Term:
         return Term(_var_ident(name))
@@ -422,47 +433,47 @@ class K2Lean4:
         encoded = ''.join(encode(c) for c in value)
         return Term(f'"{encoded}"')
 
-    def _transform_app(self, symbol: str, sorts: tuple[Sort, ...], args: tuple[Pattern, ...]) -> Term:
+    def _transform_app(
+        self,
+        symbol: str,
+        sorts: tuple[Sort, ...],
+        args: tuple[Pattern, ...],
+        *,
+        concrete: bool,
+    ) -> Term:
         if symbol == 'inj':
-            return self._transform_inj_app(sorts, args)
+            return self._transform_inj_app(sorts, args, concrete=concrete)
 
         if symbol in self.structure_symbols:
             fields = self.structures[self.structure_symbols[symbol]]
-            return self._transform_structure_app(fields, args)
+            return self._transform_structure_app(fields, args, concrete=concrete)
 
         decl = self.defn.symbols[symbol]
         sort = decl.sort.name if isinstance(decl.sort, SortApp) else None
-        return self._transform_basic_app(sort, symbol, args)
+        return self._transform_basic_app(sort, symbol, args, concrete=concrete)
 
-    def _transform_arg(self, pattern: Pattern) -> Term:
-        term = self._transform_pattern(pattern)
-
-        if not isinstance(pattern, App):
-            return term
-
-        if pattern.symbol in self.structure_symbols:
-            return term
-
-        return Term(f'({term})')
-
-    def _transform_inj_app(self, sorts: tuple[Sort, ...], args: tuple[Pattern, ...]) -> Term:
+    def _transform_inj_app(self, sorts: tuple[Sort, ...], args: tuple[Pattern, ...], *, concrete: bool) -> Term:
         _from_sort, _to_sort = sorts
         assert isinstance(_from_sort, SortApp)
         assert isinstance(_to_sort, SortApp)
         from_str = _from_sort.name
         to_str = _to_sort.name
         (arg,) = args
-        term = self._transform_arg(arg)
-        return Term(f'(@inj {from_str} {to_str}) {term}')
+        term = self._transform_arg(arg, concrete=concrete)
+        if concrete:
+            return Term(f'{to_str}.inj_{from_str} {term}')
+        else:
+            return Term(f'(@inj {from_str} {to_str}) {term}')
 
-    def _transform_structure_app(self, fields: Iterable[Field], args: Iterable[Pattern]) -> Term:
+    def _transform_structure_app(self, fields: Iterable[Field], args: Iterable[Pattern], *, concrete: bool) -> Term:
         fields_str = ', '.join(
-            f'{field.name} := {self._transform_pattern(arg)}' for field, arg in zip(fields, args, strict=True)
+            f'{field.name} := {self._transform_pattern(arg, concrete=concrete)}'
+            for field, arg in zip(fields, args, strict=True)
         )
         lbrace, rbrace = ['{', '}']
         return Term(f'{lbrace} {fields_str} {rbrace}')
 
-    def _transform_basic_app(self, sort: str | None, symbol: str, args: Iterable[Pattern]) -> Term:
+    def _transform_basic_app(self, sort: str | None, symbol: str, args: Iterable[Pattern], *, concrete: bool) -> Term:
         chunks = []
 
         ident: str
@@ -473,7 +484,7 @@ class K2Lean4:
             ident = _symbol_ident(symbol)
 
         chunks.append(ident)
-        chunks.extend(str(self._transform_arg(arg)) for arg in args)
+        chunks.extend(str(self._transform_arg(arg, concrete=concrete)) for arg in args)
         return Term(' '.join(chunks))
 
 
