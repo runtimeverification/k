@@ -44,10 +44,6 @@ if TYPE_CHECKING:
     from .model import Binder, Command, Declaration, FieldVal
 
 
-_VALID_LEAN_IDENT: Final = re.compile(
-    "_[a-zA-Z0-9_?!']+|[a-zA-Z][a-zA-Z0-9_?!']*"
-)  # Simplified to characters permitted in KORE in the first place
-
 _PRELUDE_SORTS: Final = {'SortBool', 'SortBytes', 'SortId', 'SortInt', 'SortString', 'SortStringBuffer'}
 
 _SYMBOL_OVERRIDES: Final = {
@@ -196,37 +192,9 @@ class K2Lean4:
     def _symbol_ctor(self, sort: str, symbol: str) -> Ctor:
         decl = self.defn.symbols[symbol]
         param_sorts = _param_sorts(decl)
-        symbol = self._symbol_ident(symbol)
+        symbol = _symbol_ident(symbol)
         binders = tuple(ExplBinder((f'x{i}',), Term(sort)) for i, sort in enumerate(param_sorts))
         return Ctor(symbol, Signature(binders, Term(sort)))
-
-    @staticmethod
-    def _rule_name(rule: Rule) -> str:
-        if rule.label:
-            label = rule.label.replace('-', '_').replace('.', '_')
-            return K2Lean4._escape_ident(label)
-        return f'_{rule.uid[:7]}'
-
-    @staticmethod
-    def _symbol_ident(symbol: str) -> str:
-        if symbol in _SYMBOL_OVERRIDES:
-            return _SYMBOL_OVERRIDES[symbol]
-        if symbol.startswith('Lbl'):
-            symbol = symbol[3:]
-        return K2Lean4._escape_ident(symbol, kore=True)
-
-    @staticmethod
-    def _var_ident(var: str) -> str:
-        assert var.startswith('Var')
-        return K2Lean4._escape_ident(var[3:], kore=True)
-
-    @staticmethod
-    def _escape_ident(ident: str, *, kore: bool = False) -> str:
-        if kore:
-            ident = unmunge(ident)
-        if not _VALID_LEAN_IDENT.fullmatch(ident):
-            ident = f'«{ident}»'
-        return ident
 
     def _structure(self, sort: str) -> Structure:
         fields = self.structures[sort]
@@ -287,7 +255,7 @@ class K2Lean4:
         return Module(commands=commands)
 
     def _transform_func(self, func: str) -> Axiom:
-        ident = self._symbol_ident(func)
+        ident = _symbol_ident(func)
         decl = self.defn.symbols[func]
         sort_params = [var.name for var in decl.symbol.vars]
         param_sorts = [sort.name for sort in decl.param_sorts]
@@ -324,7 +292,7 @@ class K2Lean4:
         return Inductive('Rewrites', signature, ctors=ctors)
 
     def _rewrite_ctors(self) -> list[Ctor]:
-        rewrites = sorted(self.defn.rewrites, key=self._rule_name)
+        rewrites = sorted(self.defn.rewrites, key=_rule_name)
         return [self._rewrite_ctor(rule) for rule in rewrites]
 
     def _rewrite_ctor(self, rule: RewriteRule) -> Ctor:
@@ -354,7 +322,7 @@ class K2Lean4:
 
         lhs_term = self._transform_pattern(lhs)
         rhs_term = self._transform_pattern(rhs)
-        return Ctor(self._rule_name(rule), Signature(binders, Term(f'Rewrites {lhs_term} {rhs_term}')))
+        return Ctor(_rule_name(rule), Signature(binders, Term(f'Rewrites {lhs_term} {rhs_term}')))
 
     def _elim_fun_apps(self, pattern: Pattern, free: Iterator[str]) -> tuple[Pattern, dict[str, Pattern]]:
         """Replace ``foo(bar(x))`` with ``z`` and return mapping ``{y: bar(x), z: foo(y)}`` with ``y``, ``z`` fresh variables."""
@@ -363,7 +331,7 @@ class K2Lean4:
         def abstract_funcs(pattern: Pattern) -> Pattern:
             if isinstance(pattern, App) and pattern.symbol in self.defn.functions:
                 name = next(free)
-                ident = self._var_ident(name)
+                ident = _var_ident(name)
                 defs[ident] = pattern
                 sort = self.symbol_table.infer_sort(pattern)
                 return EVar(name, sort)
@@ -377,7 +345,7 @@ class K2Lean4:
         for var in free_vars:
             match var:
                 case EVar(name, SortApp(sort)):
-                    ident = self._var_ident(name)
+                    ident = _var_ident(name)
                     assert ident not in grouped_vars.get(sort, ())
                     grouped_vars.setdefault(sort, set()).add(ident)
                 case _:
@@ -405,7 +373,7 @@ class K2Lean4:
                 raise ValueError(f'Unsupported pattern: {pattern.text}')
 
     def _transform_evar(self, name: str) -> Term:
-        return Term(self._var_ident(name))
+        return Term(_var_ident(name))
 
     def _transform_dv(self, sort: str, value: str) -> Term:
         match sort:
@@ -500,13 +468,46 @@ class K2Lean4:
         ident: str
         if sort and symbol in self.defn.constructors.get(sort, ()):
             # Symbol is a constructor
-            ident = f'{sort}.{self._symbol_ident(symbol)}'
+            ident = f'{sort}.{_symbol_ident(symbol)}'
         else:
-            ident = self._symbol_ident(symbol)
+            ident = _symbol_ident(symbol)
 
         chunks.append(ident)
         chunks.extend(str(self._transform_arg(arg)) for arg in args)
         return Term(' '.join(chunks))
+
+
+def _rule_name(rule: Rule) -> str:
+    if rule.label:
+        label = rule.label.replace('-', '_').replace('.', '_')
+        return _escape_ident(label)
+    return f'_{rule.uid[:7]}'
+
+
+def _symbol_ident(symbol: str) -> str:
+    if symbol in _SYMBOL_OVERRIDES:
+        return _SYMBOL_OVERRIDES[symbol]
+    if symbol.startswith('Lbl'):
+        symbol = symbol[3:]
+    return _escape_ident(symbol, kore=True)
+
+
+def _var_ident(var: str) -> str:
+    assert var.startswith('Var')
+    return _escape_ident(var[3:], kore=True)
+
+
+_VALID_LEAN_IDENT: Final = re.compile(
+    "_[a-zA-Z0-9_?!']+|[a-zA-Z][a-zA-Z0-9_?!']*"
+)  # Simplified to characters permitted in KORE in the first place
+
+
+def _escape_ident(ident: str, *, kore: bool = False) -> str:
+    if kore:
+        ident = unmunge(ident)
+    if not _VALID_LEAN_IDENT.fullmatch(ident):
+        ident = f'«{ident}»'
+    return ident
 
 
 def _param_sorts(decl: SymbolDecl) -> list[str]:
