@@ -378,6 +378,9 @@ class K2Lean4:
         if not isinstance(pattern, App):
             return term
 
+        if not pattern.args:
+            return term
+
         if pattern.symbol in self.structure_symbols:
             return term
 
