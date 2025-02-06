@@ -426,7 +426,7 @@ class K2Lean4:
 
     def _transform_bytes_dv(self, value: str) -> Term:
         bytes_str = ', '.join(f'0x{byte:02X}' for byte in bytes_encode(value))
-        return Term(f'⟨#[{bytes_str}⟩]')
+        return Term(f'⟨#[{bytes_str}]⟩')
 
     def _transform_string_dv(self, value: str) -> Term:
         escapes = {
