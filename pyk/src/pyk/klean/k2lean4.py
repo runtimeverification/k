@@ -350,8 +350,9 @@ class K2Lean4:
             rule_str = sorted_rules[0]
             term = Term(f'{rule_str}{arg_str}')
         else:
-            rules_str = f'[{", ".join(sorted_rules)}]'
-            term = Term(f'{rules_str}.findSome? (·{arg_str})')
+            assert arg_str  # a function with multiple rules is not nullary
+            rules_str = ' <|> '.join(f'({rule_str}{arg_str})' for rule_str in sorted_rules)
+            term = Term(rules_str)
 
         val = SimpleVal(term)
         func = decl.symbol.name
