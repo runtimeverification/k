@@ -54,6 +54,7 @@ structure MapHookSig (K V : Type) where
   includes   : map → map → Bool -- map inclusion
   choice     : map → K -- arbitrary key from a map
   nodup      : forall al : map, List.Nodup (keys al)
+  split      : map → List K → Option (List V × map)
 
 -- We use axioms to have uninterpreted functions
 namespace MapHookDef
@@ -76,6 +77,7 @@ namespace MapHookDef
   axiom includesAx   : mapCAx → mapCAx → Bool -- map inclusion
   axiom choiceAx     : mapCAx → K -- arbitrary key from a map
   axiom nodupAx      : forall m, List.Nodup (keysAx K m)
+  axiom splitAx      : mapCAx → List K → Option (List V × mapCAx)
 end MapHookDef
 
 -- Uninterpreted Map implementation
@@ -97,7 +99,8 @@ noncomputable def MapHook (K V : Type) : MapHookSig K V :=
     size       := MapHookDef.sizeAx,
     includes   := MapHookDef.includesAx,
     choice     := MapHookDef.choiceAx K,
-    nodup      := MapHookDef.nodupAx K }
+    nodup      := MapHookDef.nodupAx K,
+    split      := MapHookDef.splitAx K V }
 
 /-
 Implementation of immutable, associative, commutative sets of `KItem`.
@@ -117,6 +120,7 @@ structure SetHookSig (T : Type) where
   inclusion    : set → set → Bool
   size         : set → Int
   choice       : set → T
+  split        : set → List T → Option set
 
 namespace SetHookDef
   variable (T : Type)
@@ -131,6 +135,7 @@ namespace SetHookDef
   axiom inclusionAx    : setCAx → setCAx → Bool
   axiom sizeAx         : setCAx → Int
   axiom choiceAx       : setCAx → T
+  axiom splitAx        : setCAx → List T → Option setCAx
 end SetHookDef
 
 noncomputable def SetHook (T : Type) : SetHookSig T :=
@@ -144,7 +149,8 @@ noncomputable def SetHook (T : Type) : SetHookSig T :=
     inSet        := SetHookDef.inSetAx T,
     inclusion    := SetHookDef.inclusionAx,
     size         := SetHookDef.sizeAx,
-    choice       := SetHookDef.choiceAx T }
+    choice       := SetHookDef.choiceAx T,
+    split        := SetHookDef.splitAx T }
 
 /-
 The `List` sort is an ordered collection that may contain duplicate elements.
@@ -173,6 +179,8 @@ structure listHookSig (T : Type) where
   -- the hook is `in`, but clashes with Lean syntax
   inList    : T → list → Bool
   size      : list → Int
+  -- split list into prefix, middle and postfix, given prefix and postfix length
+  split     : list → Nat → Nat → Option (List T × list × List T)
 
 namespace ListHookDef
   variable (T : Type)
@@ -189,6 +197,7 @@ namespace ListHookDef
   axiom rangeAx     : listCAx → Int → Int → Option listCAx
   axiom inListAx    : T → listCAx → Bool
   axiom sizeAx      : listCAx → Int
+  axiom splitAx     : listCAx → Nat → Nat → Option (List T × listCAx × List T)
 end ListHookDef
 
 noncomputable def ListHook (T : Type) : listHookSig T :=
@@ -204,7 +213,8 @@ noncomputable def ListHook (T : Type) : listHookSig T :=
     fill      := ListHookDef.fillAx T,
     range     := ListHookDef.rangeAx,
     inList    := ListHookDef.inListAx T,
-    size      := ListHookDef.sizeAx }
+    size      := ListHookDef.sizeAx,
+    split     := ListHookDef.splitAx T }
 
 class Inj (From To : Type) : Type where
   inj (x : From) : To
