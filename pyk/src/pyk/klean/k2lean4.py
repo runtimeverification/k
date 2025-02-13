@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from abc import ABC
 from dataclasses import dataclass
 from functools import cached_property
 from graphlib import TopologicalSorter
@@ -12,7 +13,7 @@ from ..konvert import unmunge
 from ..kore.internal import CollectionKind
 from ..kore.kompiled import KoreSymbolTable
 from ..kore.manip import collect_symbols, elim_aliases, free_occs
-from ..kore.syntax import DV, And, App, EVar, SortApp, String, Top
+from ..kore.syntax import DV, And, App, EVar, Pattern, SortApp, String, Top
 from ..utils import FrozenDict, POSet
 from .model import (
     Alt,
@@ -44,7 +45,7 @@ if TYPE_CHECKING:
 
     from ..kore.internal import KoreDefn
     from ..kore.rule import FunctionRule, RewriteRule, Rule
-    from ..kore.syntax import Pattern, Sort, SymbolDecl
+    from ..kore.syntax import Sort, SymbolDecl
     from .model import Binder, Command, Declaration, DeclVal, FieldVal
 
 
@@ -64,6 +65,31 @@ _SYMBOL_OVERRIDES: Final = {
 class Field(NamedTuple):
     name: str
     ty: Term
+
+
+class Matcher(ABC):
+    var: EVar
+
+
+@dataclass(frozen=True)
+class SubsortMatcher(Matcher):
+    var: EVar
+    subsort: str
+    supersort: str
+
+
+@dataclass(frozen=True)
+class ListMatcher(Matcher):
+    var: EVar
+    prefix: tuple[Pattern, ...]
+    middle: Pattern
+    suffix: tuple[Pattern, ...]
+
+
+@dataclass(frozen=True)
+class MatcherTree(NamedTuple):
+    matcher: Matcher
+    children: tuple[MatcherTree, ...]
 
 
 class Config(TypedDict, total=False):
@@ -436,7 +462,9 @@ class K2Lean4:
         signature = Signature(binders, ty)
 
         req, lhs, rhs, defs = self._extract_func_rule(rule)
-        val = self._func_rule_val(lhs.args, req, rhs, defs)
+        free = (f"Var'Unds'Pat{i}" for i in count())
+        args, matchers = self._func_rule_matchers(lhs, free)
+        val = self._func_rule_val(args, matchers, req, rhs, defs)
 
         return Definition(ident, val, signature, modifiers=modifiers)
 
@@ -457,12 +485,14 @@ class K2Lean4:
 
     def _func_rule_val(
         self,
-        args: tuple[Pattern, ...],
+        args: list[Pattern],
+        matchers: list[list[Matcher]],
         req: Pattern,
         rhs: Pattern,
         defs: dict[str, Pattern],
     ) -> DeclVal:
-        term = self._func_rule_term(req, rhs, defs)
+        rhs_term = self._func_rule_rhs(req, rhs, defs)
+        term = self._func_rule_term(matchers, rhs_term)
 
         if not args:
             return SimpleVal(term)
@@ -478,7 +508,40 @@ class K2Lean4:
 
         return AltsVal(alts)
 
-    def _func_rule_term(self, req: Pattern, rhs: Pattern, defs: dict[str, Pattern]) -> Term:
+    def _func_rule_term(self, matchers: list[list[Matcher]], rhs: Term) -> Term:
+        def indent_rest(s: str, n: int) -> str:
+            lines = s.splitlines()
+            return '\n'.join([lines[0]] + [' ' * n + line for line in lines[1:]])
+
+        match_groups = [
+            list(zip(*(self._matcher_to_terms(matcher) for matcher in group), strict=True)) for group in matchers
+        ]
+
+        res = str(rhs)
+        for group in reversed(match_groups):
+            args_str = 'match {args} with\n'.format(args=', '.join(str(term) for term in group[0]))
+            match_str = '  | {matches} => {res}\n'.format(matches=', '.join(str(term) for term in group[1]), res=indent_rest(res, 2))
+            nomatch_str = '  | {no_matches} => none'.format(no_matches=', '.join(['_'] * len(group[1])))
+            res = f'{args_str}{match_str}{nomatch_str}'
+
+        return Term(res)
+
+    def _matcher_to_terms(self, matcher: Matcher) -> tuple[Term, Term]:
+        var = self._transform_pattern(matcher.var)
+        match matcher:
+            case SubsortMatcher(_, subsort, supersort):
+                return Term(f'inj_{subsort}_{supersort}? {var}'), Term('true')
+            case ListMatcher(_, prefix, middle, suffix):
+                arg = Term(f'ListHook.split {var} {len(prefix)} {len(suffix)}')
+                pterm = '[' + ', '.join(str(self._transform_pattern(p, concrete=True)) for p in prefix) + ']'
+                mterm = self._transform_pattern(middle, concrete=True)
+                sterm = '[' + ', '.join(str(self._transform_pattern(p, concrete=True)) for p in suffix) + ']'
+                pattern = Term(f'some ({pterm}, {mterm}, {sterm})')
+                return arg, pattern
+            case _:
+                raise AssertionError
+
+    def _func_rule_rhs(self, req: Pattern, rhs: Pattern, defs: dict[str, Pattern]) -> Term:
         if not defs and isinstance(req, Top):
             return Term(f'some {self._transform_arg(rhs)}')
 
@@ -509,6 +572,51 @@ class K2Lean4:
                 return n_ctors == 1 and all(self._is_exhaustive(arg) for arg in args)
             case _:
                 raise AssertionError()
+
+    def _func_rule_matchers(self, lhs: Pattern, free: Iterator[str]) -> tuple[list[Pattern], list[list[Matcher]]]:
+        assert isinstance(lhs, App)  # pattern is the LHS of a function rule
+
+        def construct_matchers(pattern: Pattern) -> Pattern | Matcher:
+            match pattern:
+                case App('inj', (SortApp(subsort), SortApp(supersort))):
+                    if self.defn.subsorts.get(subsort):
+                        var = EVar(next(free), SortApp(supersort))
+                        return SubsortMatcher(var, subsort, supersort)
+                case App("Lbl'Unds'List'Unds'", (), (App('LblListItem', (), (head,)), tail)):
+                    var = EVar(next(free), SortApp('SortList'))
+                    return ListMatcher(var, (head,), tail, ())
+            return pattern
+
+        def merge_forests(
+            matcher: Matcher | None,
+            forests: list[list[MatcherTree]],
+        ) -> list[MatcherTree]:
+            trees = (tree for trees in forests for tree in trees)
+            if matcher:
+                return [MatcherTree(matcher, tuple(trees))]
+            return list(trees)
+
+        def build_matcher_trees(
+            pattern: Pattern,
+            forests: list[list[MatcherTree]],
+        ) -> tuple[Pattern, list[MatcherTree]]:
+            constructed = construct_matchers(pattern)
+            matcher = constructed if isinstance(constructed, Matcher) else None
+            pattern = constructed if isinstance(constructed, Pattern) else constructed.var
+            trees = merge_forests(matcher, forests)
+            return pattern, trees
+
+        def extract_matchers(forest: list[MatcherTree]) -> list[list[Matcher]]:
+            res = []
+            level = forest
+            while level:
+                res.append([tree.matcher for tree in level])
+                level = [subtree for tree in level for subtree in tree.children]
+            return res
+
+        pattern, forest = lhs.bottom_up_with_summary(build_matcher_trees)
+        assert isinstance(pattern, App)
+        return list(pattern.args), extract_matchers(forest)
 
     def _func_axiom(self, decl: SymbolDecl) -> Axiom:
         ident = _symbol_ident(decl.symbol.name)

@@ -54,6 +54,7 @@ structure MapHookSig (K V : Type) where
   includes   : map → map → Bool -- map inclusion
   choice     : map → K -- arbitrary key from a map
   nodup      : forall al : map, List.Nodup (keys al)
+  split      : map → List K → Option (List V × map)
 
 -- We use axioms to have uninterpreted functions
 namespace MapHookDef
@@ -76,6 +77,7 @@ namespace MapHookDef
   axiom includesAx   : mapCAx K V → mapCAx K V → Bool -- map inclusion
   axiom choiceAx     : mapCAx K V → K -- arbitrary key from a map
   axiom nodupAx      : forall m, List.Nodup (keysAx K V m)
+  axiom splitAx      : mapCAx K V → List K → Option (List V × (mapCAx K V))
 end MapHookDef
 
 -- Uninterpreted Map implementation
@@ -97,7 +99,8 @@ noncomputable def MapHook (K V : Type) : MapHookSig K V :=
     size       := MapHookDef.sizeAx K V,
     includes   := MapHookDef.includesAx K V,
     choice     := MapHookDef.choiceAx K V,
-    nodup      := MapHookDef.nodupAx K V}
+    nodup      := MapHookDef.nodupAx K V,
+    split      := MapHookDef.splitAx K V }
 
 instance {K V : Type} [BEq K] [BEq V]: BEq (MapHook K V).map where
   beq := List.beq
@@ -120,6 +123,7 @@ structure SetHookSig (T : Type) where
   inclusion    : set → set → Bool
   size         : set → Int
   choice       : set → T
+  split        : set → List T → Option set
 
 namespace SetHookDef
   variable (T : Type)
@@ -134,6 +138,7 @@ namespace SetHookDef
   axiom inclusionAx    : setCAx T → setCAx T → Bool
   axiom sizeAx         : setCAx T → Int
   axiom choiceAx       : setCAx T → T
+  axiom splitAx        : setCAx T → List T → Option (setCAx T)
 end SetHookDef
 
 noncomputable def SetHook (T : Type) : SetHookSig T :=
@@ -147,7 +152,8 @@ noncomputable def SetHook (T : Type) : SetHookSig T :=
     inSet        := SetHookDef.inSetAx T,
     inclusion    := SetHookDef.inclusionAx T,
     size         := SetHookDef.sizeAx T,
-    choice       := SetHookDef.choiceAx T }
+    choice       := SetHookDef.choiceAx T,
+    split        := SetHookDef.splitAx T }
 
 /-
 The `List` sort is an ordered collection that may contain duplicate elements.
@@ -176,6 +182,8 @@ structure listHookSig (T : Type) where
   -- the hook is `in`, but clashes with Lean syntax
   inList    : T → list → Bool
   size      : list → Int
+  -- split list into prefix, middle and postfix, given prefix and postfix length
+  split     : list → Nat → Nat → Option (List T × list × List T)
 
 namespace ListHookDef
   variable (T : Type)
@@ -192,6 +200,7 @@ namespace ListHookDef
   axiom rangeAx     : listCAx T → Int → Int → Option (listCAx T)
   axiom inListAx    : T → listCAx T → Bool
   axiom sizeAx      : listCAx T → Int
+  axiom splitAx     : listCAx T → Nat → Nat → Option (List T × (listCAx T) × List T)
 end ListHookDef
 
 noncomputable def ListHook (T : Type) : listHookSig T :=
@@ -207,7 +216,8 @@ noncomputable def ListHook (T : Type) : listHookSig T :=
     fill      := ListHookDef.fillAx T,
     range     := ListHookDef.rangeAx T,
     inList    := ListHookDef.inListAx T,
-    size      := ListHookDef.sizeAx T }
+    size      := ListHookDef.sizeAx T,
+    split     := ListHookDef.splitAx T }
 
 class Inj (From To : Type) : Type where
   inj (x : From) : To
