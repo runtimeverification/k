@@ -125,6 +125,26 @@ class SetMatcher(Matcher):
         return [self.rest]
 
 
+@dataclass(frozen=True)
+class MapMatcher(Matcher):
+    var: EVar
+    keys: tuple[Pattern, ...]
+    values: tuple[Pattern, ...]
+    rest: Pattern
+
+    def _input_patterns(self) -> list[Pattern]:
+        res: list[Pattern] = []
+        res.append(self.var)
+        res.extend(self.keys)
+        return res
+
+    def _output_patterns(self) -> list[Pattern]:
+        res: list[Pattern] = []
+        res.extend(self.values)
+        res.append(self.rest)
+        return res
+
+
 class Config(TypedDict, total=False):
     derive_beq: bool | None
     derive_decidableeq: bool | None
@@ -583,6 +603,13 @@ class K2Lean4:
                 arg = Term(f'SetHook.split {var} {eterm}')
                 pattern = Term(f'some {rterm}')
                 return arg, pattern
+            case MapMatcher(_, keys, values, rest):
+                kterm = list_from(keys)
+                arg = Term(f'MapHook.split {var} {kterm}')
+                vterm = list_from(values)
+                rterm = self._transform_pattern(rest, concrete=True)
+                pattern = Term(f'some ({vterm}, {rterm})')
+                return arg, pattern
             case _:
                 raise AssertionError
 
@@ -637,6 +664,10 @@ class K2Lean4:
                 case App("Lbl'Unds'Set'Unds'", (), (App('LblSetItem', (), (elem,)), rest)):
                     var = EVar(next(free), SortApp('SortSet'))
                     matchers.append(SetMatcher(var, (elem,), rest))
+                    return var
+                case App("Lbl'Unds'Map'Unds'", (), (App("Lbl'UndsPipe'-'-GT-Unds'", (), (key, value)), rest)):
+                    var = EVar(next(free), SortApp('SortMap'))
+                    matchers.append(MapMatcher(var, (key,), (value,), rest))
                     return var
 
             return pattern
