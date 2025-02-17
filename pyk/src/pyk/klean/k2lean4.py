@@ -109,6 +109,22 @@ class ListMatcher(Matcher):
         return res
 
 
+@dataclass(frozen=True)
+class SetMatcher(Matcher):
+    var: EVar
+    elems: tuple[Pattern, ...]
+    rest: Pattern
+
+    def _input_patterns(self) -> list[Pattern]:
+        res: list[Pattern] = []
+        res.append(self.var)
+        res.extend(self.elems)
+        return res
+
+    def _output_patterns(self) -> list[Pattern]:
+        return [self.rest]
+
+
 class Config(TypedDict, total=False):
     derive_beq: bool | None
     derive_decidableeq: bool | None
@@ -546,16 +562,26 @@ class K2Lean4:
         return Term(res)
 
     def _matcher_to_terms(self, matcher: Matcher) -> tuple[Term, Term]:
+        def list_from(elems: Iterable[Pattern]) -> str:
+            elems_str = ', '.join(str(self._transform_pattern(elem, concrete=True)) for elem in elems)
+            return f'[{elems_str}]'
+
         var = self._transform_pattern(matcher.var)
         match matcher:
             case SubsortMatcher(_, subsort, supersort):
                 return Term(f'inj_{subsort}_{supersort}? {var}'), Term('true')
             case ListMatcher(_, prefix, middle, suffix):
                 arg = Term(f'ListHook.split {var} {len(prefix)} {len(suffix)}')
-                pterm = '[' + ', '.join(str(self._transform_pattern(p, concrete=True)) for p in prefix) + ']'
+                pterm = list_from(prefix)
                 mterm = self._transform_pattern(middle, concrete=True)
-                sterm = '[' + ', '.join(str(self._transform_pattern(p, concrete=True)) for p in suffix) + ']'
+                sterm = list_from(suffix)
                 pattern = Term(f'some ({pterm}, {mterm}, {sterm})')
+                return arg, pattern
+            case SetMatcher(_, elems, rest):
+                eterm = list_from(elems)
+                rterm = self._transform_arg(rest, concrete=True)
+                arg = Term(f'SetHook.split {var} {eterm}')
+                pattern = Term(f'some {rterm}')
                 return arg, pattern
             case _:
                 raise AssertionError
@@ -608,6 +634,11 @@ class K2Lean4:
                     var = EVar(next(free), SortApp('SortList'))
                     matchers.append(ListMatcher(var, (head,), tail, ()))
                     return var
+                case App("Lbl'Unds'Set'Unds'", (), (App('LblSetItem', (), (elem,)), rest)):
+                    var = EVar(next(free), SortApp('SortSet'))
+                    matchers.append(SetMatcher(var, (elem,), rest))
+                    return var
+
             return pattern
 
         def order_matchers(matchers: list[Matcher]) -> list[list[Matcher]]:
