@@ -8,12 +8,14 @@ from graphlib import TopologicalSorter
 from itertools import count
 from typing import TYPE_CHECKING, NamedTuple, TypedDict
 
+import networkx as nx
+
 from ..dequote import bytes_encode
 from ..konvert import unmunge
 from ..kore.internal import CollectionKind
 from ..kore.kompiled import KoreSymbolTable
 from ..kore.manip import collect_symbols, elim_aliases, free_occs
-from ..kore.syntax import DV, And, App, EVar, Pattern, SortApp, String, Top
+from ..kore.syntax import DV, And, App, EVar, SortApp, String, Top
 from ..utils import FrozenDict, POSet
 from .model import (
     Alt,
@@ -45,7 +47,7 @@ if TYPE_CHECKING:
 
     from ..kore.internal import KoreDefn
     from ..kore.rule import FunctionRule, RewriteRule, Rule
-    from ..kore.syntax import Sort, SymbolDecl
+    from ..kore.syntax import Pattern, Sort, SymbolDecl
     from .model import Binder, Command, Declaration, DeclVal, FieldVal
 
 
@@ -70,6 +72,20 @@ class Field(NamedTuple):
 class Matcher(ABC):
     var: EVar
 
+    @cached_property
+    def inputs(self) -> frozenset[EVar]:
+        return frozenset(v for pat in self._input_patterns() for vs in free_occs(pat).values() for v in vs)
+
+    @cached_property
+    def outputs(self) -> frozenset[EVar]:
+        return frozenset(v for pat in self._output_patterns() for vs in free_occs(pat).values() for v in vs)
+
+    def _input_patterns(self) -> list[Pattern]:
+        return [self.var]
+
+    def _output_patterns(self) -> list[Pattern]:
+        return []
+
 
 @dataclass(frozen=True)
 class SubsortMatcher(Matcher):
@@ -85,11 +101,12 @@ class ListMatcher(Matcher):
     middle: Pattern
     suffix: tuple[Pattern, ...]
 
-
-@dataclass(frozen=True)
-class MatcherTree(NamedTuple):
-    matcher: Matcher
-    children: tuple[MatcherTree, ...]
+    def _output_patterns(self) -> list[Pattern]:
+        res: list[Pattern] = []
+        res.extend(self.prefix)
+        res.append(self.middle)
+        res.extend(self.suffix)
+        return res
 
 
 class Config(TypedDict, total=False):
@@ -520,7 +537,9 @@ class K2Lean4:
         res = str(rhs)
         for group in reversed(match_groups):
             args_str = 'match {args} with\n'.format(args=', '.join(str(term) for term in group[0]))
-            match_str = '  | {matches} => {res}\n'.format(matches=', '.join(str(term) for term in group[1]), res=indent_rest(res, 2))
+            match_str = '  | {matches} => {res}\n'.format(
+                matches=', '.join(str(term) for term in group[1]), res=indent_rest(res, 2)
+            )
             nomatch_str = '  | {no_matches} => none'.format(no_matches=', '.join(['_'] * len(group[1])))
             res = f'{args_str}{match_str}{nomatch_str}'
 
@@ -576,47 +595,38 @@ class K2Lean4:
     def _func_rule_matchers(self, lhs: Pattern, free: Iterator[str]) -> tuple[list[Pattern], list[list[Matcher]]]:
         assert isinstance(lhs, App)  # pattern is the LHS of a function rule
 
-        def construct_matchers(pattern: Pattern) -> Pattern | Matcher:
+        matchers: list[Matcher] = []
+
+        def abstract_matchers(pattern: Pattern) -> Pattern:
             match pattern:
                 case App('inj', (SortApp(subsort), SortApp(supersort))):
                     if self.defn.subsorts.get(subsort):
                         var = EVar(next(free), SortApp(supersort))
-                        return SubsortMatcher(var, subsort, supersort)
+                        matchers.append(SubsortMatcher(var, subsort, supersort))
+                        return var
                 case App("Lbl'Unds'List'Unds'", (), (App('LblListItem', (), (head,)), tail)):
                     var = EVar(next(free), SortApp('SortList'))
-                    return ListMatcher(var, (head,), tail, ())
+                    matchers.append(ListMatcher(var, (head,), tail, ()))
+                    return var
             return pattern
 
-        def merge_forests(
-            matcher: Matcher | None,
-            forests: list[list[MatcherTree]],
-        ) -> list[MatcherTree]:
-            trees = (tree for trees in forests for tree in trees)
-            if matcher:
-                return [MatcherTree(matcher, tuple(trees))]
-            return list(trees)
+        def order_matchers(matchers: list[Matcher]) -> list[list[Matcher]]:
+            prec: dict[int, list[int]] = {}
+            for i, this in enumerate(matchers):
+                prec[i] = []
+                for j, other in enumerate(matchers):
+                    if any(v in this.outputs for v in other.inputs):
+                        prec[i].append(j)
 
-        def build_matcher_trees(
-            pattern: Pattern,
-            forests: list[list[MatcherTree]],
-        ) -> tuple[Pattern, list[MatcherTree]]:
-            constructed = construct_matchers(pattern)
-            matcher = constructed if isinstance(constructed, Matcher) else None
-            pattern = constructed if isinstance(constructed, Pattern) else constructed.var
-            trees = merge_forests(matcher, forests)
-            return pattern, trees
+            dg = nx.DiGraph(prec)
+            generations = nx.topological_generations(dg)
+            return [[matchers[i] for i in generation] for generation in generations]
 
-        def extract_matchers(forest: list[MatcherTree]) -> list[list[Matcher]]:
-            res = []
-            level = forest
-            while level:
-                res.append([tree.matcher for tree in level])
-                level = [subtree for tree in level for subtree in tree.children]
-            return res
-
-        pattern, forest = lhs.bottom_up_with_summary(build_matcher_trees)
+        pattern = lhs.bottom_up(abstract_matchers)
         assert isinstance(pattern, App)
-        return list(pattern.args), extract_matchers(forest)
+        ordered = order_matchers(matchers)
+
+        return list(pattern.args), ordered
 
     def _func_axiom(self, decl: SymbolDecl) -> Axiom:
         ident = _symbol_ident(decl.symbol.name)
