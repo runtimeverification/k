@@ -110,6 +110,11 @@ class ListMatcher(Matcher):
 
 
 @dataclass(frozen=True)
+class EmptyListMatcher(Matcher):
+    var: EVar
+
+
+@dataclass(frozen=True)
 class SetMatcher(Matcher):
     var: EVar
     elems: tuple[Pattern, ...]
@@ -123,6 +128,11 @@ class SetMatcher(Matcher):
 
     def _output_patterns(self) -> list[Pattern]:
         return [self.rest]
+
+
+@dataclass(frozen=True)
+class EmptySetMatcher(Matcher):
+    var: EVar
 
 
 @dataclass(frozen=True)
@@ -143,6 +153,11 @@ class MapMatcher(Matcher):
         res.extend(self.values)
         res.append(self.rest)
         return res
+
+
+@dataclass(frozen=True)
+class EmptyMapMatcher(Matcher):
+    var: EVar
 
 
 class Config(TypedDict, total=False):
@@ -597,11 +612,19 @@ class K2Lean4:
                 sterm = list_from(suffix)
                 pattern = Term(f'some ({pterm}, {mterm}, {sterm})')
                 return arg, pattern
+            case EmptyListMatcher(_):
+                arg = Term(f'ListHook.size {var}')
+                pattern = Term('0')
+                return arg, pattern
             case SetMatcher(_, elems, rest):
                 eterm = list_from(elems)
                 rterm = self._transform_arg(rest, concrete=True)
                 arg = Term(f'SetHook.split {var} {eterm}')
                 pattern = Term(f'some {rterm}')
+                return arg, pattern
+            case EmptySetMatcher(_):
+                arg = Term(f'SetHook.size {var}')
+                pattern = Term('0')
                 return arg, pattern
             case MapMatcher(_, keys, values, rest):
                 kterm = list_from(keys)
@@ -609,6 +632,10 @@ class K2Lean4:
                 vterm = list_from(values)
                 rterm = self._transform_pattern(rest, concrete=True)
                 pattern = Term(f'some ({vterm}, {rterm})')
+                return arg, pattern
+            case EmptyMapMatcher(_):
+                arg = Term(f'MapHook.size {var}')
+                pattern = Term('0')
                 return arg, pattern
             case _:
                 raise AssertionError
@@ -661,13 +688,25 @@ class K2Lean4:
                     var = EVar(next(free), SortApp('SortList'))
                     matchers.append(ListMatcher(var, (head,), tail, ()))
                     return var
+                case App("Lbl'Stop'List"):
+                    var = EVar(next(free), SortApp('SortList'))
+                    matchers.append(EmptyListMatcher(var))
+                    return var
                 case App("Lbl'Unds'Set'Unds'", (), (App('LblSetItem', (), (elem,)), rest)):
                     var = EVar(next(free), SortApp('SortSet'))
                     matchers.append(SetMatcher(var, (elem,), rest))
                     return var
+                case App("Lbl'Stop'Set"):
+                    var = EVar(next(free), SortApp('SortSet'))
+                    matchers.append(EmptySetMatcher(var))
+                    return var
                 case App("Lbl'Unds'Map'Unds'", (), (App("Lbl'UndsPipe'-'-GT-Unds'", (), (key, value)), rest)):
                     var = EVar(next(free), SortApp('SortMap'))
                     matchers.append(MapMatcher(var, (key,), (value,), rest))
+                    return var
+                case App("Lbl'Stop'Map"):
+                    var = EVar(next(free), SortApp('SortMap'))
+                    matchers.append(EmptyMapMatcher(var))
                     return var
 
             return pattern
