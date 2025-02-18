@@ -221,8 +221,10 @@ noncomputable def ListHook (T : Type) : listHookSig T :=
 
 class Inj (From To : Type) : Type where
   inj (x : From) : To
+  retr (x : To) : Option From
 
 def inj {From To : Type} [inst : Inj From To] := inst.inj
+def retr {From To : Type} [inst : Inj From To] := inst.retr
 
 def «_+Int_» (x0 : SortInt) (x1 : SortInt) : Option SortInt := some (x0 + x1)
 def «_-Int_» (x0 : SortInt) (x1 : SortInt) : Option SortInt := some (x0 - x1)

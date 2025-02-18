@@ -430,8 +430,11 @@ class K2Lean4:
 
     def _inj_instance(self, subsort: str, supersort: str) -> Instance:
         ty = Term(f'Inj {subsort} {supersort}')
-        field = self._inj_field(subsort, supersort)
-        return Instance(Signature((), ty), StructVal((field,)))
+        fields = (
+            self._inj_field(subsort, supersort),
+            self._retr_field(subsort, supersort),
+        )
+        return Instance(Signature((), ty), StructVal(fields))
 
     def _inj_field(self, subsort: str, supersort: str) -> InstField:
         val = self._inj_val(subsort, supersort)
@@ -461,6 +464,37 @@ class K2Lean4:
             # Has actual constructors, not only subsorts
             default = Alt((Term('x'),), inj(subsort, supersort, 'x'))
             res.append(default)
+
+        return res
+
+    def _retr_field(self, subsort: str, supersort: str) -> InstField:
+        val = self._retr_val(subsort, supersort)
+        return InstField('retr', val)
+
+    def _retr_val(self, subsort: str, supersort: str) -> FieldVal:
+        subsubsorts: list[str]
+        if subsort.endswith('CellMap'):
+            subsubsorts = []  # Disregard injection from value sort to cell map sort
+        else:
+            subsubsorts = sorted(self.defn.subsorts.get(subsort, []))
+
+        return AltsFieldVal(self._retr_alts(subsort, supersort, subsubsorts))
+
+    def _retr_alts(self, subsort: str, supersort: str, subsubsorts: list[str]) -> list[Alt]:
+        def inj(subsort: str, supersort: str, x: str) -> Term:
+            return Term(f'{supersort}.inj_{subsort} {x}')
+
+        res = []
+        for subsubsort in subsubsorts:
+            res_inj = inj(subsubsort, subsort, 'x')
+            res.append(Alt((inj(subsubsort, supersort, 'x'),), Term(f'some ({res_inj})')))
+
+        res.append(Alt((inj(subsort, supersort, 'x'),), Term('some x')))
+
+        n_covered = len(subsubsorts) + 1
+        n_ctors = len(self.defn.constructors.get(supersort, ())) + len(self.defn.subsorts.get(supersort, ()))
+        if n_ctors > n_covered:
+            res.append(Alt((Term('_'),), Term('none')))
 
         return res
 
