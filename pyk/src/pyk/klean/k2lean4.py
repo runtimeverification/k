@@ -142,6 +142,8 @@ class EmptySetMatcher(Matcher):
 @dataclass(frozen=True)
 class MapMatcher(Matcher):
     var: EVar
+    key_sort: str
+    value_sort: str
     keys: tuple[Pattern, ...]
     values: tuple[Pattern, ...]
     rest: Pattern
@@ -162,6 +164,8 @@ class MapMatcher(Matcher):
 @dataclass(frozen=True)
 class EmptyMapMatcher(Matcher):
     var: EVar
+    key_sort: str
+    value_sort: str
 
 
 class Config(TypedDict, total=False):
@@ -665,15 +669,15 @@ class K2Lean4:
                 arg = Term(f'(SetHook SortKItem).size {var}.coll')
                 pattern = Term('0')
                 return arg, pattern
-            case MapMatcher(_, keys, values, rest):
+            case MapMatcher(_, key_sort, value_sort, keys, values, rest):
                 kterm = list_from(keys)
-                arg = Term(f'(MapHook SortKItem).split {var}.coll {kterm}')
+                arg = Term(f'(MapHook {key_sort} {value_sort}).split {var}.coll {kterm}')
                 vterm = list_from(values)
                 rterm = self._transform_pattern(rest, concrete=True)
                 pattern = Term(f'some ({vterm}, {rterm})')
                 return arg, pattern
-            case EmptyMapMatcher(_):
-                arg = Term(f'(MapHook SortKItem).size {var}.coll')
+            case EmptyMapMatcher(_, key_sort, value_sort):
+                arg = Term(f'(MapHook {key_sort} {value_sort}).size {var}.coll')
                 pattern = Term('0')
                 return arg, pattern
             case _:
@@ -739,14 +743,31 @@ class K2Lean4:
                     var = EVar(next(free), SortApp('SortSet'))
                     matchers.append(EmptySetMatcher(var))
                     return var
-                case App("Lbl'Unds'Map'Unds'", (), (App("Lbl'UndsPipe'-'-GT-Unds'", (), (key, value)), rest)):
-                    var = EVar(next(free), SortApp('SortMap'))
-                    matchers.append(MapMatcher(var, (key,), (value,), rest))
-                    return var
-                case App("Lbl'Stop'Map"):
-                    var = EVar(next(free), SortApp('SortMap'))
-                    matchers.append(EmptyMapMatcher(var))
-                    return var
+                case App(map_symbol, (), (App(item_symbol, (), (key, value)), rest)):
+                    if (
+                        map_symbol.startswith("Lbl'Unds'")
+                        and map_symbol.endswith("Map'Unds'")
+                        and (
+                            item_symbol == "Lbl'UndsPipe'-'-GT-Unds'"
+                            or (item_symbol.startswith('Lbl') and item_symbol.endswith('CellMapItem'))
+                        )
+                    ):
+                        sort = f'Sort{map_symbol[9:-6]}'
+                        var = EVar(next(free), SortApp(sort))
+                        coll = self.defn.collections[sort]
+                        elem_decl = self.defn.symbols[coll.element]
+                        key_sort, value_sort = _param_sorts(elem_decl)
+                        matchers.append(MapMatcher(var, key_sort, value_sort, (key,), (value,), rest))
+                        return var
+                case App(symbol):
+                    if symbol.startswith("Lbl'Stop'") and symbol.endswith('Map'):
+                        sort = f'Sort{symbol[9:]}'
+                        var = EVar(next(free), SortApp(sort))
+                        coll = self.defn.collections[sort]
+                        elem_decl = self.defn.symbols[coll.element]
+                        key_sort, value_sort = _param_sorts(elem_decl)
+                        matchers.append(EmptyMapMatcher(var, key_sort, value_sort))
+                        return var
 
             return pattern
 
