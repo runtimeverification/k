@@ -645,35 +645,35 @@ class K2Lean4:
                 pterm = self._transform_arg(pat, concrete=True)
                 return Term(f'(@retr {subsort} {supersort}) {var}'), Term(f'some {pterm}')
             case ListMatcher(_, prefix, middle, suffix):
-                arg = Term(f'ListHook.split {var} {len(prefix)} {len(suffix)}')
+                arg = Term(f'(ListHook SortKItem).split {var}.coll {len(prefix)} {len(suffix)}')
                 pterm = list_from(prefix)
                 mterm = self._transform_pattern(middle, concrete=True)
                 sterm = list_from(suffix)
                 pattern = Term(f'some ({pterm}, {mterm}, {sterm})')
                 return arg, pattern
             case EmptyListMatcher(_):
-                arg = Term(f'ListHook.size {var}')
+                arg = Term(f'(ListHook SortKItem).size {var}.coll')
                 pattern = Term('0')
                 return arg, pattern
             case SetMatcher(_, elems, rest):
                 eterm = list_from(elems)
                 rterm = self._transform_arg(rest, concrete=True)
-                arg = Term(f'SetHook.split {var} {eterm}')
+                arg = Term(f'(SetHook SortKItem).split {var}.coll {eterm}')
                 pattern = Term(f'some {rterm}')
                 return arg, pattern
             case EmptySetMatcher(_):
-                arg = Term(f'SetHook.size {var}')
+                arg = Term(f'(SetHook SortKItem).size {var}.coll')
                 pattern = Term('0')
                 return arg, pattern
             case MapMatcher(_, keys, values, rest):
                 kterm = list_from(keys)
-                arg = Term(f'MapHook.split {var} {kterm}')
+                arg = Term(f'(MapHook SortKItem).split {var}.coll {kterm}')
                 vterm = list_from(values)
                 rterm = self._transform_pattern(rest, concrete=True)
                 pattern = Term(f'some ({vterm}, {rterm})')
                 return arg, pattern
             case EmptyMapMatcher(_):
-                arg = Term(f'MapHook.size {var}')
+                arg = Term(f'(MapHook SortKItem).size {var}.coll')
                 pattern = Term('0')
                 return arg, pattern
             case _:
