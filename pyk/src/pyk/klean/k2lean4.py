@@ -14,7 +14,7 @@ from ..dequote import bytes_encode
 from ..konvert import unmunge
 from ..kore.internal import CollectionKind
 from ..kore.kompiled import KoreSymbolTable
-from ..kore.manip import collect_symbols, elim_aliases, free_occs
+from ..kore.manip import collect_symbols, elim_aliases, free_occs, rename_unique
 from ..kore.syntax import DV, And, App, EVar, SortApp, String, Top
 from ..utils import FrozenDict, POSet
 from .model import (
@@ -783,7 +783,8 @@ class K2Lean4:
             generations = nx.topological_generations(dg)
             return [[matchers[i] for i in generation] for generation in generations]
 
-        pattern = lhs.bottom_up(abstract_matchers)
+        pattern, _eq_classes = rename_unique(lhs, (f"Var'Unds'Uniq{i}" for i in count()))
+        pattern = pattern.bottom_up(abstract_matchers)
         assert isinstance(pattern, App)
         ordered = order_matchers(matchers)
 
