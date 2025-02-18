@@ -92,6 +92,10 @@ class SubsortMatcher(Matcher):
     var: EVar
     subsort: str
     supersort: str
+    pattern: Pattern
+
+    def _output_patterns(self) -> list[Pattern]:
+        return [self.pattern]
 
 
 @dataclass(frozen=True)
@@ -597,14 +601,15 @@ class K2Lean4:
         return Term(res)
 
     def _matcher_to_terms(self, matcher: Matcher) -> tuple[Term, Term]:
-        def list_from(elems: Iterable[Pattern]) -> str:
+        def list_from(elems: Iterable[Pattern]) -> Term:
             elems_str = ', '.join(str(self._transform_pattern(elem, concrete=True)) for elem in elems)
-            return f'[{elems_str}]'
+            return Term(f'[{elems_str}]')
 
         var = self._transform_pattern(matcher.var)
         match matcher:
-            case SubsortMatcher(_, subsort, supersort):
-                return Term(f'inj_{subsort}_{supersort}? {var}'), Term('true')
+            case SubsortMatcher(_, subsort, supersort, pat):
+                pterm = self._transform_arg(pat, concrete=True)
+                return Term(f'(@retr {subsort} {supersort}) {var}'), Term(f'some {pterm}')
             case ListMatcher(_, prefix, middle, suffix):
                 arg = Term(f'ListHook.split {var} {len(prefix)} {len(suffix)}')
                 pterm = list_from(prefix)
@@ -679,10 +684,10 @@ class K2Lean4:
 
         def abstract_matchers(pattern: Pattern) -> Pattern:
             match pattern:
-                case App('inj', (SortApp(subsort), SortApp(supersort))):
-                    if self.defn.subsorts.get(subsort):
+                case App('inj', (SortApp(subsort), SortApp(supersort)), (pat,)):
+                    if self.defn.subsorts.get(subsort) and free_occs(pat):
                         var = EVar(next(free), SortApp(supersort))
-                        matchers.append(SubsortMatcher(var, subsort, supersort))
+                        matchers.append(SubsortMatcher(var, subsort, supersort, pat))
                         return var
                 case App("Lbl'Unds'List'Unds'", (), (App('LblListItem', (), (head,)), tail)):
                     var = EVar(next(free), SortApp('SortList'))
