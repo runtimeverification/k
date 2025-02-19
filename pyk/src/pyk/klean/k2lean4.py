@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from abc import ABC
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from functools import cached_property
 from graphlib import TopologicalSorter
@@ -70,8 +70,6 @@ class Field(NamedTuple):
 
 
 class Matcher(ABC):
-    var: EVar
-
     @cached_property
     def inputs(self) -> frozenset[EVar]:
         return frozenset(v for pat in self._input_patterns() for vs in free_occs(pat).values() for v in vs)
@@ -79,6 +77,16 @@ class Matcher(ABC):
     @cached_property
     def outputs(self) -> frozenset[EVar]:
         return frozenset(v for pat in self._output_patterns() for vs in free_occs(pat).values() for v in vs)
+
+    @abstractmethod
+    def _input_patterns(self) -> list[Pattern]: ...
+
+    @abstractmethod
+    def _output_patterns(self) -> list[Pattern]: ...
+
+
+class BaseMatcher(Matcher, ABC):
+    var: EVar
 
     def _input_patterns(self) -> list[Pattern]:
         return [self.var]
@@ -88,7 +96,7 @@ class Matcher(ABC):
 
 
 @dataclass(frozen=True)
-class SubsortMatcher(Matcher):
+class SubsortMatcher(BaseMatcher):
     var: EVar
     subsort: str
     supersort: str
@@ -99,7 +107,7 @@ class SubsortMatcher(Matcher):
 
 
 @dataclass(frozen=True)
-class ListMatcher(Matcher):
+class ListMatcher(BaseMatcher):
     var: EVar
     prefix: tuple[Pattern, ...]
     middle: Pattern
@@ -114,12 +122,12 @@ class ListMatcher(Matcher):
 
 
 @dataclass(frozen=True)
-class EmptyListMatcher(Matcher):
+class EmptyListMatcher(BaseMatcher):
     var: EVar
 
 
 @dataclass(frozen=True)
-class SetMatcher(Matcher):
+class SetMatcher(BaseMatcher):
     var: EVar
     elems: tuple[Pattern, ...]
     rest: Pattern
@@ -135,12 +143,12 @@ class SetMatcher(Matcher):
 
 
 @dataclass(frozen=True)
-class EmptySetMatcher(Matcher):
+class EmptySetMatcher(BaseMatcher):
     var: EVar
 
 
 @dataclass(frozen=True)
-class MapMatcher(Matcher):
+class MapMatcher(BaseMatcher):
     var: EVar
     key_sort: str
     value_sort: str
@@ -162,7 +170,7 @@ class MapMatcher(Matcher):
 
 
 @dataclass(frozen=True)
-class EmptyMapMatcher(Matcher):
+class EmptyMapMatcher(BaseMatcher):
     var: EVar
     key_sort: str
     value_sort: str
@@ -643,41 +651,47 @@ class K2Lean4:
             elems_str = ', '.join(str(self._transform_pattern(elem, concrete=True)) for elem in elems)
             return Term(f'[{elems_str}]')
 
-        var = self._transform_pattern(matcher.var)
         match matcher:
-            case SubsortMatcher(_, subsort, supersort, pat):
+            case SubsortMatcher(var, subsort, supersort, pat):
+                vterm = self._transform_pattern(var)
                 pterm = self._transform_arg(pat, concrete=True)
-                return Term(f'(@retr {subsort} {supersort}) {var}'), Term(f'some {pterm}')
-            case ListMatcher(_, prefix, middle, suffix):
-                arg = Term(f'(ListHook SortKItem).split {var}.coll {len(prefix)} {len(suffix)}')
+                return Term(f'(@retr {subsort} {supersort}) {vterm}'), Term(f'some {pterm}')
+            case ListMatcher(var, prefix, middle, suffix):
+                vterm = self._transform_pattern(var)
+                arg = Term(f'(ListHook SortKItem).split {vterm}.coll {len(prefix)} {len(suffix)}')
                 pterm = list_from(prefix)
                 mterm = self._transform_pattern(middle, concrete=True)
                 sterm = list_from(suffix)
                 pattern = Term(f'some ({pterm}, {mterm}, {sterm})')
                 return arg, pattern
-            case EmptyListMatcher(_):
-                arg = Term(f'(ListHook SortKItem).size {var}.coll')
+            case EmptyListMatcher(var):
+                vterm = self._transform_pattern(var)
+                arg = Term(f'(ListHook SortKItem).size {vterm}.coll')
                 pattern = Term('0')
                 return arg, pattern
-            case SetMatcher(_, elems, rest):
+            case SetMatcher(var, elems, rest):
+                vterm = self._transform_pattern(var)
                 eterm = list_from(elems)
                 rterm = self._transform_arg(rest, concrete=True)
-                arg = Term(f'(SetHook SortKItem).split {var}.coll {eterm}')
+                arg = Term(f'(SetHook SortKItem).split {vterm}.coll {eterm}')
                 pattern = Term(f'some {rterm}')
                 return arg, pattern
-            case EmptySetMatcher(_):
-                arg = Term(f'(SetHook SortKItem).size {var}.coll')
+            case EmptySetMatcher(var):
+                vterm = self._transform_pattern(var)
+                arg = Term(f'(SetHook SortKItem).size {vterm}.coll')
                 pattern = Term('0')
                 return arg, pattern
-            case MapMatcher(_, key_sort, value_sort, keys, values, rest):
+            case MapMatcher(var, key_sort, value_sort, keys, values, rest):
+                vterm = self._transform_pattern(var)
                 kterm = list_from(keys)
-                arg = Term(f'(MapHook {key_sort} {value_sort}).split {var}.coll {kterm}')
+                arg = Term(f'(MapHook {key_sort} {value_sort}).split {vterm}.coll {kterm}')
                 vterm = list_from(values)
                 rterm = self._transform_pattern(rest, concrete=True)
                 pattern = Term(f'some ({vterm}, {rterm})')
                 return arg, pattern
-            case EmptyMapMatcher(_, key_sort, value_sort):
-                arg = Term(f'(MapHook {key_sort} {value_sort}).size {var}.coll')
+            case EmptyMapMatcher(var, key_sort, value_sort):
+                vterm = self._transform_pattern(var)
+                arg = Term(f'(MapHook {key_sort} {value_sort}).size {vterm}.coll')
                 pattern = Term('0')
                 return arg, pattern
             case _:
