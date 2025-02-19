@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-from itertools import count
 from typing import TYPE_CHECKING
 
 from .syntax import And, App, EVar, MLQuant, Top
 
 if TYPE_CHECKING:
-    from collections.abc import Collection, Iterator
+    from collections.abc import Collection
 
     from .syntax import Pattern
 
@@ -56,31 +55,6 @@ def collect_symbols(pattern: Pattern) -> set[str]:
 
     pattern.collect(add_symbol)
     return res
-
-
-def rename_unique(pattern: Pattern, free: Iterator[str]) -> tuple[Pattern, dict[EVar, int]]:
-    var_names = set(free_occs(pattern))
-    class_idx = count()
-    classes = {}
-
-    def rename(pattern: Pattern) -> Pattern:
-        match pattern:
-            case EVar() as var:
-                if var not in classes:
-                    classes[var] = next(class_idx)
-                    return pattern
-
-                while (new_name := next(free)) in var_names:
-                    continue
-
-                var_names.add(new_name)
-                new_var = pattern.let(name=new_name)
-                classes[new_var] = classes[var]
-                return new_var
-            case _:
-                return pattern
-
-    return pattern.bottom_up(rename), classes
 
 
 def elim_aliases(pattern: Pattern) -> Pattern:
