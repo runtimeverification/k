@@ -14,7 +14,7 @@ from ..dequote import bytes_encode
 from ..konvert import unmunge
 from ..kore.internal import CollectionKind
 from ..kore.kompiled import KoreSymbolTable
-from ..kore.manip import collect_symbols, elim_aliases, free_occs, rename_unique
+from ..kore.manip import collect_symbols, elim_aliases, free_occs
 from ..kore.syntax import DV, And, App, EVar, SortApp, String, Top
 from ..utils import FrozenDict, POSet
 from .model import (
@@ -83,6 +83,18 @@ class Matcher(ABC):
 
     @abstractmethod
     def _output_patterns(self) -> list[Pattern]: ...
+
+
+@dataclass(frozen=True)
+class EqMatcher(Matcher):
+    var1: EVar
+    var2: EVar
+
+    def _input_patterns(self) -> list[Pattern]:
+        return [self.var1, self.var2]
+
+    def _output_patterns(self) -> list[Pattern]:
+        return []
 
 
 class BaseMatcher(Matcher, ABC):
@@ -652,6 +664,10 @@ class K2Lean4:
             return Term(f'[{elems_str}]')
 
         match matcher:
+            case EqMatcher(var1, var2):
+                v1term = self._transform_pattern(var1)
+                v2term = self._transform_pattern(var2)
+                return Term(f'{v1term} == {v2term}'), Term('true')
             case SubsortMatcher(var, subsort, supersort, pat):
                 vterm = self._transform_pattern(var)
                 pterm = self._transform_arg(pat, concrete=True)
@@ -734,6 +750,51 @@ class K2Lean4:
 
         matchers: list[Matcher] = []
 
+        def rename_outputs(pattern: Pattern, free: Iterator[str]) -> tuple[Pattern, dict[EVar, int]]:
+            var_names = set(free_occs(pattern))
+            class_idx = count()
+            classes = {}
+
+            def rename(pattern: Pattern) -> Pattern:
+                match pattern:
+                    case EVar() as var:
+                        if var not in classes:
+                            classes[var] = next(class_idx)
+                            return pattern
+
+                        while (new_name := next(free)) in var_names:
+                            continue
+
+                        var_names.add(new_name)
+                        new_var = pattern.let(name=new_name)
+                        classes[new_var] = classes[var]
+                        return new_var
+                    case App('LblSetItem'):
+                        return pattern  # the arg is input
+                    case App("Lbl'UndsPipe'-'-GT-Unds'", (), (key, value)):
+                        return pattern.let(args=(key, rename(value)))  # the key is input
+                    case App(symbol, (), (key, value)):
+                        if symbol.endswith('CellMapItem'):
+                            return pattern.let(args=(key, rename(value)))  # the key is input
+
+                return pattern.let_patterns(tuple(rename(arg) for arg in pattern.patterns))
+
+            return rename(pattern), classes
+
+        def eq_matchers(classes: dict[EVar, int]) -> list[EqMatcher]:
+            grouped: dict[int, list[EVar]] = {}
+            for var, idx in classes.items():
+                grouped.setdefault(idx, []).append(var)
+
+            res = []
+            for clazz in grouped.values():
+                assert clazz
+                representative, *rest = clazz
+                for other in rest:
+                    res.append(EqMatcher(representative, other))
+
+            return res
+
         def abstract_matchers(pattern: Pattern) -> Pattern:
             match pattern:
                 case App('inj', (SortApp(subsort), SortApp(supersort)), (pat,)):
@@ -797,7 +858,8 @@ class K2Lean4:
             generations = nx.topological_generations(dg)
             return [[matchers[i] for i in generation] for generation in generations]
 
-        pattern, _eq_classes = rename_unique(lhs, (f"Var'Unds'Uniq{i}" for i in count()))
+        pattern, eq_classes = rename_outputs(lhs, (f"Var'Unds'Uniq{i}" for i in count()))
+        matchers += eq_matchers(eq_classes)
         pattern = pattern.bottom_up(abstract_matchers)
         assert isinstance(pattern, App)
         ordered = order_matchers(matchers)
