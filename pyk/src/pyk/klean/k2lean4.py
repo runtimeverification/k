@@ -806,6 +806,10 @@ class K2Lean4:
                     var = EVar(next(free), SortApp('SortList'))
                     matchers.append(ListMatcher(var, (head,), tail, ()))
                     return var
+                case App("Lbl'Unds'List'Unds'", (), (init, App('LblListItem', (), (last,)))):
+                    var = EVar(next(free), SortApp('SortList'))
+                    matchers.append(ListMatcher(var, (), init, (last,)))
+                    return var
                 case App("Lbl'Stop'List"):
                     var = EVar(next(free), SortApp('SortList'))
                     matchers.append(EmptyListMatcher(var))
