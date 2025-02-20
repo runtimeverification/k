@@ -18,13 +18,11 @@ class GenContext(TypedDict):
 
 
 def generate(
+    *,
     defn: KoreDefn,
     context: GenContext,
-    *,
-    output_dir: str | Path | None = None,
+    output_dir: Path,
 ) -> Path:
-    output_dir = Path(output_dir) if output_dir is not None else Path('.')
-
     k2lean4 = K2Lean4(defn)
     genmodel = {
         'Sorts': (k2lean4.sort_module, ['Prelude']),
