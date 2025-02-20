@@ -50,6 +50,10 @@ _VALID_LEAN_IDENT: Final = re.compile(
 
 _PRELUDE_SORTS: Final = {'SortBool', 'SortBytes', 'SortId', 'SortInt', 'SortString', 'SortStringBuffer'}
 
+_SYMBOL_OVERRIDES: Final = {
+    'Lblite': 'kite',
+}
+
 
 class Field(NamedTuple):
     name: str
@@ -198,6 +202,8 @@ class K2Lean4:
 
     @staticmethod
     def _symbol_ident(symbol: str) -> str:
+        if symbol in _SYMBOL_OVERRIDES:
+            return _SYMBOL_OVERRIDES[symbol]
         if symbol.startswith('Lbl'):
             symbol = symbol[3:]
         return K2Lean4._escape_ident(symbol, kore=True)
