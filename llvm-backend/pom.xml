@@ -30,6 +30,7 @@
     <llvm.backend.gc.interval>2000</llvm.backend.gc.interval>
     <llvm.backend.prefix>${project.build.directory}/../target/build/install</llvm.backend.prefix>
     <llvm.backend.destdir></llvm.backend.destdir>
+    <llvm.backend.hyperblock.size.mult>1024</llvm.backend.hyperblock.size.mult>
   </properties>
 
   <build>
@@ -49,6 +50,7 @@
                   <arg value="-DCMAKE_PREFIX_PATH=${prefix.path}" />
                   <arg value="-DCMAKE_BUILD_TYPE=${project.build.type}" />
                   <arg value="-DCMAKE_INSTALL_PREFIX=${llvm.backend.prefix}" />
+                  <arg value="-DHYPERBLOCK_SIZE_MULTIPLIER=${llvm.backend.hyperblock.size.mult}" />
                   <arg value="-DK_LLVM_BACKEND_LTO=OFF" />
                   <arg value="${project.basedir}/src/main/native/llvm-backend" />
                 </exec>
