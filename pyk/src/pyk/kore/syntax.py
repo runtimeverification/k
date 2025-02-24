@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Iterator, Mapping
     from typing import IO, Any, Final, TypeVar
 
+    A = TypeVar('A')
     T = TypeVar('T', bound='Kore')
     P = TypeVar('P', bound='Pattern')
     WS = TypeVar('WS', bound='WithSort')
@@ -323,6 +324,27 @@ class Pattern(Kore):
                 stack[-1].append(pattern)
             else:
                 stack.append(pattern.patterns[idx])
+                stack.append([])
+
+    def bottom_up_with_summary(self, f: Callable[[Pattern, list[A]], tuple[Pattern, A]]) -> tuple[Pattern, A]:
+        stack: list = [self, [], []]
+        while True:
+            summaries = stack[-1]
+            patterns = stack[-2]
+            pattern = stack[-3]
+            idx = len(patterns) - len(pattern.patterns)
+            if not idx:
+                stack.pop()
+                stack.pop()
+                stack.pop()
+                pattern, summary = f(pattern.let_patterns(patterns), summaries)
+                if not stack:
+                    return pattern, summary
+                stack[-1].append(summary)
+                stack[-2].append(pattern)
+            else:
+                stack.append(pattern.patterns[idx])
+                stack.append([])
                 stack.append([])
 
     def top_down(self, f: Callable[[Pattern], Pattern]) -> Pattern:
