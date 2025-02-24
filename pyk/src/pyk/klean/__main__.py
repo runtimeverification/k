@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from argparse import ArgumentParser
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -10,6 +11,12 @@ from pyk.kore.internal import KoreDefn
 if TYPE_CHECKING:
     from argparse import Namespace
     from collections.abc import Iterable
+
+
+@dataclass(frozen=True)
+class CliError(Exception):
+    message: str
+    status: int
 
 
 def main() -> None:
@@ -22,7 +29,15 @@ def main() -> None:
     level, args = _extract_log_level(args)
     logging.basicConfig(level=level, format=LOG_FORMAT)
 
-    klean(args)
+    try:
+        klean(args)
+    except CliError as err:
+        match err:
+            case CliError(message, status):
+                print(f'Error: {message}', file=sys.stderr)
+                raise SystemExit(status) from err
+            case _:
+                raise AssertionError() from None
 
 
 def _extract_log_level(args: list[str]) -> tuple[int, list[str]]:
@@ -39,13 +54,18 @@ def klean(args: Iterable[str]) -> None:
     from .generate import generate
 
     ns = _parse_args(args)
+    output_dir = ns.output_dir or Path()
+    package_dir = output_dir / ns.package_name
+    if package_dir.exists():
+        raise CliError(f'Directory exists: {package_dir}', 115)
+
     defn = _load_defn(ns.definition_dir)
     if ns.rules:
         defn = defn.filter_rewrites(ns.rules)
     defn = defn.project_to_rewrites()
     generate(
         defn=defn,
-        output_dir=ns.output_dir,
+        output_dir=output_dir,
         context={
             'package_name': ns.package_name,
             'library_name': ns.library_name,
