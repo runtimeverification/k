@@ -26,9 +26,9 @@ def generate(
     k2lean4 = K2Lean4(defn)
     genmodel = {
         'Sorts': (k2lean4.sort_module, ['Prelude']),
-        'Func': (k2lean4.func_module, ['Sorts']),
         'Inj': (k2lean4.inj_module, ['Sorts']),
-        'Rewrite': (k2lean4.rewrite_module, ['Func', 'Inj']),
+        'Func': (k2lean4.func_module, ['Inj']),
+        'Rewrite': (k2lean4.rewrite_module, ['Func']),
     }
 
     modules = _gen_modules(context['library_name'], genmodel)

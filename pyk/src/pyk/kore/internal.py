@@ -13,7 +13,7 @@ from .syntax import App, Axiom, SortApp, SortDecl, String, Symbol, SymbolDecl
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-    from .syntax import Definition
+    from .syntax import Definition, Pattern
 
 
 class CollectionKind(Enum):
@@ -151,17 +151,21 @@ class KoreDefn:
 
     def project_to_symbols(self) -> KoreDefn:
         """Project definition to symbols present in the definition."""
-        symbol_sorts = {sort for symbol in self.symbols for sort in self._symbol_sorts(symbol)}
-        sorts: FrozenDict[str, SortDecl] = FrozenDict(
-            (sort, decl) for sort, decl in self.sorts.items() if sort in symbol_sorts
+        functions: FrozenDict[str, tuple[FunctionRule, ...]] = FrozenDict(
+            (function, rules) for function, rules in self.functions.items() if function in self.symbols
         )
+
+        _sorts: set[str] = set()
+        _sorts.update(sort for symbol in self.symbols for sort in self._symbol_sorts(symbol))
+        _sorts.update(sort for rules in functions.values() for rule in rules for sort in self._arg_subsorts(rule))
+        sorts: FrozenDict[str, SortDecl] = FrozenDict(
+            (sort, decl) for sort, decl in self.sorts.items() if sort in _sorts
+        )
+
         subsorts: FrozenDict[str, frozenset[str]] = FrozenDict(
             (supersort, frozenset(subsort for subsort in subsorts if subsort in sorts))
             for supersort, subsorts in self.subsorts.items()
             if supersort in sorts
-        )
-        functions: FrozenDict[str, tuple[FunctionRule, ...]] = FrozenDict(
-            (function, rules) for function, rules in self.functions.items() if function in self.symbols
         )
 
         return self.let(
@@ -186,6 +190,22 @@ class KoreDefn:
         if isinstance(decl.sort, SortApp):
             res.append(decl.sort.name)
         res.extend(sort.name for sort in decl.param_sorts if isinstance(sort, SortApp))
+        return res
+
+    def _arg_subsorts(self, rule: FunctionRule) -> set[str]:
+        """Collect the from-sorts of injections on the LHS of a function rule.
+
+        These potentially indicate matching on a subsort of a certain sort, e.g.
+        rule isKResult(inj{KResult,KItem}(KResult)) => true
+        """
+        res = set()
+
+        def from_sort(pattern: Pattern) -> None:
+            match pattern:
+                case App('inj', (SortApp(sort), _), _):
+                    res.add(sort)
+
+        rule.lhs.collect(from_sort)
         return res
 
     def _config_symbols(self) -> set[str]:
