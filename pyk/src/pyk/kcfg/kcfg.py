@@ -568,7 +568,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             result_info_message = f': {result_info}' if result_info else ''
             _LOGGER.log(
                 logging.WARNING if warning else logging.INFO,
-                f'Extending current KCFG with the following: {message}{result_info_message}',
+                f'Extending with {message}{result_info_message}',
             )
 
         match extend_result:
