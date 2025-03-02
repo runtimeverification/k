@@ -11,23 +11,27 @@ from ..dequote import bytes_encode
 from ..konvert import unmunge
 from ..kore.internal import CollectionKind
 from ..kore.kompiled import KoreSymbolTable
-from ..kore.manip import elim_aliases, free_occs
+from ..kore.manip import collect_symbols, elim_aliases, free_occs
 from ..kore.syntax import DV, And, App, EVar, SortApp, String, Top
 from ..utils import FrozenDict, POSet
 from .model import (
     Alt,
     AltsFieldVal,
+    AltsVal,
     Axiom,
     Ctor,
+    Definition,
     ExplBinder,
     ImplBinder,
     Inductive,
     Instance,
     InstField,
+    Modifiers,
     Module,
     Mutual,
     Signature,
     SimpleFieldVal,
+    SimpleVal,
     StructCtor,
     Structure,
     StructVal,
@@ -35,20 +39,26 @@ from .model import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Iterator, Mapping
+    from collections.abc import Collection, Iterable, Iterator, Mapping
     from typing import Final
 
     from ..kore.internal import KoreDefn
-    from ..kore.rule import RewriteRule
+    from ..kore.rule import FunctionRule, RewriteRule, Rule
     from ..kore.syntax import Pattern, Sort, SymbolDecl
-    from .model import Binder, Command, Declaration, FieldVal
+    from .model import Binder, Command, Declaration, DeclVal, FieldVal
 
-
-_VALID_LEAN_IDENT: Final = re.compile(
-    "_[a-zA-Z0-9_?!']+|[a-zA-Z][a-zA-Z0-9_?!']*"
-)  # Simplified to characters permitted in KORE in the first place
 
 _PRELUDE_SORTS: Final = {'SortBool', 'SortBytes', 'SortId', 'SortInt', 'SortString', 'SortStringBuffer'}
+_PRELUDE_FUNCS: Final = {
+    "Lbl'UndsPlus'Int'Unds'",
+    "Lbl'Unds'-Int'Unds'",
+    "Lbl'UndsStar'Int'Unds'",
+    "Lbl'Unds-LT-Eqls'Int'Unds'",
+}
+
+_SYMBOL_OVERRIDES: Final = {
+    'Lblite': 'kite',
+}
 
 
 class Field(NamedTuple):
@@ -99,6 +109,51 @@ class K2Lean4:
             return None
 
         return FrozenDict((sort, fields) for sort in self.defn.sorts if (fields := fields_of(sort)) is not None)
+
+    @cached_property
+    def _func_rules_by_uid(self) -> FrozenDict[str, FunctionRule]:
+        return FrozenDict((rule.uid, rule) for rules in self.defn.functions.values() for rule in rules)
+
+    @cached_property
+    def _func_deps(self) -> FrozenDict[str, frozenset[str]]:
+        deps: list[tuple[str, str]] = []
+        elems: set[str] = set()
+        for func, rules in self.defn.functions.items():
+            elems.add(func)
+            for rule in rules:
+                elems.add(rule.uid)
+                # A function depends on the rules that define it
+                deps.append((func, rule.uid))
+                # A rule depends on all the functions that it applies
+                symbols = collect_symbols(
+                    And(SortApp('SortFoo'), (rule.req or Top(SortApp('SortFoo')), *rule.lhs.args, rule.rhs))
+                )  # Collection functions like `_List_` can occur on the LHS
+                deps.extend((rule.uid, symbol) for symbol in symbols if symbol in self.defn.functions)
+
+        closed = POSet(deps).image
+        return FrozenDict((elem, frozenset(closed.get(elem, []))) for elem in elems)
+
+    @cached_property
+    def _func_sccs(self) -> tuple[tuple[str, ...], ...]:
+        sccs = _ordered_sccs(self._func_deps)
+        return tuple(tuple(scc) for scc in sccs)
+
+    @cached_property
+    def noncomputable(self) -> frozenset[str]:
+        res: set[str] = set()
+
+        for scc in self._func_sccs:
+            assert scc
+            elem = scc[0]
+
+            if elem in self.defn.functions and elem not in _PRELUDE_FUNCS and not self.defn.functions[elem]:
+                assert len(scc) == 1
+                res.add(elem)
+
+            if any(dep in res for dep in self._func_deps[elem]):
+                res.update(scc)
+
+        return frozenset(res)
 
     @staticmethod
     def _is_cell(sort: str) -> bool:
@@ -192,28 +247,9 @@ class K2Lean4:
     def _symbol_ctor(self, sort: str, symbol: str) -> Ctor:
         decl = self.defn.symbols[symbol]
         param_sorts = _param_sorts(decl)
-        symbol = self._symbol_ident(symbol)
+        symbol = _symbol_ident(symbol)
         binders = tuple(ExplBinder((f'x{i}',), Term(sort)) for i, sort in enumerate(param_sorts))
         return Ctor(symbol, Signature(binders, Term(sort)))
-
-    @staticmethod
-    def _symbol_ident(symbol: str) -> str:
-        if symbol.startswith('Lbl'):
-            symbol = symbol[3:]
-        return K2Lean4._escape_ident(symbol, kore=True)
-
-    @staticmethod
-    def _var_ident(var: str) -> str:
-        assert var.startswith('Var')
-        return K2Lean4._escape_ident(var[3:], kore=True)
-
-    @staticmethod
-    def _escape_ident(ident: str, *, kore: bool = False) -> str:
-        if kore:
-            ident = unmunge(ident)
-        if not _VALID_LEAN_IDENT.fullmatch(ident):
-            ident = f'«{ident}»'
-        return ident
 
     def _structure(self, sort: str) -> Structure:
         fields = self.structures[sort]
@@ -270,12 +306,155 @@ class K2Lean4:
         return res
 
     def func_module(self) -> Module:
-        commands = [self._transform_func(func) for func in self.defn.functions]
-        return Module(commands=commands)
+        sccs = self._func_sccs
+        return Module(commands=tuple(command for elems in sccs if (command := self._func_block(elems))))
 
-    def _transform_func(self, func: str) -> Axiom:
-        ident = self._symbol_ident(func)
-        decl = self.defn.symbols[func]
+    def _func_block(self, elems: Iterable[str]) -> Command | None:
+        assert elems
+        elems = [elem for elem in elems if elem not in _PRELUDE_FUNCS]
+
+        if not elems:
+            return None
+
+        if len(elems) == 1:
+            (elem,) = elems
+            return self._func_command(elem)
+
+        return Mutual(commands=tuple(self._func_command(elem) for elem in elems))
+
+    def _func_command(self, elem: str) -> Command:
+        if elem in self.defn.functions:
+            decl = self.defn.symbols[elem]
+            rules = self.defn.functions[elem]
+            if rules:
+                return self._func_def(decl, rules)
+            return self._func_axiom(decl)
+        rule = self._func_rules_by_uid[elem]
+        return self._func_rule_def(rule)
+
+    def _func_def(self, decl: SymbolDecl, rules: tuple[FunctionRule, ...]) -> Definition:
+        def sort_rules_by_priority(rules: tuple[FunctionRule, ...]) -> list[str]:
+            grouped: dict[int, list[str]] = {}
+            for rule in rules:
+                grouped.setdefault(rule.priority, []).append(_rule_name(rule))
+            groups = [sorted(grouped[priority]) for priority in sorted(grouped)]
+            return [rule for group in groups for rule in group]
+
+        assert rules
+
+        sorted_rules = sort_rules_by_priority(rules)
+        params = [f'x{i}' for i in range(len(decl.param_sorts))]
+        arg_str = ' ' + ' '.join(params) if params else ''
+        term: Term
+        if len(sorted_rules) == 1:
+            rule_str = sorted_rules[0]
+            term = Term(f'{rule_str}{arg_str}')
+        else:
+            assert arg_str  # a function with multiple rules is not nullary
+            rules_str = ' <|> '.join(f'({rule_str}{arg_str})' for rule_str in sorted_rules)
+            term = Term(rules_str)
+
+        val = SimpleVal(term)
+        func = decl.symbol.name
+        ident = _symbol_ident(func)
+        signature = self._func_signature(decl)
+        modifiers = Modifiers(noncomputable=True) if func in self.noncomputable else None
+
+        return Definition(ident, val, signature, modifiers=modifiers)
+
+    def _func_rule_def(self, rule: FunctionRule) -> Definition:
+        decl = self.defn.symbols[rule.lhs.symbol]
+        sort_params = [var.name for var in decl.symbol.vars]
+        param_sorts = [sort.name for sort in decl.param_sorts]
+        sort = decl.sort.name
+
+        ident = _rule_name(rule)
+        binders = (ImplBinder(sort_params, Term('Type')),) if sort_params else ()
+        ty = Term(' → '.join(param_sorts + [f'Option {sort}']))
+        modifiers = Modifiers(noncomputable=True) if rule.uid in self.noncomputable else None
+        signature = Signature(binders, ty)
+
+        req, lhs, rhs, defs = self._extract_func_rule(rule)
+        val = self._func_rule_val(lhs.args, req, rhs, defs)
+
+        return Definition(ident, val, signature, modifiers=modifiers)
+
+    def _extract_func_rule(self, rule: FunctionRule) -> tuple[Pattern, App, Pattern, dict[str, Pattern]]:
+        req = rule.req if rule.req else Top(SortApp('Foo'))
+
+        pattern = elim_aliases(And(SortApp('Foo'), (req, rule.lhs, rule.rhs)))
+        assert isinstance(pattern, And)
+        req, lhs, rhs = pattern.ops
+        assert isinstance(lhs, App)
+
+        free = (f"Var'Unds'Val{i}" for i in count())
+        pattern, defs = self._elim_fun_apps(And(SortApp('Foo'), (req, rhs)), free)
+        assert isinstance(pattern, And)
+        req, rhs = pattern.ops
+
+        return req, lhs, rhs, defs
+
+    def _func_rule_val(
+        self,
+        args: tuple[Pattern, ...],
+        req: Pattern,
+        rhs: Pattern,
+        defs: dict[str, Pattern],
+    ) -> DeclVal:
+        term = self._func_rule_term(req, rhs, defs)
+
+        if not args:
+            return SimpleVal(term)
+
+        alts: list[Alt] = []
+
+        match_alt = Alt(tuple(self._transform_pattern(arg, concrete=True) for arg in args), term)
+        alts.append(match_alt)
+
+        if not all(self._is_exhaustive(arg) for arg in args):
+            nomatch_alt = Alt((Term('_'),) * len(args), Term('none'))
+            alts.append(nomatch_alt)
+
+        return AltsVal(alts)
+
+    def _func_rule_term(self, req: Pattern, rhs: Pattern, defs: dict[str, Pattern]) -> Term:
+        if not defs and isinstance(req, Top):
+            return Term(f'some {self._transform_arg(rhs)}')
+
+        seq_strs: list[str] = []
+        seq_strs.extend(f'let {var} <- {self._transform_pattern(pattern)}' for var, pattern in defs.items())
+        if not isinstance(req, Top):
+            seq_strs.append(f'guard {self._transform_arg(req)}')
+        seq_strs.append(f'return {self._transform_arg(rhs)}')
+        do_str = '\n'.join('  ' + seq_str for seq_str in seq_strs)
+        return Term(f'do\n{do_str}')
+
+    def _is_exhaustive(self, pattern: Pattern) -> bool:
+        match pattern:
+            case DV():
+                return False
+            case EVar():
+                return True
+            case App(symbol, _, args) as app:
+                if symbol in self.defn.functions:
+                    # Collection function
+                    return False
+
+                _sort = self.symbol_table.infer_sort(app)
+                assert isinstance(_sort, SortApp)
+                sort = _sort.name
+                n_ctors = len(self.defn.constructors.get(sort, ())) + len(self.defn.subsorts.get(sort, ()))
+                assert n_ctors
+                return n_ctors == 1 and all(self._is_exhaustive(arg) for arg in args)
+            case _:
+                raise AssertionError()
+
+    def _func_axiom(self, decl: SymbolDecl) -> Axiom:
+        ident = _symbol_ident(decl.symbol.name)
+        signature = self._func_signature(decl)
+        return Axiom(ident, signature)
+
+    def _func_signature(self, decl: SymbolDecl) -> Signature:
         sort_params = [var.name for var in decl.symbol.vars]
         param_sorts = [sort.name for sort in decl.param_sorts]
         sort = decl.sort.name
@@ -284,7 +463,8 @@ class K2Lean4:
         if sort_params:
             binders.append(ImplBinder(sort_params, Term('Type')))
         binders.extend(ExplBinder((f'x{i}',), Term(sort)) for i, sort in enumerate(param_sorts))
-        return Axiom(ident, Signature(binders, Term(f'Option {sort}')))
+
+        return Signature(binders, Term(f'Option {sort}'))
 
     def rewrite_module(self) -> Module:
         commands = (self._rewrite_inductive(),)
@@ -311,7 +491,7 @@ class K2Lean4:
         return Inductive('Rewrites', signature, ctors=ctors)
 
     def _rewrite_ctors(self) -> list[Ctor]:
-        rewrites = sorted(self.defn.rewrites, key=self._rewrite_name)
+        rewrites = sorted(self.defn.rewrites, key=_rule_name)
         return [self._rewrite_ctor(rule) for rule in rewrites]
 
     def _rewrite_ctor(self, rule: RewriteRule) -> Ctor:
@@ -341,14 +521,7 @@ class K2Lean4:
 
         lhs_term = self._transform_pattern(lhs)
         rhs_term = self._transform_pattern(rhs)
-        return Ctor(self._rewrite_name(rule), Signature(binders, Term(f'Rewrites {lhs_term} {rhs_term}')))
-
-    @staticmethod
-    def _rewrite_name(rule: RewriteRule) -> str:
-        if rule.label:
-            label = rule.label.replace('-', '_').replace('.', '_')
-            return K2Lean4._escape_ident(label)
-        return f'_{rule.uid[:7]}'
+        return Ctor(_rule_name(rule), Signature(binders, Term(f'Rewrites {lhs_term} {rhs_term}')))
 
     def _elim_fun_apps(self, pattern: Pattern, free: Iterator[str]) -> tuple[Pattern, dict[str, Pattern]]:
         """Replace ``foo(bar(x))`` with ``z`` and return mapping ``{y: bar(x), z: foo(y)}`` with ``y``, ``z`` fresh variables."""
@@ -357,7 +530,7 @@ class K2Lean4:
         def abstract_funcs(pattern: Pattern) -> Pattern:
             if isinstance(pattern, App) and pattern.symbol in self.defn.functions:
                 name = next(free)
-                ident = self._var_ident(name)
+                ident = _var_ident(name)
                 defs[ident] = pattern
                 sort = self.symbol_table.infer_sort(pattern)
                 return EVar(name, sort)
@@ -371,7 +544,7 @@ class K2Lean4:
         for var in free_vars:
             match var:
                 case EVar(name, SortApp(sort)):
-                    ident = self._var_ident(name)
+                    ident = _var_ident(name)
                     assert ident not in grouped_vars.get(sort, ())
                     grouped_vars.setdefault(sort, set()).add(ident)
                 case _:
@@ -387,19 +560,33 @@ class K2Lean4:
             for ident, pattern in defs.items()
         ]
 
-    def _transform_pattern(self, pattern: Pattern) -> Term:
+    def _transform_pattern(self, pattern: Pattern, *, concrete: bool = False) -> Term:
         match pattern:
             case EVar(name):
                 return self._transform_evar(name)
             case DV(SortApp(sort), String(value)):
                 return self._transform_dv(sort, value)
             case App(symbol, sorts, args):
-                return self._transform_app(symbol, sorts, args)
+                return self._transform_app(symbol, sorts, args, concrete=concrete)
             case _:
                 raise ValueError(f'Unsupported pattern: {pattern.text}')
 
+    def _transform_arg(self, pattern: Pattern, *, concrete: bool = False) -> Term:
+        term = self._transform_pattern(pattern, concrete=concrete)
+
+        if not isinstance(pattern, App):
+            return term
+
+        if not pattern.args:
+            return term
+
+        if pattern.symbol in self.structure_symbols:
+            return term
+
+        return Term(f'({term})')
+
     def _transform_evar(self, name: str) -> Term:
-        return Term(self._var_ident(name))
+        return Term(_var_ident(name))
 
     def _transform_dv(self, sort: str, value: str) -> Term:
         match sort:
@@ -420,7 +607,7 @@ class K2Lean4:
 
     def _transform_bytes_dv(self, value: str) -> Term:
         bytes_str = ', '.join(f'0x{byte:02X}' for byte in bytes_encode(value))
-        return Term(f'⟨#[{bytes_str}⟩]')
+        return Term(f'⟨#[{bytes_str}]⟩')
 
     def _transform_string_dv(self, value: str) -> Term:
         escapes = {
@@ -448,59 +635,92 @@ class K2Lean4:
         encoded = ''.join(encode(c) for c in value)
         return Term(f'"{encoded}"')
 
-    def _transform_app(self, symbol: str, sorts: tuple[Sort, ...], args: tuple[Pattern, ...]) -> Term:
+    def _transform_app(
+        self,
+        symbol: str,
+        sorts: tuple[Sort, ...],
+        args: tuple[Pattern, ...],
+        *,
+        concrete: bool,
+    ) -> Term:
         if symbol == 'inj':
-            return self._transform_inj_app(sorts, args)
+            return self._transform_inj_app(sorts, args, concrete=concrete)
 
         if symbol in self.structure_symbols:
             fields = self.structures[self.structure_symbols[symbol]]
-            return self._transform_structure_app(fields, args)
+            return self._transform_structure_app(fields, args, concrete=concrete)
 
         decl = self.defn.symbols[symbol]
         sort = decl.sort.name if isinstance(decl.sort, SortApp) else None
-        return self._transform_basic_app(sort, symbol, args)
+        return self._transform_basic_app(sort, symbol, args, concrete=concrete)
 
-    def _transform_arg(self, pattern: Pattern) -> Term:
-        term = self._transform_pattern(pattern)
-
-        if not isinstance(pattern, App):
-            return term
-
-        if pattern.symbol in self.structure_symbols:
-            return term
-
-        return Term(f'({term})')
-
-    def _transform_inj_app(self, sorts: tuple[Sort, ...], args: tuple[Pattern, ...]) -> Term:
+    def _transform_inj_app(self, sorts: tuple[Sort, ...], args: tuple[Pattern, ...], *, concrete: bool) -> Term:
         _from_sort, _to_sort = sorts
         assert isinstance(_from_sort, SortApp)
         assert isinstance(_to_sort, SortApp)
         from_str = _from_sort.name
         to_str = _to_sort.name
         (arg,) = args
-        term = self._transform_arg(arg)
-        return Term(f'(@inj {from_str} {to_str}) {term}')
+        term = self._transform_arg(arg, concrete=concrete)
+        if concrete:
+            return Term(f'{to_str}.inj_{from_str} {term}')
+        else:
+            return Term(f'(@inj {from_str} {to_str}) {term}')
 
-    def _transform_structure_app(self, fields: Iterable[Field], args: Iterable[Pattern]) -> Term:
+    def _transform_structure_app(self, fields: Iterable[Field], args: Iterable[Pattern], *, concrete: bool) -> Term:
         fields_str = ', '.join(
-            f'{field.name} := {self._transform_pattern(arg)}' for field, arg in zip(fields, args, strict=True)
+            f'{field.name} := {self._transform_pattern(arg, concrete=concrete)}'
+            for field, arg in zip(fields, args, strict=True)
         )
         lbrace, rbrace = ['{', '}']
         return Term(f'{lbrace} {fields_str} {rbrace}')
 
-    def _transform_basic_app(self, sort: str | None, symbol: str, args: Iterable[Pattern]) -> Term:
+    def _transform_basic_app(self, sort: str | None, symbol: str, args: Iterable[Pattern], *, concrete: bool) -> Term:
         chunks = []
 
         ident: str
         if sort and symbol in self.defn.constructors.get(sort, ()):
             # Symbol is a constructor
-            ident = f'{sort}.{self._symbol_ident(symbol)}'
+            ident = f'{sort}.{_symbol_ident(symbol)}'
         else:
-            ident = self._symbol_ident(symbol)
+            ident = _symbol_ident(symbol)
 
         chunks.append(ident)
-        chunks.extend(str(self._transform_arg(arg)) for arg in args)
+        chunks.extend(str(self._transform_arg(arg, concrete=concrete)) for arg in args)
         return Term(' '.join(chunks))
+
+
+def _rule_name(rule: Rule) -> str:
+    if rule.label:
+        label = rule.label.replace('-', '_').replace('.', '_')
+        return _escape_ident(label)
+    return f'_{rule.uid[:7]}'
+
+
+def _symbol_ident(symbol: str) -> str:
+    if symbol in _SYMBOL_OVERRIDES:
+        return _SYMBOL_OVERRIDES[symbol]
+    if symbol.startswith('Lbl'):
+        symbol = symbol[3:]
+    return _escape_ident(symbol, kore=True)
+
+
+def _var_ident(var: str) -> str:
+    assert var.startswith('Var')
+    return _escape_ident(var[3:], kore=True)
+
+
+_VALID_LEAN_IDENT: Final = re.compile(
+    "_[a-zA-Z0-9_?!']+|[a-zA-Z][a-zA-Z0-9_?!']*"
+)  # Simplified to characters permitted in KORE in the first place
+
+
+def _escape_ident(ident: str, *, kore: bool = False) -> str:
+    if kore:
+        ident = unmunge(ident)
+    if not _VALID_LEAN_IDENT.fullmatch(ident):
+        ident = f'«{ident}»'
+    return ident
 
 
 def _param_sorts(decl: SymbolDecl) -> list[str]:
@@ -510,26 +730,7 @@ def _param_sorts(decl: SymbolDecl) -> list[str]:
 
 
 def _ordered_sorts(defn: KoreDefn) -> list[list[str]]:
-    deps = _sort_dependencies(defn)
-    sccs = _sort_sccs(deps)
-
-    sorts_by_scc: dict[int, set[str]] = {}
-    for sort, scc in sccs.items():
-        sorts_by_scc.setdefault(scc, set()).add(sort)
-
-    scc_deps: dict[int, set[int]] = {}
-    for scc, sorts in sorts_by_scc.items():
-        assert sorts
-        sort, *_ = sorts
-        scc_deps[scc] = set()
-        for dep in deps[sort]:
-            dep_scc = sccs[dep]
-            if dep_scc == scc:
-                continue
-            scc_deps[scc].add(dep_scc)
-
-    ordered_sccs = list(TopologicalSorter(scc_deps).static_order())
-    return [sorted(sorts_by_scc[scc]) for scc in ordered_sccs]
+    return _ordered_sccs(_sort_dependencies(defn))
 
 
 def _sort_dependencies(defn: KoreDefn) -> dict[str, set[str]]:
@@ -552,24 +753,45 @@ def _sort_dependencies(defn: KoreDefn) -> dict[str, set[str]]:
             deps.extend((sort, param_sort) for param_sort in _param_sorts(elem))
 
     closed = POSet(deps).image  # TODO POSet should be called "transitively closed relation" or similar
-    res = {
+    return {
         sort: set(closed.get(sort, [])) for sort in sorts
     }  # Ensure that sorts without dependencies are also represented
-    return res
+
+
+def _ordered_sccs(deps: Mapping[str, Collection[str]]) -> list[list[str]]:
+    sccs = _sccs(deps)
+
+    elems_by_scc: dict[int, set[str]] = {}
+    for elem, scc in sccs.items():
+        elems_by_scc.setdefault(scc, set()).add(elem)
+
+    scc_deps: dict[int, set[int]] = {}
+    for scc, elems in elems_by_scc.items():
+        assert elems
+        elem, *_ = elems
+        scc_deps[scc] = set()
+        for dep in deps[elem]:
+            dep_scc = sccs[dep]
+            if dep_scc == scc:
+                continue
+            scc_deps[scc].add(dep_scc)
+
+    ordered_sccs = list(TopologicalSorter(scc_deps).static_order())
+    return [sorted(elems_by_scc[scc]) for scc in ordered_sccs]
 
 
 # TODO Implement a more efficient algorithm, e.g. Tarjan's algorithm
-def _sort_sccs(deps: dict[str, set[str]]) -> dict[str, int]:
+def _sccs(deps: Mapping[str, Iterable[str]]) -> dict[str, int]:
     res: dict[str, int] = {}
 
     scc = count()
-    for sort, dep_sorts in deps.items():
-        if sort in res:
+    for elem, dep_elems in deps.items():
+        if elem in res:
             continue
         idx = next(scc)
-        res[sort] = idx
-        for dep in dep_sorts:
-            if sort in deps[dep]:
+        res[elem] = idx
+        for dep in dep_elems:
+            if elem in deps[dep]:
                 res[dep] = idx
 
     return res

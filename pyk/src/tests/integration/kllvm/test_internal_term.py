@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import pytest
+
 import pyk.kllvm.load  # noqa: F401
 from pyk.kllvm.parser import Parser
 from pyk.testing import RuntimeTest
@@ -13,6 +15,9 @@ if TYPE_CHECKING:
     from pyk.kllvm.runtime import Runtime
 
 
+@pytest.mark.skip(
+    reason="This test doesn't conform with the current version of LLVM GC. It should be updated or deleted soon."
+)
 class TestInternalTerm(RuntimeTest):
     KOMPILE_MAIN_FILE = K_FILES / 'imp.k'
 

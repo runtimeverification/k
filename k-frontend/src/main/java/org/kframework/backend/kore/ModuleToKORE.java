@@ -34,6 +34,7 @@ import org.kframework.builtin.Sorts;
 import org.kframework.compile.AddSortInjections;
 import org.kframework.compile.ComputeTransitiveFunctionDependencies;
 import org.kframework.compile.ExpandMacros;
+import org.kframework.compile.NumberSentences;
 import org.kframework.compile.RefreshRules;
 import org.kframework.compile.RewriteToTop;
 import org.kframework.definition.Claim;
@@ -723,6 +724,7 @@ public class ModuleToKORE {
             BooleanUtils.TRUE,
             BooleanUtils.TRUE,
             Att.empty().add(Att.SIMPLIFICATION()));
+    ceilMapRule = (Rule) NumberSentences.number(ceilMapRule);
     rules.add(ceilMapRule);
   }
 
