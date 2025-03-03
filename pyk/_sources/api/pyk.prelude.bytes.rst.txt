@@ -1,0 +1,7 @@
+pyk.prelude.bytes module
+========================
+
+.. automodule:: pyk.prelude.bytes
+   :members:
+   :undoc-members:
+   :show-inheritance:

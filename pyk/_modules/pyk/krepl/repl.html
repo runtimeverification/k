@@ -1,0 +1,326 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyk.krepl.repl &mdash; pyk 7.1.217 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=11bfb627"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            pyk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">pyk</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pyk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pyk.krepl.repl</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyk.krepl.repl</h1><div class="highlight"><pre>
+<span></span><span class="linenos">  1</span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<span class="linenos">  2</span>
+<span class="linenos">  3</span><span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="linenos">  4</span><span class="kn">from</span><span class="w"> </span><span class="nn">argparse</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArgumentParser</span>
+<span class="linenos">  5</span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="linenos">  6</span><span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">cached_property</span>
+<span class="linenos">  7</span><span class="kn">from</span><span class="w"> </span><span class="nn">subprocess</span><span class="w"> </span><span class="kn">import</span> <span class="n">CalledProcessError</span>
+<span class="linenos">  8</span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">final</span>
+<span class="linenos">  9</span>
+<span class="linenos"> 10</span><span class="kn">from</span><span class="w"> </span><span class="nn">cmd2</span><span class="w"> </span><span class="kn">import</span> <span class="n">Cmd</span><span class="p">,</span> <span class="n">with_argparser</span><span class="p">,</span> <span class="n">with_category</span>
+<span class="linenos"> 11</span>
+<span class="linenos"> 12</span><span class="kn">from</span><span class="w"> </span><span class="nn">..cli.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_dir_path</span><span class="p">,</span> <span class="n">check_file_path</span><span class="p">,</span> <span class="n">file_path</span>
+<span class="linenos"> 13</span><span class="kn">from</span><span class="w"> </span><span class="nn">..kore.parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">KoreParser</span>
+<span class="linenos"> 14</span><span class="kn">from</span><span class="w"> </span><span class="nn">..ktool.kprint</span><span class="w"> </span><span class="kn">import</span> <span class="n">KPrint</span>
+<span class="linenos"> 15</span><span class="kn">from</span><span class="w"> </span><span class="nn">..ktool.krun</span><span class="w"> </span><span class="kn">import</span> <span class="n">KRun</span><span class="p">,</span> <span class="n">KRunOutput</span><span class="p">,</span> <span class="n">_krun</span>
+<span class="linenos"> 16</span>
+<span class="linenos"> 17</span><span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+<span class="linenos"> 18</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">argparse</span><span class="w"> </span><span class="kn">import</span> <span class="n">Namespace</span>
+<span class="linenos"> 19</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterator</span>
+<span class="linenos"> 20</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="linenos"> 21</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Final</span>
+<span class="linenos"> 22</span>
+<span class="linenos"> 23</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">..kore.syntax</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pattern</span>
+<span class="linenos"> 24</span>
+<span class="linenos"> 25</span><span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;T&#39;</span><span class="p">)</span>
+<span class="linenos"> 26</span>
+<span class="linenos"> 27</span>
+<div class="viewcode-block" id="Interpreter">
+<a class="viewcode-back" href="../../../api/pyk.krepl.repl.html#pyk.krepl.repl.Interpreter">[docs]</a>
+<span class="linenos"> 28</span><span class="k">class</span><span class="w"> </span><span class="nc">Interpreter</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="linenos"> 29</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+<span class="linenos"> 30</span>        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_state</span><span class="p">()</span>
+<span class="linenos"> 31</span>        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+<span class="linenos"> 32</span>            <span class="k">yield</span> <span class="n">state</span>
+<span class="linenos"> 33</span>            <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">next_state</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+<span class="linenos"> 34</span>
+<div class="viewcode-block" id="Interpreter.init_state">
+<a class="viewcode-back" href="../../../api/pyk.krepl.repl.html#pyk.krepl.repl.Interpreter.init_state">[docs]</a>
+<span class="linenos"> 35</span>    <span class="nd">@abstractmethod</span>
+<span class="linenos"> 36</span>    <span class="k">def</span><span class="w"> </span><span class="nf">init_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span> <span class="o">...</span></div>
+
+<span class="linenos"> 37</span>
+<div class="viewcode-block" id="Interpreter.next_state">
+<a class="viewcode-back" href="../../../api/pyk.krepl.repl.html#pyk.krepl.repl.Interpreter.next_state">[docs]</a>
+<span class="linenos"> 38</span>    <span class="nd">@abstractmethod</span>
+<span class="linenos"> 39</span>    <span class="k">def</span><span class="w"> </span><span class="nf">next_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span> <span class="o">...</span></div>
+</div>
+
+<span class="linenos"> 40</span>
+<span class="linenos"> 41</span>
+<div class="viewcode-block" id="KState">
+<a class="viewcode-back" href="../../../api/pyk.krepl.repl.html#pyk.krepl.repl.KState">[docs]</a>
+<span class="linenos"> 42</span><span class="nd">@final</span>
+<span class="linenos"> 43</span><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos"> 44</span><span class="k">class</span><span class="w"> </span><span class="nc">KState</span><span class="p">:</span>
+<span class="linenos"> 45</span>    <span class="n">definition_dir</span><span class="p">:</span> <span class="n">Path</span>
+<span class="linenos"> 46</span>    <span class="n">pattern</span><span class="p">:</span> <span class="n">Pattern</span>
+<span class="linenos"> 47</span>
+<span class="linenos"> 48</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">definition_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">pattern</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">):</span>
+<span class="linenos"> 49</span>        <span class="n">definition_dir</span> <span class="o">=</span> <span class="n">definition_dir</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+<span class="linenos"> 50</span>        <span class="n">check_dir_path</span><span class="p">(</span><span class="n">definition_dir</span><span class="p">)</span>
+<span class="linenos"> 51</span>        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;pattern&#39;</span><span class="p">,</span> <span class="n">pattern</span><span class="p">)</span>
+<span class="linenos"> 52</span>        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;definition_dir&#39;</span><span class="p">,</span> <span class="n">definition_dir</span><span class="p">)</span>
+<span class="linenos"> 53</span>
+<span class="linenos"> 54</span>    <span class="nd">@cached_property</span>
+<span class="linenos"> 55</span>    <span class="k">def</span><span class="w"> </span><span class="nf">pretty</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos"> 56</span>        <span class="k">return</span> <span class="n">KPrint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">definition_dir</span><span class="p">)</span><span class="o">.</span><span class="n">kore_to_pretty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pattern</span><span class="p">)</span>
+<span class="linenos"> 57</span>
+<span class="linenos"> 58</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos"> 59</span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pretty</span></div>
+
+<span class="linenos"> 60</span>
+<span class="linenos"> 61</span>
+<div class="viewcode-block" id="KInterpreter">
+<a class="viewcode-back" href="../../../api/pyk.krepl.repl.html#pyk.krepl.repl.KInterpreter">[docs]</a>
+<span class="linenos"> 62</span><span class="k">class</span><span class="w"> </span><span class="nc">KInterpreter</span><span class="p">(</span><span class="n">Interpreter</span><span class="p">[</span><span class="n">KState</span><span class="p">]):</span>
+<span class="linenos"> 63</span>    <span class="n">definition_dir</span><span class="p">:</span> <span class="n">Path</span>
+<span class="linenos"> 64</span>    <span class="n">program_file</span><span class="p">:</span> <span class="n">Path</span>
+<span class="linenos"> 65</span>
+<span class="linenos"> 66</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">definition_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">program_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos"> 67</span>        <span class="n">check_dir_path</span><span class="p">(</span><span class="n">definition_dir</span><span class="p">)</span>
+<span class="linenos"> 68</span>        <span class="n">check_file_path</span><span class="p">(</span><span class="n">program_file</span><span class="p">)</span>
+<span class="linenos"> 69</span>        <span class="bp">self</span><span class="o">.</span><span class="n">definition_dir</span> <span class="o">=</span> <span class="n">definition_dir</span>
+<span class="linenos"> 70</span>        <span class="bp">self</span><span class="o">.</span><span class="n">program_file</span> <span class="o">=</span> <span class="n">program_file</span>
+<span class="linenos"> 71</span>
+<div class="viewcode-block" id="KInterpreter.init_state">
+<a class="viewcode-back" href="../../../api/pyk.krepl.repl.html#pyk.krepl.repl.KInterpreter.init_state">[docs]</a>
+<span class="linenos"> 72</span>    <span class="k">def</span><span class="w"> </span><span class="nf">init_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KState</span><span class="p">:</span>
+<span class="linenos"> 73</span>        <span class="k">try</span><span class="p">:</span>
+<span class="linenos"> 74</span>            <span class="n">proc_res</span> <span class="o">=</span> <span class="n">_krun</span><span class="p">(</span>
+<span class="linenos"> 75</span>                <span class="n">input_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">program_file</span><span class="p">,</span>
+<span class="linenos"> 76</span>                <span class="n">definition_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">definition_dir</span><span class="p">,</span>
+<span class="linenos"> 77</span>                <span class="n">output</span><span class="o">=</span><span class="n">KRunOutput</span><span class="o">.</span><span class="n">KORE</span><span class="p">,</span>
+<span class="linenos"> 78</span>                <span class="n">depth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+<span class="linenos"> 79</span>            <span class="p">)</span>
+<span class="linenos"> 80</span>        <span class="k">except</span> <span class="n">CalledProcessError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+<span class="linenos"> 81</span>            <span class="k">raise</span> <span class="n">ReplError</span><span class="p">(</span><span class="s1">&#39;Failed to load program&#39;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">err</span>
+<span class="linenos"> 82</span>
+<span class="linenos"> 83</span>        <span class="n">pattern</span> <span class="o">=</span> <span class="n">KoreParser</span><span class="p">(</span><span class="n">proc_res</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span><span class="o">.</span><span class="n">pattern</span><span class="p">()</span>
+<span class="linenos"> 84</span>        <span class="k">return</span> <span class="n">KState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">definition_dir</span><span class="p">,</span> <span class="n">pattern</span><span class="p">)</span></div>
+
+<span class="linenos"> 85</span>
+<div class="viewcode-block" id="KInterpreter.next_state">
+<a class="viewcode-back" href="../../../api/pyk.krepl.repl.html#pyk.krepl.repl.KInterpreter.next_state">[docs]</a>
+<span class="linenos"> 86</span>    <span class="k">def</span><span class="w"> </span><span class="nf">next_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">KState</span><span class="p">,</span> <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KState</span><span class="p">:</span>
+<span class="linenos"> 87</span>        <span class="n">pattern</span> <span class="o">=</span> <span class="n">KRun</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">definition_dir</span><span class="p">)</span><span class="o">.</span><span class="n">run_pattern</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">pattern</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="n">steps</span><span class="p">)</span>
+<span class="linenos"> 88</span>        <span class="k">return</span> <span class="n">KState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">definition_dir</span><span class="p">,</span> <span class="n">pattern</span><span class="p">)</span></div>
+</div>
+
+<span class="linenos"> 89</span>
+<span class="linenos"> 90</span>
+<span class="linenos"> 91</span><span class="k">def</span><span class="w"> </span><span class="nf">_step_parser</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">ArgumentParser</span><span class="p">:</span>
+<span class="linenos"> 92</span>    <span class="n">parser</span> <span class="o">=</span> <span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s1">&#39;Execute steps in the program&#39;</span><span class="p">)</span>
+<span class="linenos"> 93</span>    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;steps&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;?&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;STEPS&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;number of steps to take&#39;</span><span class="p">)</span>
+<span class="linenos"> 94</span>    <span class="k">return</span> <span class="n">parser</span>
+<span class="linenos"> 95</span>
+<span class="linenos"> 96</span>
+<span class="linenos"> 97</span><span class="k">def</span><span class="w"> </span><span class="nf">_show_parser</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">ArgumentParser</span><span class="p">:</span>
+<span class="linenos"> 98</span>    <span class="k">return</span> <span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s1">&#39;Show the current configuration&#39;</span><span class="p">)</span>
+<span class="linenos"> 99</span>
+<span class="linenos">100</span>
+<div class="viewcode-block" id="ReplError">
+<a class="viewcode-back" href="../../../api/pyk.krepl.repl.html#pyk.krepl.repl.ReplError">[docs]</a>
+<span class="linenos">101</span><span class="k">class</span><span class="w"> </span><span class="nc">ReplError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span> <span class="o">...</span></div>
+
+<span class="linenos">102</span>
+<span class="linenos">103</span>
+<div class="viewcode-block" id="BaseRepl">
+<a class="viewcode-back" href="../../../api/pyk.krepl.repl.html#pyk.krepl.repl.BaseRepl">[docs]</a>
+<span class="linenos">104</span><span class="k">class</span><span class="w"> </span><span class="nc">BaseRepl</span><span class="p">(</span><span class="n">Cmd</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="linenos">105</span>    <span class="n">CAT_DEBUG</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="s1">&#39;Debugger Commands&#39;</span>
+<span class="linenos">106</span>    <span class="n">CAT_BUILTIN</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="s1">&#39;Built-in Commands&#39;</span>
+<span class="linenos">107</span>
+<span class="linenos">108</span>    <span class="n">prompt</span> <span class="o">=</span> <span class="s1">&#39;&gt; &#39;</span>
+<span class="linenos">109</span>
+<span class="linenos">110</span>    <span class="n">interpreter</span><span class="p">:</span> <span class="n">Interpreter</span><span class="p">[</span><span class="n">T</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span>
+<span class="linenos">111</span>    <span class="n">state</span><span class="p">:</span> <span class="n">T</span> <span class="o">|</span> <span class="kc">None</span>
+<span class="linenos">112</span>
+<span class="linenos">113</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">114</span>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">allow_cli_args</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="linenos">115</span>        <span class="bp">self</span><span class="o">.</span><span class="n">default_category</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CAT_BUILTIN</span>
+<span class="linenos">116</span>
+<span class="linenos">117</span>        <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="linenos">118</span>        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="linenos">119</span>
+<div class="viewcode-block" id="BaseRepl.do_load">
+<a class="viewcode-back" href="../../../api/pyk.krepl.repl.html#pyk.krepl.repl.BaseRepl.do_load">[docs]</a>
+<span class="linenos">120</span>    <span class="nd">@abstractmethod</span>
+<span class="linenos">121</span>    <span class="k">def</span><span class="w"> </span><span class="nf">do_load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># Leaky abstraction - make extension mechanism more robust</span>
+<span class="linenos">122</span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up the interpreter.</span>
+<span class="linenos">123</span>
+<span class="linenos">124</span><span class="sd">        Subclasses are expected to</span>
+<span class="linenos">125</span>
+<span class="linenos">126</span><span class="sd">        - Decorate the method with `with_argparser` to ensure the right set of arguments is parsed.</span>
+<span class="linenos">127</span><span class="sd">        - Instantiate an `Interpreter[T]` based on `args`, then set `self.interpreter`.</span>
+<span class="linenos">128</span><span class="sd">        - Set `self.state` to `self.interpreter.init_state()`.</span>
+<span class="linenos">129</span><span class="sd">        &quot;&quot;&quot;</span>
+<span class="linenos">130</span>        <span class="o">...</span></div>
+
+<span class="linenos">131</span>
+<div class="viewcode-block" id="BaseRepl.do_step">
+<a class="viewcode-back" href="../../../api/pyk.krepl.repl.html#pyk.krepl.repl.BaseRepl.do_step">[docs]</a>
+<span class="linenos">132</span>    <span class="nd">@with_argparser</span><span class="p">(</span><span class="n">_step_parser</span><span class="p">())</span>
+<span class="linenos">133</span>    <span class="nd">@with_category</span><span class="p">(</span><span class="n">CAT_DEBUG</span><span class="p">)</span>
+<span class="linenos">134</span>    <span class="k">def</span><span class="w"> </span><span class="nf">do_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">Namespace</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">135</span>        <span class="k">try</span><span class="p">:</span>
+<span class="linenos">136</span>            <span class="n">interpreter</span><span class="p">,</span> <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_state</span><span class="p">()</span>
+<span class="linenos">137</span>            <span class="bp">self</span><span class="o">.</span><span class="n">_check_steps</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">steps</span><span class="p">)</span>
+<span class="linenos">138</span>            <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">interpreter</span><span class="o">.</span><span class="n">next_state</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">steps</span><span class="p">)</span>
+<span class="linenos">139</span>        <span class="k">except</span> <span class="n">ReplError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+<span class="linenos">140</span>            <span class="bp">self</span><span class="o">.</span><span class="n">poutput</span><span class="p">(</span><span class="n">err</span><span class="p">)</span></div>
+
+<span class="linenos">141</span>
+<div class="viewcode-block" id="BaseRepl.do_show">
+<a class="viewcode-back" href="../../../api/pyk.krepl.repl.html#pyk.krepl.repl.BaseRepl.do_show">[docs]</a>
+<span class="linenos">142</span>    <span class="nd">@with_argparser</span><span class="p">(</span><span class="n">_show_parser</span><span class="p">())</span>
+<span class="linenos">143</span>    <span class="nd">@with_category</span><span class="p">(</span><span class="n">CAT_DEBUG</span><span class="p">)</span>
+<span class="linenos">144</span>    <span class="k">def</span><span class="w"> </span><span class="nf">do_show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">Namespace</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">145</span>        <span class="k">try</span><span class="p">:</span>
+<span class="linenos">146</span>            <span class="n">_</span><span class="p">,</span> <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_state</span><span class="p">()</span>
+<span class="linenos">147</span>            <span class="bp">self</span><span class="o">.</span><span class="n">poutput</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+<span class="linenos">148</span>        <span class="k">except</span> <span class="n">ReplError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+<span class="linenos">149</span>            <span class="bp">self</span><span class="o">.</span><span class="n">poutput</span><span class="p">(</span><span class="n">err</span><span class="p">)</span></div>
+
+<span class="linenos">150</span>
+<span class="linenos">151</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_check_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Interpreter</span><span class="p">,</span> <span class="n">T</span><span class="p">]:</span>
+<span class="linenos">152</span>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">153</span>            <span class="k">raise</span> <span class="n">ReplError</span><span class="p">(</span><span class="s1">&#39;No program is loaded&#39;</span><span class="p">)</span>
+<span class="linenos">154</span>        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+<span class="linenos">155</span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span>
+<span class="linenos">156</span>
+<span class="linenos">157</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_check_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">158</span>        <span class="k">if</span> <span class="n">steps</span> <span class="ow">and</span> <span class="n">steps</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+<span class="linenos">159</span>            <span class="k">raise</span> <span class="n">ReplError</span><span class="p">(</span><span class="s1">&#39;Depth should be non-negative&#39;</span><span class="p">)</span></div>
+
+<span class="linenos">160</span>
+<span class="linenos">161</span>
+<span class="linenos">162</span><span class="k">def</span><span class="w"> </span><span class="nf">_load_parser</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">ArgumentParser</span><span class="p">:</span>
+<span class="linenos">163</span>    <span class="n">parser</span> <span class="o">=</span> <span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s1">&#39;Load a program&#39;</span><span class="p">)</span>
+<span class="linenos">164</span>    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;program&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">file_path</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;PROGRAM&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;program to load&#39;</span><span class="p">)</span>
+<span class="linenos">165</span>    <span class="k">return</span> <span class="n">parser</span>
+<span class="linenos">166</span>
+<span class="linenos">167</span>
+<div class="viewcode-block" id="KRepl">
+<a class="viewcode-back" href="../../../api/pyk.krepl.repl.html#pyk.krepl.repl.KRepl">[docs]</a>
+<span class="linenos">168</span><span class="k">class</span><span class="w"> </span><span class="nc">KRepl</span><span class="p">(</span><span class="n">BaseRepl</span><span class="p">[</span><span class="n">KState</span><span class="p">]):</span>
+<span class="linenos">169</span>    <span class="n">intro</span> <span class="o">=</span> <span class="s1">&#39;K-REPL Shell</span><span class="se">\n</span><span class="s1">Type &quot;help&quot; or &quot;?&quot; for more information.&#39;</span>
+<span class="linenos">170</span>
+<span class="linenos">171</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">definition_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+<span class="linenos">172</span>        <span class="n">check_dir_path</span><span class="p">(</span><span class="n">definition_dir</span><span class="p">)</span>
+<span class="linenos">173</span>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+<span class="linenos">174</span>        <span class="bp">self</span><span class="o">.</span><span class="n">definition_dir</span> <span class="o">=</span> <span class="n">definition_dir</span>
+<span class="linenos">175</span>
+<div class="viewcode-block" id="KRepl.do_load">
+<a class="viewcode-back" href="../../../api/pyk.krepl.repl.html#pyk.krepl.repl.KRepl.do_load">[docs]</a>
+<span class="linenos">176</span>    <span class="nd">@with_argparser</span><span class="p">(</span><span class="n">_load_parser</span><span class="p">())</span>
+<span class="linenos">177</span>    <span class="nd">@with_category</span><span class="p">(</span><span class="n">BaseRepl</span><span class="o">.</span><span class="n">CAT_DEBUG</span><span class="p">)</span>
+<span class="linenos">178</span>    <span class="k">def</span><span class="w"> </span><span class="nf">do_load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">Namespace</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">179</span>        <span class="k">try</span><span class="p">:</span>
+<span class="linenos">180</span>            <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span> <span class="o">=</span> <span class="n">KInterpreter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">definition_dir</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">program</span><span class="p">)</span>
+<span class="linenos">181</span>            <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">init_state</span><span class="p">()</span>
+<span class="linenos">182</span>        <span class="k">except</span> <span class="n">ReplError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+<span class="linenos">183</span>            <span class="bp">self</span><span class="o">.</span><span class="n">poutput</span><span class="p">(</span><span class="n">err</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Runtime Verification, Inc.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

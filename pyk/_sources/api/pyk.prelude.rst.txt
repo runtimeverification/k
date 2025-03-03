@@ -1,0 +1,22 @@
+pyk.prelude package
+===================
+
+.. automodule:: pyk.prelude
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pyk.prelude.bytes
+   pyk.prelude.collections
+   pyk.prelude.k
+   pyk.prelude.kbool
+   pyk.prelude.kint
+   pyk.prelude.ml
+   pyk.prelude.string
+   pyk.prelude.utils
