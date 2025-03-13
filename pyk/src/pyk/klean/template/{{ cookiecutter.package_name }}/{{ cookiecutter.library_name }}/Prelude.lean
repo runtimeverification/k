@@ -58,46 +58,49 @@ structure MapHookSig (K V : Type) where
 -- We use axioms to have uninterpreted functions
 namespace MapHookDef
   variable (K V : Type)
-  axiom mapCAx       : Type -- Map Carrier
-  axiom unitAx       : mapCAx
-  axiom consAx       : K → V → mapCAx → mapCAx
-  axiom lookupAx     : mapCAx → K → Option V
-  axiom lookupAx?    : mapCAx → K → V -- lookup with default
-  axiom updateAx     : K → V → mapCAx → mapCAx
-  axiom deleteAx     : mapCAx → K → mapCAx
-  axiom concatAx     : mapCAx → mapCAx → Option mapCAx
-  axiom differenceAx : mapCAx → mapCAx → mapCAx
-  axiom updateMapAx  : mapCAx → mapCAx → mapCAx
-  axiom removeAllAx  : mapCAx → List K → mapCAx
-  axiom keysAx       : mapCAx → List K
-  axiom in_keysAx    : mapCAx → K → Bool
-  axiom valuesAx     : mapCAx → List V
-  axiom sizeAx       : mapCAx → Nat
-  axiom includesAx   : mapCAx → mapCAx → Bool -- map inclusion
-  axiom choiceAx     : mapCAx → K -- arbitrary key from a map
-  axiom nodupAx      : forall m, List.Nodup (keysAx K m)
+  def mapCAx        := List (K × V) -- Map Carrier
+  axiom unitAx       : mapCAx K V
+  axiom consAx       : K → V → mapCAx K V → mapCAx K V
+  axiom lookupAx     : mapCAx K V → K → Option V
+  axiom lookupAx?    : mapCAx K V → K → V -- lookup with default
+  axiom updateAx     : K → V → mapCAx K V → mapCAx K V
+  axiom deleteAx     : mapCAx K V → K → mapCAx K V
+  axiom concatAx     : mapCAx K V → mapCAx K V → Option (mapCAx K V)
+  axiom differenceAx : mapCAx K V → mapCAx K V → mapCAx K V
+  axiom updateMapAx  : mapCAx K V → mapCAx K V → mapCAx K V
+  axiom removeAllAx  : mapCAx K V → List K → mapCAx K V
+  axiom keysAx       : mapCAx K V → List K
+  axiom in_keysAx    : mapCAx K V → K → Bool
+  axiom valuesAx     : mapCAx K V → List V
+  axiom sizeAx       : mapCAx K V → Nat
+  axiom includesAx   : mapCAx K V → mapCAx K V → Bool -- map inclusion
+  axiom choiceAx     : mapCAx K V → K -- arbitrary key from a map
+  axiom nodupAx      : forall m, List.Nodup (keysAx K V m)
 end MapHookDef
 
 -- Uninterpreted Map implementation
 noncomputable def MapHook (K V : Type) : MapHookSig K V :=
-  { map        := MapHookDef.mapCAx,
-    unit       := MapHookDef.unitAx,
+  { map        := MapHookDef.mapCAx K V,
+    unit       := MapHookDef.unitAx K V,
     cons       := MapHookDef.consAx K V,
     lookup     := MapHookDef.lookupAx K V,
     lookup?    := MapHookDef.lookupAx? K V,
     update     := MapHookDef.updateAx K V,
-    delete     := MapHookDef.deleteAx K,
-    concat     := MapHookDef.concatAx,
-    difference := MapHookDef.differenceAx,
-    updateMap  := MapHookDef.updateMapAx,
-    removeAll  := MapHookDef.removeAllAx K,
-    keys       := MapHookDef.keysAx K,
-    in_keys    := MapHookDef.in_keysAx K,
-    values     := MapHookDef.valuesAx V,
-    size       := MapHookDef.sizeAx,
-    includes   := MapHookDef.includesAx,
-    choice     := MapHookDef.choiceAx K,
-    nodup      := MapHookDef.nodupAx K }
+    delete     := MapHookDef.deleteAx K V,
+    concat     := MapHookDef.concatAx K V,
+    difference := MapHookDef.differenceAx K V,
+    updateMap  := MapHookDef.updateMapAx K V,
+    removeAll  := MapHookDef.removeAllAx K V,
+    keys       := MapHookDef.keysAx K V,
+    in_keys    := MapHookDef.in_keysAx K V,
+    values     := MapHookDef.valuesAx K V,
+    size       := MapHookDef.sizeAx K V,
+    includes   := MapHookDef.includesAx K V,
+    choice     := MapHookDef.choiceAx K V,
+    nodup      := MapHookDef.nodupAx K V}
+
+instance {K V : Type} [BEq K] [BEq V]: BEq (MapHook K V).map where
+  beq := List.beq
 
 /-
 Implementation of immutable, associative, commutative sets of `KItem`.
@@ -120,30 +123,30 @@ structure SetHookSig (T : Type) where
 
 namespace SetHookDef
   variable (T : Type)
-  axiom setCAx         : Type
-  axiom unitAx         : setCAx
-  axiom concatAx       : setCAx → setCAx → Option setCAx
-  axiom elementAx      : T → setCAx
-  axiom unionAx        : setCAx → setCAx → setCAx
-  axiom intersectionAx : setCAx → setCAx → setCAx
-  axiom differenceAx   : setCAx → setCAx → setCAx
-  axiom inSetAx        : T → setCAx → Bool
-  axiom inclusionAx    : setCAx → setCAx → Bool
-  axiom sizeAx         : setCAx → Int
-  axiom choiceAx       : setCAx → T
+  def setCAx          := List T
+  axiom unitAx         : setCAx T
+  axiom concatAx       : setCAx T → setCAx T → Option (setCAx T)
+  axiom elementAx      : T → setCAx T
+  axiom unionAx        : setCAx T → setCAx T → setCAx T
+  axiom intersectionAx : setCAx T → setCAx T → setCAx T
+  axiom differenceAx   : setCAx T → setCAx T → setCAx T
+  axiom inSetAx        : T → setCAx T → Bool
+  axiom inclusionAx    : setCAx T → setCAx T → Bool
+  axiom sizeAx         : setCAx T → Int
+  axiom choiceAx       : setCAx T → T
 end SetHookDef
 
 noncomputable def SetHook (T : Type) : SetHookSig T :=
-  { set          := SetHookDef.setCAx,
-    unit         := SetHookDef.unitAx,
-    concat       := SetHookDef.concatAx,
+  { set          := SetHookDef.setCAx T,
+    unit         := SetHookDef.unitAx T,
+    concat       := SetHookDef.concatAx T,
     element      := SetHookDef.elementAx T,
-    union        := SetHookDef.unionAx,
-    intersection := SetHookDef.intersectionAx,
-    difference   := SetHookDef.differenceAx,
+    union        := SetHookDef.unionAx T,
+    intersection := SetHookDef.intersectionAx T,
+    difference   := SetHookDef.differenceAx T,
     inSet        := SetHookDef.inSetAx T,
-    inclusion    := SetHookDef.inclusionAx,
-    size         := SetHookDef.sizeAx,
+    inclusion    := SetHookDef.inclusionAx T,
+    size         := SetHookDef.sizeAx T,
     choice       := SetHookDef.choiceAx T }
 
 /-
@@ -176,35 +179,35 @@ structure listHookSig (T : Type) where
 
 namespace ListHookDef
   variable (T : Type)
-  axiom listCAx     : Type
-  axiom unitAx      : listCAx
-  axiom concatAx    : listCAx → listCAx → Option listCAx
-  axiom elementAx   : T → listCAx
-  axiom pushAx      : T → listCAx → listCAx
-  axiom getAx       : Int → listCAx → Option T
-  axiom updteAx     : Int → T → listCAx → Option listCAx
-  axiom makeAx      : Int → T → Option listCAx
-  axiom updateAllAx : listCAx → Int → listCAx → Option listCAx
-  axiom fillAx      : listCAx → Int → T → Option listCAx
-  axiom rangeAx     : listCAx → Int → Int → Option listCAx
-  axiom inListAx    : T → listCAx → Bool
-  axiom sizeAx      : listCAx → Int
+  def listCAx       := List T
+  axiom unitAx      : listCAx T
+  axiom concatAx    : listCAx T → listCAx T → Option (listCAx T)
+  axiom elementAx   : T → listCAx T
+  axiom pushAx      : T → listCAx T → listCAx T
+  axiom getAx       : Int → listCAx T → Option T
+  axiom updteAx     : Int → T → listCAx T → Option (listCAx T)
+  axiom makeAx      : Int → T → Option (listCAx T)
+  axiom updateAllAx : listCAx T → Int → listCAx T → Option (listCAx T)
+  axiom fillAx      : listCAx T → Int → T → Option (listCAx T)
+  axiom rangeAx     : listCAx T → Int → Int → Option (listCAx T)
+  axiom inListAx    : T → listCAx T → Bool
+  axiom sizeAx      : listCAx T → Int
 end ListHookDef
 
 noncomputable def ListHook (T : Type) : listHookSig T :=
-  { list      := ListHookDef.listCAx,
-    unit      := ListHookDef.unitAx,
-    concat    := ListHookDef.concatAx,
+  { list      := ListHookDef.listCAx T,
+    unit      := ListHookDef.unitAx T,
+    concat    := ListHookDef.concatAx T,
     element   := ListHookDef.elementAx T,
     push      := ListHookDef.pushAx T,
     get       := ListHookDef.getAx T,
     updte     := ListHookDef.updteAx T,
     make      := ListHookDef.makeAx T,
-    updateAll := ListHookDef.updateAllAx,
+    updateAll := ListHookDef.updateAllAx T,
     fill      := ListHookDef.fillAx T,
-    range     := ListHookDef.rangeAx,
+    range     := ListHookDef.rangeAx T,
     inList    := ListHookDef.inListAx T,
-    size      := ListHookDef.sizeAx }
+    size      := ListHookDef.sizeAx T }
 
 class Inj (From To : Type) : Type where
   inj (x : From) : To
@@ -215,3 +218,19 @@ def «_+Int_» (x0 : SortInt) (x1 : SortInt) : Option SortInt := some (x0 + x1)
 def «_-Int_» (x0 : SortInt) (x1 : SortInt) : Option SortInt := some (x0 - x1)
 def «_*Int_» (x0 : SortInt) (x1 : SortInt) : Option SortInt := some (x0 * x1)
 def «_<=Int_» (x0 : SortInt) (x1 : SortInt) : Option SortBool := some (x0 <= x1)
+
+-- Instances
+
+instance: BEq UInt8 where
+  beq a b := decide (Eq a b)
+
+instance: BEq SortBytes where
+  beq a b := (ByteArray.toList a) == (ByteArray.toList b)
+
+def ByteArray.decEq (a b : ByteArray) : Decidable (Eq a b) :=
+  match a, b with
+  | ⟨⟨al⟩⟩, ⟨⟨bl⟩⟩ => match List.hasDecEq al bl with
+    | isTrue t => isTrue (by rw [t])
+    | isFalse f => isFalse (by simp [f])
+
+instance: DecidableEq SortBytes := ByteArray.decEq
