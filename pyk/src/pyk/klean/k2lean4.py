@@ -282,7 +282,12 @@ class K2Lean4:
         ctors: list[Ctor] = []
         ctors.extend(self._inj_ctor(sort, subsort) for subsort in subsorts)
         ctors.extend(self._symbol_ctor(sort, symbol) for symbol in symbols)
-        return Inductive(sort, Signature((), Term('Type')), ctors=ctors)
+        return Inductive(
+            sort,
+            Signature((), Term('Type')),
+            ctors=ctors,
+            deriving=self._deriving(sort),
+        )
 
     def _inj_ctor(self, sort: str, subsort: str) -> Ctor:
         return Ctor(f'inj_{subsort}', Signature((ExplBinder(('x',), Term(subsort)),), Term(sort)))
@@ -297,7 +302,20 @@ class K2Lean4:
     def _structure(self, sort: str) -> Structure:
         fields = self.structures[sort]
         binders = tuple(ExplBinder((name,), ty) for name, ty in fields)
-        return Structure(sort, Signature((), Term('Type')), ctor=StructCtor(binders))
+        return Structure(
+            sort,
+            Signature((), Term('Type')),
+            ctor=StructCtor(binders),
+            deriving=self._deriving(sort),
+        )
+
+    def _deriving(self, sort: str) -> list[str]:
+        res = []
+        if self.derive_beq:
+            res.append('BEq')
+        if self.derive_decidableeq and not 'SortKItem' in self._sort_deps[sort]:
+            res.append('DecidableEq')
+        return res
 
     def inj_module(self) -> Module:
         return Module(commands=self._inj_commands())
