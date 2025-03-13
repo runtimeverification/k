@@ -123,30 +123,30 @@ structure SetHookSig (T : Type) where
 
 namespace SetHookDef
   variable (T : Type)
-  axiom setCAx         : Type
-  axiom unitAx         : setCAx
-  axiom concatAx       : setCAx → setCAx → Option setCAx
-  axiom elementAx      : T → setCAx
-  axiom unionAx        : setCAx → setCAx → setCAx
-  axiom intersectionAx : setCAx → setCAx → setCAx
-  axiom differenceAx   : setCAx → setCAx → setCAx
-  axiom inSetAx        : T → setCAx → Bool
-  axiom inclusionAx    : setCAx → setCAx → Bool
-  axiom sizeAx         : setCAx → Int
-  axiom choiceAx       : setCAx → T
+  def setCAx          := List T
+  axiom unitAx         : setCAx T
+  axiom concatAx       : setCAx T → setCAx T → Option (setCAx T)
+  axiom elementAx      : T → setCAx T
+  axiom unionAx        : setCAx T → setCAx T → setCAx T
+  axiom intersectionAx : setCAx T → setCAx T → setCAx T
+  axiom differenceAx   : setCAx T → setCAx T → setCAx T
+  axiom inSetAx        : T → setCAx T → Bool
+  axiom inclusionAx    : setCAx T → setCAx T → Bool
+  axiom sizeAx         : setCAx T → Int
+  axiom choiceAx       : setCAx T → T
 end SetHookDef
 
 noncomputable def SetHook (T : Type) : SetHookSig T :=
-  { set          := SetHookDef.setCAx,
-    unit         := SetHookDef.unitAx,
-    concat       := SetHookDef.concatAx,
+  { set          := SetHookDef.setCAx T,
+    unit         := SetHookDef.unitAx T,
+    concat       := SetHookDef.concatAx T,
     element      := SetHookDef.elementAx T,
-    union        := SetHookDef.unionAx,
-    intersection := SetHookDef.intersectionAx,
-    difference   := SetHookDef.differenceAx,
+    union        := SetHookDef.unionAx T,
+    intersection := SetHookDef.intersectionAx T,
+    difference   := SetHookDef.differenceAx T,
     inSet        := SetHookDef.inSetAx T,
-    inclusion    := SetHookDef.inclusionAx,
-    size         := SetHookDef.sizeAx,
+    inclusion    := SetHookDef.inclusionAx T,
+    size         := SetHookDef.sizeAx T,
     choice       := SetHookDef.choiceAx T }
 
 /-
