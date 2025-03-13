@@ -16,7 +16,7 @@ runs:
     - name: 'Install Poetry'
       uses: Gr1N/setup-poetry@v9
       with:
-        poetry-version: '1.8.5'
+        poetry-version: '2.1.1'
     - name: 'Install package'
       shell: bash
       run: poetry -C pyk install
