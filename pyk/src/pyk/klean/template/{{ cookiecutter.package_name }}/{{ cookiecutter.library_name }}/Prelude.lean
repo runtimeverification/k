@@ -218,3 +218,19 @@ def «_+Int_» (x0 : SortInt) (x1 : SortInt) : Option SortInt := some (x0 + x1)
 def «_-Int_» (x0 : SortInt) (x1 : SortInt) : Option SortInt := some (x0 - x1)
 def «_*Int_» (x0 : SortInt) (x1 : SortInt) : Option SortInt := some (x0 * x1)
 def «_<=Int_» (x0 : SortInt) (x1 : SortInt) : Option SortBool := some (x0 <= x1)
+
+-- Instances
+
+instance: BEq UInt8 where
+  beq a b := decide (Eq a b)
+
+instance: BEq SortBytes where
+  beq a b := (ByteArray.toList a) == (ByteArray.toList b)
+
+def ByteArray.decEq (a b : ByteArray) : Decidable (Eq a b) :=
+  match a, b with
+  | ⟨⟨al⟩⟩, ⟨⟨bl⟩⟩ => match List.hasDecEq al bl with
+    | isTrue t => isTrue (by rw [t])
+    | isFalse f => isFalse (by simp [f])
+
+instance: DecidableEq SortBytes := ByteArray.decEq
