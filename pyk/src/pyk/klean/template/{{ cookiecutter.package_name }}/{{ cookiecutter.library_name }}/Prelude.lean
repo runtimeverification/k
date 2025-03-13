@@ -95,10 +95,7 @@ noncomputable def MapHook (K V : Type) : MapHookSig K V :=
     includes   := MapHookDef.includesAx K V,
     choice     := MapHookDef.choiceAx K V,
     nodup      := MapHookDef.nodupAx K V}
-/-
-instance {K V : Type} [BEq K] [BEq V]: BEq (List (K × V)) where
-  beq := List.beq
- -/
+
 /-
 Implementation of immutable, associative, commutative sets of `KItem`.
 The sets are nilpotent, i.e., the concatenation of two sets containing elements in common is `#False` (note however, this may be silently allowed during concrete execution).
