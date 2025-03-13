@@ -190,13 +190,13 @@ class K2Lean4:
         match coll.kind:
             case CollectionKind.LIST:
                 (item,) = sorts
-                term = Term(f'(ListHook {item}).list')
+                term = Term(f'List {item}')
             case CollectionKind.SET:
                 (item,) = sorts
-                term = Term(f'(SetHook {item}).set')
+                term = Term(f'List {item}')
             case CollectionKind.MAP:
                 key, value = sorts
-                term = Term(f'(MapHook {key} {value}).map')
+                term = Term(f'List ({key} × {value})')
         return Field('coll', term)
 
     def sort_module(self) -> Module:
