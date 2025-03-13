@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from functools import cached_property
 from graphlib import TopologicalSorter
 from itertools import count
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING, NamedTuple, TypedDict
 
 from ..dequote import bytes_encode
 from ..konvert import unmunge
@@ -66,9 +66,22 @@ class Field(NamedTuple):
     ty: Term
 
 
-@dataclass(frozen=True)
+class Config(TypedDict, total=False):
+    derive_beq: bool | None
+    derive_decidableeq: bool | None
+
+
+@dataclass
 class K2Lean4:
     defn: KoreDefn
+    derive_beq: bool
+    derive_decidableeq: bool
+
+    def __init__(self, defn: KoreDefn, *, config: Config | None = None):
+        config = config or {}
+        self.defn = defn
+        self.derive_beq = bool(config.get('derive_beq'))
+        self.derive_decidableeq = bool(config.get('derive_decidableeq'))
 
     @cached_property
     def symbol_table(self) -> KoreSymbolTable:
