@@ -10,19 +10,21 @@ After installation of the `kframework` package, the code generator is available
 on the command line under the `klean` command.
 
 ```
-usage: klean [-h] [-o DIR] [-l NAME] [-r LABEL] DEFN_DIR PKG_NAME
+usage: klean [-h] [-o DIR] [-l NAME] [-r LABEL] [--derive-beq] [--derive-decidableeq] DEFN_DIR PKG_NAME
 
 Generate a Lean 4 project from a K definition
 
 positional arguments:
-  DEFN_DIR            definition directory
-  PKG_NAME            name of the generated Lean 4 package (in kebab-case)
+  DEFN_DIR              definition directory
+  PKG_NAME              name of the generated Lean 4 package (in kebab-case)
 
 options:
-  -h, --help          show this help message and exit
-  -o, --output DIR    output directory (default: .)
-  -l, --library NAME  name of the generated Lean library (default: package name in PascalCase)
-  -r, --rule LABEL    labels of rules to include (default: all)
+  -h, --help            show this help message and exit
+  -o, --output DIR      output directory (default: .)
+  -l, --library NAME    name of the generated Lean library (default: package name in PascalCase)
+  -r, --rule LABEL      labels of rules to include (default: all)
+  --derive-beq          derive BEq for all types
+  --derive-decidableeq  derive DecidableEq for all types except SortKItem and its dependents
 ```
 
 The `-r` flag can be provided multiple times, each time with a rule label, to
