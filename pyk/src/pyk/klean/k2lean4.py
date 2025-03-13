@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from functools import cached_property
 from graphlib import TopologicalSorter
 from itertools import count
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING, NamedTuple, TypedDict
 
 from ..dequote import bytes_encode
 from ..konvert import unmunge
@@ -66,9 +66,22 @@ class Field(NamedTuple):
     ty: Term
 
 
-@dataclass(frozen=True)
+class Config(TypedDict, total=False):
+    derive_beq: bool | None
+    derive_decidableeq: bool | None
+
+
+@dataclass
 class K2Lean4:
     defn: KoreDefn
+    derive_beq: bool
+    derive_decidableeq: bool
+
+    def __init__(self, defn: KoreDefn, *, config: Config | None = None):
+        config = config or {}
+        self.defn = defn
+        self.derive_beq = bool(config.get('derive_beq'))
+        self.derive_decidableeq = bool(config.get('derive_decidableeq'))
 
     @cached_property
     def symbol_table(self) -> KoreSymbolTable:
@@ -109,6 +122,36 @@ class K2Lean4:
             return None
 
         return FrozenDict((sort, fields) for sort in self.defn.sorts if (fields := fields_of(sort)) is not None)
+
+    @cached_property
+    def _sort_deps(self) -> FrozenDict[str, frozenset[str]]:
+        """Transitively closed sort dependency graph."""
+        sorts = self.defn.sorts
+        deps: list[tuple[str, str]] = []
+        for sort in sorts:
+            # A sort depends on its subsorts (due to inj_{subsort} constructors)
+            deps.extend((sort, subsort) for subsort in self.defn.subsorts.get(sort, []))
+            # A sort depends on the parameter sorts of all its constructors
+            deps.extend(
+                (sort, param_sort)
+                for ctor in self.defn.constructors.get(sort, [])
+                for param_sort in _param_sorts(self.defn.symbols[ctor])
+            )
+            # If the sort is a collection, the element function parameters are dependencies
+            if sort in self.defn.collections:
+                coll = self.defn.collections[sort]
+                elem = self.defn.symbols[coll.element]
+                deps.extend((sort, param_sort) for param_sort in _param_sorts(elem))
+
+        closed = POSet(deps).image  # TODO POSet should be called "transitively closed relation" or similar
+        return FrozenDict(
+            (sort, frozenset(closed.get(sort, []))) for sort in sorts
+        )  # Ensure that sorts without dependencies are also represented
+
+    @cached_property
+    def _sort_sccs(self) -> tuple[tuple[str, ...], ...]:
+        sccs = _ordered_sccs(self._sort_deps)
+        return tuple(tuple(scc) for scc in sccs)
 
     @cached_property
     def _func_rules_by_uid(self) -> FrozenDict[str, FunctionRule]:
@@ -201,11 +244,11 @@ class K2Lean4:
 
     def sort_module(self) -> Module:
         commands: tuple[Command, ...] = tuple(
-            block for sorts in _ordered_sorts(self.defn) if (block := self._sort_block(sorts)) is not None
+            block for sorts in self._sort_sccs if (block := self._sort_block(sorts)) is not None
         )
         return Module(commands=commands)
 
-    def _sort_block(self, sorts: list[str]) -> Command | None:
+    def _sort_block(self, sorts: tuple[str, ...]) -> Command | None:
         """Return an optional mutual block or declaration."""
         commands: tuple[Command, ...] = tuple(
             self._transform_sort(sort) for sort in sorts if sort not in _PRELUDE_SORTS
@@ -239,7 +282,12 @@ class K2Lean4:
         ctors: list[Ctor] = []
         ctors.extend(self._inj_ctor(sort, subsort) for subsort in subsorts)
         ctors.extend(self._symbol_ctor(sort, symbol) for symbol in symbols)
-        return Inductive(sort, Signature((), Term('Type')), ctors=ctors)
+        return Inductive(
+            sort,
+            Signature((), Term('Type')),
+            ctors=ctors,
+            deriving=self._deriving(sort),
+        )
 
     def _inj_ctor(self, sort: str, subsort: str) -> Ctor:
         return Ctor(f'inj_{subsort}', Signature((ExplBinder(('x',), Term(subsort)),), Term(sort)))
@@ -254,7 +302,20 @@ class K2Lean4:
     def _structure(self, sort: str) -> Structure:
         fields = self.structures[sort]
         binders = tuple(ExplBinder((name,), ty) for name, ty in fields)
-        return Structure(sort, Signature((), Term('Type')), ctor=StructCtor(binders))
+        return Structure(
+            sort,
+            Signature((), Term('Type')),
+            ctor=StructCtor(binders),
+            deriving=self._deriving(sort),
+        )
+
+    def _deriving(self, sort: str) -> list[str]:
+        res = []
+        if self.derive_beq:
+            res.append('BEq')
+        if self.derive_decidableeq and not 'SortKItem' in self._sort_deps[sort]:
+            res.append('DecidableEq')
+        return res
 
     def inj_module(self) -> Module:
         return Module(commands=self._inj_commands())
@@ -727,35 +788,6 @@ def _param_sorts(decl: SymbolDecl) -> list[str]:
     from ..utils import check_type
 
     return [check_type(sort, SortApp).name for sort in decl.param_sorts]  # TODO eliminate check_type
-
-
-def _ordered_sorts(defn: KoreDefn) -> list[list[str]]:
-    return _ordered_sccs(_sort_dependencies(defn))
-
-
-def _sort_dependencies(defn: KoreDefn) -> dict[str, set[str]]:
-    """Transitively closed sort dependency graph."""
-    sorts = defn.sorts
-    deps: list[tuple[str, str]] = []
-    for sort in sorts:
-        # A sort depends on its subsorts (due to inj_{subsort} constructors)
-        deps.extend((sort, subsort) for subsort in defn.subsorts.get(sort, []))
-        # A sort depends on the parameter sorts of all its constructors
-        deps.extend(
-            (sort, param_sort)
-            for ctor in defn.constructors.get(sort, [])
-            for param_sort in _param_sorts(defn.symbols[ctor])
-        )
-        # If the sort is a collection, the element function parameters are dependencies
-        if sort in defn.collections:
-            coll = defn.collections[sort]
-            elem = defn.symbols[coll.element]
-            deps.extend((sort, param_sort) for param_sort in _param_sorts(elem))
-
-    closed = POSet(deps).image  # TODO POSet should be called "transitively closed relation" or similar
-    return {
-        sort: set(closed.get(sort, [])) for sort in sorts
-    }  # Ensure that sorts without dependencies are also represented
 
 
 def _ordered_sccs(deps: Mapping[str, Collection[str]]) -> list[list[str]]:

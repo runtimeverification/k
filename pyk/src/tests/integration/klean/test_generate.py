@@ -48,6 +48,10 @@ def test_generate(
             'package_name': 'klean-imp',
             'library_name': 'KLeanImp',
         },
+        config={
+            'derive_beq': True,
+            'derive_decidableeq': True,
+        },
     )
 
     proc_res = run_process_2(['lake', 'build'], cwd=project_dir, check=False)
