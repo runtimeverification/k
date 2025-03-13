@@ -391,11 +391,12 @@ class Structure(Declaration):
         where = ' where' if self.ctor else ''
         lines.append(f'{modifiers}structure {self.ident}{binders}{extends}{ty}{where}')
 
-        if self.deriving:
-            lines.append(f'  deriving {self.deriving}')
-
         if self.ctor:
             lines.extend(f'  {line}' for line in str(self.ctor).splitlines())
+
+        if self.deriving:
+            deriving = ', '.join(self.deriving)
+            lines.append(f'  deriving {deriving}')
 
         return '\n'.join(lines)
 

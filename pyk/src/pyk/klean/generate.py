@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, TypedDict
 
-from .k2lean4 import K2Lean4
+from . import k2lean4 as k2l
 from .model import Module
 
 if TYPE_CHECKING:
@@ -22,8 +22,9 @@ def generate(
     defn: KoreDefn,
     context: GenContext,
     output_dir: Path,
+    config: k2l.Config | None = None,
 ) -> Path:
-    k2lean4 = K2Lean4(defn)
+    k2lean4 = k2l.K2Lean4(defn, config=config)
     genmodel = {
         'Sorts': (k2lean4.sort_module, ['Prelude']),
         'Inj': (k2lean4.inj_module, ['Sorts']),
