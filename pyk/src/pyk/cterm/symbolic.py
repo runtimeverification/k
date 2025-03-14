@@ -5,13 +5,11 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, NamedTuple, final
 
-from pyk.utils import not_none
-
 from ..cterm import CSubst, CTerm
 from ..kast.inner import KApply, KLabel, KRewrite, KToken, KVariable, Subst
 from ..kast.manip import flatten_label, is_spurious_constraint, sort_ac_collections
 from ..kast.pretty import PrettyPrinter
-from ..konvert import kast_to_kore, kore_to_kast
+from ..konvert import kast_to_kore, kflatmodule_to_kore, kore_to_kast
 from ..kore.rpc import (
     AbortedResult,
     KoreClient,
@@ -26,6 +24,7 @@ from ..kore.rpc import (
 )
 from ..prelude.k import GENERATED_TOP_CELL, K_ITEM
 from ..prelude.ml import mlAnd
+from ..utils import not_none
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
@@ -33,7 +32,7 @@ if TYPE_CHECKING:
     from typing import Final
 
     from ..kast import KInner
-    from ..kast.outer import KDefinition
+    from ..kast.outer import KDefinition, KFlatModule
     from ..kore.rpc import FallbackReason, LogEntry
     from ..kore.syntax import Pattern
     from ..utils import BugReport
@@ -278,6 +277,10 @@ class CTermSymbolic:
         kast_simplified, logs = self.kast_simplify(kast, module_name=module_name)
         _LOGGER.debug(f'Definedness condition computed: {kast_simplified}')
         return cterm.add_constraint(kast_simplified)
+
+    def add_module(self, module: KFlatModule, name_as_id: bool = False) -> str:
+        _kore_module = kflatmodule_to_kore(self._definition, module)
+        return self._kore_client.add_module(_kore_module, name_as_id=name_as_id)
 
     def _smt_solver_error(self, err: SmtSolverError) -> CTermSMTError:
         kast = self.kore_to_kast(err.pattern)
