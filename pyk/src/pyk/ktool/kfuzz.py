@@ -169,7 +169,7 @@ def fuzz(
                 return p
 
         handler.handle_test(subst_case)
-        test_pattern = template.top_down(sub)
+        test_pattern = template.bottom_up(sub)
         res = llvm_interpret_raw(definition_dir, test_pattern.text, check=False)
 
         try:
