@@ -3,7 +3,7 @@ SHELL=/bin/bash
 UNAME := $(shell uname)
 
 ROOT=$(abspath $(MAKEFILE_PATH)/../..)
-POETRY_RUN?=poetry run -C $(ROOT)
+POETRY_RUN?=poetry -P $(ROOT) run --
 # path to the current makefile
 MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 # path to the kompile binary of this distribuition

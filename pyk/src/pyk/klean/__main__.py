@@ -70,6 +70,10 @@ def klean(args: Iterable[str]) -> None:
             'package_name': ns.package_name,
             'library_name': ns.library_name,
         },
+        config={
+            'derive_beq': ns.derive_beq,
+            'derive_decidableeq': ns.derive_decidableeq,
+        },
     )
 
 
@@ -113,6 +117,16 @@ def _parser() -> ArgumentParser:
         metavar='LABEL',
         action='append',
         help='labels of rules to include (default: all)',
+    )
+    parser.add_argument(
+        '--derive-beq',
+        action='store_true',
+        help='derive BEq for all types',
+    )
+    parser.add_argument(
+        '--derive-decidableeq',
+        action='store_true',
+        help='derive DecidableEq for all types except SortKItem and its dependents',
     )
     return parser
 
