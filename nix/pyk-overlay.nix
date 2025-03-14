@@ -12,10 +12,21 @@
         checkGroups = [ ];
         overrides = p2n.defaultPoetryOverrides.extend
           (self: super: {
-            click = super.urllib3.overridePythonAttrs
-            (
+            click = super.click.overridePythonAttrs (
               old: {
                 buildInputs = (old.buildInputs or [ ]) ++ [ super.flit-core ];
+              }
+            );
+            urllib3 = super.urllib3.overridePythonAttrs (
+              old: {
+                buildInputs = (old.buildInputs or [ ]) ++ [ super.hatch-vcs ];
+              }
+            );
+            attrs = super.attrs.overridePythonAttrs (
+              old: {
+                patches = (old.patches or [ ]) ++ [
+                  ./resources/attrs-pyproject.toml.patch
+                ];
               }
             );
           });
