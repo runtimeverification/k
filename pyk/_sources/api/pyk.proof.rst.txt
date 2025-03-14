@@ -1,0 +1,19 @@
+pyk.proof package
+=================
+
+.. automodule:: pyk.proof
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pyk.proof.implies
+   pyk.proof.proof
+   pyk.proof.reachability
+   pyk.proof.show
+   pyk.proof.tui

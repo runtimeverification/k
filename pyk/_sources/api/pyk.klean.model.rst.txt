@@ -1,0 +1,7 @@
+pyk.klean.model module
+======================
+
+.. automodule:: pyk.klean.model
+   :members:
+   :undoc-members:
+   :show-inheritance:
