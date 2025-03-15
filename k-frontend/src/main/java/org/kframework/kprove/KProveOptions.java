@@ -113,4 +113,10 @@ public class KProveOptions {
       description = "Allow functional claims to be printed in kore format. Use with --dry-run.",
       hidden = true)
   public boolean allowFuncClaims = false;
+
+  @Parameter(
+      names = "--allow-new-rules",
+      description = "Allow new rules to be introduced in proof modules. Use with --dry-run.",
+      hidden = true)
+  public boolean allowNewRules = false;
 }
