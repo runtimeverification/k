@@ -539,7 +539,7 @@ public class Kompile {
   }
 
   // Extra checks just for the prover specification.
-  public void proverChecksX(Module specModule, Module mainDefModule) {
+  public void proverChecksX(Module specModule, Module mainDefModule, boolean allowRules) {
     // check rogue syntax in spec module
     Set<Sentence> toCheck = mutable(specModule.sentences().$minus$minus(mainDefModule.sentences()));
     for (Sentence s : toCheck)
@@ -558,7 +558,7 @@ public class Kompile {
               if (m.name().equals(mainDefModule.name())
                   || mainDefModule.importedModuleNames().contains(m.name())) return s;
               if (!(s instanceof Claim || s.isSyntax())) {
-                if (s instanceof Rule && !s.att().contains(Att.SIMPLIFICATION()))
+                if (s instanceof Rule && !allowRules && !s.att().contains(Att.SIMPLIFICATION()))
                   errors.add(
                       KEMException.compilerError(
                           "Only claims and simplification rules are allowed in proof modules.", s));
