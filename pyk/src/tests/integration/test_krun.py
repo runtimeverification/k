@@ -9,7 +9,7 @@ import pyk.kore.match as km
 from pyk.kast.inner import KApply, KSequence, KSort, KToken, Subst
 from pyk.kore.parser import KoreParser
 from pyk.kore.prelude import inj, top_cell_initializer
-from pyk.kore.syntax import SortApp
+from pyk.kore.syntax import App, SortApp
 from pyk.ktool.kprint import _kast
 from pyk.ktool.krun import llvm_interpret
 from pyk.prelude.kint import intToken
@@ -128,3 +128,15 @@ def test_llvm_interpret(imp_definition: Path, a: int, b: int, expected: int) -> 
 
     # Then
     assert actual == expected
+
+
+def test_llvm_interpret_no_output(imp_definition: Path) -> None:
+    # Given
+    init_pattern = App('foo')
+
+    # When
+    with pytest.raises(RuntimeError) as excinfo:
+        llvm_interpret(imp_definition, init_pattern, depth=1000, check=False)
+
+    # Then
+    assert 'produced no output' in str(excinfo.value)
