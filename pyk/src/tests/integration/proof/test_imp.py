@@ -1516,7 +1516,7 @@ class TestImpParallelProof(ParallelTest, KProveTest):
         proof_status: ProofStatus,
         expected_leaf_number: int,
         tmp_path_factory: TempPathFactory,
-        create_prover: Callable[[int, Iterable[str]], Prover],
+        create_prover: Callable[[int | None, Iterable[str]], Prover],
     ) -> None:
         proof_dir = tmp_path_factory.mktemp(f'apr_tmp_proofs-{test_id}')
         spec_modules = kprove.parse_modules(Path(spec_file), module_name=spec_module)

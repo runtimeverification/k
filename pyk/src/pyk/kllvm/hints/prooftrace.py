@@ -26,7 +26,7 @@ from ..ast import Pattern
 # isort: on
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
+    from collections.abc import Iterator
     from pathlib import Path
 
     from _kllvm.prooftrace import Argument
@@ -568,7 +568,7 @@ class LLVMRewriteTraceIterator:
         """
         return self._rewrite_trace_iterator.__repr__()
 
-    def __iter__(self) -> Generator[LLVMEventAnnotated, None, None]:
+    def __iter__(self) -> Iterator[LLVMEventAnnotated]:
         """Yield LLVMEventAnnotated options.
 
         This method is an iterator that yields LLVMEventAnnotated options.
