@@ -14,7 +14,6 @@ from ..kast.manip import flatten_label, free_vars, ml_pred_to_bool
 from ..kast.outer import KFlatModule, KImport, KRule
 from ..kcfg import KCFG, KCFGStore
 from ..kcfg.exploration import KCFGExploration
-from ..konvert import kflatmodule_to_kore
 from ..ktool.claim_index import ClaimIndex
 from ..prelude.ml import mlAnd, mlTop
 from ..utils import FrozenDict, ensure_dir_path, hash_str, shorten_hashes, single
@@ -752,15 +751,11 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
     def init_proof(self, proof: APRProof) -> None:
         main_module_name = self.main_module_name
         if self.extra_module:
-            _kore_module = kflatmodule_to_kore(self.kcfg_explore.cterm_symbolic._definition, self.extra_module)
-            _LOGGER.warning(f'_kore_module: {_kore_module.text}')
-            self.kcfg_explore.cterm_symbolic._kore_client.add_module(_kore_module, name_as_id=True)
-            main_module_name = self.extra_module.name
+            main_module_name = self.kcfg_explore.cterm_symbolic.add_module(self.extra_module, name_as_id=True)
 
         def _inject_module(module_name: str, import_name: str, sentences: list[KRule]) -> None:
             _module = KFlatModule(module_name, sentences, [KImport(import_name)])
-            _kore_module = kflatmodule_to_kore(self.kcfg_explore.cterm_symbolic._definition, _module)
-            self.kcfg_explore.cterm_symbolic._kore_client.add_module(_kore_module, name_as_id=True)
+            self.kcfg_explore.cterm_symbolic.add_module(_module, name_as_id=True)
 
         subproofs: list[Proof] = (
             [Proof.read_proof_data(proof.proof_dir, i) for i in proof.subproof_ids]
