@@ -17,6 +17,13 @@ def indent(text: str, n: int) -> str:
     return '\n'.join(res)
 
 
+# TODO: Improve
+def format_state(s: str) -> str:
+    s = s.replace(',', ',\n ')
+    s = s.replace('{ ', '{\n ')
+    return s
+
+
 @final
 @dataclass(frozen=True)
 class Module:
