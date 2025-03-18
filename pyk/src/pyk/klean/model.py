@@ -491,7 +491,15 @@ class Signature:
         object.__setattr__(self, 'ty', ty)
 
     def __str__(self) -> str:
-        binders = ' '.join(str(binder) for binder in self.binders)
+        max_inline_binders = 6
+        first_binder_sep = ''
+        binders_sep = ' '
+        binders_indent = 0
+        if max_inline_binders < len(self.binders):
+            binders_sep = '\n'
+            first_binder_sep = '\n'
+            binders_indent = 4
+        binders = indent(f'{binders_sep}'.join(str(binder) for binder in self.binders), binders_indent)
         sep = ' ' if self.binders else ''
         ty = f'{sep}: {self.ty}' if self.ty else ''
         return f'{binders}{ty}'
