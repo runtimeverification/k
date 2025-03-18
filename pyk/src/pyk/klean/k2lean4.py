@@ -942,7 +942,7 @@ class K2Lean4:
 
         lhs_term = self._transform_pattern(lhs)
         rhs_term = self._transform_pattern(rhs)
-        return Ctor(_rule_name(rule), Signature(binders, Term(f'Rewrites {lhs_term} {rhs_term}')))
+        return Ctor(_rule_name(rule), Signature(binders, Term(f'{lhs_term}', f'{rhs_term}', 'Rewrites')))
 
     def _elim_fun_apps(self, pattern: Pattern, free: Iterator[str]) -> tuple[Pattern, dict[str, Pattern]]:
         """Replace ``foo(bar(x))`` with ``z`` and return mapping ``{y: bar(x), z: foo(y)}`` with ``y``, ``z`` fresh variables."""
