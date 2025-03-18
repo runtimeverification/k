@@ -187,7 +187,7 @@ class CTerm:
         return CTerm(self.config, [new_constraint] + list(self.constraints))
 
     def anti_unify(
-        self, other: CTerm, keep_values: bool = False, kdef: KDefinition | None = None
+        self: CTerm, other: CTerm, keep_values: bool = False, kdef: KDefinition | None = None
     ) -> tuple[CTerm, CSubst, CSubst]:
         """Given two `CTerm` instances, find a more general `CTerm` which can instantiate to both.
 
@@ -203,19 +203,21 @@ class CTerm:
             - ``csubst1``: Constrained substitution to apply to `cterm` to obtain `self`.
             - ``csubst2``: Constrained substitution to apply to `cterm` to obtain `other`.
         """
+
+
         new_config, self_subst, other_subst = anti_unify(self.config, other.config, kdef=kdef)
-        # todo: It's not able to distinguish between constraints in different cterms,
-        #  because variable names may be used inconsistently in different cterms.
         common_constraints = [constraint for constraint in self.constraints if constraint in other.constraints]
-        self_unique_constraints = [
-            ml_pred_to_bool(constraint) for constraint in self.constraints if constraint not in other.constraints
-        ]
-        other_unique_constraints = [
-            ml_pred_to_bool(constraint) for constraint in other.constraints if constraint not in self.constraints
-        ]
 
         new_cterm = CTerm(config=new_config, constraints=())
         if keep_values:
+            # todo: It's not able to distinguish between constraints in different cterms,
+            #  because variable names may be used inconsistently in different cterms.
+            self_unique_constraints = [
+                ml_pred_to_bool(constraint) for constraint in self.constraints if constraint not in other.constraints
+            ]
+            other_unique_constraints = [
+                ml_pred_to_bool(constraint) for constraint in other.constraints if constraint not in self.constraints
+            ]
             disjunct_lhs = andBool([self_subst.pred] + self_unique_constraints)
             disjunct_rhs = andBool([other_subst.pred] + other_unique_constraints)
             if KToken('true', 'Bool') not in [disjunct_lhs, disjunct_rhs]:
