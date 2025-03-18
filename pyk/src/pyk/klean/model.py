@@ -502,7 +502,16 @@ class Signature:
         binders = indent(f'{binders_sep}'.join(str(binder) for binder in self.binders), binders_indent)
         sep = ' ' if self.binders else ''
         ty = f'{sep}: {self.ty}' if self.ty else ''
-        return f'{binders}{ty}'
+        if self.ty and self.ty.label == 'Rewrites':
+            assert self.ty.term
+            assert self.ty.auxterm
+            rw = self.ty.label
+            lhs = format_state(self.ty.term)
+            rhs = format_state(self.ty.auxterm)
+            ty1 = f'{sep}: {rw}\n'
+            ty2 = indent(f'{lhs}\n{rhs}', 4)
+            ty = f'{ty1}{ty2}'
+        return f'{first_binder_sep}{binders}{ty}'
 
 
 class Binder(ABC): ...
