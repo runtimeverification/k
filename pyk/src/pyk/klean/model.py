@@ -550,6 +550,13 @@ class InstBinder(BracketBinder):
 @dataclass(frozen=True)
 class Term:
     term: str  # TODO: refine
+    auxterm: str | None
+    label: str | None
+
+    def __init__(self, term: str, auxterm: str | None = None, label: str | None = None):
+        object.__setattr__(self, 'term', term)
+        object.__setattr__(self, 'auxterm', auxterm)
+        object.__setattr__(self, 'label', label)
 
     def __str__(self) -> str:
         return self.term
