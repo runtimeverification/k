@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import re
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from functools import cached_property
 from graphlib import TopologicalSorter
 from itertools import count
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING, NamedTuple, TypedDict
+
+import networkx as nx
 
 from ..dequote import bytes_encode
 from ..konvert import unmunge
@@ -66,9 +69,141 @@ class Field(NamedTuple):
     ty: Term
 
 
+class Matcher(ABC):
+    @cached_property
+    def inputs(self) -> frozenset[EVar]:
+        return frozenset(v for pat in self._input_patterns() for vs in free_occs(pat).values() for v in vs)
+
+    @cached_property
+    def outputs(self) -> frozenset[EVar]:
+        return frozenset(v for pat in self._output_patterns() for vs in free_occs(pat).values() for v in vs)
+
+    @abstractmethod
+    def _input_patterns(self) -> list[Pattern]: ...
+
+    @abstractmethod
+    def _output_patterns(self) -> list[Pattern]: ...
+
+
 @dataclass(frozen=True)
+class EqMatcher(Matcher):
+    var1: EVar
+    var2: EVar
+
+    def _input_patterns(self) -> list[Pattern]:
+        return [self.var1, self.var2]
+
+    def _output_patterns(self) -> list[Pattern]:
+        return []
+
+
+class BaseMatcher(Matcher, ABC):
+    var: EVar
+
+    def _input_patterns(self) -> list[Pattern]:
+        return [self.var]
+
+    def _output_patterns(self) -> list[Pattern]:
+        return []
+
+
+@dataclass(frozen=True)
+class SubsortMatcher(BaseMatcher):
+    var: EVar
+    subsort: str
+    supersort: str
+    pattern: Pattern
+
+    def _output_patterns(self) -> list[Pattern]:
+        return [self.pattern]
+
+
+@dataclass(frozen=True)
+class ListMatcher(BaseMatcher):
+    var: EVar
+    prefix: tuple[Pattern, ...]
+    middle: Pattern
+    suffix: tuple[Pattern, ...]
+
+    def _output_patterns(self) -> list[Pattern]:
+        res: list[Pattern] = []
+        res.extend(self.prefix)
+        res.append(self.middle)
+        res.extend(self.suffix)
+        return res
+
+
+@dataclass(frozen=True)
+class EmptyListMatcher(BaseMatcher):
+    var: EVar
+
+
+@dataclass(frozen=True)
+class SetMatcher(BaseMatcher):
+    var: EVar
+    elems: tuple[Pattern, ...]
+    rest: Pattern
+
+    def _input_patterns(self) -> list[Pattern]:
+        res: list[Pattern] = []
+        res.append(self.var)
+        res.extend(self.elems)
+        return res
+
+    def _output_patterns(self) -> list[Pattern]:
+        return [self.rest]
+
+
+@dataclass(frozen=True)
+class EmptySetMatcher(BaseMatcher):
+    var: EVar
+
+
+@dataclass(frozen=True)
+class MapMatcher(BaseMatcher):
+    var: EVar
+    key_sort: str
+    value_sort: str
+    keys: tuple[Pattern, ...]
+    values: tuple[Pattern, ...]
+    rest: Pattern
+
+    def _input_patterns(self) -> list[Pattern]:
+        res: list[Pattern] = []
+        res.append(self.var)
+        res.extend(self.keys)
+        return res
+
+    def _output_patterns(self) -> list[Pattern]:
+        res: list[Pattern] = []
+        res.extend(self.values)
+        res.append(self.rest)
+        return res
+
+
+@dataclass(frozen=True)
+class EmptyMapMatcher(BaseMatcher):
+    var: EVar
+    key_sort: str
+    value_sort: str
+
+
+class Config(TypedDict, total=False):
+    derive_beq: bool | None
+    derive_decidableeq: bool | None
+
+
+@dataclass
 class K2Lean4:
     defn: KoreDefn
+    derive_beq: bool
+    derive_decidableeq: bool
+
+    def __init__(self, defn: KoreDefn, *, config: Config | None = None):
+        config = config or {}
+        self.defn = defn
+        self.derive_beq = bool(config.get('derive_beq'))
+        self.derive_decidableeq = bool(config.get('derive_decidableeq'))
 
     @cached_property
     def symbol_table(self) -> KoreSymbolTable:
@@ -109,6 +244,36 @@ class K2Lean4:
             return None
 
         return FrozenDict((sort, fields) for sort in self.defn.sorts if (fields := fields_of(sort)) is not None)
+
+    @cached_property
+    def _sort_deps(self) -> FrozenDict[str, frozenset[str]]:
+        """Transitively closed sort dependency graph."""
+        sorts = self.defn.sorts
+        deps: list[tuple[str, str]] = []
+        for sort in sorts:
+            # A sort depends on its subsorts (due to inj_{subsort} constructors)
+            deps.extend((sort, subsort) for subsort in self.defn.subsorts.get(sort, []))
+            # A sort depends on the parameter sorts of all its constructors
+            deps.extend(
+                (sort, param_sort)
+                for ctor in self.defn.constructors.get(sort, [])
+                for param_sort in _param_sorts(self.defn.symbols[ctor])
+            )
+            # If the sort is a collection, the element function parameters are dependencies
+            if sort in self.defn.collections:
+                coll = self.defn.collections[sort]
+                elem = self.defn.symbols[coll.element]
+                deps.extend((sort, param_sort) for param_sort in _param_sorts(elem))
+
+        closed = POSet(deps).image  # TODO POSet should be called "transitively closed relation" or similar
+        return FrozenDict(
+            (sort, frozenset(closed.get(sort, []))) for sort in sorts
+        )  # Ensure that sorts without dependencies are also represented
+
+    @cached_property
+    def _sort_sccs(self) -> tuple[tuple[str, ...], ...]:
+        sccs = _ordered_sccs(self._sort_deps)
+        return tuple(tuple(scc) for scc in sccs)
 
     @cached_property
     def _func_rules_by_uid(self) -> FrozenDict[str, FunctionRule]:
@@ -190,22 +355,22 @@ class K2Lean4:
         match coll.kind:
             case CollectionKind.LIST:
                 (item,) = sorts
-                term = Term(f'(ListHook {item}).list')
+                term = Term(f'List {item}')
             case CollectionKind.SET:
                 (item,) = sorts
-                term = Term(f'(SetHook {item}).set')
+                term = Term(f'List {item}')
             case CollectionKind.MAP:
                 key, value = sorts
-                term = Term(f'(MapHook {key} {value}).map')
+                term = Term(f'List ({key} × {value})')
         return Field('coll', term)
 
     def sort_module(self) -> Module:
         commands: tuple[Command, ...] = tuple(
-            block for sorts in _ordered_sorts(self.defn) if (block := self._sort_block(sorts)) is not None
+            block for sorts in self._sort_sccs if (block := self._sort_block(sorts)) is not None
         )
         return Module(commands=commands)
 
-    def _sort_block(self, sorts: list[str]) -> Command | None:
+    def _sort_block(self, sorts: tuple[str, ...]) -> Command | None:
         """Return an optional mutual block or declaration."""
         commands: tuple[Command, ...] = tuple(
             self._transform_sort(sort) for sort in sorts if sort not in _PRELUDE_SORTS
@@ -239,7 +404,12 @@ class K2Lean4:
         ctors: list[Ctor] = []
         ctors.extend(self._inj_ctor(sort, subsort) for subsort in subsorts)
         ctors.extend(self._symbol_ctor(sort, symbol) for symbol in symbols)
-        return Inductive(sort, Signature((), Term('Type')), ctors=ctors)
+        return Inductive(
+            sort,
+            Signature((), Term('Type')),
+            ctors=ctors,
+            deriving=self._deriving(sort),
+        )
 
     def _inj_ctor(self, sort: str, subsort: str) -> Ctor:
         return Ctor(f'inj_{subsort}', Signature((ExplBinder(('x',), Term(subsort)),), Term(sort)))
@@ -254,7 +424,20 @@ class K2Lean4:
     def _structure(self, sort: str) -> Structure:
         fields = self.structures[sort]
         binders = tuple(ExplBinder((name,), ty) for name, ty in fields)
-        return Structure(sort, Signature((), Term('Type')), ctor=StructCtor(binders))
+        return Structure(
+            sort,
+            Signature((), Term('Type')),
+            ctor=StructCtor(binders),
+            deriving=self._deriving(sort),
+        )
+
+    def _deriving(self, sort: str) -> list[str]:
+        res = []
+        if self.derive_beq:
+            res.append('BEq')
+        if self.derive_decidableeq and not 'SortKItem' in self._sort_deps[sort]:
+            res.append('DecidableEq')
+        return res
 
     def inj_module(self) -> Module:
         return Module(commands=self._inj_commands())
@@ -271,8 +454,11 @@ class K2Lean4:
 
     def _inj_instance(self, subsort: str, supersort: str) -> Instance:
         ty = Term(f'Inj {subsort} {supersort}')
-        field = self._inj_field(subsort, supersort)
-        return Instance(Signature((), ty), StructVal((field,)))
+        fields = (
+            self._inj_field(subsort, supersort),
+            self._retr_field(subsort, supersort),
+        )
+        return Instance(Signature((), ty), StructVal(fields))
 
     def _inj_field(self, subsort: str, supersort: str) -> InstField:
         val = self._inj_val(subsort, supersort)
@@ -302,6 +488,37 @@ class K2Lean4:
             # Has actual constructors, not only subsorts
             default = Alt((Term('x'),), inj(subsort, supersort, 'x'))
             res.append(default)
+
+        return res
+
+    def _retr_field(self, subsort: str, supersort: str) -> InstField:
+        val = self._retr_val(subsort, supersort)
+        return InstField('retr', val)
+
+    def _retr_val(self, subsort: str, supersort: str) -> FieldVal:
+        subsubsorts: list[str]
+        if subsort.endswith('CellMap'):
+            subsubsorts = []  # Disregard injection from value sort to cell map sort
+        else:
+            subsubsorts = sorted(self.defn.subsorts.get(subsort, []))
+
+        return AltsFieldVal(self._retr_alts(subsort, supersort, subsubsorts))
+
+    def _retr_alts(self, subsort: str, supersort: str, subsubsorts: list[str]) -> list[Alt]:
+        def inj(subsort: str, supersort: str, x: str) -> Term:
+            return Term(f'{supersort}.inj_{subsort} {x}')
+
+        res = []
+        for subsubsort in subsubsorts:
+            res_inj = inj(subsubsort, subsort, 'x')
+            res.append(Alt((inj(subsubsort, supersort, 'x'),), Term(f'some ({res_inj})')))
+
+        res.append(Alt((inj(subsort, supersort, 'x'),), Term('some x')))
+
+        n_covered = len(subsubsorts) + 1
+        n_ctors = len(self.defn.constructors.get(supersort, ())) + len(self.defn.subsorts.get(supersort, ()))
+        if n_ctors > n_covered:
+            res.append(Alt((Term('_'),), Term('none')))
 
         return res
 
@@ -375,7 +592,9 @@ class K2Lean4:
         signature = Signature(binders, ty)
 
         req, lhs, rhs, defs = self._extract_func_rule(rule)
-        val = self._func_rule_val(lhs.args, req, rhs, defs)
+        free = (f"Var'Unds'Pat{i}" for i in count())
+        args, matchers = self._func_rule_matchers(lhs, free)
+        val = self._func_rule_val(args, matchers, req, rhs, defs)
 
         return Definition(ident, val, signature, modifiers=modifiers)
 
@@ -396,12 +615,14 @@ class K2Lean4:
 
     def _func_rule_val(
         self,
-        args: tuple[Pattern, ...],
+        args: list[Pattern],
+        matchers: list[list[Matcher]],
         req: Pattern,
         rhs: Pattern,
         defs: dict[str, Pattern],
     ) -> DeclVal:
-        term = self._func_rule_term(req, rhs, defs)
+        rhs_term = self._func_rule_rhs(req, rhs, defs)
+        term = self._func_rule_term(matchers, rhs_term)
 
         if not args:
             return SimpleVal(term)
@@ -417,7 +638,82 @@ class K2Lean4:
 
         return AltsVal(alts)
 
-    def _func_rule_term(self, req: Pattern, rhs: Pattern, defs: dict[str, Pattern]) -> Term:
+    def _func_rule_term(self, matchers: list[list[Matcher]], rhs: Term) -> Term:
+        def indent_rest(s: str, n: int) -> str:
+            lines = s.splitlines()
+            return '\n'.join([lines[0]] + [' ' * n + line for line in lines[1:]])
+
+        match_groups = [
+            list(zip(*(self._matcher_to_terms(matcher) for matcher in group), strict=True)) for group in matchers
+        ]
+
+        res = str(rhs)
+        for group in reversed(match_groups):
+            args_str = 'match {args} with\n'.format(args=', '.join(str(term) for term in group[0]))
+            match_str = '  | {matches} => {res}\n'.format(
+                matches=', '.join(str(term) for term in group[1]), res=indent_rest(res, 2)
+            )
+            nomatch_str = '  | {no_matches} => none'.format(no_matches=', '.join(['_'] * len(group[1])))
+            res = f'{args_str}{match_str}{nomatch_str}'
+
+        return Term(res)
+
+    def _matcher_to_terms(self, matcher: Matcher) -> tuple[Term, Term]:
+        def list_from(elems: Iterable[Pattern]) -> Term:
+            elems_str = ', '.join(str(self._transform_pattern(elem, concrete=True)) for elem in elems)
+            return Term(f'[{elems_str}]')
+
+        match matcher:
+            case EqMatcher(var1, var2):
+                v1term = self._transform_pattern(var1)
+                v2term = self._transform_pattern(var2)
+                return Term(f'{v1term} == {v2term}'), Term('true')
+            case SubsortMatcher(var, subsort, supersort, pat):
+                vterm = self._transform_pattern(var)
+                pterm = self._transform_arg(pat, concrete=True)
+                return Term(f'(@retr {subsort} {supersort}) {vterm}'), Term(f'some {pterm}')
+            case ListMatcher(var, prefix, middle, suffix):
+                vterm = self._transform_pattern(var)
+                arg = Term(f'(ListHook SortKItem).split {vterm}.coll {len(prefix)} {len(suffix)}')
+                pterm = list_from(prefix)
+                mterm = self._transform_pattern(middle, concrete=True)
+                sterm = list_from(suffix)
+                pattern = Term(f'some ({pterm}, {mterm}, {sterm})')
+                return arg, pattern
+            case EmptyListMatcher(var):
+                vterm = self._transform_pattern(var)
+                arg = Term(f'(ListHook SortKItem).size {vterm}.coll')
+                pattern = Term('0')
+                return arg, pattern
+            case SetMatcher(var, elems, rest):
+                vterm = self._transform_pattern(var)
+                eterm = list_from(elems)
+                rterm = self._transform_arg(rest, concrete=True)
+                arg = Term(f'(SetHook SortKItem).split {vterm}.coll {eterm}')
+                pattern = Term(f'some {rterm}')
+                return arg, pattern
+            case EmptySetMatcher(var):
+                vterm = self._transform_pattern(var)
+                arg = Term(f'(SetHook SortKItem).size {vterm}.coll')
+                pattern = Term('0')
+                return arg, pattern
+            case MapMatcher(var, key_sort, value_sort, keys, values, rest):
+                vterm = self._transform_pattern(var)
+                kterm = list_from(keys)
+                arg = Term(f'(MapHook {key_sort} {value_sort}).split {vterm}.coll {kterm}')
+                vterm = list_from(values)
+                rterm = self._transform_pattern(rest, concrete=True)
+                pattern = Term(f'some ({vterm}, {rterm})')
+                return arg, pattern
+            case EmptyMapMatcher(var, key_sort, value_sort):
+                vterm = self._transform_pattern(var)
+                arg = Term(f'(MapHook {key_sort} {value_sort}).size {vterm}.coll')
+                pattern = Term('0')
+                return arg, pattern
+            case _:
+                raise AssertionError
+
+    def _func_rule_rhs(self, req: Pattern, rhs: Pattern, defs: dict[str, Pattern]) -> Term:
         if not defs and isinstance(req, Top):
             return Term(f'some {self._transform_arg(rhs)}')
 
@@ -448,6 +744,131 @@ class K2Lean4:
                 return n_ctors == 1 and all(self._is_exhaustive(arg) for arg in args)
             case _:
                 raise AssertionError()
+
+    def _func_rule_matchers(self, lhs: Pattern, free: Iterator[str]) -> tuple[list[Pattern], list[list[Matcher]]]:
+        assert isinstance(lhs, App)  # pattern is the LHS of a function rule
+
+        matchers: list[Matcher] = []
+
+        def rename_outputs(pattern: Pattern, free: Iterator[str]) -> tuple[Pattern, dict[EVar, int]]:
+            var_names = set(free_occs(pattern))
+            class_idx = count()
+            classes = {}
+
+            def rename(pattern: Pattern) -> Pattern:
+                match pattern:
+                    case EVar() as var:
+                        if var not in classes:
+                            classes[var] = next(class_idx)
+                            return pattern
+
+                        while (new_name := next(free)) in var_names:
+                            continue
+
+                        var_names.add(new_name)
+                        new_var = pattern.let(name=new_name)
+                        classes[new_var] = classes[var]
+                        return new_var
+                    case App('LblSetItem'):
+                        return pattern  # the arg is input
+                    case App("Lbl'UndsPipe'-'-GT-Unds'", (), (key, value)):
+                        return pattern.let(args=(key, rename(value)))  # the key is input
+                    case App(symbol, (), (key, value)):
+                        if symbol.endswith('CellMapItem'):
+                            return pattern.let(args=(key, rename(value)))  # the key is input
+
+                return pattern.let_patterns(tuple(rename(arg) for arg in pattern.patterns))
+
+            return rename(pattern), classes
+
+        def eq_matchers(classes: dict[EVar, int]) -> list[EqMatcher]:
+            grouped: dict[int, list[EVar]] = {}
+            for var, idx in classes.items():
+                grouped.setdefault(idx, []).append(var)
+
+            res = []
+            for clazz in grouped.values():
+                assert clazz
+                representative, *rest = clazz
+                for other in rest:
+                    res.append(EqMatcher(representative, other))
+
+            return res
+
+        def abstract_matchers(pattern: Pattern) -> Pattern:
+            match pattern:
+                case App('inj', (SortApp(subsort), SortApp(supersort)), (pat,)):
+                    if self.defn.subsorts.get(subsort) and free_occs(pat):
+                        var = EVar(next(free), SortApp(supersort))
+                        matchers.append(SubsortMatcher(var, subsort, supersort, pat))
+                        return var
+                case App("Lbl'Unds'List'Unds'", (), (App('LblListItem', (), (head,)), tail)):
+                    var = EVar(next(free), SortApp('SortList'))
+                    matchers.append(ListMatcher(var, (head,), tail, ()))
+                    return var
+                case App("Lbl'Unds'List'Unds'", (), (init, App('LblListItem', (), (last,)))):
+                    var = EVar(next(free), SortApp('SortList'))
+                    matchers.append(ListMatcher(var, (), init, (last,)))
+                    return var
+                case App("Lbl'Stop'List"):
+                    var = EVar(next(free), SortApp('SortList'))
+                    matchers.append(EmptyListMatcher(var))
+                    return var
+                case App("Lbl'Unds'Set'Unds'", (), (App('LblSetItem', (), (elem,)), rest)):
+                    var = EVar(next(free), SortApp('SortSet'))
+                    matchers.append(SetMatcher(var, (elem,), rest))
+                    return var
+                case App("Lbl'Stop'Set"):
+                    var = EVar(next(free), SortApp('SortSet'))
+                    matchers.append(EmptySetMatcher(var))
+                    return var
+                case App(map_symbol, (), (App(item_symbol, (), (key, value)), rest)):
+                    if (
+                        map_symbol.startswith("Lbl'Unds'")
+                        and map_symbol.endswith("Map'Unds'")
+                        and (
+                            item_symbol == "Lbl'UndsPipe'-'-GT-Unds'"
+                            or (item_symbol.startswith('Lbl') and item_symbol.endswith('CellMapItem'))
+                        )
+                    ):
+                        sort = f'Sort{map_symbol[9:-6]}'
+                        var = EVar(next(free), SortApp(sort))
+                        coll = self.defn.collections[sort]
+                        elem_decl = self.defn.symbols[coll.element]
+                        key_sort, value_sort = _param_sorts(elem_decl)
+                        matchers.append(MapMatcher(var, key_sort, value_sort, (key,), (value,), rest))
+                        return var
+                case App(symbol):
+                    if symbol.startswith("Lbl'Stop'") and symbol.endswith('Map'):
+                        sort = f'Sort{symbol[9:]}'
+                        var = EVar(next(free), SortApp(sort))
+                        coll = self.defn.collections[sort]
+                        elem_decl = self.defn.symbols[coll.element]
+                        key_sort, value_sort = _param_sorts(elem_decl)
+                        matchers.append(EmptyMapMatcher(var, key_sort, value_sort))
+                        return var
+
+            return pattern
+
+        def order_matchers(matchers: list[Matcher]) -> list[list[Matcher]]:
+            prec: dict[int, list[int]] = {}
+            for i, this in enumerate(matchers):
+                prec[i] = []
+                for j, other in enumerate(matchers):
+                    if any(v in this.outputs for v in other.inputs):
+                        prec[i].append(j)
+
+            dg = nx.DiGraph(prec)
+            generations = nx.topological_generations(dg)
+            return [[matchers[i] for i in generation] for generation in generations]
+
+        pattern, eq_classes = rename_outputs(lhs, (f"Var'Unds'Uniq{i}" for i in count()))
+        matchers += eq_matchers(eq_classes)
+        pattern = pattern.bottom_up(abstract_matchers)
+        assert isinstance(pattern, App)
+        ordered = order_matchers(matchers)
+
+        return list(pattern.args), ordered
 
     def _func_axiom(self, decl: SymbolDecl) -> Axiom:
         ident = _symbol_ident(decl.symbol.name)
@@ -727,35 +1148,6 @@ def _param_sorts(decl: SymbolDecl) -> list[str]:
     from ..utils import check_type
 
     return [check_type(sort, SortApp).name for sort in decl.param_sorts]  # TODO eliminate check_type
-
-
-def _ordered_sorts(defn: KoreDefn) -> list[list[str]]:
-    return _ordered_sccs(_sort_dependencies(defn))
-
-
-def _sort_dependencies(defn: KoreDefn) -> dict[str, set[str]]:
-    """Transitively closed sort dependency graph."""
-    sorts = defn.sorts
-    deps: list[tuple[str, str]] = []
-    for sort in sorts:
-        # A sort depends on its subsorts (due to inj_{subsort} constructors)
-        deps.extend((sort, subsort) for subsort in defn.subsorts.get(sort, []))
-        # A sort depends on the parameter sorts of all its constructors
-        deps.extend(
-            (sort, param_sort)
-            for ctor in defn.constructors.get(sort, [])
-            for param_sort in _param_sorts(defn.symbols[ctor])
-        )
-        # If the sort is a collection, the element function parameters are dependencies
-        if sort in defn.collections:
-            coll = defn.collections[sort]
-            elem = defn.symbols[coll.element]
-            deps.extend((sort, param_sort) for param_sort in _param_sorts(elem))
-
-    closed = POSet(deps).image  # TODO POSet should be called "transitively closed relation" or similar
-    return {
-        sort: set(closed.get(sort, [])) for sort in sorts
-    }  # Ensure that sorts without dependencies are also represented
 
 
 def _ordered_sccs(deps: Mapping[str, Collection[str]]) -> list[list[str]]:
