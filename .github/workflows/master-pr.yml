@@ -6,6 +6,9 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
 
@@ -16,7 +19,6 @@ jobs:
       - name: 'Check out code'
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.JENKINS_GITHUB_PAT }}
           # fetch-depth 0 means deep clone the repo
           fetch-depth: 0
       - name: 'Change base'
