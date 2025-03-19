@@ -203,8 +203,6 @@ class CTerm:
             - ``csubst1``: Constrained substitution to apply to `cterm` to obtain `self`.
             - ``csubst2``: Constrained substitution to apply to `cterm` to obtain `other`.
         """
-
-
         new_config, self_subst, other_subst = anti_unify(self.config, other.config, kdef=kdef)
         common_constraints = [constraint for constraint in self.constraints if constraint in other.constraints]
 
