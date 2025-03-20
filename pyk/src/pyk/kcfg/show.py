@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 
     from ..cterm import CSubst
     from ..kast import KInner
-    from ..kast.outer import KFlatModule, KSentence
+    from ..kast.outer import KDefinition, KFlatModule, KImport, KSentence
     from ..ktool.kprint import KPrint
     from .kcfg import NodeIdLike
 
@@ -311,6 +311,8 @@ class KCFGShow:
         module_name: str | None = None,
         omit_cells: Iterable[str] = (),
         parseable_output: bool = True,
+        defunc_with: KDefinition | None = None,
+        imports: Iterable[KImport] = (),
     ) -> KFlatModule:
         def _process_sentence(sent: KSentence) -> KSentence:
             if type(sent) is KRule:
@@ -320,7 +322,7 @@ class KCFGShow:
                     sent = minimize_rule_like(sent)
             return sent
 
-        module = cfg.to_module(module_name)
+        module = cfg.to_module(module_name, defunc_with=defunc_with, imports=imports)
         return module.let(sentences=[_process_sentence(sent) for sent in module.sentences])
 
     def show(
