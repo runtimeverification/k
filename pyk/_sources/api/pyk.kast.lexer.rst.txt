@@ -1,0 +1,7 @@
+pyk.kast.lexer module
+=====================
+
+.. automodule:: pyk.kast.lexer
+   :members:
+   :undoc-members:
+   :show-inheritance:

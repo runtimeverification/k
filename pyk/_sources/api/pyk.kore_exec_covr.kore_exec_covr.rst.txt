@@ -1,0 +1,7 @@
+pyk.kore\_exec\_covr.kore\_exec\_covr module
+============================================
+
+.. automodule:: pyk.kore_exec_covr.kore_exec_covr
+   :members:
+   :undoc-members:
+   :show-inheritance:
