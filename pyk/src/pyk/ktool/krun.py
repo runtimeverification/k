@@ -445,6 +445,9 @@ def llvm_interpret(
     except CalledProcessError as err:
         raise RuntimeError(f'Interpreter failed with status {err.returncode}: {err.stderr}') from err
 
+    if not res.stdout:
+        raise RuntimeError(f'Interpreter terminated with status {res.returncode} and produced no output: {res.stderr}')
+
     return KoreParser(res.stdout).pattern()
 
 
