@@ -187,7 +187,7 @@ class CTerm:
         return CTerm(self.config, [new_constraint] + list(self.constraints))
 
     def anti_unify(
-        self: CTerm, other: CTerm, keep_values: bool = False, kdef: KDefinition | None = None
+        self, other: CTerm, keep_values: bool = False, kdef: KDefinition | None = None
     ) -> tuple[CTerm, CSubst, CSubst]:
         """Given two `CTerm` instances, find a more general `CTerm` which can instantiate to both.
 
