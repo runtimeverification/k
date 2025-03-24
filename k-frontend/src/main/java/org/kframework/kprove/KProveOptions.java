@@ -115,8 +115,8 @@ public class KProveOptions {
   public boolean allowFuncClaims = false;
 
   @Parameter(
-      names = "--allow-new-rules",
+      names = "--allow-rules",
       description = "Allow new rules to be introduced in proof modules. Use with --dry-run.",
       hidden = true)
-  public boolean allowNewRules = false;
+  public boolean allowRules = false;
 }

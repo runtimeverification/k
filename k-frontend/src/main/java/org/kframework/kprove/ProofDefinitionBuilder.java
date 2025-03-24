@@ -64,7 +64,7 @@ public record ProofDefinitionBuilder(
     Module specModule = getModule(specModuleNameUpdated, modulesMap, parsedDefinition);
     specModule = filter(specModule);
     kompile.proverChecksX(
-        specModule, modulesMap.get(defModuleNameUpdated), proveOptions.allowNewRules);
+        specModule, modulesMap.get(defModuleNameUpdated), proveOptions.allowRules);
     kompile.structuralChecks(
         immutable(modules), specModule, Option.empty(), backend.excludedModuleTags());
     specModule =
