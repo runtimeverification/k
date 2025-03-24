@@ -3,6 +3,8 @@ requires "imp-verification.k"
 module LOOPING-SPEC
     imports IMP-VERIFICATION
 
+    rule [if-true-true]: <k> if (true && true)  S else _ => S ... </k> [priority(80)]
+
     claim <k> while ( 1 <= $n ) {
                 $s = $s + $n ;
                 $n = $n + -1 ;
