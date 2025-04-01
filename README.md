@@ -234,7 +234,7 @@ This is needed to expose the Nix 2.0 CLI and flakes support that are hidden behi
 
 By default, Nix will build the project and its transitive dependencies from
 source, which can take up to an hour. We recommend setting up
-[the binary cache](https://app.cachix.org/cache/kore) to speed up the build
+[the binary cache](https://app.cachix.org/cache/k-framework) to speed up the build
 process significantly. You will also need to add the following sections to `/etc/nix/nix.conf` or, if you are a trusted user, `~/.config/nix/nix.conf` (if you don't know what a "trusted user" is, you probably want to do the former):
 
 ```
