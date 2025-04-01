@@ -274,7 +274,7 @@ class KProve(KPrint):
                 temp_dir=self.use_directory,
                 dry_run=True,
                 type_inference_mode=type_inference_mode,
-                args=['--emit-json-spec', ntf.name],
+                args=['--emit-json-spec', ntf.name, '--allow-rules'],
             )
             json_data = json.loads(Path(ntf.name).read_text())
 

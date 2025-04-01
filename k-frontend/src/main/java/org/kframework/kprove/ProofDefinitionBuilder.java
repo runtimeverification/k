@@ -63,7 +63,8 @@ public record ProofDefinitionBuilder(
     Definition parsedDefinition = compiledDefinition.getParsedDefinition();
     Module specModule = getModule(specModuleNameUpdated, modulesMap, parsedDefinition);
     specModule = filter(specModule);
-    kompile.proverChecksX(specModule, modulesMap.get(defModuleNameUpdated));
+    kompile.proverChecksX(
+        specModule, modulesMap.get(defModuleNameUpdated), proveOptions.allowRules);
     kompile.structuralChecks(
         immutable(modules), specModule, Option.empty(), backend.excludedModuleTags());
     specModule =
