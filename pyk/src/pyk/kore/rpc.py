@@ -265,9 +265,6 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         bug_report_id: str | None = None,
         transport: TransportType = TransportType.SINGLE_SOCKET,
     ):
-        if (bug_report is None) != (bug_report_id is None):
-            raise ValueError('bug_report and bug_report_id must be passed together.')
-
         self._transport = self._create_transport(transport, host=host, port=port, timeout=timeout)
         self._req_id = 1
         self._bug_report_id = bug_report_id
