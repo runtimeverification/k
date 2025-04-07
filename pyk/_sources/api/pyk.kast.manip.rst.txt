@@ -1,0 +1,7 @@
+pyk.kast.manip module
+=====================
+
+.. automodule:: pyk.kast.manip
+   :members:
+   :undoc-members:
+   :show-inheritance:
