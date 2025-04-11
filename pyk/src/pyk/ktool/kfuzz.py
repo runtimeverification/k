@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 from hypothesis import Phase, given, settings
 from hypothesis.strategies import fixed_dictionaries, integers
 
+from ..kore.manip import substitute_vars
 from ..kore.parser import KoreParser
 from ..kore.prelude import inj
 from ..kore.syntax import DV, EVar, SortApp, String
@@ -54,10 +55,17 @@ class KFuzz:
 
     definition_dir: Path
     handler: KFuzzHandler
+    subst_func: Callable[[Pattern, Mapping[EVar, Pattern]], Pattern]
 
-    def __init__(self, definition_dir: Path, handler: KFuzzHandler = _DEFAULT_HANDLER) -> None:
+    def __init__(
+        self,
+        definition_dir: Path,
+        handler: KFuzzHandler = _DEFAULT_HANDLER,
+        subst_func: Callable[[Pattern, Mapping[EVar, Pattern]], Pattern] = substitute_vars,
+    ) -> None:
         self.definition_dir = definition_dir
         self.handler = handler
+        self.subst_func = subst_func
 
     def fuzz_with_check(
         self,
@@ -76,6 +84,7 @@ class KFuzz:
             subst_strategy,
             check_func=check_func,
             handler=self.handler,
+            subst_func=self.subst_func,
             **hypothesis_args,
         )
 
@@ -95,6 +104,7 @@ class KFuzz:
             subst_strategy,
             check_exit_code=True,
             handler=self.handler,
+            subst_func=self.subst_func,
             **hypothesis_args,
         )
 
@@ -133,6 +143,7 @@ def fuzz(
     check_func: Callable[[Pattern], Any] | None = None,
     check_exit_code: bool = False,
     handler: KFuzzHandler = _DEFAULT_HANDLER,
+    subst_func: Callable[[Pattern, Mapping[EVar, Pattern]], Pattern] = substitute_vars,
     **hypothesis_args: Any,
 ) -> None:
     """Fuzz a property test with concrete execution over a K term.
@@ -148,6 +159,9 @@ def fuzz(
           An exit code of 0 indicates a passing test.
           A RuntimeError will be thrown if this is True and check_func is also passed as an argument.
         handler: An instance of a `KFuzzHandler` implementing custom behavior while fuzzing.
+        subst_func: A function used to apply the substitution to the template.
+          Takes the original template and a substitution map, and returns the substituted pattern.
+          Defaults to a bottom-up traversal that replaces variables with the corresponding values in the substitution map.
         hypothesis_args: Keyword arguments that will be passed as settings for the hypothesis test. Defaults:
 
           deadline: 5000
@@ -169,7 +183,7 @@ def fuzz(
                 return p
 
         handler.handle_test(subst_case)
-        test_pattern = template.bottom_up(sub)
+        test_pattern = subst_func(template, subst_case)
         res = llvm_interpret_raw(definition_dir, test_pattern.text, check=False)
 
         try:
