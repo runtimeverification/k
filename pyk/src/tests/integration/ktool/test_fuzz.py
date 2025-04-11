@@ -16,8 +16,9 @@ from pyk.testing import KompiledTest
 from ..utils import K_FILES, TEST_DATA_DIR
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
     from pathlib import Path
-    from typing import Final, Mapping
+    from typing import Final
 
     from pyk.kore.syntax import Pattern
 
