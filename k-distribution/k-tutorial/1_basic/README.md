@@ -17,4 +17,3 @@ the next section [Section 2: Intermediate K Concepts](../2_intermediate/README.m
 
 First things first, you need to set up K environment on your machine.
 [Lesson 1.1: Setting up K Environment](01_installing/README.md).
-
