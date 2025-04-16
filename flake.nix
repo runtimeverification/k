@@ -3,7 +3,7 @@
   inputs = {
     llvm-backend.url = "github:runtimeverification/llvm-backend/v0.1.130";
     haskell-backend = {
-      url = "github:runtimeverification/haskell-backend/v0.1.119";
+      url = "github:runtimeverification/haskell-backend/v0.1.120";
       inputs.rv-utils.follows = "llvm-backend/rv-utils";
       inputs.nixpkgs.follows = "llvm-backend/nixpkgs";
     };
@@ -84,7 +84,7 @@
 
             mk-k-framework = { haskell-backend-bins, llvm-kompile-libs }:
               prev.callPackage ./nix/k.nix {
-                mvnHash = "sha256-cdSX3vKp5wXPz/qQbKoUBoDEyZ4f1yQ7+lc/yy6aJZk=";
+                mvnHash = "sha256-uHhx3L2ma9/N5fbagpXMbE3boL7RNfkRy5vzPmKOfU8=";
                 manualMvnArtifacts = [
                   "org.scala-lang:scala-compiler:2.13.13"
                   "ant-contrib:ant-contrib:1.0b3"
