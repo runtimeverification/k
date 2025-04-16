@@ -67,7 +67,7 @@ def substitute_vars(pattern: Pattern, subst_map: Mapping[EVar, Pattern]) -> Patt
 
     def subst(pattern: Pattern) -> Pattern:
         match pattern:
-            case EVar(_) as var:
+            case EVar() as var:
                 return subst_map.get(var, var)
             case _:
                 return pattern
@@ -84,7 +84,7 @@ def elim_aliases(pattern: Pattern) -> Pattern:
 
     def inline_aliases(pattern: Pattern) -> Pattern:
         match pattern:
-            case And(_, (p, EVar(_) as var)):
+            case And(_, (p, EVar() as var)):
                 aliases[var] = p
                 return p
             case _:
