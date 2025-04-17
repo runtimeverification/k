@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from .syntax import And, App, EVar, MLQuant, Top
 
 if TYPE_CHECKING:
-    from collections.abc import Collection
+    from collections.abc import Collection, Mapping
 
     from .syntax import Pattern
 
@@ -57,6 +57,24 @@ def collect_symbols(pattern: Pattern) -> set[str]:
     return res
 
 
+def substitute_vars(pattern: Pattern, subst_map: Mapping[EVar, Pattern]) -> Pattern:
+    """Substitute variables in a pattern using a bottom-up traversal.
+
+    Args:
+        pattern: The pattern containing variables to be substituted.
+        subst_map: A mapping from variables to their replacement patterns.
+    """
+
+    def subst(pattern: Pattern) -> Pattern:
+        match pattern:
+            case EVar() as var:
+                return subst_map.get(var, var)
+            case _:
+                return pattern
+
+    return pattern.bottom_up(subst)
+
+
 def elim_aliases(pattern: Pattern) -> Pattern:
     r"""Eliminate subpatterns of the form ``\and{S}(p, X : S)``.
 
@@ -66,19 +84,12 @@ def elim_aliases(pattern: Pattern) -> Pattern:
 
     def inline_aliases(pattern: Pattern) -> Pattern:
         match pattern:
-            case And(_, (p, EVar(name))):
-                aliases[name] = p
+            case And(_, (p, EVar() as var)):
+                aliases[var] = p
                 return p
             case _:
                 return pattern
 
-    def substitute_vars(pattern: Pattern) -> Pattern:
-        match pattern:
-            case EVar(name) as var:
-                return aliases.get(name, var)
-            case _:
-                return pattern
-
     pattern = pattern.bottom_up(inline_aliases)
-    pattern = pattern.bottom_up(substitute_vars)
+    pattern = substitute_vars(pattern, aliases)
     return pattern
