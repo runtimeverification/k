@@ -101,13 +101,13 @@ output file. We'll come back to them later.
 
 You can also execute small programs directly on the command line instead of 
 putting them in a file. For example, the same program above
-could also have been executed by running the following command:
+could have been executed by running the following command:
 
 ```
 krun -cPGM='colorOf(Banana())'
 ```
 
-You could also run it as:
+Or by running the command below:
 
 ```
 krun -cPGM='colorOf(Banana())' --definition 'lesson-02-a-kompiled'
@@ -130,7 +130,7 @@ attribute `main-module` at compile time.
 Modules residing in other K files are imported instead through **requires** 
 statements (similar to `include` in C/C++). You'll learn more about **imports** and 
 **requires** in [Lesson 1.5](../05_modules/README.md).
-In this lesson we continue with a closer look to a K module syntax.
+In this lesson we continue with a closer look to a K module structure.
 
 A K module is formed of sentences (and **imports**), and sentences 
 come in different forms. For example, **productions** and **rules** are two 
