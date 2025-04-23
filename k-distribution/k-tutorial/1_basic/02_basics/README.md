@@ -12,7 +12,7 @@ to write simple K definitions, and how to compile and run them.
 Now that you've installed K on your system, you're ready for your first 
 program in K.
 
-Copy the code below into your editor and save it as `lesson-02-a.k`.
+Copy the program below into your editor and save it as `lesson-02-a.k`.
 K files end with the `.k` extension.
 
 ```k
@@ -55,15 +55,24 @@ LESSON-02-A-SYNTAX in definition.  Use --syntax-module to specify one. Using
 LESSON-02-A as default.
 ```
 
-It's just a warning, and you can ignore it for now. Compilation succeeded.
+It's a warning highlighting a K convention of splitting the syntactic 
+definitions from the actual implementation into different modules. In 
+[Lesson 1.5](../05_modules/README.md) you will learn how to do it the proper 
+way, as the examples will get bigger. For the smaller examples we work on
+now, we can just ignore it.
 
 `kompile` will also output a directory containing everything needed to execute
-programs and perform proofs using the definition given as input.
+programs and perform proofs using the K definition given as input.
 Check your working directory and you'll see directory `lesson-02-a-kompiled`
 has beed created inside. If you're curious, have a look at its contents and 
 inspect the generated documentation. 
 
-Next, save the following code in file `banana.color` in the same directory as 
+This directory not only contains all the basic tools produced by a K 
+definition, e.g., parser, interpreter, or verifier, but also all sorts of 
+files that can be used as input to execute these tools. More about K's parser
+will come in the next lesson, more on the other tools in due time.
+
+Now, save the following code in file `banana.color` in the same directory as 
 `lesson-02-a.k`:
 
 ```
@@ -310,6 +319,10 @@ krun -cPGM='contentsOfJar(Jar(Apple()))' --definition 'lesson-02-e-kompiled'
 The program returns `Apple()`, because that is the pattern that was matched by 
 `F`.
 
+### Exercise
+
+Extend the definition of function `colorOf` in `lesson-02-d.k` to return a
+pattern for `Kiwi()`.
 
 ## Exercises
 
