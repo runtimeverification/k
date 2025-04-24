@@ -12,7 +12,7 @@ to write simple K definitions, and how to compile and run them.
 Now that you've installed K on your system, you're ready for your first 
 program in K.
 
-Copy the program below into your editor and save it as `lesson-02-a.k`.
+Copy the code below into your editor and save it as `lesson-02-a.k`.
 K files end with the `.k` extension.
 
 ```k
@@ -72,12 +72,15 @@ definition, e.g., parser, interpreter, or verifier, but also all sorts of
 files that can be used as input to execute these tools. More about K's parser
 will come in the next lesson, more on the other tools in due time.
 
-Now, save the following code in file `banana.color` in the same directory as 
+Now, save the program below in file `banana.color` in the same directory as 
 `lesson-02-a.k`:
 
 ```
 colorOf(Banana())
 ```
+Note that we use `color` as file extension, but merely because this is the 
+sort returned by function `colorOf`. The file name gives us a better 
+understanding of what the file contains.
 
 We can now evaluate this K term by running (from the same directory):
 
