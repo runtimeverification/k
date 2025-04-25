@@ -72,7 +72,7 @@ definition, e.g., parser, interpreter, or verifier, but also all sorts of
 files that can be used as input to execute these tools. More about K's parser
 will come in the next lesson, more on the other tools in due time.
 
-Now, save the program below in file `banana.color` in the same directory as 
+Now, save the program below in the file `banana.color` in the same directory as 
 `lesson-02-a.k`:
 
 ```
@@ -151,13 +151,16 @@ Most of productions above are **constructor** productions (e.g., `Yellow()`,
 `Blue()`, or `Blueberry()`), while the last one is a **function** production 
 (`colorOf(Fruit) [function]`). It's easy to distinguish the two as the latter 
 production has additional attribute `function`.
-There are other types of productions---tokens, brackets, lists, macros, 
-or aliases---but you'll learn about them in due time.
+There are other types of productions&mdash;tokens, brackets, lists, macros, 
+or aliases&mdash;but you'll learn about them in due time.
+There are other types of attributes too, and a sentence can carry several, 
+in which case they will be separated by comma between square brackets. 
+We will discuss them throughout the tutorial.
 
 Constructors can have arguments, but these ones do not. We will cover the
 syntax of productions in detail in the next lesson, but for now, you can write
 a production with no arguments as an uppercase or lowercase identifier followed
-by the `()` operator.
+by the `()` operator. Sorts must always start with uppercase letter.
 
 Returning to the syntax of a K module instead, note that individual productions 
 of the same sort are separated by pipe operator `|`.
@@ -224,7 +227,7 @@ A rule begins with the `rule` keyword, which is followed by a **left-hand side**
 **rewrite operator** `=>`, and a **right-hand side**. The left-hand side 
 contains the name of the function and zero or more **patterns** corresponding 
 to the parameters of the function. The right-hand side is another pattern
-specifying the "formula" to compute the output value of the function for those 
+specifying the term representing the output value of the function for those 
 parameters. Then, we can read the rule as follows: if the function is called with 
 arguments that **match** the patterns on the left-hand side, then the function will 
 return the value of the pattern on the right-hand side.
@@ -282,7 +285,7 @@ right-hand side pattern either, and no output value.
 We said that the left- and right-hand sides of a `rule` are **patterns**.
 Thus, constructors are a type of pattern. We will introduce more complex patterns
 later, but before we proceed to the next lesson, let us briefly 
-discuss one more type of pattern---**variables**.
+discuss one more type of pattern&mdash;**variables**.
 
 A variable, syntactically, consists of an uppercase identifier. It differs from 
 a constructor in that it matches **any** pattern with one exception: two 
@@ -336,7 +339,7 @@ pattern for `Kiwi()`.
 2. Create a new definition which defines an outfit as a multi-argument constructor 
    consisting of a hat, shirt, pants, and shoes. Define a new sort
    `Boolean` with two constructors, true and false. Productions for hat, shirt, pants,
-   and shoes will have a single argument each---a color, either black or
+   and shoes will have a single argument each&mdash;a color, either black or
    white. Then define an `outfitMatching` function that will return true if all
    the pieces of the outfit are the same color. You do not need to define the
    case that returns false. Execute your program on different values to see that 
