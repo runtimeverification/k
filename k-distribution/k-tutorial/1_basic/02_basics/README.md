@@ -226,11 +226,11 @@ we use rules.
 A rule begins with the `rule` keyword, which is followed by a **left-hand side**,
 **rewrite operator** `=>`, and a **right-hand side**. The left-hand side 
 contains the name of the function and zero or more **patterns** corresponding 
-to the parameters of the function. The right-hand side is another pattern
-specifying the term representing the output value of the function for those 
-parameters. Then, we can read the rule as follows: if the function is called with 
-arguments that **match** the patterns on the left-hand side, then the function will 
-return the value of the pattern on the right-hand side.
+to the parameters of the function. The right-hand side is another pattern.
+It specifies the function behavior for those parameters. Then, we can read the 
+rule as follows: if the function is called with arguments that **match** the 
+patterns on the left-hand side, then the function will return the value of the 
+rewritten pattern on the right-hand side.
 
 For example, in the above example, if the argument of the `colorOf` function
 is `Banana()`, then the return value of the function is `Yellow()`.
