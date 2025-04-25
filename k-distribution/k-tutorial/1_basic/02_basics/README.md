@@ -116,6 +116,8 @@ Or by running the command below:
 krun -cPGM='colorOf(Banana())' --definition 'lesson-02-a-kompiled'
 ```
 
+`-cPGM='colorOf(Banana())'` simply sets variable `PGM` responsible for holding
+the program to execute to value `colorOf(Banana())`.
 Attribute `--definition` points to the *directory* containing the compiled version
 of `LESSON-02-A`.
 
