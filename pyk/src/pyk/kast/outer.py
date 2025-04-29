@@ -30,7 +30,6 @@ from .inner import (
     top_down,
 )
 from .kast import kast_term
-from .prelude.kbool import TRUE
 from .rewrite import indexed_rewrite
 
 if TYPE_CHECKING:
@@ -42,6 +41,10 @@ if TYPE_CHECKING:
     RL = TypeVar('RL', bound='KRuleLike')
 
 _LOGGER: Final = logging.getLogger(__name__)
+
+
+_BOOL: Final = KSort('Bool')
+_TRUE: Final = KToken('true', _BOOL)
 
 
 class KOuter(KAst):
@@ -627,7 +630,7 @@ class KRule(KRuleLike):
     ensures: KInner
     att: KAtt
 
-    def __init__(self, body: KInner, requires: KInner = TRUE, ensures: KInner = TRUE, att: KAtt = EMPTY_ATT):
+    def __init__(self, body: KInner, requires: KInner = _TRUE, ensures: KInner = _TRUE, att: KAtt = EMPTY_ATT):
         object.__setattr__(self, 'body', body)
         object.__setattr__(self, 'requires', requires)
         object.__setattr__(self, 'ensures', ensures)
@@ -637,8 +640,8 @@ class KRule(KRuleLike):
     def _from_dict(cls: type[KRule], d: Mapping[str, Any]) -> KRule:
         return KRule(
             body=KInner.from_dict(d['body']),
-            requires=KInner.from_dict(d['requires']) if d.get('requires') else TRUE,
-            ensures=KInner.from_dict(d['ensures']) if d.get('ensures') else TRUE,
+            requires=KInner.from_dict(d['requires']) if d.get('requires') else _TRUE,
+            ensures=KInner.from_dict(d['ensures']) if d.get('ensures') else _TRUE,
             att=KAtt.from_dict(d['att']) if d.get('att') else EMPTY_ATT,
         )
 
@@ -683,7 +686,7 @@ class KClaim(KRuleLike):
     ensures: KInner
     att: KAtt
 
-    def __init__(self, body: KInner, requires: KInner = TRUE, ensures: KInner = TRUE, att: KAtt = EMPTY_ATT):
+    def __init__(self, body: KInner, requires: KInner = _TRUE, ensures: KInner = _TRUE, att: KAtt = EMPTY_ATT):
         object.__setattr__(self, 'body', body)
         object.__setattr__(self, 'requires', requires)
         object.__setattr__(self, 'ensures', ensures)
@@ -693,8 +696,8 @@ class KClaim(KRuleLike):
     def _from_dict(cls: type[KClaim], d: Mapping[str, Any]) -> KClaim:
         return KClaim(
             body=KInner.from_dict(d['body']),
-            requires=KInner.from_dict(d['requires']) if d.get('requires') else TRUE,
-            ensures=KInner.from_dict(d['ensures']) if d.get('ensures') else TRUE,
+            requires=KInner.from_dict(d['requires']) if d.get('requires') else _TRUE,
+            ensures=KInner.from_dict(d['ensures']) if d.get('ensures') else _TRUE,
             att=KAtt.from_dict(d['att']) if d.get('att') else EMPTY_ATT,
         )
 
@@ -752,7 +755,7 @@ class KContext(KSentence):
     requires: KInner
     att: KAtt
 
-    def __init__(self, body: KInner, requires: KInner = TRUE, att: KAtt = EMPTY_ATT):
+    def __init__(self, body: KInner, requires: KInner = _TRUE, att: KAtt = EMPTY_ATT):
         object.__setattr__(self, 'body', body)
         object.__setattr__(self, 'requires', requires)
         object.__setattr__(self, 'att', att)
@@ -761,7 +764,7 @@ class KContext(KSentence):
     def _from_dict(cls: type[KContext], d: Mapping[str, Any]) -> KContext:
         return KContext(
             body=KInner.from_dict(d['body']),
-            requires=KInner.from_dict(d['requires']) if d.get('requires') else TRUE,
+            requires=KInner.from_dict(d['requires']) if d.get('requires') else _TRUE,
             att=KAtt.from_dict(d['att']) if d.get('att') else EMPTY_ATT,
         )
 
