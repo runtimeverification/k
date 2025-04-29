@@ -31,7 +31,6 @@ from .inner import (
 )
 from .kast import kast_term
 from .prelude.kbool import TRUE
-from .prelude.ml import ML_QUANTIFIERS
 from .rewrite import indexed_rewrite
 
 if TYPE_CHECKING:
@@ -1400,6 +1399,8 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
 
     def sort_vars(self, kast: KInner, sort: KSort | None = None) -> KInner:
         """Return the original term with all the variables having the sorts added or specialized, failing if recieving conflicting sorts for a given variable."""
+        ml_quantifiers = {'#Exists', '#Forall'}
+
         if type(kast) is KVariable and kast.sort is None and sort is not None:
             return kast.let(sort=sort)
 
@@ -1422,7 +1423,7 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
             if isinstance(term, KVariable):
                 result[term.name].append(term)
             elif isinstance(term, KApply):
-                if term.label.name in ML_QUANTIFIERS:
+                if term.label.name in ml_quantifiers:
                     var = get_quantifier_variable(term)
                     result[var.name].append(var)
             return result
@@ -1444,7 +1445,7 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
             occurrences = merge_variables(term, child_variables)
 
             if isinstance(term, KApply):
-                if term.label.name in ML_QUANTIFIERS:
+                if term.label.name in ml_quantifiers:
                     var = get_quantifier_variable(term)
                     subst: dict[str, KVariable] = {}
                     add_var_to_subst(var.name, occurrences[var.name], subst)
