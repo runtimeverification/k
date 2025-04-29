@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from ..kast.inner import KApply, KLabel, KSort, build_assoc
+from ..inner import KApply, KLabel, KSort, build_assoc
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
     from typing import Final
 
-    from ..kast import KInner
+    from .. import KInner
 
 SET: Final = KSort('Set')
 LIST: Final = KSort('List')

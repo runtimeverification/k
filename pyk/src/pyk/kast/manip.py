@@ -4,9 +4,9 @@ import logging
 from collections import Counter
 from typing import TYPE_CHECKING
 
-from ..prelude.k import DOTS, GENERATED_TOP_CELL
-from ..prelude.kbool import FALSE, TRUE, andBool, impliesBool, notBool, orBool
-from ..prelude.ml import is_top, mlAnd, mlBottom, mlEquals, mlEqualsTrue, mlImplies, mlOr, mlTop
+from ..kast.prelude.k import DOTS, GENERATED_TOP_CELL
+from ..kast.prelude.kbool import FALSE, TRUE, andBool, impliesBool, notBool, orBool
+from ..kast.prelude.ml import is_top, mlAnd, mlBottom, mlEquals, mlEqualsTrue, mlImplies, mlOr, mlTop
 from ..utils import find_common_items, hash_str, unique
 from .att import EMPTY_ATT, Atts, KAtt, WithKAtt
 from .inner import (

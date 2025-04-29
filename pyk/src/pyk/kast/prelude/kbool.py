@@ -2,14 +2,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from ..kast.inner import KApply, KLabel, KSort, KToken, build_assoc
-from ..utils import unique
+from ...utils import unique
+from ..inner import KApply, KLabel, KSort, KToken, build_assoc
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
     from typing import Final
 
-    from ..kast import KInner
+    from .. import KInner
 
 BOOL: Final = KSort('Bool')
 TRUE: Final = KToken('true', BOOL)

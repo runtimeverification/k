@@ -1,7 +1,7 @@
 from typing import Final
 
-from ..dequote import bytes_decode, bytes_encode, dequote_bytes, enquote_bytes
-from ..kast.inner import KSort, KToken
+from ...dequote import bytes_decode, bytes_encode, dequote_bytes, enquote_bytes
+from ..inner import KSort, KToken
 
 BYTES: Final = KSort('Bytes')
 

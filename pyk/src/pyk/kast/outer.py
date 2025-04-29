@@ -13,8 +13,6 @@ from functools import cached_property, reduce
 from itertools import pairwise, product
 from typing import TYPE_CHECKING, final, overload
 
-from ..prelude.kbool import TRUE
-from ..prelude.ml import ML_QUANTIFIERS
 from ..utils import FrozenDict, POSet, filter_none, not_none, single, unique
 from .att import EMPTY_ATT, Atts, Format, KAst, KAtt, WithKAtt
 from .inner import (
@@ -32,6 +30,8 @@ from .inner import (
     top_down,
 )
 from .kast import kast_term
+from .prelude.kbool import TRUE
+from .prelude.ml import ML_QUANTIFIERS
 from .rewrite import indexed_rewrite
 
 if TYPE_CHECKING:

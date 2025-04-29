@@ -4,6 +4,9 @@ import logging
 from typing import TYPE_CHECKING
 
 from ..kast.inner import KApply, KLabel, KSequence, KSort, KToken, KVariable
+from ..kast.prelude.bytes import bytesToken_from_str
+from ..kast.prelude.ml import mlAnd, mlBottom, mlCeil, mlEquals, mlExists, mlImplies, mlNot, mlOr, mlTop
+from ..kast.prelude.string import stringToken
 from ..kore.prelude import BYTES as KORE_BYTES
 from ..kore.prelude import LBL_ITE
 from ..kore.prelude import STRING as KORE_STRING
@@ -24,9 +27,6 @@ from ..kore.syntax import (
     String,
     Top,
 )
-from ..prelude.bytes import bytesToken_from_str
-from ..prelude.ml import mlAnd, mlBottom, mlCeil, mlEquals, mlExists, mlImplies, mlNot, mlOr, mlTop
-from ..prelude.string import stringToken
 from ._utils import unmunge
 
 if TYPE_CHECKING:

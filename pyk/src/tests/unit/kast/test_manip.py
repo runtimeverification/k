@@ -24,11 +24,11 @@ from pyk.kast.manip import (
     split_config_from,
 )
 from pyk.kast.outer import KDefinition, KFlatModule, KNonTerminal, KProduction, KTerminal
-from pyk.prelude.k import DOTS, GENERATED_TOP_CELL
-from pyk.prelude.kbool import BOOL, FALSE, TRUE, andBool, notBool
-from pyk.prelude.kint import INT, intToken
-from pyk.prelude.ml import mlAnd, mlBottom, mlEqualsFalse, mlEqualsTrue, mlNot, mlTop
-from pyk.prelude.utils import token
+from pyk.kast.prelude.k import DOTS, GENERATED_TOP_CELL
+from pyk.kast.prelude.kbool import BOOL, FALSE, TRUE, andBool, notBool
+from pyk.kast.prelude.kint import INT, intToken
+from pyk.kast.prelude.ml import mlAnd, mlBottom, mlEqualsFalse, mlEqualsTrue, mlNot, mlTop
+from pyk.kast.prelude.utils import token
 
 from ..utils import a, b, c, f, k, x
 

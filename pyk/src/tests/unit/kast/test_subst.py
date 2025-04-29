@@ -7,8 +7,8 @@ import pytest
 
 from pyk.kast.inner import KApply, KLabel, KVariable, Subst
 from pyk.kast.manip import extract_subst
-from pyk.prelude.kint import INT, intToken
-from pyk.prelude.ml import mlAnd, mlEquals, mlEqualsTrue, mlOr, mlTop
+from pyk.kast.prelude.kint import INT, intToken
+from pyk.kast.prelude.ml import mlAnd, mlEquals, mlEqualsTrue, mlOr, mlTop
 
 from ..utils import a, b, c, f, g, h, x, y, z
 

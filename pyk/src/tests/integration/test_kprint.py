@@ -6,12 +6,12 @@ import pytest
 
 from pyk.kast.inner import KApply, KSequence, KSort, KToken, KVariable
 from pyk.kast.manip import inline_cell_maps, remove_attrs
+from pyk.kast.prelude.collections import set_of
+from pyk.kast.prelude.k import GENERATED_TOP_CELL
+from pyk.kast.prelude.kbool import andBool
+from pyk.kast.prelude.kint import INT, intToken, leInt, ltInt
+from pyk.kast.prelude.utils import token
 from pyk.kast.pretty import assoc_with_unit
-from pyk.prelude.collections import set_of
-from pyk.prelude.k import GENERATED_TOP_CELL
-from pyk.prelude.kbool import andBool
-from pyk.prelude.kint import INT, intToken, leInt, ltInt
-from pyk.prelude.utils import token
 from pyk.testing import KPrintTest
 
 from .utils import K_FILES

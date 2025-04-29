@@ -21,7 +21,7 @@ from ..kast.manip import (
     sort_ac_collections,
 )
 from ..kast.outer import KFlatModule
-from ..prelude.kbool import andBool
+from ..kast.prelude.kbool import andBool
 from ..utils import ensure_dir_path, not_none
 
 if TYPE_CHECKING:

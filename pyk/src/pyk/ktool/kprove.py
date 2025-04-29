@@ -16,8 +16,8 @@ from ..kast import kast_term
 from ..kast.inner import KInner
 from ..kast.manip import flatten_label
 from ..kast.outer import KDefinition, KFlatModule, KFlatModuleList, KImport, KRequire
+from ..kast.prelude.ml import is_top
 from ..kore.rpc import KoreExecLogFormat
-from ..prelude.ml import is_top
 from ..utils import gen_file_timestamp, run_process_2
 from . import TypeInferenceMode
 from .claim_index import ClaimIndex

@@ -12,10 +12,10 @@ from ..cterm.cterm import remove_useless_constraints
 from ..kast.inner import KInner, Subst
 from ..kast.manip import flatten_label, free_vars, ml_pred_to_bool
 from ..kast.outer import KFlatModule, KImport, KRule
+from ..kast.prelude.ml import mlAnd, mlTop
 from ..kcfg import KCFG, KCFGStore
 from ..kcfg.exploration import KCFGExploration
 from ..ktool.claim_index import ClaimIndex
-from ..prelude.ml import mlAnd, mlTop
 from ..utils import FrozenDict, ensure_dir_path, hash_str, shorten_hashes, single
 from .implies import ProofSummary, Prover, RefutationProof
 from .proof import CompositeSummary, FailureInfo, Proof, ProofStatus

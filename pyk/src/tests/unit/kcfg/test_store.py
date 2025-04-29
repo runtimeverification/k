@@ -7,9 +7,9 @@ import pytest
 
 from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KSequence
+from pyk.kast.prelude.utils import token
 from pyk.kcfg.kcfg import KCFG
 from pyk.kcfg.store import OptimizedNodeStore, _Cache
-from pyk.prelude.utils import token
 
 from ..utils import a, b, c, f
 

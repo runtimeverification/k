@@ -2,9 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from pyk.utils import single
-
-from ..kast.inner import KApply, KLabel, build_assoc, flatten_label
+from ...utils import single
+from ..inner import KApply, KLabel, build_assoc, flatten_label
 from .k import GENERATED_TOP_CELL, K_ITEM, K
 from .kbool import BOOL, FALSE, TRUE
 
@@ -12,8 +11,8 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
     from typing import Final
 
-    from ..kast import KInner
-    from ..kast.inner import KSort, KVariable
+    from .. import KInner
+    from ..inner import KSort, KVariable
 
 
 ML_QUANTIFIERS: Final = {

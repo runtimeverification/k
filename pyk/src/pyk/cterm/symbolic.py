@@ -8,6 +8,8 @@ from typing import TYPE_CHECKING, NamedTuple, final
 from ..cterm import CSubst, CTerm
 from ..kast.inner import KApply, KLabel, KRewrite, KToken, KVariable, Subst
 from ..kast.manip import flatten_label, is_spurious_constraint, sort_ac_collections
+from ..kast.prelude.k import GENERATED_TOP_CELL, K_ITEM
+from ..kast.prelude.ml import mlAnd
 from ..kast.pretty import PrettyPrinter
 from ..konvert import kast_to_kore, kflatmodule_to_kore, kore_to_kast
 from ..kore.rpc import (
@@ -21,8 +23,6 @@ from ..kore.rpc import (
     UnsatResult,
     kore_server,
 )
-from ..prelude.k import GENERATED_TOP_CELL, K_ITEM
-from ..prelude.ml import mlAnd
 from ..utils import not_none
 
 if TYPE_CHECKING:

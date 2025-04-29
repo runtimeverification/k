@@ -5,9 +5,9 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk.kast.inner import KApply, KSort, KVariable
+from pyk.kast.prelude.kint import INT, intToken
 from pyk.konvert import kast_to_kore, kore_to_kast
 from pyk.kore.parser import KoreParser
-from pyk.prelude.kint import INT, intToken
 from pyk.testing import KompiledTest
 
 from ..utils import K_FILES

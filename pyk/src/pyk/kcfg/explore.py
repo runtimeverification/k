@@ -13,9 +13,9 @@ from ..kast.manip import (
     push_down_rewrites,
     replace_rewrites_with_implies,
 )
+from ..kast.prelude.ml import is_top, mlAnd
 from ..kast.pretty import PrettyPrinter
 from ..kore.rpc import LogRewrite, RewriteSuccess
-from ..prelude.ml import is_top, mlAnd
 from ..utils import not_none, shorten_hashes, single, unique
 from .kcfg import KCFG, Abstract, Branch, NDBranch, Step, Stuck, Vacuous
 from .semantics import DefaultSemantics
