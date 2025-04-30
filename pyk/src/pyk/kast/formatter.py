@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from ..prelude.k import K_ITEM
+from ..kast.prelude.k import K_ITEM
 from ..utils import intersperse
 from .att import Atts, Format, KAtt
 from .inner import KApply, KToken, KVariable, bottom_up

@@ -11,8 +11,8 @@ from pyk.kast.att import Atts, Format
 from pyk.kast.formatter import Formatter
 from pyk.kast.inner import KLabel, KSort, KVariable
 from pyk.kast.outer import KDefinition, KFlatModule, KNonTerminal, KProduction, KTerminal
-from pyk.prelude.kint import INT
-from pyk.prelude.utils import token
+from pyk.kast.prelude.kint import INT
+from pyk.kast.prelude.utils import token
 
 if TYPE_CHECKING:
     from collections.abc import Iterable

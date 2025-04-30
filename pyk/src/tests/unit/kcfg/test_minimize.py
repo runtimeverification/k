@@ -5,11 +5,11 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk.kast.inner import KVariable
+from pyk.kast.prelude.kint import geInt, intToken, ltInt
+from pyk.kast.prelude.ml import mlEqualsTrue, mlTop
 from pyk.kcfg import KCFG, KCFGShow
 from pyk.kcfg.minimize import KCFGMinimizer
 from pyk.kcfg.show import NodePrinter
-from pyk.prelude.kint import geInt, intToken, ltInt
-from pyk.prelude.ml import mlEqualsTrue, mlTop
 from pyk.utils import single
 
 from ..kcfg.merge_node_data import KCFG_MERGE_NODE_TEST_DATA

@@ -738,8 +738,6 @@ class Subst(Mapping[str, KInner]):
     @staticmethod
     def from_pred(pred: KInner) -> Subst:
         """Given a generic matching logic predicate, attempt to extract a `Subst` from it."""
-        from .manip import flatten_label
-
         subst: dict[str, KInner] = {}
         for conjunct in flatten_label('#And', pred):
             match conjunct:

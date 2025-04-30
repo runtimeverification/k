@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk.kast.inner import KSequence
-from pyk.prelude.ml import mlBottom, mlTop
+from pyk.kast.prelude.ml import mlBottom, mlTop
 
 from ..utils import a, b, c, f, g, h, x, y, z
 

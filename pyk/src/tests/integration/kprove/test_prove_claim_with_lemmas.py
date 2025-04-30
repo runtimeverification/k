@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING
 from pyk.kast import Atts, KAtt
 from pyk.kast.inner import KToken
 from pyk.kast.outer import KClaim, KRule
-from pyk.prelude.kbool import BOOL
-from pyk.prelude.ml import is_top, mlOr
+from pyk.kast.prelude.kbool import BOOL
+from pyk.kast.prelude.ml import is_top, mlOr
 from pyk.testing import KProveTest
 
 from ..utils import K_FILES

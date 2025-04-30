@@ -8,7 +8,7 @@ from .kint import intToken
 from .string import stringToken
 
 if TYPE_CHECKING:
-    from ..kast.inner import KToken
+    from ..inner import KToken
 
 
 def token(x: bool | int | str | bytes) -> KToken:
