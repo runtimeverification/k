@@ -53,6 +53,8 @@
                   "haskell-backend/src/main/native/haskell-backend/*"
                   "llvm-backend/src/main/native/llvm-backend/*"
                   "k-distribution/tests/regression-new"
+                  # do not include submodule directories that might be initilized empty or non-existent
+                  "/web/k-web-theme"
                 ] ./.);
               dontBuild = true;
               installPhase = ''
