@@ -13,8 +13,6 @@ from functools import cached_property, reduce
 from itertools import pairwise, product
 from typing import TYPE_CHECKING, final, overload
 
-from ..prelude.kbool import TRUE
-from ..prelude.ml import ML_QUANTIFIERS
 from ..utils import FrozenDict, POSet, filter_none, not_none, single, unique
 from .att import EMPTY_ATT, Atts, Format, KAst, KAtt, WithKAtt
 from .inner import (
@@ -43,6 +41,10 @@ if TYPE_CHECKING:
     RL = TypeVar('RL', bound='KRuleLike')
 
 _LOGGER: Final = logging.getLogger(__name__)
+
+
+_BOOL: Final = KSort('Bool')
+_TRUE: Final = KToken('true', _BOOL)
 
 
 class KOuter(KAst):
@@ -628,7 +630,7 @@ class KRule(KRuleLike):
     ensures: KInner
     att: KAtt
 
-    def __init__(self, body: KInner, requires: KInner = TRUE, ensures: KInner = TRUE, att: KAtt = EMPTY_ATT):
+    def __init__(self, body: KInner, requires: KInner = _TRUE, ensures: KInner = _TRUE, att: KAtt = EMPTY_ATT):
         object.__setattr__(self, 'body', body)
         object.__setattr__(self, 'requires', requires)
         object.__setattr__(self, 'ensures', ensures)
@@ -638,8 +640,8 @@ class KRule(KRuleLike):
     def _from_dict(cls: type[KRule], d: Mapping[str, Any]) -> KRule:
         return KRule(
             body=KInner.from_dict(d['body']),
-            requires=KInner.from_dict(d['requires']) if d.get('requires') else TRUE,
-            ensures=KInner.from_dict(d['ensures']) if d.get('ensures') else TRUE,
+            requires=KInner.from_dict(d['requires']) if d.get('requires') else _TRUE,
+            ensures=KInner.from_dict(d['ensures']) if d.get('ensures') else _TRUE,
             att=KAtt.from_dict(d['att']) if d.get('att') else EMPTY_ATT,
         )
 
@@ -684,7 +686,7 @@ class KClaim(KRuleLike):
     ensures: KInner
     att: KAtt
 
-    def __init__(self, body: KInner, requires: KInner = TRUE, ensures: KInner = TRUE, att: KAtt = EMPTY_ATT):
+    def __init__(self, body: KInner, requires: KInner = _TRUE, ensures: KInner = _TRUE, att: KAtt = EMPTY_ATT):
         object.__setattr__(self, 'body', body)
         object.__setattr__(self, 'requires', requires)
         object.__setattr__(self, 'ensures', ensures)
@@ -694,8 +696,8 @@ class KClaim(KRuleLike):
     def _from_dict(cls: type[KClaim], d: Mapping[str, Any]) -> KClaim:
         return KClaim(
             body=KInner.from_dict(d['body']),
-            requires=KInner.from_dict(d['requires']) if d.get('requires') else TRUE,
-            ensures=KInner.from_dict(d['ensures']) if d.get('ensures') else TRUE,
+            requires=KInner.from_dict(d['requires']) if d.get('requires') else _TRUE,
+            ensures=KInner.from_dict(d['ensures']) if d.get('ensures') else _TRUE,
             att=KAtt.from_dict(d['att']) if d.get('att') else EMPTY_ATT,
         )
 
@@ -753,7 +755,7 @@ class KContext(KSentence):
     requires: KInner
     att: KAtt
 
-    def __init__(self, body: KInner, requires: KInner = TRUE, att: KAtt = EMPTY_ATT):
+    def __init__(self, body: KInner, requires: KInner = _TRUE, att: KAtt = EMPTY_ATT):
         object.__setattr__(self, 'body', body)
         object.__setattr__(self, 'requires', requires)
         object.__setattr__(self, 'att', att)
@@ -762,7 +764,7 @@ class KContext(KSentence):
     def _from_dict(cls: type[KContext], d: Mapping[str, Any]) -> KContext:
         return KContext(
             body=KInner.from_dict(d['body']),
-            requires=KInner.from_dict(d['requires']) if d.get('requires') else TRUE,
+            requires=KInner.from_dict(d['requires']) if d.get('requires') else _TRUE,
             att=KAtt.from_dict(d['att']) if d.get('att') else EMPTY_ATT,
         )
 
@@ -1400,6 +1402,8 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
 
     def sort_vars(self, kast: KInner, sort: KSort | None = None) -> KInner:
         """Return the original term with all the variables having the sorts added or specialized, failing if recieving conflicting sorts for a given variable."""
+        ml_quantifiers = {'#Exists', '#Forall'}
+
         if type(kast) is KVariable and kast.sort is None and sort is not None:
             return kast.let(sort=sort)
 
@@ -1422,7 +1426,7 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
             if isinstance(term, KVariable):
                 result[term.name].append(term)
             elif isinstance(term, KApply):
-                if term.label.name in ML_QUANTIFIERS:
+                if term.label.name in ml_quantifiers:
                     var = get_quantifier_variable(term)
                     result[var.name].append(var)
             return result
@@ -1444,7 +1448,7 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
             occurrences = merge_variables(term, child_variables)
 
             if isinstance(term, KApply):
-                if term.label.name in ML_QUANTIFIERS:
+                if term.label.name in ml_quantifiers:
                     var = get_quantifier_variable(term)
                     subst: dict[str, KVariable] = {}
                     add_var_to_subst(var.name, occurrences[var.name], subst)

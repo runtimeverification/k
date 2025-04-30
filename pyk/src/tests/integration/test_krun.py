@@ -7,12 +7,12 @@ import pytest
 
 import pyk.kore.match as km
 from pyk.kast.inner import KApply, KSequence, KSort, KToken, Subst
+from pyk.kast.prelude.kint import intToken
 from pyk.kore.parser import KoreParser
 from pyk.kore.prelude import inj, top_cell_initializer
 from pyk.kore.syntax import App, SortApp
 from pyk.ktool.kprint import _kast
 from pyk.ktool.krun import llvm_interpret
-from pyk.prelude.kint import intToken
 from pyk.testing import KRunTest
 from pyk.utils import chain
 

@@ -17,8 +17,8 @@ from ..kast.manip import (
     sort_ac_collections,
 )
 from ..kast.outer import KRule
-from ..prelude.k import DOTS
-from ..prelude.ml import mlAnd
+from ..kast.prelude.k import DOTS
+from ..kast.prelude.ml import mlAnd
 from ..utils import add_indent, ensure_dir_path
 from .kcfg import KCFG
 

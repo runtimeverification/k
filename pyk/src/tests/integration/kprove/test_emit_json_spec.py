@@ -8,8 +8,8 @@ import pytest
 from pyk.kast import EMPTY_ATT
 from pyk.kast.manip import remove_generated_cells
 from pyk.kast.outer import KDefinition, KRequire
+from pyk.kast.prelude.ml import is_top, mlOr
 from pyk.kast.pretty import paren
-from pyk.prelude.ml import is_top, mlOr
 from pyk.testing import KProveTest
 
 from ..utils import K_FILES

@@ -8,6 +8,7 @@ import pytest
 from pyk.kast.inner import KInner
 from pyk.kast.kast import KAst, kast_term
 from pyk.kast.outer import read_kast_definition
+from pyk.kast.prelude.bytes import bytesToken
 from pyk.kast.pretty import PrettyPrinter
 from pyk.kllvm.compiler import compile_runtime
 from pyk.kllvm.importer import import_runtime
@@ -18,7 +19,6 @@ from pyk.kore.rpc import KoreClient, KoreServer, StuckResult
 from pyk.kore.syntax import App
 from pyk.ktool.kprint import _kast
 from pyk.ktool.krun import KRun
-from pyk.prelude.bytes import bytesToken
 
 if TYPE_CHECKING:
     from pathlib import Path

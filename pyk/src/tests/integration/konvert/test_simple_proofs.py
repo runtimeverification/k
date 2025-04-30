@@ -7,13 +7,13 @@ import pytest
 from pyk.kast import Atts
 from pyk.kast.inner import KApply, KLabel, KRewrite, KSequence, KSort, KToken, KVariable
 from pyk.kast.outer import KRule
+from pyk.kast.prelude.bytes import bytesToken
+from pyk.kast.prelude.kbool import BOOL, TRUE
+from pyk.kast.prelude.kint import INT, intToken
+from pyk.kast.prelude.ml import mlBottom, mlImplies, mlTop
+from pyk.kast.prelude.string import STRING, stringToken
 from pyk.konvert import kast_to_kore, kore_to_kast, krule_to_kore
 from pyk.kore.parser import KoreParser
-from pyk.prelude.bytes import bytesToken
-from pyk.prelude.kbool import BOOL, TRUE
-from pyk.prelude.kint import INT, intToken
-from pyk.prelude.ml import mlBottom, mlImplies, mlTop
-from pyk.prelude.string import STRING, stringToken
 from pyk.testing import KPrintTest
 from pyk.utils import single
 

@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk.kast.inner import KToken
-from pyk.prelude.kbool import BOOL
-from pyk.prelude.ml import mlAnd, mlEqualsTrue
+from pyk.kast.prelude.kbool import BOOL
+from pyk.kast.prelude.ml import mlAnd, mlEqualsTrue
 from pyk.proof import EqualityProof, ImpliesProof, ImpliesProver, ProofStatus
 from pyk.testing import KCFGExploreTest, KProveTest
 from pyk.utils import single

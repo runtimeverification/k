@@ -4,10 +4,10 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from pyk.kast.prelude.kbool import BOOL
+from pyk.kast.prelude.kint import intToken
 from pyk.kcfg.exploration import KCFGExplorationNodeAttr
 from pyk.kcfg.kcfg import KCFG, KCFGNodeAttr
-from pyk.prelude.kbool import BOOL
-from pyk.prelude.kint import intToken
 from pyk.proof import EqualityProof
 from pyk.proof.implies import EqualitySummary
 from pyk.proof.proof import CompositeSummary, Proof, ProofStatus

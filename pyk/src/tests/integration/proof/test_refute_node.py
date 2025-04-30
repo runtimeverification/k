@@ -10,11 +10,11 @@ from pyk.kast import Atts, KAtt
 from pyk.kast.inner import KApply, KRewrite, KSequence, KToken, KVariable
 from pyk.kast.manip import free_vars
 from pyk.kast.outer import KClaim
+from pyk.kast.prelude.kint import gtInt, intToken, leInt
+from pyk.kast.prelude.ml import is_top, mlEqualsTrue
 from pyk.kcfg import KCFG
 from pyk.kcfg.minimize import KCFGMinimizer
 from pyk.kcfg.semantics import DefaultSemantics
-from pyk.prelude.kint import gtInt, intToken, leInt
-from pyk.prelude.ml import is_top, mlEqualsTrue
 from pyk.proof import APRProof, APRProver, ImpliesProver, ProofStatus, RefutationProof
 from pyk.testing import KCFGExploreTest, KProveTest
 from pyk.utils import single

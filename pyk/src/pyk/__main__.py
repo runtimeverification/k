@@ -29,6 +29,8 @@ from .kast.manip import (
     split_config_and_constraints,
 )
 from .kast.outer import KFlatModule, read_kast_definition
+from .kast.prelude.k import GENERATED_TOP_CELL
+from .kast.prelude.ml import is_top, mlAnd, mlOr
 from .kast.pretty import PrettyPrinter
 from .kast.utils import parse_outer
 from .kcfg import KCFGExplore
@@ -40,8 +42,6 @@ from .ktool.kprint import KPrint
 from .ktool.kprove import KProve
 from .ktool.krun import KRun
 from .ktool.prove_rpc import ProveRpc
-from .prelude.k import GENERATED_TOP_CELL
-from .prelude.ml import is_top, mlAnd, mlOr
 from .proof.reachability import APRFailureInfo, APRProof
 from .proof.show import APRProofNodePrinter, APRProofShow
 from .utils import check_file_path, ensure_dir_path, exit_with_process_error

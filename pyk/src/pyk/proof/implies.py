@@ -8,9 +8,9 @@ from typing import TYPE_CHECKING, Any, Final
 from ..cterm import CSubst, CTerm, build_claim
 from ..kast.inner import KApply, KInner, Subst
 from ..kast.manip import extract_lhs, extract_rhs, flatten_label
-from ..prelude.k import GENERATED_TOP_CELL
-from ..prelude.kbool import BOOL, FALSE, TRUE
-from ..prelude.ml import is_bottom, is_top, mlAnd, mlEquals, mlEqualsFalse, mlEqualsTrue
+from ..kast.prelude.k import GENERATED_TOP_CELL
+from ..kast.prelude.kbool import BOOL, FALSE, TRUE
+from ..kast.prelude.ml import is_bottom, is_top, mlAnd, mlEquals, mlEqualsFalse, mlEqualsTrue
 from ..utils import ensure_dir_path
 from .proof import FailureInfo, Proof, ProofStatus, ProofSummary, Prover
 
