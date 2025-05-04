@@ -4,14 +4,16 @@ copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 
 # Lesson 1.3: BNF Syntax and Parser Generation
 
-The purpose of this lesson is to explain the full syntax and semantics of
-**productions** in K, as well as how productions and other syntactic
-**sentences** can be used to define grammars for parsing both rules and 
-programs. In this context, you'll also learn about two additional types
-of productions, **brackets** and **tokens**.
+In this lesson we will introduce more key aspects of the syntax and 
+semantics of **productions** in K, and show how these, along with other 
+syntactic **sentences** can be used to define grammars for parsing both rules 
+and programs. In this context, you'll also learn about two additional types
+of productions, **brakets** and **tokens**.
 
 ## K's approach to parsing
 
+K's grammar is divided into two components: one **outer syntax** and one
+**inner syntax**.  Outer syntax refers to the parsing of **requires**,
 K's grammar is divided into two components: one **outer syntax** and one
 **inner syntax**.  Outer syntax refers to the parsing of **requires**,
 **modules**, **imports**, and **sentences** in a K definition. Inner syntax
@@ -33,7 +35,7 @@ To illustrate how this works, let's consider the K module below which defines
 a logical calculator for evaluating Boolean expressions containing operations 
 AND, OR, NOT, and XOR.
 
-Input the code below into your editor as file `lesson-03-a.k`:
+Save the code below in file `lesson-03-a.k`:
 
 ```k
 module LESSON-03-A
@@ -47,15 +49,14 @@ module LESSON-03-A
 endmodule
 ```
 
-Observe that the productions in this file look a little different than
+Observe that the productions in this module look a little different than
 what we have seen in the previous lesson. The reason is that K has two 
 mechanisms for defining productions:
 [BNF notation](https://en.wikipedia.org/wiki/Backus%E2%80%93Naur_form) and
-alphanumeric identifiers. In [Lesson 1.2](../02_basics/README.md) we have 
-seen the latter, where the identifier was followed by a (possibly empty) 
-list of sorts in parentheses. In this lesson, we will learn about the 
-former, which is a more generic mechanism for defining the syntax of
-productions.
+alphanumeric identifiers. In [Lesson 1.2](../02_basics/README.md) we presented 
+the latter, where the identifier was followed by a (possibly empty) list of 
+sorts in parentheses. In this lesson, we introduce the former, which is a more 
+generic mechanism for defining the syntax of productions.
 
 Recall the set of productions from the previous lesson:
 
@@ -69,8 +70,7 @@ module LESSON-03-B
 endmodule
 ```
 
-This definition is equivalent to the following one which specifies the same 
-grammar, but in BNF notation:
+We can write an equivalent definition in BNF notation as follows:
 
 ```k
 module LESSON-03-C
@@ -82,7 +82,7 @@ module LESSON-03-C
 endmodule
 ```
 
-You can see that the sort of the function's argument is unchanged, but
+Note that sort `Fruit` of the function's argument is unchanged, but
 everything else has been wrapped in double quotation marks. This is because
 in BNF notation, we distinguish between two types of **production items**:
 **terminals** and **non-terminals**. A terminal represents a literal string
@@ -92,25 +92,23 @@ to a sort name, like `Fruit`, and the syntax of the production they
 belong to accepts any valid term of that sort at that position.
 
 In the previous lesson we executed successfully the program `colorOf(Banana())` 
-using `krun`. `krun` parses and interprets terms according to the grammar we
-have defined. `Banana()` is a term of sort `Fruit`, hence a valid argument
+using `krun`. `krun` parses and interprets terms according to the grammar 
+defined. `Banana()` is a term of sort `Fruit`, hence a valid argument
 for function `colorOf`. Under the hood, the term is automatically converted
 into an AST (abstract syntax tree), and then the function `colorOf` is
 evaluated using the function rules provided in the definition.
 
-What about the strings between the double quotes? How does K match them?
-The answer is that K uses [Flex](https://github.com/westes/flex) to generate a 
+How does K match the strings between the double quotes? The answer is that K 
+uses [Flex](https://github.com/westes/flex) to generate a 
 scanner for the grammar. Remember that a scanner, or lexical analyzer or lexer, 
 is a component of an interpreter that breaks down source code into tokens, 
 which are units such as keywords, variables, and operators. These tokens are 
 then processed by the parser, which interprets the structure of the code 
-according to the grammar rules.
-
-Flex looks for the longest possible match of a regular expression in the input. 
-If there are ambiguities between two or more regular expressions, it will pick 
-the one with the highest `prec` attribute. You can learn more about how Flex 
-matching works in the 
-[Flex Manual](https://westes.github.io/flex/manual/Matching.html#Matching).
+according to the grammar rules. Flex looks for the longest possible match of a 
+regular expression in the input. If there are ambiguities between two or more 
+regular expressions, it will pick the one with the highest `prec` attribute. 
+You can learn more about how Flex matching works in the 
+[Flex Manual | Matching](https://westes.github.io/flex/manual/Matching.html#Matching).
 
 Returning to module `LESSON-03-A`, we can see that it defines a simple BNF 
 grammar for expressions over Booleans. We have defined constructors 
@@ -120,22 +118,20 @@ given a syntax for each of these functions based on their syntax in the `C`
 programming language. As such, we can now write programs in the simple language 
 we have defined!
 
-First, let's compile our grammar:
-
-```
-kompile lesson-03-a.k
-```
-
-Recall that compilation produces a parser, interpreter, and verifier for the
-grammar specified in the K definition.
-
-Now, save the following program as `and.bool` in the same directory:
+Save the code below in file  `and.bool`:
 
 ```
 true && false
 ```
 
-Interpreting this program by executing
+Now, let's compile our grammar first:
+
+```
+kompile lesson-03-a.k
+```
+
+Recall that compilation produces a parser, interpreter, and verifier for the 
+grammar specified in the K definition. Interpreting the program by executing
 
 ```
 krun and.bool
@@ -160,7 +156,7 @@ This is expected, as we have not given rules defining the meaning of the `&&`
 function, and the error message highlights exactly this&mdash;_Maybe attempted 
 to evaluate a symbol with no rules?_ 
 
-We cannot interpret the program just yet, but we can _parse_ it. To do this, 
+While we cannot interpret the program just yet, we can _parse_ it. To do this, 
 run the command below from the same directory:
 
 ```
@@ -179,14 +175,16 @@ inj{SortBoolean{}, SortKItem{}}(
 )
 ```
 
-`kast` is K's just-in-time parser, just another tool produced at compile time. 
-It generates a grammar from your K definition on the fly and uses it to parse 
+`kast` is K's just-in-time parser, just another tool generated at compile time. 
+It produces a grammar from the K definition on the fly and uses it to parse 
 the program passed on the command line. 
 
-The `--output` flag controls how the resulting AST is represented. There are 
-several possible values for it, and you can see all options by running 
+K allows for several AST representations and you can choose a specific one by
+setting the `--output` flag. You can see all possible value options by running 
 `kast --help`. `kore` used above is one of them and denotes KORE, the 
-intermediate representation of K. 
+intermediate representation of K. You can learn more about KORE in another
+[tutorial](https://github.com/runtimeverification/haskell-backend/blob/master/docs/kore-syntax.md), 
+currently work-in-progress.
 Value `kast` for the flag gives us an AST in a more direct representation of 
 the original K definition.
 
@@ -206,12 +204,17 @@ yields the following output, minus the formatting:
 ```
 
 Comparing both outputs, you can observe that the former is largely a 
-name-mangled version of the latter. However, a notable difference is 
-represented by the `inj` attribute in the KORE output. Keep it in mind for now,
-we will talk more about it in future lessons.
+name-mangled version of the latter. A notable difference is represented by the 
+`inj` attribute in the KORE output and you can learn more about it in the
+[KORE tutorial](https://github.com/runtimeverification/haskell-backend/blob/master/docs/kore-syntax.md).
 
-Note that while `krun` also accepts programs as arguments, `kast` only takes  
-file names as arguments.
+Note that `kast` also takes expressions as arguments, not only file names, 
+but not both at the same time. If you want to parse an expression, you need to
+use flag `-e` or `--expression`:
+
+```
+kast --output kast -e "true && false"
+```
 
 ### Exercise
 
@@ -248,15 +251,36 @@ ambiguous. K's just-in-time parser is a GLL (<u>g</u>eneralized
 the full generality of context-free grammars, including those grammars which
 are ambiguous. An ambiguous grammar is one where the same string can be parsed
 as multiple distinct ASTs. In this example, it can't decide whether it should
-be parsed as `(true && false) || false` or as `true && (false || false)`. 
+be parsed as `(true && false) || false` (Fig. 3-A) or as `true && (false || false)`
+(Fig. 3-B). 
+
+Fig. 3-A
+```
+         ||
+       /    \
+     &&    false
+   /    \
+true   false
+```
+
+Fig. 3-B
+```
+    &&
+  /    \
+true    ||              
+      /    \
+   false  false    
+```
 
 In Boolean logic and other programming languages such as C, logical AND has 
-precedence over logical OR. However, grammars defined in K assume all operators 
-to have the same priority in evaluation, unless specified otherwise. Hence the 
+precedence over logical OR, rendering the AST in Fig. 3-A the only valid one. 
+However, grammars defined in K assume all operators to have the same priority 
+in evaluation, unless specified otherwise. Both ASTs in Fig. 3-A and Fig. 3-B
+are possible with the grammar we defined in module `LESSON-3-A`, hence the 
 ambiguity reported by the parser. You will learn in the next lesson how to set 
 up precendence of some operators over others and define the logical connectives 
-_the usual way_. We continue this lesson by showing how to reduce ambiguity by 
-using brackets.
+_the usual way_. We continue this lesson by showing how to reduce ambiguity 
+through the use of **brackets**.
 
 
 ## Brackets
@@ -275,9 +299,8 @@ not impose any restrictions on the grammar provided for a bracket.
 Like in other languages, the most common type of bracket is one in which a 
 non-terminal is surrounded by terminals representing one of the following
 symbols `()`, `[]`, `{}`, or `<>`. For example, we can define the most common
-type of bracket, the parentheses, quite simply.
-
-Consider the following modified definition and save it to file `lesson-03-d.k`:
+type of bracket, the parentheses, quite simply. Consider the following modified 
+definition and save it to file `lesson-03-d.k`:
 
 ```k 
 module LESSON-03-D
@@ -309,11 +332,11 @@ true && (false || false)
 
 When parsing these programs with `kast`, you get a unique AST with no error. 
 If you check the output carefully, you will notice that the bracket itself does 
-not appear in the AST. In fact, this is a property unique to brackets: 
-productions with the bracket attribute are not represented in the parsed AST of 
-a term, and the child of the bracket is folded immediately into the parent 
-term. This is why a bracket production must have a single non-terminal of the same 
-sort as the production itself.
+not appear in the AST. In fact, this is a property unique to bracket 
+productions: they are not represented in the parsed AST of a term, and the 
+child of the bracket is folded immediately into the parent term. This is why we 
+have the requirement mentioned above, that a bracket production must have a 
+single non-terminal of the same sort as the production itself.
 
 ### Exercise
 
@@ -325,19 +348,17 @@ the AST.
 ## Tokens
 
 So far we have seen how to define the grammar of a language and we have 
-implicitly been using K's automatic lexer generation to generate a token for 
-each terminal in our grammar.
-However, the grammar is not the only relevant part of parsing a language. Also 
-relevant is the lexical syntax of the language, i.e., how the tokens are 
-defined and recognized. 
+implicitly been using K's automatic lexer generation to produce a token for 
+each terminal in our grammar. However, the grammar is not the only relevant 
+part of parsing a language. Also relevant is the lexical syntax of the 
+language, i.e., how the tokens are defined and recognized. 
 
 Sometimes we need to define more complex lexical syntax. Consider, for 
-instance, integers in C: an integer consists of a decimal, octal, 
-or hexadecimal number, followed by an optional suffix that specifies the type 
-of the literal. While it’s theoretically possible to define this syntax using 
-a grammar, doing so would be cumbersome and tedious. Additionally, you'd be 
-faced with an AST generated for the literal, which is not particularly 
-convenient to work with. 
+instance, integers in C. They consist of a decimal, octal, or hexadecimal 
+number, followed by an optional suffix that specifies the type of the literal. 
+While it’s theoretically possible to define this syntax using a grammar, doing 
+so would be cumbersome and tedious. Additionally, you'd be faced with an AST 
+generated for the literal, which is not particularly convenient to work with. 
 
 As an alternative, K allows you to define **token** productions, which are
 [regular expressions](https://en.wikipedia.org/wiki/Regular_expression) followed 
@@ -413,7 +434,7 @@ expression.
 
 Finally, recall that K uses [Flex](https://github.com/westes/flex) to implement 
 its lexical analysis. As such, you can refer to the
-[Flex Manual](http://westes.github.io/flex/manual/Patterns.html#Patterns)
+[Flex Manual | Patterns](http://westes.github.io/flex/manual/Patterns.html#Patterns)
 for a detailed description of the regular expression syntax supported. For
 performance reasons, Flex's regular expressions are actually a regular 
 language, and thus lack some of the syntactic convenience of modern "regular 
@@ -426,9 +447,9 @@ instead.
 So far we have been entirely focused on K's support for just-in-time parsing,
 where the parser is generated on the fly prior to being used. This method 
 offers faster parser generation, but its performance suffers if you have to 
-repeatedly parse strings with the same parser. For this reason, it is generally 
-encouraged that when parsing programs to use K's ahead-of-time parser 
-generation based on tool [GNU Bison](https://www.gnu.org/software/bison/).
+repeatedly parse strings with the same parser. For this reason, when parsing
+programs, it is generally recommended to use K's ahead-of-time parser 
+generation based on [GNU Bison](https://www.gnu.org/software/bison/).
 
 You can enable ahead-of-time parsing via the `--gen-bison-parser` flag to 
 `kompile`. This will make use of Bison's 
