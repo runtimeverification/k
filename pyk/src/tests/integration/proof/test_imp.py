@@ -10,11 +10,11 @@ import pytest
 from pyk.cterm import CSubst, CTerm
 from pyk.kast.inner import KApply, KSequence, KSort, KToken, KVariable, Subst
 from pyk.kast.manip import minimize_term, sort_ac_collections
+from pyk.kast.prelude.kbool import BOOL, FALSE, andBool, orBool
+from pyk.kast.prelude.kint import intToken
+from pyk.kast.prelude.ml import mlAnd, mlBottom, mlEquals, mlEqualsFalse, mlEqualsTrue, mlTop
 from pyk.kcfg.semantics import DefaultSemantics
 from pyk.kcfg.show import KCFGShow
-from pyk.prelude.kbool import BOOL, FALSE, andBool, orBool
-from pyk.prelude.kint import intToken
-from pyk.prelude.ml import mlAnd, mlBottom, mlEquals, mlEqualsFalse, mlEqualsTrue, mlTop
 from pyk.proof import APRProver, ProofStatus
 from pyk.proof.proof import parallel_advance_proof
 from pyk.proof.reachability import APRFailureInfo, APRProof

@@ -9,10 +9,10 @@ from pyk.kast import KInner
 from pyk.kast.att import Format
 from pyk.kast.inner import KApply, KLabel, KSequence, KSort, KVariable, build_assoc
 from pyk.kast.outer import KDefinition, KFlatModule, KImport, KNonTerminal, KProduction, KRegexTerminal, KTerminal
-from pyk.prelude.kbool import BOOL
-from pyk.prelude.kint import INT
-from pyk.prelude.string import STRING
-from pyk.prelude.utils import token
+from pyk.kast.prelude.kbool import BOOL
+from pyk.kast.prelude.kint import INT
+from pyk.kast.prelude.string import STRING
+from pyk.kast.prelude.utils import token
 
 from ..utils import f, x, y, z
 

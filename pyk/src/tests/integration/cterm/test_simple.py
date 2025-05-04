@@ -6,7 +6,7 @@ import pytest
 
 from pyk.cterm import CTerm, cterm_build_rule
 from pyk.kast.inner import KApply, KSequence, KToken, KVariable
-from pyk.prelude.ml import mlEqualsTrue, mlTop
+from pyk.kast.prelude.ml import mlEqualsTrue, mlTop
 from pyk.testing import CTermSymbolicTest, KPrintTest
 
 from ..utils import K_FILES

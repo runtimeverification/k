@@ -7,12 +7,12 @@ import pytest
 from pyk.cterm import CSubst, CTerm
 from pyk.kast.inner import KApply, KRewrite, KToken, KVariable, Subst
 from pyk.kast.manip import no_cell_rewrite_to_dots
+from pyk.kast.prelude.kint import INT
+from pyk.kast.prelude.ml import mlEquals, mlTop
+from pyk.kast.prelude.utils import token
 from pyk.kcfg import KCFG, KCFGShow
 from pyk.kcfg.kcfg import KCFGNodeAttr
 from pyk.kcfg.show import NodePrinter
-from pyk.prelude.kint import INT
-from pyk.prelude.ml import mlEquals, mlTop
-from pyk.prelude.utils import token
 from pyk.utils import not_none, single
 
 from .mock_kprint import MockKPrint

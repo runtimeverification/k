@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from pyk.kast.inner import KApply, KRewrite, KVariable
 from pyk.kast.manip import push_down_rewrites
 from pyk.kast.outer import KClaim
-from pyk.prelude.ml import is_top, mlOr
+from pyk.kast.prelude.ml import is_top, mlOr
 from pyk.testing import KProveTest
 
 from ..utils import K_FILES

@@ -9,10 +9,10 @@ from pyk.cterm import CSubst, CTerm, cterm_build_claim, cterm_build_rule
 from pyk.kast import Atts, KAtt
 from pyk.kast.inner import KApply, KLabel, KRewrite, KSequence, KSort, KVariable, Subst
 from pyk.kast.outer import KClaim
-from pyk.prelude.k import GENERATED_TOP_CELL, K
-from pyk.prelude.kbool import TRUE
-from pyk.prelude.kint import INT, geInt, intToken
-from pyk.prelude.ml import mlAnd, mlEquals, mlEqualsTrue, mlTop
+from pyk.kast.prelude.k import GENERATED_TOP_CELL, K
+from pyk.kast.prelude.kbool import TRUE
+from pyk.kast.prelude.kint import INT, geInt, intToken
+from pyk.kast.prelude.ml import mlAnd, mlEquals, mlEqualsTrue, mlTop
 
 from .utils import a, b, c, f, g, ge_ml, h, k, lt_ml, x, y, z
 

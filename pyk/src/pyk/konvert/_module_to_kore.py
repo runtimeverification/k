@@ -14,6 +14,7 @@ from ..kast.att import Format, NoneType
 from ..kast.inner import KApply, KLabel, KRewrite, KSort, collect
 from ..kast.manip import extract_lhs, extract_rhs
 from ..kast.outer import KDefinition, KNonTerminal, KProduction, KRegexTerminal, KRule, KSyntaxSort, KTerminal
+from ..kast.prelude.k import K_ITEM, K
 from ..kore.prelude import inj
 from ..kore.syntax import (
     And,
@@ -36,7 +37,6 @@ from ..kore.syntax import (
     SymbolDecl,
     Top,
 )
-from ..prelude.k import K_ITEM, K
 from ..utils import FrozenDict, intersperse, not_none
 from ._kast_to_kore import _kast_to_kore
 from ._utils import munge

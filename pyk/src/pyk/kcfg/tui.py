@@ -13,7 +13,7 @@ from textual.widgets import Footer, Static
 from ..cterm import CTerm
 from ..kast.inner import KApply, KRewrite
 from ..kast.manip import flatten_label, minimize_term, push_down_rewrites
-from ..prelude.kbool import TRUE
+from ..kast.prelude.kbool import TRUE
 from ..utils import ROOT, shorten_hashes, single
 from .kcfg import KCFG
 from .show import KCFGShow

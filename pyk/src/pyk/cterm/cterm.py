@@ -21,9 +21,9 @@ from ..kast.manip import (
     split_config_and_constraints,
     split_config_from,
 )
-from ..prelude.k import GENERATED_TOP_CELL, K
-from ..prelude.kbool import andBool, orBool
-from ..prelude.ml import is_bottom, is_top, mlAnd, mlBottom, mlEquals, mlEqualsTrue, mlImplies, mlTop
+from ..kast.prelude.k import GENERATED_TOP_CELL, K
+from ..kast.prelude.kbool import andBool, orBool
+from ..kast.prelude.ml import is_bottom, is_top, mlAnd, mlBottom, mlEquals, mlEqualsTrue, mlImplies, mlTop
 from ..utils import not_none, unique
 
 if TYPE_CHECKING:
