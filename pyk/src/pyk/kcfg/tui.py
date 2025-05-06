@@ -11,8 +11,9 @@ from textual.widget import Widget
 from textual.widgets import Footer, Static
 
 from ..cterm import CTerm
+from ..cterm.show import CTermShow
 from ..kast.inner import KApply, KRewrite
-from ..kast.manip import flatten_label, minimize_term, push_down_rewrites
+from ..kast.manip import flatten_label, push_down_rewrites
 from ..kast.prelude.kbool import TRUE
 from ..utils import ROOT, shorten_hashes, single
 from .kcfg import KCFG
@@ -174,6 +175,7 @@ class BehaviorView(ScrollableContainer, can_focus=True):
 class NodeView(Widget):
     _kprint: KPrint
     _custom_view: Callable[[KCFGElem], Iterable[str]] | None
+    _cterm_show: CTermShow
 
     _element: KCFGElem | None
 
@@ -196,6 +198,7 @@ class NodeView(Widget):
         custom_on: bool = False,
         status_on: bool = True,
         custom_view: Callable[[KCFGElem], Iterable[str]] | None = None,
+        cterm_show: CTermShow | None = None,
         proof_status: str = '',
         proof_id: str = '',
         exec_time: float = 0,
@@ -212,6 +215,7 @@ class NodeView(Widget):
         self._proof_status = proof_status
         self._proof_id = proof_id
         self._exec_time = exec_time
+        self._cterm_show = cterm_show if cterm_show else CTermShow(self._kprint.definition)
 
     def _info_text(self) -> str:
         term_str = '✅' if self._term_on else '❌'
@@ -278,11 +282,9 @@ class NodeView(Widget):
                 return c
 
         def _cterm_text(cterm: CTerm) -> tuple[str, str]:
-            config = cterm.config
-            constraints = map(_boolify, cterm.constraints)
-            if self._minimize:
-                config = minimize_term(config)
-            return (self._kprint.pretty_print(config), '\n'.join(self._kprint.pretty_print(c) for c in constraints))
+            config_text = self._cterm_show.show(cterm, boolify=True, minimize=self._minimize, omit_constraints=True)
+            constraint_text = self._cterm_show.show(cterm, boolify=True, minimize=self._minimize, omit_config=True)
+            return '\n'.join(config_text), '\n'.join(constraint_text)
 
         term_str = 'Term'
         constraint_str = 'Constraint'
@@ -381,6 +383,7 @@ class KCFGViewer(App):
 
     _node_printer: NodePrinter | None
     _custom_view: Callable[[KCFGElem], Iterable[str]] | None
+    _cterm_show: CTermShow | None
 
     _minimize: bool
 
@@ -393,6 +396,7 @@ class KCFGViewer(App):
         kprint: KPrint,
         node_printer: NodePrinter | None = None,
         custom_view: Callable[[KCFGElem], Iterable[str]] | None = None,
+        cterm_show: CTermShow | None = None,
         minimize: bool = True,
     ) -> None:
         super().__init__()
@@ -400,6 +404,7 @@ class KCFGViewer(App):
         self._kprint = kprint
         self._node_printer = node_printer
         self._custom_view = custom_view
+        self._cterm_show = cterm_show
         self._minimize = minimize
         self._hidden_chunks = []
         self._selected_chunk = None
@@ -416,6 +421,7 @@ class KCFGViewer(App):
                 NodeView(
                     self._kprint,
                     custom_view=self._custom_view,
+                    cterm_show=self._cterm_show,
                     proof_id=str(self._kcfg._node_id),
                     id='node-view',
                 ),

@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, NamedTuple
 import pytest
 
 from pyk.cterm import CTerm
+from pyk.cterm.show import CTermShow
 from pyk.kast.inner import KApply, KSequence, KToken, KVariable, build_assoc
 from pyk.kcfg.show import KCFGShow
 from pyk.proof import APRProof, APRProver, ProofStatus
@@ -140,7 +141,9 @@ class TestCellMapProof(KCFGExploreTest, KProveTest):
         prover = APRProver(kcfg_explore=kcfg_explore, execute_depth=max_depth)
         prover.advance_proof(proof, max_iterations=max_iterations)
 
-        kcfg_show = KCFGShow(kprove, node_printer=APRProofNodePrinter(proof, kprove, full_printer=True))
+        kcfg_show = KCFGShow(
+            kprove, node_printer=APRProofNodePrinter(proof, CTermShow(kprove.definition), full_printer=True)
+        )
         cfg_lines = kcfg_show.show(proof.kcfg)
         _LOGGER.info('\n'.join(cfg_lines))
 
