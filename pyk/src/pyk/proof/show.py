@@ -14,9 +14,9 @@ if TYPE_CHECKING:
     from graphviz import Digraph
 
     from ..cterm.show import CTermShow
+    from ..kast.outer import KDefinition
     from ..kcfg import KCFG
     from ..kcfg.kcfg import NodeIdLike
-    from ..ktool.kprint import KPrint
     from .reachability import APRProof
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -53,8 +53,8 @@ class APRProofNodePrinter(NodePrinter):
 class APRProofShow:
     kcfg_show: KCFGShow
 
-    def __init__(self, kprint: KPrint, node_printer: NodePrinter | None = None):
-        self.kcfg_show = KCFGShow(kprint.definition, node_printer=node_printer)
+    def __init__(self, definition: KDefinition, node_printer: NodePrinter | None = None):
+        self.kcfg_show = KCFGShow(definition, node_printer=node_printer)
 
     def pretty_segments(self, proof: APRProof, minimize: bool = True) -> Iterable[tuple[str, Iterable[str]]]:
         ret_lines = list(self.kcfg_show.pretty_segments(proof.kcfg, minimize=minimize))

@@ -41,7 +41,7 @@ class APRProofBehaviorView(ScrollableContainer, can_focus=True):
         self._minimize = minimize
         self._node_printer = node_printer
         self._proof_nodes = []
-        proof_show = APRProofShow(kprint, node_printer=node_printer)
+        proof_show = APRProofShow(kprint.definition, node_printer=node_printer)
         for lseg_id, node_lines in proof_show.pretty_segments(self._proof, minimize=self._minimize):
             self._proof_nodes.append(GraphChunk(lseg_id, node_lines))
 
