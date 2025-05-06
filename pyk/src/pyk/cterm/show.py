@@ -48,7 +48,7 @@ class CTermShow(PrettyPrinter):
         omit_constraints: bool = False,
         boolify: bool = False,
         minimize: bool = False,
-    ) -> str:
+    ) -> list[str]:
         def _boolify(c: KInner) -> KInner:
             if type(c) is KApply and c.label.name == '#Equals' and c.args[0] == TRUE:
                 return c.args[1]
@@ -66,11 +66,15 @@ class CTermShow(PrettyPrinter):
         elif boolify:
             cterm = CTerm(cterm.config, map(_boolify, cterm.constraints))
 
-        ret_strs = []
+        ret_strs: list[str] = []
         if not omit_config:
-            ret_strs.append(self.print(cterm.config))
+            ret_strs.extend(self.print(cterm.config).split('\n'))
         if not omit_constraints:
-            ret_strs.extend([self.print(constraint) for constraint in cterm.constraints])
-        if len(ret_strs) == 0:
-            ret_strs = ['#Top']
-        return '\n'.join(ret_strs)
+            for constraint in cterm.constraints:
+                constraint_strs = self.print(constraint).split('\n')
+                if len(constraint_strs) > 0:
+                    if not boolify:
+                        constraint_strs = [f'#And {cstr}' for cstr in constraint_strs]
+                    ret_strs.append(constraint_strs[0])
+                    ret_strs.extend([f'  {constraint_str}' for constraint_str in constraint_strs[1:]])
+        return ret_strs
