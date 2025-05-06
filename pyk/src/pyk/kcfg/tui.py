@@ -15,6 +15,7 @@ from ..cterm.show import CTermShow
 from ..kast.inner import KApply, KRewrite
 from ..kast.manip import flatten_label, push_down_rewrites
 from ..kast.prelude.kbool import TRUE
+from ..kast.pretty import PrettyPrinter
 from ..utils import ROOT, shorten_hashes, single
 from .kcfg import KCFG
 from .show import KCFGShow
@@ -26,8 +27,8 @@ if TYPE_CHECKING:
     from textual.events import Click
 
     from ..cterm import CSubst
-    from ..kast import KInner
-    from ..ktool.kprint import KPrint
+    from ..kast.inner import KInner
+    from ..kast.outer import KDefinition
     from .show import NodePrinter
 
 
@@ -138,7 +139,6 @@ class Custom(NavWidget):
 
 class BehaviorView(ScrollableContainer, can_focus=True):
     _kcfg: KCFG
-    _kprint: KPrint
     _minimize: bool
     _node_printer: NodePrinter | None
     _kcfg_nodes: Iterable[GraphChunk]
@@ -150,18 +150,17 @@ class BehaviorView(ScrollableContainer, can_focus=True):
     def __init__(
         self,
         kcfg: KCFG,
-        kprint: KPrint,
+        definition: KDefinition,
         minimize: bool = True,
         node_printer: NodePrinter | None = None,
         id: str = '',
     ):
         super().__init__(id=id)
         self._kcfg = kcfg
-        self._kprint = kprint
         self._minimize = minimize
         self._node_printer = node_printer
         self._kcfg_nodes = []
-        kcfg_show = KCFGShow(kprint.definition, node_printer=node_printer)
+        kcfg_show = KCFGShow(definition, node_printer=node_printer)
         for lseg_id, node_lines in kcfg_show.pretty_segments(self._kcfg, minimize=self._minimize):
             self._kcfg_nodes.append(GraphChunk(lseg_id, node_lines))
 
@@ -174,7 +173,7 @@ class BehaviorView(ScrollableContainer, can_focus=True):
 
 
 class NodeView(Widget):
-    _kprint: KPrint
+    _definition: KDefinition
     _custom_view: Callable[[KCFGElem], Iterable[str]] | None
     _cterm_show: CTermShow
 
@@ -191,7 +190,7 @@ class NodeView(Widget):
 
     def __init__(
         self,
-        kprint: KPrint,
+        definition: KDefinition,
         id: str = '',
         minimize: bool = True,
         term_on: bool = True,
@@ -205,7 +204,7 @@ class NodeView(Widget):
         exec_time: float = 0,
     ):
         super().__init__(id=id)
-        self._kprint = kprint
+        self._definition = definition
         self._element = None
         self._minimize = minimize
         self._term_on = term_on
@@ -216,7 +215,7 @@ class NodeView(Widget):
         self._proof_status = proof_status
         self._proof_id = proof_id
         self._exec_time = exec_time
-        self._cterm_show = cterm_show if cterm_show else CTermShow(self._kprint.definition)
+        self._cterm_show = cterm_show if cterm_show else CTermShow(definition)
 
     def _info_text(self) -> str:
         term_str = '✅' if self._term_on else '❌'
@@ -283,7 +282,7 @@ class NodeView(Widget):
                 return c
 
         def _boolify_print(c: KInner) -> str:
-            return self._kprint.pretty_print(_boolify(c))
+            return PrettyPrinter(self._definition).print(_boolify(c))
 
         def _cterm_text(cterm: CTerm) -> tuple[str, str]:
             config_text = self._cterm_show.show(cterm, boolify=True, minimize=self._minimize, omit_constraints=True)
@@ -292,7 +291,7 @@ class NodeView(Widget):
 
         def _csubst_text(csubst: CSubst) -> tuple[str, str]:
             equalities = map(
-                _boolify_print, flatten_label('#And', csubst.pred(sort_with=self._kprint.definition, constraints=False))
+                _boolify_print, flatten_label('#And', csubst.pred(sort_with=self._definition, constraints=False))
             )
             constraints = map(_boolify_print, flatten_label('#And', csubst.constraint))
             return '\n'.join(equalities), '\n'.join(constraints)
@@ -378,7 +377,7 @@ class KCFGViewer(App):
     CSS_PATH = ROOT / 'kcfg/style.css'
 
     _kcfg: KCFG
-    _kprint: KPrint
+    _definition: KDefinition
 
     _node_printer: NodePrinter | None
     _custom_view: Callable[[KCFGElem], Iterable[str]] | None
@@ -392,7 +391,7 @@ class KCFGViewer(App):
     def __init__(
         self,
         kcfg: KCFG,
-        kprint: KPrint,
+        definition: KDefinition,
         node_printer: NodePrinter | None = None,
         custom_view: Callable[[KCFGElem], Iterable[str]] | None = None,
         cterm_show: CTermShow | None = None,
@@ -400,7 +399,7 @@ class KCFGViewer(App):
     ) -> None:
         super().__init__()
         self._kcfg = kcfg
-        self._kprint = kprint
+        self._definition = definition
         self._node_printer = node_printer
         self._custom_view = custom_view
         self._cterm_show = cterm_show
@@ -413,12 +412,12 @@ class KCFGViewer(App):
     def compose(self) -> ComposeResult:
         yield Horizontal(
             Vertical(
-                BehaviorView(self._kcfg, self._kprint, node_printer=self._node_printer, id='behavior'),
+                BehaviorView(self._kcfg, self._definition, node_printer=self._node_printer, id='behavior'),
                 id='navigation',
             ),
             Vertical(
                 NodeView(
-                    self._kprint,
+                    self._definition,
                     custom_view=self._custom_view,
                     cterm_show=self._cterm_show,
                     proof_id=str(self._kcfg._node_id),
