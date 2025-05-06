@@ -217,7 +217,7 @@ class TestCustomStep(CTermSymbolicTest, KProveTest):
         prover.advance_proof(proof, max_iterations=max_iterations)
 
         kcfg_show = KCFGShow(
-            kprove,
+            kprove.definition,
             node_printer=APRProofNodePrinter(proof, CTermShow(kprove.definition), full_printer=True, minimize=False),
         )
         return proof.status, kcfg_show.show(proof.kcfg)

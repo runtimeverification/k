@@ -54,7 +54,7 @@ class APRProofShow:
     kcfg_show: KCFGShow
 
     def __init__(self, kprint: KPrint, node_printer: NodePrinter | None = None):
-        self.kcfg_show = KCFGShow(kprint, node_printer=node_printer)
+        self.kcfg_show = KCFGShow(kprint.definition, node_printer=node_printer)
 
     def pretty_segments(self, proof: APRProof, minimize: bool = True) -> Iterable[tuple[str, Iterable[str]]]:
         ret_lines = list(self.kcfg_show.pretty_segments(proof.kcfg, minimize=minimize))
@@ -74,7 +74,6 @@ class APRProofShow:
         node_deltas: Iterable[tuple[NodeIdLike, NodeIdLike]] = (),
         to_module: bool = False,
         minimize: bool = True,
-        sort_collections: bool = False,
         omit_cells: Iterable[str] = (),
     ) -> list[str]:
         res_lines = self.kcfg_show.show(
@@ -83,7 +82,6 @@ class APRProofShow:
             node_deltas=node_deltas,
             to_module=to_module,
             minimize=minimize,
-            sort_collections=sort_collections,
             omit_cells=omit_cells,
             module_name=f'SUMMARY-{proof.id.upper().replace("_", "-")}',
         )

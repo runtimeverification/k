@@ -161,7 +161,7 @@ class BehaviorView(ScrollableContainer, can_focus=True):
         self._minimize = minimize
         self._node_printer = node_printer
         self._kcfg_nodes = []
-        kcfg_show = KCFGShow(kprint, node_printer=node_printer)
+        kcfg_show = KCFGShow(kprint.definition, node_printer=node_printer)
         for lseg_id, node_lines in kcfg_show.pretty_segments(self._kcfg, minimize=self._minimize):
             self._kcfg_nodes.append(GraphChunk(lseg_id, node_lines))
 
