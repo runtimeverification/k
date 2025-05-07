@@ -45,7 +45,7 @@ class CTerm:
     config: KInner  # TODO Optional?
     constraints: tuple[KInner, ...]
 
-    def __init__(self, config: KInner, constraints: Iterable[KInner] = ()) -> None:
+    def __init__(self, config: KInner, constraints: Iterable[KInner] = (), sort_constraints: bool = True) -> None:
         """Instantiate a given `CTerm`, performing basic sanity checks on the `config` and `constraints`."""
         if is_top(config, weak=True):
             config = mlTop()
@@ -55,7 +55,7 @@ class CTerm:
             constraints = ()
         else:
             self._check_config(config)
-            constraints = self._normalize_constraints(constraints)
+            constraints = self._normalize_constraints(constraints, sort_constraints)
         object.__setattr__(self, 'config', config)
         object.__setattr__(self, 'constraints', constraints)
 
@@ -94,8 +94,12 @@ class CTerm:
             raise ValueError(f'Expected cell label, found: {config}')
 
     @staticmethod
-    def _normalize_constraints(constraints: Iterable[KInner]) -> tuple[KInner, ...]:
-        constraints = sorted(normalize_constraints(constraints), key=CTerm._constraint_sort_key)
+    def _normalize_constraints(constraints: Iterable[KInner], sort_constraints: bool = True) -> tuple[KInner, ...]:
+        if sort_constraints:
+            constraints = normalize_constraints(constraints)
+            # constraints = sorted(normalize_constraints(constraints), key=CTerm._constraint_sort_key)
+        else:
+            constraints = normalize_constraints(constraints)
         return tuple(constraints)
 
     @property
@@ -349,7 +353,7 @@ class CSubst:
         """Apply this `CSubst` to the given `CTerm` (instantiating the free variables, and adding the constraints)."""
         config = self.subst(cterm.config)
         constraints = [self.subst(constraint) for constraint in cterm.constraints] + list(self.constraints)
-        return CTerm(config, constraints)
+        return CTerm(config, constraints, sort_constraints=False)
 
     def __call__(self, cterm: CTerm) -> CTerm:
         """Overload for `CSubst.apply`."""
