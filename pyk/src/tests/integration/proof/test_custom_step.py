@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk.cterm import CTerm
+from pyk.cterm.show import CTermShow
 from pyk.kast.inner import KApply, KSequence, KVariable
 from pyk.kast.manip import set_cell
 from pyk.kcfg import KCFGExplore
@@ -215,5 +216,8 @@ class TestCustomStep(CTermSymbolicTest, KProveTest):
         )
         prover.advance_proof(proof, max_iterations=max_iterations)
 
-        kcfg_show = KCFGShow(kprove, node_printer=APRProofNodePrinter(proof, kprove, full_printer=True, minimize=False))
+        kcfg_show = KCFGShow(
+            kprove,
+            node_printer=APRProofNodePrinter(proof, CTermShow(kprove.definition), full_printer=True, minimize=False),
+        )
         return proof.status, kcfg_show.show(proof.kcfg)

@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from graphviz import Digraph
 
+from ..cterm.show import CTermShow
 from ..kast.inner import KApply, KRewrite, top_down
 from ..kast.manip import (
     flatten_label,
@@ -37,12 +38,12 @@ _LOGGER: Final = logging.getLogger(__name__)
 
 
 class NodePrinter:
-    kprint: KPrint
+    cterm_show: CTermShow
     full_printer: bool
     minimize: bool
 
-    def __init__(self, kprint: KPrint, full_printer: bool = False, minimize: bool = False):
-        self.kprint = kprint
+    def __init__(self, cterm_show: CTermShow, full_printer: bool = False, minimize: bool = False):
+        self.cterm_show = cterm_show
         self.full_printer = full_printer
         self.minimize = minimize
 
@@ -51,10 +52,7 @@ class NodePrinter:
         attr_str = ' (' + ', '.join(attrs) + ')' if attrs else ''
         node_strs = [f'{node.id}{attr_str}']
         if self.full_printer:
-            kast = node.cterm.kast
-            if self.minimize:
-                kast = minimize_term(kast)
-            node_strs.extend('  ' + line for line in self.kprint.pretty_print(kast).split('\n'))
+            node_strs.extend('  ' + line for line in self.cterm_show.show(node.cterm, minimize=self.minimize))
         return node_strs
 
     def node_attrs(self, kcfg: KCFG, node: KCFG.Node) -> list[str]:
@@ -79,7 +77,7 @@ class KCFGShow:
 
     def __init__(self, kprint: KPrint, node_printer: NodePrinter | None = None):
         self.kprint = kprint
-        self.node_printer = node_printer if node_printer is not None else NodePrinter(kprint)
+        self.node_printer = node_printer if node_printer else NodePrinter(CTermShow(kprint.definition))
 
     def node_short_info(self, kcfg: KCFG, node: KCFG.Node) -> list[str]:
         return self.node_printer.print_node(kcfg, node)

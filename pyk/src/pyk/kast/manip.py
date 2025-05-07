@@ -506,9 +506,7 @@ def on_attributes(kast: W, f: Callable[[KAtt], KAtt]) -> W:
     return kast
 
 
-def minimize_term(
-    term: KInner, keep_vars: Iterable[str] = (), abstract_labels: Collection[str] = (), keep_cells: Collection[str] = ()
-) -> KInner:
+def minimize_term(term: KInner, keep_vars: Iterable[str] = ()) -> KInner:
     """Minimize a K term for pretty-printing.
 
     - Variables only used once will be removed.
@@ -524,14 +522,7 @@ def minimize_term(
     term = inline_cell_maps(term)
     term = remove_semantic_casts(term)
     term = useless_vars_to_dots(term, keep_vars=keep_vars)
-
-    if keep_cells:
-        term = extract_cells(term, keep_cells)
-    else:
-        term = labels_to_dots(term, abstract_labels)
-
     term = collapse_dots(term)
-
     return term
 
 

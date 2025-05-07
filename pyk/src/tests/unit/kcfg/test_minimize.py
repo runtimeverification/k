@@ -13,7 +13,7 @@ from pyk.kcfg.show import NodePrinter
 from pyk.utils import single
 
 from ..kcfg.merge_node_data import KCFG_MERGE_NODE_TEST_DATA
-from ..mock_kprint import MockKPrint
+from ..mock_kprint import MockCTermShow, MockKPrint
 from ..test_kcfg import edge_dicts, node_dicts, split_dicts, to_csubst_node, x_config, x_node, x_subst
 
 if TYPE_CHECKING:
@@ -337,7 +337,7 @@ def test_split_constraint_accumulation() -> None:
 
     minimizer.minimize()
 
-    kcfg_show = KCFGShow(MockKPrint(), node_printer=NodePrinter(MockKPrint()))
+    kcfg_show = KCFGShow(MockKPrint(), node_printer=NodePrinter(MockCTermShow()))
     actual = '\n'.join(kcfg_show.pretty(cfg)) + '\n'
 
     expected = (

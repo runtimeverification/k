@@ -3,6 +3,7 @@ from __future__ import annotations
 from functools import cached_property
 from typing import TYPE_CHECKING
 
+from pyk.cterm.show import CTermShow
 from pyk.kast.outer import KDefinition, KFlatModule
 from pyk.ktool.kprint import KPrint
 
@@ -10,6 +11,12 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
 
     from pyk.kast.pretty import SymbolTable
+
+
+class MockCTermShow(CTermShow):
+    def __init__(self) -> None:
+        definition = KDefinition('MOCK', [KFlatModule('MOCK', [])], [])
+        super().__init__(definition)
 
 
 class MockKPrint(KPrint):

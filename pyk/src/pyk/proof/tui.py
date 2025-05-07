@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 
     from textual.app import ComposeResult
 
+    from ..cterm.show import CTermShow
     from ..kcfg.show import NodePrinter
     from ..kcfg.tui import KCFGElem
     from ..ktool.kprint import KPrint
@@ -57,9 +58,17 @@ class APRProofViewer(KCFGViewer):
         kprint: KPrint,
         node_printer: NodePrinter | None = None,
         custom_view: Callable[[KCFGElem], Iterable[str]] | None = None,
+        cterm_show: CTermShow | None = None,
         minimize: bool = True,
     ) -> None:
-        super().__init__(proof.kcfg, kprint, node_printer=node_printer, custom_view=custom_view, minimize=minimize)
+        super().__init__(
+            proof.kcfg,
+            kprint,
+            node_printer=node_printer,
+            custom_view=custom_view,
+            cterm_show=cterm_show,
+            minimize=minimize,
+        )
         self._proof = proof
 
     def on_mount(self) -> None:

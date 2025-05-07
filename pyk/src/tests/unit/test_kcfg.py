@@ -15,7 +15,7 @@ from pyk.kcfg.kcfg import KCFGNodeAttr
 from pyk.kcfg.show import NodePrinter
 from pyk.utils import not_none, single
 
-from .mock_kprint import MockKPrint
+from .mock_kprint import MockCTermShow, MockKPrint
 from .utils import ge_ml, k, lt_ml
 
 if TYPE_CHECKING:
@@ -821,8 +821,8 @@ def test_pretty_print() -> None:
     )
 
     # When
-    kcfg_show = KCFGShow(MockKPrint(), node_printer=NodePrinter(MockKPrint()))
-    kcfg_show_full_printer = KCFGShow(MockKPrint(), node_printer=NodePrinter(MockKPrint(), full_printer=True))
+    kcfg_show = KCFGShow(MockKPrint(), node_printer=NodePrinter(MockCTermShow()))
+    kcfg_show_full_printer = KCFGShow(MockKPrint(), node_printer=NodePrinter(MockCTermShow(), full_printer=True))
     actual = '\n'.join(kcfg_show.pretty(cfg)) + '\n'
     actual_full_printer = '\n'.join(kcfg_show_full_printer.pretty(cfg)) + '\n'
 

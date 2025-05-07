@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 
     from graphviz import Digraph
 
+    from ..cterm.show import CTermShow
     from ..kcfg import KCFG
     from ..kcfg.kcfg import NodeIdLike
     from ..ktool.kprint import KPrint
@@ -24,8 +25,8 @@ _LOGGER: Final = logging.getLogger(__name__)
 class APRProofNodePrinter(NodePrinter):
     proof: APRProof
 
-    def __init__(self, proof: APRProof, kprint: KPrint, full_printer: bool = False, minimize: bool = False):
-        super().__init__(kprint, full_printer=full_printer, minimize=minimize)
+    def __init__(self, proof: APRProof, cterm_show: CTermShow, full_printer: bool = False, minimize: bool = False):
+        super().__init__(cterm_show, full_printer=full_printer, minimize=minimize)
         self.proof = proof
 
     def node_attrs(self, kcfg: KCFG, node: KCFG.Node) -> list[str]:
