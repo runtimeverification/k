@@ -24,6 +24,7 @@ if TYPE_CHECKING:
     from textual.app import ComposeResult
     from textual.events import Click
 
+    from ..cterm import CSubst
     from ..kast import KInner
     from ..ktool.kprint import KPrint
     from .show import NodePrinter
@@ -277,12 +278,22 @@ class NodeView(Widget):
             else:
                 return c
 
+        def _boolify_print(c: KInner) -> str:
+            return self._kprint.pretty_print(_boolify(c))
+
         def _cterm_text(cterm: CTerm) -> tuple[str, str]:
             config = cterm.config
             constraints = map(_boolify, cterm.constraints)
             if self._minimize:
                 config = minimize_term(config)
             return (self._kprint.pretty_print(config), '\n'.join(self._kprint.pretty_print(c) for c in constraints))
+
+        def _csubst_text(csubst: CSubst) -> tuple[str, str]:
+            equalities = map(
+                _boolify_print, flatten_label('#And', csubst.pred(sort_with=self._kprint.definition, constraints=False))
+            )
+            constraints = map(_boolify_print, flatten_label('#And', csubst.constraint))
+            return '\n'.join(equalities), '\n'.join(constraints)
 
         term_str = 'Term'
         constraint_str = 'Constraint'
@@ -309,30 +320,18 @@ class NodeView(Widget):
                 term_str, constraint_str = _cterm_text(crewrite)
 
             elif type(self._element) is KCFG.Cover:
-                subst_equalities = map(
-                    _boolify,
-                    flatten_label(
-                        '#And', self._element.csubst.pred(sort_with=self._kprint.definition, constraints=False)
-                    ),
-                )
-                constraints = map(_boolify, flatten_label('#And', self._element.csubst.constraint))
-                term_str = '\n'.join(self._kprint.pretty_print(se) for se in subst_equalities)
-                constraint_str = '\n'.join(self._kprint.pretty_print(c) for c in constraints)
+                term_str, constraint_str = _csubst_text(self._element.csubst)
 
             elif type(self._element) is KCFG.Split:
                 term_strs = [f'split: {shorten_hashes(self._element.source.id)}']
                 for target_id, csubst in self._element.splits.items():
                     term_strs.append('')
                     term_strs.append(f'  - {shorten_hashes(target_id)}')
-                    if len(csubst.subst) > 0:
-                        subst_equalities = map(
-                            _boolify,
-                            flatten_label('#And', csubst.pred(sort_with=self._kprint.definition, constraints=False)),
-                        )
-                        term_strs.extend(f'    {self._kprint.pretty_print(cline)}' for cline in subst_equalities)
-                    if len(csubst.constraints) > 0:
-                        constraints = map(_boolify, flatten_label('#And', csubst.constraint))
-                        term_strs.extend(f'    {self._kprint.pretty_print(cline)}' for cline in constraints)
+                    equalities_str, constraints_str = _csubst_text(csubst)
+                    if equalities_str != '#Top':
+                        term_strs.extend([f'    {es}' for es in equalities_str.split('\n')])
+                    if constraints_str != '#Top':
+                        term_strs.extend([f'    {es}' for es in constraints_str.split('\n')])
                 term_str = '\n'.join(term_strs)
 
             elif type(self._element) is KCFG.NDBranch:
