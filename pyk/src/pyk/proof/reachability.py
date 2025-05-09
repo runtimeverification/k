@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 from pyk.kore.rpc import LogEntry
 
 from ..cterm.cterm import remove_useless_constraints
+from ..kast import Atts
 from ..kast.inner import KInner, Subst
 from ..kast.manip import flatten_label, free_vars, ml_pred_to_bool
 from ..kast.outer import KClaim, KFlatModule, KImport, KRule
@@ -769,11 +770,13 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
             else []
         )
         dependencies_as_rules = [
-            rule
+            rule.update_atts([Atts.UNIQUE_ID('subproof')])
             for subproof in subproofs
             if isinstance(subproof, APRProof)
             for rule in subproof.as_rules(priority=20, direct_rule=self.direct_subproof_rules)
         ]
+        for rule in dependencies_as_rules:
+            print(f'rule atts: {rule.att.to_dict()}')
         circularity_rule = proof.as_rule(priority=20)
 
         _inject_module(proof.dependencies_module_name, main_module_name, dependencies_as_rules)
