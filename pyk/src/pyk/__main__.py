@@ -188,7 +188,7 @@ def exec_rpc_print(options: RPCPrintOptions) -> None:
                 exit(1)
         else:
             if not 'result' in input_dict:
-                _LOGGER.critical('The input is neither a request not a resonse')
+                _LOGGER.critical('The input is neither a request not a response')
                 exit(1)
             output_buffer.append('JSON RPC Response')
             output_buffer.append(f'id: {input_dict["id"]}')
@@ -461,7 +461,7 @@ def exec_kompilex(options: KompileXCommandOptions) -> None:
             _LOGGER.error(base_msg)
             exit(1)
         else:
-            _LOGGER.warn(f'{base_msg} Use --syntax-module to specify one. Using {main_module_name} as default.')
+            _LOGGER.warning(f'{base_msg} Use --syntax-module to specify one. Using {main_module_name} as default.')
         syntax_module_name = main_module_name
     syntax_att = KAtt.parse({'syntaxModule': main_module_name})
 
