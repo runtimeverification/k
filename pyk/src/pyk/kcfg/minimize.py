@@ -3,16 +3,14 @@ from __future__ import annotations
 from functools import reduce
 from typing import TYPE_CHECKING
 
-from pyk.cterm.cterm import cterms_anti_unify
-from pyk.utils import partition, single
-
+from ..cterm.cterm import cterms_anti_unify
+from ..utils import partition, single
 from .semantics import DefaultSemantics
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from pyk.kast.outer import KDefinition
-
+    from ..kast.outer import KDefinition
     from .kcfg import KCFG, NodeIdLike
     from .semantics import KCFGSemantics
 
