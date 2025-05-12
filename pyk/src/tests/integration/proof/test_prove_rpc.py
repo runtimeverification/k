@@ -10,8 +10,8 @@ import pytest
 from pyk.cli.pyk import ProveOptions
 from pyk.kast.inner import KApply, KSequence, KVariable
 from pyk.kcfg.semantics import DefaultSemantics
-from pyk.ktool.prove_rpc import ProveRpc
 from pyk.proof import ProofStatus
+from pyk.proof.prove_rpc import ProveRpc
 from pyk.testing import KCFGExploreTest, KProveTest
 from pyk.utils import single
 
@@ -170,7 +170,7 @@ PROVE_TEST_DATA: Iterable[tuple[str, Path, str, str, ProofStatus]] = (
 )
 
 
-class TestImpProve(KCFGExploreTest, KProveTest):
+class TestProveRpc(KCFGExploreTest, KProveTest):
     KOMPILE_MAIN_FILE = K_FILES / 'imp-verification.k'
 
     def semantics(self, definition: KDefinition) -> KCFGSemantics:
