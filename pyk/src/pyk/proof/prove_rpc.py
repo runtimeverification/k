@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 from ..kast.manip import extract_lhs
 from ..kast.outer import KApply
-from ..proof import APRProof, APRProver, EqualityProof, ImpliesProver
+from . import APRProof, APRProver, EqualityProof, ImpliesProver
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -15,8 +15,8 @@ if TYPE_CHECKING:
     from ..cli.pyk import ProveOptions
     from ..kast.outer import KClaim
     from ..kcfg import KCFGExplore
-    from ..proof import Proof, Prover
-    from .kprove import KProve
+    from ..ktool.kprove import KProve
+    from . import Proof, Prover
 
 _LOGGER: Final = logging.getLogger(__name__)
 
