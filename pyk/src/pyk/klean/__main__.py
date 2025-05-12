@@ -5,8 +5,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from pyk.cli.utils import dir_path
-from pyk.kore.internal import KoreDefn
+from ..cli.utils import dir_path
+from ..kore.internal import KoreDefn
 
 if TYPE_CHECKING:
     from argparse import Namespace
@@ -23,7 +23,7 @@ def main() -> None:
     import logging
     import sys
 
-    from pyk.cli.utils import LOG_FORMAT
+    from ..cli.utils import LOG_FORMAT
 
     args = sys.argv
     level, args = _extract_log_level(args)
@@ -41,8 +41,8 @@ def main() -> None:
 
 
 def _extract_log_level(args: list[str]) -> tuple[int, list[str]]:
-    from pyk.cli.args import KCLIArgs
-    from pyk.cli.utils import loglevel
+    from ..cli.args import KCLIArgs
+    from ..cli.utils import loglevel
 
     parser = KCLIArgs().logging_args
     ns, rest = parser.parse_known_args(args)

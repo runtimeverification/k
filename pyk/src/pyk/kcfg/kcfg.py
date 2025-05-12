@@ -30,11 +30,10 @@ if TYPE_CHECKING:
     from types import TracebackType
     from typing import Any
 
-    from pyk.kore.rpc import LogEntry
-
     from ..kast import KAtt
     from ..kast.inner import KInner
     from ..kast.outer import KClaim, KDefinition, KImport, KRuleLike
+    from ..kore.rpc import LogEntry
 
 
 NodeIdLike = int | str

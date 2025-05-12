@@ -2,15 +2,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from pyk.kcfg.kcfg import KCFG, NodeAttr
-from pyk.kcfg.minimize import KCFGMinimizer
+from .kcfg import KCFG, NodeAttr
+from .minimize import KCFGMinimizer
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
     from typing import Any
 
-    from pyk.kcfg.kcfg import NodeIdLike
-    from pyk.kcfg.semantics import KCFGSemantics
+    from .kcfg import NodeIdLike
+    from .semantics import KCFGSemantics
 
 
 class KCFGExplorationNodeAttr(NodeAttr):

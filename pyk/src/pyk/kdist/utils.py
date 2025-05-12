@@ -6,7 +6,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from pyk.utils import check_dir_path
+from ..utils import check_dir_path
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
