@@ -8,8 +8,6 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from pyk.proof.reachability import APRProver
-
 from ..cterm import CTermSymbolic
 from ..kast.outer import read_kast_definition
 from ..kcfg import KCFGExplore
@@ -23,6 +21,7 @@ from ..ktool.kompile import DefinitionInfo, Kompile, LLVMKompileType
 from ..ktool.kprint import KPrint
 from ..ktool.kprove import KProve
 from ..ktool.krun import KRun
+from ..proof.reachability import APRProver
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Iterator

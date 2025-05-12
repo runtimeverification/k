@@ -5,9 +5,8 @@ import logging
 from argparse import ArgumentParser
 from typing import TYPE_CHECKING
 
-from pyk.cli.args import KCLIArgs
-from pyk.cli.utils import loglevel
-
+from ..cli.args import KCLIArgs
+from ..cli.utils import loglevel
 from ..kdist import kdist, target_ids
 from .utils import LOG_FORMAT
 
