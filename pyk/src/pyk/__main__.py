@@ -42,7 +42,7 @@ from .ktool.kompile import Kompile, KompileBackend
 from .ktool.kprint import KPrint
 from .ktool.kprove import KProve
 from .ktool.krun import KRun
-from .ktool.prove_rpc import ProveRpc
+from .proof.prove_rpc import ProveRpc
 from .proof.reachability import APRFailureInfo, APRProof
 from .proof.show import APRProofNodePrinter, APRProofShow
 from .utils import check_file_path, ensure_dir_path, exit_with_process_error
