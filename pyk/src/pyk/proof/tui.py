@@ -88,6 +88,7 @@ class APRProofViewer(KCFGViewer):
                     proof_id=self._proof.id,
                     proof_status=self._proof.status.value,
                     exec_time=self._proof.exec_time,
+                    cterm_show=self._cterm_show,
                     id='node-view',
                 ),
                 id='display',
