@@ -257,6 +257,8 @@ class NodeView(Widget):
         if field == 'custom_on' and self._custom_view is None:
             new_value = False
         setattr(self, field_attr, new_value)
+        if field == 'minimize':
+            self._cterm_show = self._cterm_show.let(minimize=self._minimize)
         self._update()
         return new_value
 

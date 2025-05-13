@@ -47,6 +47,25 @@ class CTermShow(PrettyPrinter):
         self.boolify = boolify
         self.minimize = minimize
 
+    def let(
+        self,
+        unalias: bool | None = None,
+        sort_collections: bool | None = None,
+        adjust_cterm: Callable[[CTerm], CTerm] | None = None,
+        boolify: bool | None = None,
+        minimize: bool | None = None,
+    ) -> CTermShow:
+        return CTermShow(
+            self.definition,
+            extra_unparsing_modules=self._extra_unparsing_modules,
+            patch_symbol_table=self._patch_symbol_table,
+            unalias=(self._unalias if unalias is None else unalias),
+            sort_collections=(self._sort_collections if sort_collections is None else sort_collections),
+            adjust_cterm=(self.adjust_cterm if adjust_cterm is None else adjust_cterm),
+            boolify=(self.boolify if boolify is None else boolify),
+            minimize=(self.minimize if minimize is None else minimize),
+        )
+
     def show(self, cterm: CTerm, omit_config: bool = False, omit_constraints: bool = False) -> list[str]:
         def _boolify(c: KInner) -> KInner:
             if type(c) is KApply and c.label.name == '#Equals' and c.args[0] == TRUE:
