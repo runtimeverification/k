@@ -52,7 +52,7 @@ class NodePrinter:
         attr_str = ' (' + ', '.join(attrs) + ')' if attrs else ''
         node_strs = [f'{node.id}{attr_str}']
         if self.full_printer:
-            node_strs.extend('  ' + line for line in self.cterm_show.show(node.cterm, minimize=self.minimize))
+            node_strs.extend('  ' + line for line in self.cterm_show.show(node.cterm))
         return node_strs
 
     def node_attrs(self, kcfg: KCFG, node: KCFG.Node) -> list[str]:

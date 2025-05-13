@@ -22,6 +22,8 @@ _LOGGER: Final = logging.getLogger(__name__)
 
 class CTermShow(PrettyPrinter):
     adjust_cterm: Callable[[CTerm], CTerm] | None
+    boolify: bool
+    minimize: bool
 
     def __init__(
         self,
@@ -31,6 +33,8 @@ class CTermShow(PrettyPrinter):
         unalias: bool = True,
         sort_collections: bool = False,
         adjust_cterm: Callable[[CTerm], CTerm] | None = None,
+        boolify: bool = False,
+        minimize: bool = False,
     ):
         super().__init__(
             definition,
@@ -40,15 +44,10 @@ class CTermShow(PrettyPrinter):
             sort_collections,
         )
         self.adjust_cterm = adjust_cterm
+        self.boolify = boolify
+        self.minimize = minimize
 
-    def show(
-        self,
-        cterm: CTerm,
-        omit_config: bool = False,
-        omit_constraints: bool = False,
-        boolify: bool = False,
-        minimize: bool = False,
-    ) -> list[str]:
+    def show(self, cterm: CTerm, omit_config: bool = False, omit_constraints: bool = False) -> list[str]:
         def _boolify(c: KInner) -> KInner:
             if type(c) is KApply and c.label.name == '#Equals' and c.args[0] == TRUE:
                 return c.args[1]
@@ -58,12 +57,12 @@ class CTermShow(PrettyPrinter):
         if self.adjust_cterm:
             cterm = self.adjust_cterm(cterm)
 
-        if minimize:
+        if self.minimize:
             cterm = CTerm(minimize_term(cterm.config, keep_vars=free_vars(cterm.constraint)), cterm.constraints)
 
         if omit_constraints:
             cterm = CTerm(cterm.config)
-        elif boolify:
+        elif self.boolify:
             cterm = CTerm(cterm.config, map(_boolify, cterm.constraints))
 
         ret_strs: list[str] = []
@@ -73,7 +72,7 @@ class CTermShow(PrettyPrinter):
             for constraint in cterm.constraints:
                 constraint_strs = self.print(constraint).split('\n')
                 if len(constraint_strs) > 0:
-                    if not boolify:
+                    if not self.boolify:
                         constraint_strs = [f'#And {cstr}' for cstr in constraint_strs]
                     ret_strs.append(constraint_strs[0])
                     ret_strs.extend([f'  {constraint_str}' for constraint_str in constraint_strs[1:]])
