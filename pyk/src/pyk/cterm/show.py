@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from ..kast.inner import KApply, KSort, KToken, flatten_label, top_down
 from ..kast.manip import free_vars, minimize_term
+from ..kast.prelude.k import DOTS
 from ..kast.pretty import PrettyPrinter
 from .cterm import CTerm
 
@@ -22,6 +23,7 @@ _LOGGER: Final = logging.getLogger(__name__)
 class CTermShow(PrettyPrinter):
     minimize: bool
     break_cell_collections: bool
+    omit_cells: tuple[str, ...]
 
     def __init__(
         self,
@@ -32,6 +34,7 @@ class CTermShow(PrettyPrinter):
         sort_collections: bool = True,
         minimize: bool = True,
         break_cell_collections: bool = True,
+        omit_cells: Iterable[str] = (),
     ):
         super().__init__(
             definition,
@@ -42,6 +45,7 @@ class CTermShow(PrettyPrinter):
         )
         self.minimize = minimize
         self.break_cell_collections = break_cell_collections
+        self.omit_cells = tuple(omit_cells)
 
     def let(
         self,
@@ -49,6 +53,7 @@ class CTermShow(PrettyPrinter):
         sort_collections: bool | None = None,
         minimize: bool | None = None,
         break_cell_collections: bool | None = None,
+        omit_cells: Iterable[str] | None = None,
     ) -> CTermShow:
         return CTermShow(
             self.definition,
@@ -60,6 +65,7 @@ class CTermShow(PrettyPrinter):
             break_cell_collections=(
                 self.break_cell_collections if break_cell_collections is None else break_cell_collections
             ),
+            omit_cells=(self.omit_cells if omit_cells is None else omit_cells),
         )
 
     def _break_cell_collections(self, kast: KInner) -> KInner:
@@ -75,9 +81,16 @@ class CTermShow(PrettyPrinter):
             return KApply(kast.label, [printed])
         return kast
 
+    def _hide_cells(self, kast: KInner) -> KInner:
+        if type(kast) == KApply and kast.label.name in self.omit_cells:
+            return DOTS
+        return kast
+
     def show_config(self, cterm: CTerm) -> list[str]:
         if self.break_cell_collections:
             cterm = CTerm(top_down(self._break_cell_collections, cterm.config), cterm.constraints)
+        if self.omit_cells:
+            cterm = CTerm(top_down(self._hide_cells, cterm.config), cterm.constraints)
         if self.minimize:
             cterm = CTerm(minimize_term(cterm.config, keep_vars=free_vars(cterm.constraint)), cterm.constraints)
         return self.print(cterm.config).split('\n')
