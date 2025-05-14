@@ -287,8 +287,8 @@ class NodeView(Widget):
             return PrettyPrinter(self._definition).print(_boolify(c))
 
         def _cterm_text(cterm: CTerm) -> tuple[str, str]:
-            config_text = self._cterm_show.show(cterm, omit_constraints=True)
-            constraint_text = self._cterm_show.show(cterm, omit_config=True)
+            config_text = self._cterm_show.show_config(cterm)
+            constraint_text = self._cterm_show.show_constraints(cterm)
             return '\n'.join(config_text), '\n'.join(constraint_text)
 
         def _csubst_text(csubst: CSubst) -> tuple[str, str]:
