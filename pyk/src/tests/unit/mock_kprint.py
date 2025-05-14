@@ -7,4 +7,4 @@ from pyk.kast.outer import KDefinition, KFlatModule
 class MockCTermShow(CTermShow):
     def __init__(self) -> None:
         definition = KDefinition('MOCK', [KFlatModule('MOCK', [])], [])
-        super().__init__(definition)
+        super().__init__(definition, minimize=False)

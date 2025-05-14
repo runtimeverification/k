@@ -30,9 +30,9 @@ class CTermShow(PrettyPrinter):
         extra_unparsing_modules: Iterable[KFlatModule] = (),
         patch_symbol_table: Callable[[SymbolTable], None] | None = None,
         unalias: bool = True,
-        sort_collections: bool = False,
+        sort_collections: bool = True,
         adjust_cterm: Callable[[CTerm], CTerm] | None = None,
-        minimize: bool = False,
+        minimize: bool = True,
         break_cell_collections: bool = True,
     ):
         super().__init__(
