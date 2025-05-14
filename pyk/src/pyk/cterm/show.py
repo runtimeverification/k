@@ -20,7 +20,6 @@ _LOGGER: Final = logging.getLogger(__name__)
 
 
 class CTermShow(PrettyPrinter):
-    adjust_cterm: Callable[[CTerm], CTerm] | None
     minimize: bool
     break_cell_collections: bool
 
@@ -31,7 +30,6 @@ class CTermShow(PrettyPrinter):
         patch_symbol_table: Callable[[SymbolTable], None] | None = None,
         unalias: bool = True,
         sort_collections: bool = True,
-        adjust_cterm: Callable[[CTerm], CTerm] | None = None,
         minimize: bool = True,
         break_cell_collections: bool = True,
     ):
@@ -42,7 +40,6 @@ class CTermShow(PrettyPrinter):
             unalias,
             sort_collections,
         )
-        self.adjust_cterm = adjust_cterm
         self.minimize = minimize
         self.break_cell_collections = break_cell_collections
 
@@ -50,7 +47,6 @@ class CTermShow(PrettyPrinter):
         self,
         unalias: bool | None = None,
         sort_collections: bool | None = None,
-        adjust_cterm: Callable[[CTerm], CTerm] | None = None,
         minimize: bool | None = None,
         break_cell_collections: bool | None = None,
     ) -> CTermShow:
@@ -60,7 +56,6 @@ class CTermShow(PrettyPrinter):
             patch_symbol_table=self._patch_symbol_table,
             unalias=(self._unalias if unalias is None else unalias),
             sort_collections=(self._sort_collections if sort_collections is None else sort_collections),
-            adjust_cterm=(self.adjust_cterm if adjust_cterm is None else adjust_cterm),
             minimize=(self.minimize if minimize is None else minimize),
             break_cell_collections=(
                 self.break_cell_collections if break_cell_collections is None else break_cell_collections
@@ -81,9 +76,6 @@ class CTermShow(PrettyPrinter):
         return kast
 
     def show(self, cterm: CTerm, omit_config: bool = False, omit_constraints: bool = False) -> list[str]:
-        if self.adjust_cterm:
-            cterm = self.adjust_cterm(cterm)
-
         if self.minimize:
             cterm = CTerm(minimize_term(cterm.config, keep_vars=free_vars(cterm.constraint)), cterm.constraints)
 
