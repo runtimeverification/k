@@ -218,6 +218,6 @@ class TestCustomStep(CTermSymbolicTest, KProveTest):
 
         kcfg_show = KCFGShow(
             kprove.definition,
-            node_printer=APRProofNodePrinter(proof, CTermShow(kprove.definition), full_printer=True, minimize=False),
+            node_printer=APRProofNodePrinter(proof, CTermShow(kprove.definition, minimize=False), full_printer=True),
         )
         return proof.status, kcfg_show.show(proof.kcfg)

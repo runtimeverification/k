@@ -96,7 +96,7 @@ class TestMiniKEVM(KCFGExploreTest, KProveTest):
 
         kcfg_show = KCFGShow(
             kprove.definition,
-            node_printer=APRProofNodePrinter(proof, CTermShow(kprove.definition), full_printer=True, minimize=False),
+            node_printer=APRProofNodePrinter(proof, CTermShow(kprove.definition, minimize=False), full_printer=True),
         )
         cfg_lines = kcfg_show.show(proof.kcfg)
         _LOGGER.info('\n'.join(cfg_lines))

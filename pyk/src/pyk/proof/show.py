@@ -25,8 +25,8 @@ _LOGGER: Final = logging.getLogger(__name__)
 class APRProofNodePrinter(NodePrinter):
     proof: APRProof
 
-    def __init__(self, proof: APRProof, cterm_show: CTermShow, full_printer: bool = False, minimize: bool = False):
-        super().__init__(cterm_show, full_printer=full_printer, minimize=minimize)
+    def __init__(self, proof: APRProof, cterm_show: CTermShow, full_printer: bool = False):
+        super().__init__(cterm_show, full_printer=full_printer)
         self.proof = proof
 
     def node_attrs(self, kcfg: KCFG, node: KCFG.Node) -> list[str]:

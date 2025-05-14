@@ -276,7 +276,7 @@ def exec_prove(options: ProveOptions) -> None:
             if type(failure_info) is APRFailureInfo:
                 print('\n'.join(failure_info.print()))
         if options.show_kcfg and type(proof) is APRProof:
-            node_printer = APRProofNodePrinter(proof, CTermShow(kprove.definition), full_printer=True, minimize=False)
+            node_printer = APRProofNodePrinter(proof, CTermShow(kprove.definition, minimize=False), full_printer=True)
             show = APRProofShow(kprove.definition, node_printer=node_printer)
             print('\n'.join(show.show(proof, minimize=False)))
     sys.exit(len([p.id for p in proofs if not p.passed]))

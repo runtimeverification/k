@@ -42,10 +42,9 @@ class NodePrinter:
     full_printer: bool
     minimize: bool
 
-    def __init__(self, cterm_show: CTermShow, full_printer: bool = False, minimize: bool = False):
+    def __init__(self, cterm_show: CTermShow, full_printer: bool = False):
         self.cterm_show = cterm_show
         self.full_printer = full_printer
-        self.minimize = minimize
 
     def print_node(self, kcfg: KCFG, node: KCFG.Node) -> list[str]:
         attrs = self.node_attrs(kcfg, node)
