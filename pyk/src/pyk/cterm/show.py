@@ -76,9 +76,6 @@ class CTermShow(PrettyPrinter):
         return kast
 
     def show(self, cterm: CTerm, omit_config: bool = False, omit_constraints: bool = False) -> list[str]:
-        if self.minimize:
-            cterm = CTerm(minimize_term(cterm.config, keep_vars=free_vars(cterm.constraint)), cterm.constraints)
-
         if omit_constraints:
             cterm = CTerm(cterm.config)
 
@@ -87,6 +84,8 @@ class CTermShow(PrettyPrinter):
         if not omit_config:
             if self.break_cell_collections:
                 cterm = CTerm(top_down(self._break_cell_collections, cterm.config), cterm.constraints)
+            if self.minimize:
+                cterm = CTerm(minimize_term(cterm.config, keep_vars=free_vars(cterm.constraint)), cterm.constraints)
             ret_strs.extend(self.print(cterm.config).split('\n'))
 
         if not omit_constraints:
