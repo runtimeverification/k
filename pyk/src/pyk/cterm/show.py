@@ -75,25 +75,25 @@ class CTermShow(PrettyPrinter):
             return KApply(kast.label, [printed])
         return kast
 
-    def show(self, cterm: CTerm, omit_config: bool = False, omit_constraints: bool = False) -> list[str]:
-        if omit_constraints:
-            cterm = CTerm(cterm.config)
+    def show_config(self, cterm: CTerm) -> list[str]:
+        if self.break_cell_collections:
+            cterm = CTerm(top_down(self._break_cell_collections, cterm.config), cterm.constraints)
+        if self.minimize:
+            cterm = CTerm(minimize_term(cterm.config, keep_vars=free_vars(cterm.constraint)), cterm.constraints)
+        return self.print(cterm.config).split('\n')
 
+    def show_constraints(self, cterm: CTerm) -> list[str]:
         ret_strs: list[str] = []
+        for constraint in cterm.constraints:
+            constraint_strs = self.print(constraint).split('\n')
+            if len(constraint_strs) > 0:
+                constraint_strs = [f'#And {cstr}' for cstr in constraint_strs]
+                ret_strs.append(constraint_strs[0])
+                ret_strs.extend([f'  {constraint_str}' for constraint_str in constraint_strs[1:]])
+        return ret_strs
 
-        if not omit_config:
-            if self.break_cell_collections:
-                cterm = CTerm(top_down(self._break_cell_collections, cterm.config), cterm.constraints)
-            if self.minimize:
-                cterm = CTerm(minimize_term(cterm.config, keep_vars=free_vars(cterm.constraint)), cterm.constraints)
-            ret_strs.extend(self.print(cterm.config).split('\n'))
-
-        if not omit_constraints:
-            for constraint in cterm.constraints:
-                constraint_strs = self.print(constraint).split('\n')
-                if len(constraint_strs) > 0:
-                    constraint_strs = [f'#And {cstr}' for cstr in constraint_strs]
-                    ret_strs.append(constraint_strs[0])
-                    ret_strs.extend([f'  {constraint_str}' for constraint_str in constraint_strs[1:]])
-
+    def show(self, cterm: CTerm) -> list[str]:
+        ret_strs: list[str] = []
+        ret_strs.extend(self.show_config(cterm))
+        ret_strs.extend(self.show_constraints(cterm))
         return ret_strs
