@@ -125,6 +125,11 @@ class CTerm:
         return mlAnd(self, GENERATED_TOP_CELL)
 
     @cached_property
+    def constraint(self) -> KInner:
+        """Return the unstructured bare `KInner` representation of the constraints."""
+        return mlAnd(self.constraints, GENERATED_TOP_CELL)
+
+    @cached_property
     def free_vars(self) -> frozenset[str]:
         """Return the set of free variable names contained in this `CTerm`."""
         return frozenset(free_vars(self.kast))
