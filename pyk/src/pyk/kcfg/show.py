@@ -127,25 +127,18 @@ class KCFGShow:
         processed_nodes: list[KCFG.Node] = []
         ret_lines: list[tuple[str, list[str]]] = []
 
-        def _multi_line_print(
-            label: str, lines: list[str], default: str = 'None', indent: int = 4, max_width: int | None = None
-        ) -> list[str]:
+        def _multi_line_print(label: str, lines: list[str], default: str = 'None', indent: int = 4) -> list[str]:
             ret_lines = []
             if len(lines) == 0:
                 ret_lines.append(f'{label}: {default}')
             else:
                 ret_lines.append(f'{label}:')
                 ret_lines.extend([f'{indent * " "}{line}' for line in lines])
-            if max_width is not None:
-                ret_lines = [
-                    ret_line if len(ret_line) <= max_width else ret_line[0:max_width] + '...' for ret_line in ret_lines
-                ]
             return ret_lines
 
         def _print_csubst(
             csubst: CSubst, subst_first: bool = False, indent: int = 4, minimize: bool = False
         ) -> list[str]:
-            max_width = 78 if minimize else None
             _constraint_strs = [
                 self.kprint.pretty_print(ml_pred_to_bool(constraint, unsafe=True)) for constraint in csubst.constraints
             ]
@@ -158,7 +151,7 @@ class KCFGShow:
                     for k, v in csubst.subst.minimize().items()
                     for line in f'{k} <- {self.kprint.pretty_print(v)}'.split('\n')
                 ]
-                subst_strs = _multi_line_print('subst', _subst_strs, '.Subst', max_width=max_width)
+                subst_strs = _multi_line_print('subst', _subst_strs, '.Subst')
             if subst_first:
                 return subst_strs + constraint_strs
             return constraint_strs + subst_strs
