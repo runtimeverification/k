@@ -15,7 +15,7 @@ from pyk.kcfg.kcfg import KCFGNodeAttr
 from pyk.kcfg.show import NodePrinter
 from pyk.utils import not_none, single
 
-from .mock_kprint import MockCTermShow
+from .mock import MockCTermShow
 from .utils import ge_ml, k, lt_ml
 
 if TYPE_CHECKING:

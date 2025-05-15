@@ -13,7 +13,7 @@ from pyk.kcfg.show import NodePrinter
 from pyk.utils import single
 
 from ..kcfg.merge_node_data import KCFG_MERGE_NODE_TEST_DATA
-from ..mock_kprint import MockCTermShow
+from ..mock import MockCTermShow
 from ..test_kcfg import edge_dicts, node_dicts, split_dicts, to_csubst_node, x_config, x_node, x_subst
 
 if TYPE_CHECKING:
