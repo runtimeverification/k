@@ -1,0 +1,7 @@
+pyk.kast.prelude.k module
+=========================
+
+.. automodule:: pyk.kast.prelude.k
+   :members:
+   :undoc-members:
+   :show-inheritance:

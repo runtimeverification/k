@@ -1,0 +1,16 @@
+pyk.cterm package
+=================
+
+.. automodule:: pyk.cterm
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pyk.cterm.cterm
+   pyk.cterm.symbolic
