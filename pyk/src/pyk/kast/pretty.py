@@ -76,10 +76,6 @@ class PrettyPrinter:
             self._patch_symbol_table(symb_table)
         return symb_table
 
-    @property
-    def printer(self) -> Callable[[KInner], list[str]]:
-        return lambda k: self.print(k).split('\n')
-
     def print(self, kast: KAst) -> str:
         """Print out KAST terms/outer syntax.
 

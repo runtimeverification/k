@@ -9,7 +9,6 @@ from .inner import KApply, KToken, KVariable, bottom_up
 from .outer import KNonTerminal, KProduction, KRegexTerminal, KSequence, KTerminal
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
     from typing import Final
 
     from . import KInner
@@ -76,10 +75,6 @@ class Formatter:
         if self._brackets:
             term = add_brackets(self.definition, term)
         return ''.join(self._format(term))
-
-    @property
-    def printer(self) -> Callable[[KInner], list[str]]:
-        return lambda k: self.format(k).split('\n')
 
     def _format(self, term: KInner) -> list[str]:
         match term:

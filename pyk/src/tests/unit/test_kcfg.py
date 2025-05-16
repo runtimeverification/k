@@ -824,7 +824,7 @@ def test_pretty_print() -> None:
 
     # When
     definition = KDefinition('MOCK', [KFlatModule('MOCK', [])], [])
-    cterm_show = CTermShow(PrettyPrinter(definition).printer, minimize=False)
+    cterm_show = CTermShow(PrettyPrinter(definition).print, minimize=False)
     kcfg_show = KCFGShow(definition, node_printer=NodePrinter(cterm_show))
     kcfg_show_full_printer = KCFGShow(definition, node_printer=NodePrinter(cterm_show, full_printer=True))
     actual = '\n'.join(kcfg_show.pretty(cfg)) + '\n'

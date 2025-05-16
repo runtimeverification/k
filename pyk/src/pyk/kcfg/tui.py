@@ -215,7 +215,7 @@ class NodeView(Widget):
         self._proof_status = proof_status
         self._proof_id = proof_id
         self._exec_time = exec_time
-        self._cterm_show = cterm_show if cterm_show else CTermShow(PrettyPrinter(definition).printer)
+        self._cterm_show = cterm_show if cterm_show else CTermShow(PrettyPrinter(definition).print)
 
     def _info_text(self) -> str:
         term_str = '✅' if self._term_on else '❌'

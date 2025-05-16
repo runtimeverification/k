@@ -18,14 +18,14 @@ _LOGGER: Final = logging.getLogger(__name__)
 
 
 class CTermShow:
-    _printer: Callable[[KInner], list[str]]
+    _printer: Callable[[KInner], str]
     minimize: bool
     break_cell_collections: bool
     omit_labels: tuple[str, ...]
 
     def __init__(
         self,
-        printer: Callable[[KInner], list[str]],
+        printer: Callable[[KInner], str],
         minimize: bool = True,
         break_cell_collections: bool = True,
         omit_labels: Iterable[str] = (),
@@ -35,8 +35,8 @@ class CTermShow:
         self.break_cell_collections = break_cell_collections
         self.omit_labels = tuple(omit_labels)
 
-    def print(self, kast: KInner) -> str:
-        return '\n'.join(self._printer(kast))
+    def print_lines(self, kast: KInner) -> list[str]:
+        return self._printer(kast).split('\n')
 
     def let(
         self,
@@ -66,12 +66,12 @@ class CTermShow:
             cterm = CTerm(top_down(self._hide_labels, cterm.config), cterm.constraints)
         if self.minimize:
             cterm = CTerm(minimize_term(cterm.config, keep_vars=free_vars(cterm.constraint)), cterm.constraints)
-        return self._printer(cterm.config)
+        return self.print_lines(cterm.config)
 
     def show_constraints(self, cterm: CTerm) -> list[str]:
         ret_strs: list[str] = []
         for constraint in cterm.constraints:
-            constraint_strs = self._printer(constraint)
+            constraint_strs = self.print_lines(constraint)
             if len(constraint_strs) > 0:
                 constraint_strs = [f'#And {cstr}' for cstr in constraint_strs]
                 ret_strs.append(constraint_strs[0])
@@ -87,7 +87,7 @@ class CTermShow:
             and kast.args[0].label.name in {'_Set_', '_List_', '_Map_'}
         ):
             items = flatten_label(kast.args[0].label.name, kast.args[0])
-            printed = KToken('\n'.join(map(self.print, items)), KSort(kast.label.name[1:-1]))
+            printed = KToken('\n'.join(map(self._printer, items)), KSort(kast.label.name[1:-1]))
             return KApply(kast.label, [printed])
         return kast
 

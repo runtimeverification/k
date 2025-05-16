@@ -340,7 +340,7 @@ def test_split_constraint_accumulation() -> None:
     minimizer.minimize()
 
     definition = KDefinition('MOCK', [KFlatModule('MOCK', [])], [])
-    cterm_show = CTermShow(PrettyPrinter(definition).printer)
+    cterm_show = CTermShow(PrettyPrinter(definition).print)
     kcfg_show = KCFGShow(definition, node_printer=NodePrinter(cterm_show))
     actual = '\n'.join(kcfg_show.pretty(cfg)) + '\n'
 

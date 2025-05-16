@@ -945,7 +945,7 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         kcfg_show = KCFGShow(
             kprove.definition,
             node_printer=APRProofNodePrinter(
-                proof, CTermShow(PrettyPrinter(kprove.definition).printer), full_printer=True
+                proof, CTermShow(PrettyPrinter(kprove.definition).print), full_printer=True
             ),
         )
         cfg_lines = kcfg_show.show(proof.kcfg)
@@ -999,7 +999,7 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         kcfg_show = KCFGShow(
             kprove.definition,
             node_printer=APRProofNodePrinter(
-                proof, CTermShow(PrettyPrinter(kprove.definition).printer), full_printer=True
+                proof, CTermShow(PrettyPrinter(kprove.definition).print), full_printer=True
             ),
         )
         cfg_lines = kcfg_show.show(proof.kcfg)
@@ -1118,7 +1118,7 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         kcfg_show = KCFGShow(
             kprove.definition,
             node_printer=APRProofNodePrinter(
-                proof, CTermShow(PrettyPrinter(kprove.definition).printer), full_printer=True
+                proof, CTermShow(PrettyPrinter(kprove.definition).print), full_printer=True
             ),
         )
         cfg_lines = kcfg_show.show(proof.kcfg)
@@ -1558,7 +1558,7 @@ class TestImpParallelProof(ParallelTest, KProveTest):
         kcfg_show = KCFGShow(
             kprove.definition,
             node_printer=APRProofNodePrinter(
-                proof, CTermShow(PrettyPrinter(kprove.definition).printer), full_printer=True
+                proof, CTermShow(PrettyPrinter(kprove.definition).print), full_printer=True
             ),
         )
         cfg_lines = kcfg_show.show(proof.kcfg)
