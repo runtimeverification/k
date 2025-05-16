@@ -68,23 +68,11 @@ class CTermShow(PrettyPrinter):
             omit_labels=(self.omit_labels if omit_labels is None else omit_labels),
         )
 
-    def _break_cell_collections(self, kast: KInner) -> KInner:
-        if (
-            type(kast) is KApply
-            and kast.is_cell
-            and len(kast.args) == 1
-            and type(kast.args[0]) is KApply
-            and kast.args[0].label.name in {'_Set_', '_List_', '_Map_'}
-        ):
-            items = flatten_label(kast.args[0].label.name, kast.args[0])
-            printed = KToken('\n'.join(map(self.print, items)), KSort(kast.label.name[1:-1]))
-            return KApply(kast.label, [printed])
-        return kast
-
-    def _hide_labels(self, kast: KInner) -> KInner:
-        if type(kast) == KApply and kast.label.name in self.omit_labels:
-            return DOTS
-        return kast
+    def show(self, cterm: CTerm) -> list[str]:
+        ret_strs: list[str] = []
+        ret_strs.extend(self.show_config(cterm))
+        ret_strs.extend(self.show_constraints(cterm))
+        return ret_strs
 
     def show_config(self, cterm: CTerm) -> list[str]:
         if self.break_cell_collections:
@@ -105,8 +93,20 @@ class CTermShow(PrettyPrinter):
                 ret_strs.extend([f'  {constraint_str}' for constraint_str in constraint_strs[1:]])
         return ret_strs
 
-    def show(self, cterm: CTerm) -> list[str]:
-        ret_strs: list[str] = []
-        ret_strs.extend(self.show_config(cterm))
-        ret_strs.extend(self.show_constraints(cterm))
-        return ret_strs
+    def _break_cell_collections(self, kast: KInner) -> KInner:
+        if (
+            type(kast) is KApply
+            and kast.is_cell
+            and len(kast.args) == 1
+            and type(kast.args[0]) is KApply
+            and kast.args[0].label.name in {'_Set_', '_List_', '_Map_'}
+        ):
+            items = flatten_label(kast.args[0].label.name, kast.args[0])
+            printed = KToken('\n'.join(map(self.print, items)), KSort(kast.label.name[1:-1]))
+            return KApply(kast.label, [printed])
+        return kast
+
+    def _hide_labels(self, kast: KInner) -> KInner:
+        if type(kast) == KApply and kast.label.name in self.omit_labels:
+            return DOTS
+        return kast
