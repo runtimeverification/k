@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk.cterm.show import CTermShow
+from pyk.kast.pretty import PrettyPrinter
 from pyk.kcfg.show import KCFGShow
 from pyk.proof import APRProof, APRProver, ProofStatus
 from pyk.proof.show import APRProofNodePrinter
@@ -87,7 +88,10 @@ class TestNonDetProof(KCFGExploreTest, KProveTest):
         prover.advance_proof(proof, max_iterations=max_iterations)
 
         kcfg_show = KCFGShow(
-            kprove.definition, node_printer=APRProofNodePrinter(proof, CTermShow(kprove.definition), full_printer=True)
+            kprove.definition,
+            node_printer=APRProofNodePrinter(
+                proof, CTermShow(PrettyPrinter(kprove.definition).printer), full_printer=True
+            ),
         )
         cfg_lines = kcfg_show.show(proof.kcfg)
         _LOGGER.info('\n'.join(cfg_lines))

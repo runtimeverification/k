@@ -14,6 +14,7 @@ from pyk.kast.manip import minimize_term, sort_ac_collections
 from pyk.kast.prelude.kbool import BOOL, FALSE, andBool, orBool
 from pyk.kast.prelude.kint import intToken
 from pyk.kast.prelude.ml import mlAnd, mlBottom, mlEquals, mlEqualsFalse, mlEqualsTrue, mlTop
+from pyk.kast.pretty import PrettyPrinter
 from pyk.kcfg.semantics import DefaultSemantics
 from pyk.kcfg.show import KCFGShow
 from pyk.proof import APRProver, ProofStatus
@@ -942,7 +943,10 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         prover.advance_proof(proof, max_iterations=max_iterations)
 
         kcfg_show = KCFGShow(
-            kprove.definition, node_printer=APRProofNodePrinter(proof, CTermShow(kprove.definition), full_printer=True)
+            kprove.definition,
+            node_printer=APRProofNodePrinter(
+                proof, CTermShow(PrettyPrinter(kprove.definition).printer), full_printer=True
+            ),
         )
         cfg_lines = kcfg_show.show(proof.kcfg)
         _LOGGER.info('\n'.join(cfg_lines))
@@ -993,7 +997,10 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         prover.advance_proof(proof, max_iterations=max_iterations)
 
         kcfg_show = KCFGShow(
-            kprove.definition, node_printer=APRProofNodePrinter(proof, CTermShow(kprove.definition), full_printer=True)
+            kprove.definition,
+            node_printer=APRProofNodePrinter(
+                proof, CTermShow(PrettyPrinter(kprove.definition).printer), full_printer=True
+            ),
         )
         cfg_lines = kcfg_show.show(proof.kcfg)
         _LOGGER.info('\n'.join(cfg_lines))
@@ -1109,7 +1116,10 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         prover.advance_proof(proof, max_iterations=max_iterations)
 
         kcfg_show = KCFGShow(
-            kprove.definition, node_printer=APRProofNodePrinter(proof, CTermShow(kprove.definition), full_printer=True)
+            kprove.definition,
+            node_printer=APRProofNodePrinter(
+                proof, CTermShow(PrettyPrinter(kprove.definition).printer), full_printer=True
+            ),
         )
         cfg_lines = kcfg_show.show(proof.kcfg)
         _LOGGER.info('\n'.join(cfg_lines))
@@ -1546,7 +1556,10 @@ class TestImpParallelProof(ParallelTest, KProveTest):
         parallel_advance_proof(proof=proof, max_iterations=max_iterations, create_prover=_create_prover, max_workers=2)
 
         kcfg_show = KCFGShow(
-            kprove.definition, node_printer=APRProofNodePrinter(proof, CTermShow(kprove.definition), full_printer=True)
+            kprove.definition,
+            node_printer=APRProofNodePrinter(
+                proof, CTermShow(PrettyPrinter(kprove.definition).printer), full_printer=True
+            ),
         )
         cfg_lines = kcfg_show.show(proof.kcfg)
         _LOGGER.info('\n'.join(cfg_lines))

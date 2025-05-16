@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING
 from ..kast.inner import KApply, KSort, KToken, flatten_label, top_down
 from ..kast.manip import free_vars, minimize_term
 from ..kast.prelude.k import DOTS
-from ..kast.pretty import PrettyPrinter
 from .cterm import CTerm
 
 if TYPE_CHECKING:
@@ -14,53 +13,39 @@ if TYPE_CHECKING:
     from typing import Final
 
     from ..kast.inner import KInner
-    from ..kast.outer import KDefinition, KFlatModule
-    from ..kast.pretty import SymbolTable
 
 _LOGGER: Final = logging.getLogger(__name__)
 
 
-class CTermShow(PrettyPrinter):
+class CTermShow:
+    _printer: Callable[[KInner], list[str]]
     minimize: bool
     break_cell_collections: bool
     omit_labels: tuple[str, ...]
 
     def __init__(
         self,
-        definition: KDefinition,
-        extra_unparsing_modules: Iterable[KFlatModule] = (),
-        patch_symbol_table: Callable[[SymbolTable], None] | None = None,
-        unalias: bool = True,
-        sort_collections: bool = True,
+        printer: Callable[[KInner], list[str]],
         minimize: bool = True,
         break_cell_collections: bool = True,
         omit_labels: Iterable[str] = (),
     ):
-        super().__init__(
-            definition,
-            extra_unparsing_modules,
-            patch_symbol_table,
-            unalias,
-            sort_collections,
-        )
+        self._printer = printer
         self.minimize = minimize
         self.break_cell_collections = break_cell_collections
         self.omit_labels = tuple(omit_labels)
 
+    def print(self, kast: KInner) -> str:
+        return '\n'.join(self._printer(kast))
+
     def let(
         self,
-        unalias: bool | None = None,
-        sort_collections: bool | None = None,
         minimize: bool | None = None,
         break_cell_collections: bool | None = None,
         omit_labels: Iterable[str] | None = None,
     ) -> CTermShow:
         return CTermShow(
-            self.definition,
-            extra_unparsing_modules=self._extra_unparsing_modules,
-            patch_symbol_table=self._patch_symbol_table,
-            unalias=(self._unalias if unalias is None else unalias),
-            sort_collections=(self._sort_collections if sort_collections is None else sort_collections),
+            self._printer,
             minimize=(self.minimize if minimize is None else minimize),
             break_cell_collections=(
                 self.break_cell_collections if break_cell_collections is None else break_cell_collections
@@ -81,12 +66,12 @@ class CTermShow(PrettyPrinter):
             cterm = CTerm(top_down(self._hide_labels, cterm.config), cterm.constraints)
         if self.minimize:
             cterm = CTerm(minimize_term(cterm.config, keep_vars=free_vars(cterm.constraint)), cterm.constraints)
-        return self.print(cterm.config).split('\n')
+        return self._printer(cterm.config)
 
     def show_constraints(self, cterm: CTerm) -> list[str]:
         ret_strs: list[str] = []
         for constraint in cterm.constraints:
-            constraint_strs = self.print(constraint).split('\n')
+            constraint_strs = self._printer(constraint)
             if len(constraint_strs) > 0:
                 constraint_strs = [f'#And {cstr}' for cstr in constraint_strs]
                 ret_strs.append(constraint_strs[0])

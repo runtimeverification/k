@@ -76,7 +76,9 @@ class KCFGShow:
 
     def __init__(self, defn: KDefinition, node_printer: NodePrinter | None = None):
         self.pretty_printer = PrettyPrinter(defn)
-        self.node_printer = node_printer if node_printer else NodePrinter(CTermShow(defn))
+        self.node_printer = (
+            node_printer if node_printer else NodePrinter(CTermShow(lambda k: self.pretty_printer.print(k).split('\n')))
+        )
 
     def node_short_info(self, kcfg: KCFG, node: KCFG.Node) -> list[str]:
         return self.node_printer.print_node(kcfg, node)

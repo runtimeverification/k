@@ -10,6 +10,7 @@ from pyk.cterm import CTerm
 from pyk.cterm.show import CTermShow
 from pyk.kast.inner import KApply, KVariable
 from pyk.kast.prelude.kint import intToken
+from pyk.kast.pretty import PrettyPrinter
 from pyk.kcfg.show import KCFGShow
 from pyk.proof import APRProof, APRProver, ProofStatus
 from pyk.proof.show import APRProofNodePrinter
@@ -96,7 +97,9 @@ class TestMiniKEVM(KCFGExploreTest, KProveTest):
 
         kcfg_show = KCFGShow(
             kprove.definition,
-            node_printer=APRProofNodePrinter(proof, CTermShow(kprove.definition, minimize=False), full_printer=True),
+            node_printer=APRProofNodePrinter(
+                proof, CTermShow(PrettyPrinter(kprove.definition).printer, minimize=False), full_printer=True
+            ),
         )
         cfg_lines = kcfg_show.show(proof.kcfg)
         _LOGGER.info('\n'.join(cfg_lines))

@@ -9,6 +9,7 @@ from pyk.cterm import CTerm
 from pyk.cterm.show import CTermShow
 from pyk.kast.inner import KApply, KSequence, KVariable
 from pyk.kast.manip import set_cell
+from pyk.kast.pretty import PrettyPrinter
 from pyk.kcfg import KCFGExplore
 from pyk.kcfg.kcfg import Step
 from pyk.kcfg.semantics import DefaultSemantics
@@ -218,6 +219,8 @@ class TestCustomStep(CTermSymbolicTest, KProveTest):
 
         kcfg_show = KCFGShow(
             kprove.definition,
-            node_printer=APRProofNodePrinter(proof, CTermShow(kprove.definition, minimize=False), full_printer=True),
+            node_printer=APRProofNodePrinter(
+                proof, CTermShow(PrettyPrinter(kprove.definition).printer, minimize=False), full_printer=True
+            ),
         )
         return proof.status, kcfg_show.show(proof.kcfg)
