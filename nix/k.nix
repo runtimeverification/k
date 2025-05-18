@@ -1,4 +1,4 @@
-{ src, maven, mvnHash, manualMvnArtifacts, manualMvnSourceArtifacts, clang, stdenv, lib, runCommand
+{ src, maven, mvnHash, manualMvnArtifacts, manualMvnArtifactsJars, manualMvnSourceArtifacts, fileReplacements, clang, stdenv, lib, runCommand
 , makeWrapper, bison, flex, gcc, git, gmp, jdk, jre, jre_minimal, mpfr, ncurses
 , pkg-config, python3, python310, python311, z3, haskell-backend, prelude-kore, llvm-backend
 , debugger, version, llvm-kompile-libs, runtimeShell }:
@@ -30,7 +30,7 @@ let
   k = current-llvm-kompile-libs:
     maven.buildMavenPackage rec {
       pname = "k";
-      inherit version src mvnHash manualMvnArtifacts manualMvnSourceArtifacts;
+      inherit version src mvnHash manualMvnArtifacts manualMvnSourceArtifacts manualMvnArtifactsJars;
 
       buildOffline = true;
 
@@ -110,6 +110,8 @@ let
 
       passthru =
         builtins.mapAttrs (_: paths: k (current-llvm-kompile-libs ++ paths))
-        llvm-kompile-libs;
+        llvm-kompile-libs // {
+          inherit fileReplacements;
+        };
     };
 in k [ ]
