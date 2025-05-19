@@ -30,7 +30,6 @@ if TYPE_CHECKING:
 
     from ..kast.outer import KClaim, KRule, KRuleLike
     from ..kast.pretty import SymbolTable
-    from ..kcfg import KCFGExplore
     from ..utils import BugReport
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -160,7 +159,6 @@ class KProve(KPrint):
     main_file: Path | None
     prover: list[str]
     prover_args: list[str]
-    _kcfg_explore: KCFGExplore | None
 
     def __init__(
         self,
@@ -183,7 +181,6 @@ class KProve(KPrint):
         self.main_file = main_file
         self.prover = [command]
         self.prover_args = []
-        self._kcfg_explore = None
 
     def prove(
         self,

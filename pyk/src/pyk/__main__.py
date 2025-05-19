@@ -41,7 +41,7 @@ from .ktool.kompile import Kompile, KompileBackend
 from .ktool.kprint import KPrint
 from .ktool.kprove import KProve
 from .ktool.krun import KRun
-from .ktool.prove_rpc import ProveRpc
+from .proof.prove_rpc import ProveRpc
 from .proof.reachability import APRFailureInfo, APRProof
 from .proof.show import APRProofNodePrinter, APRProofShow
 from .utils import check_file_path, ensure_dir_path, exit_with_process_error
@@ -113,16 +113,11 @@ def exec_print(options: PrintOptions) -> None:
         _LOGGER.info(f'Wrote file: {options.output_file.name}')
     else:
         if options.minimize:
-            if options.omit_labels is not None and options.keep_cells is not None:
-                raise ValueError('You cannot use both --omit-labels and --keep-cells.')
-
-            abstract_labels = options.omit_labels.split(',') if options.omit_labels is not None else []
-            keep_cells = options.keep_cells.split(',') if options.keep_cells is not None else []
             minimized_disjuncts = []
 
             for disjunct in flatten_label('#Or', term):
                 try:
-                    minimized = minimize_term(disjunct, abstract_labels=abstract_labels, keep_cells=keep_cells)
+                    minimized = minimize_term(disjunct)
                     config, constraint = split_config_and_constraints(minimized)
                 except ValueError as err:
                     raise ValueError('The minimized term does not contain a config cell.') from err
