@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 import logging
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from ..kast.inner import KApply, KSort, KToken, flatten_label, top_down
@@ -21,9 +21,9 @@ _LOGGER: Final = logging.getLogger(__name__)
 @dataclass
 class CTermShow:
     _printer: Callable[[KInner], str]
-    minimize: bool
-    break_cell_collections: bool
-    omit_labels: tuple[str, ...]
+    _minimize: bool
+    _break_cell_collections: bool
+    _omit_labels: tuple[str, ...]
 
     def __init__(
         self,
@@ -33,9 +33,9 @@ class CTermShow:
         omit_labels: Iterable[str] = (),
     ):
         self._printer = printer
-        self.minimize = minimize
-        self.break_cell_collections = break_cell_collections
-        self.omit_labels = tuple(omit_labels)
+        self._minimize = minimize
+        self._break_cell_collections = break_cell_collections
+        self._omit_labels = tuple(omit_labels)
 
     def print_lines(self, kast: KInner) -> list[str]:
         return self._printer(kast).split('\n')
@@ -48,11 +48,11 @@ class CTermShow:
     ) -> CTermShow:
         return CTermShow(
             self._printer,
-            minimize=(self.minimize if minimize is None else minimize),
+            minimize=(self._minimize if minimize is None else minimize),
             break_cell_collections=(
-                self.break_cell_collections if break_cell_collections is None else break_cell_collections
+                self._break_cell_collections if break_cell_collections is None else break_cell_collections
             ),
-            omit_labels=(self.omit_labels if omit_labels is None else omit_labels),
+            omit_labels=(self._omit_labels if omit_labels is None else omit_labels),
         )
 
     def show(self, cterm: CTerm) -> list[str]:
@@ -62,11 +62,11 @@ class CTermShow:
         return ret_strs
 
     def show_config(self, cterm: CTerm) -> list[str]:
-        if self.break_cell_collections:
-            cterm = CTerm(top_down(self._break_cell_collections, cterm.config), cterm.constraints)
-        if self.omit_labels:
-            cterm = CTerm(top_down(self._hide_labels, cterm.config), cterm.constraints)
-        if self.minimize:
+        if self._break_cell_collections:
+            cterm = CTerm(top_down(self._break_cells_visitor, cterm.config), cterm.constraints)
+        if self._omit_labels:
+            cterm = CTerm(top_down(self._omit_labels_visitor, cterm.config), cterm.constraints)
+        if self._minimize:
             cterm = CTerm(minimize_term(cterm.config, keep_vars=free_vars(cterm.constraint)), cterm.constraints)
         return self.print_lines(cterm.config)
 
@@ -80,7 +80,7 @@ class CTermShow:
                 ret_strs.extend([f'  {constraint_str}' for constraint_str in constraint_strs[1:]])
         return ret_strs
 
-    def _break_cell_collections(self, kast: KInner) -> KInner:
+    def _break_cells_visitor(self, kast: KInner) -> KInner:
         if (
             type(kast) is KApply
             and kast.is_cell
@@ -93,7 +93,7 @@ class CTermShow:
             return KApply(kast.label, [printed])
         return kast
 
-    def _hide_labels(self, kast: KInner) -> KInner:
-        if type(kast) == KApply and kast.label.name in self.omit_labels:
+    def _omit_labels_visitor(self, kast: KInner) -> KInner:
+        if type(kast) == KApply and kast.label.name in self._omit_labels:
             return DOTS
         return kast
