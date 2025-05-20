@@ -13,9 +13,10 @@ if TYPE_CHECKING:
 
     from graphviz import Digraph
 
+    from ..cterm.show import CTermShow
+    from ..kast.outer import KDefinition
     from ..kcfg import KCFG
     from ..kcfg.kcfg import NodeIdLike
-    from ..ktool.kprint import KPrint
     from .reachability import APRProof
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -24,8 +25,8 @@ _LOGGER: Final = logging.getLogger(__name__)
 class APRProofNodePrinter(NodePrinter):
     proof: APRProof
 
-    def __init__(self, proof: APRProof, kprint: KPrint, full_printer: bool = False, minimize: bool = False):
-        super().__init__(kprint, full_printer=full_printer, minimize=minimize)
+    def __init__(self, proof: APRProof, cterm_show: CTermShow, full_printer: bool = False):
+        super().__init__(cterm_show, full_printer=full_printer)
         self.proof = proof
 
     def node_attrs(self, kcfg: KCFG, node: KCFG.Node) -> list[str]:
@@ -52,8 +53,8 @@ class APRProofNodePrinter(NodePrinter):
 class APRProofShow:
     kcfg_show: KCFGShow
 
-    def __init__(self, kprint: KPrint, node_printer: NodePrinter | None = None):
-        self.kcfg_show = KCFGShow(kprint, node_printer=node_printer)
+    def __init__(self, definition: KDefinition, node_printer: NodePrinter | None = None):
+        self.kcfg_show = KCFGShow(definition, node_printer=node_printer)
 
     def pretty_segments(self, proof: APRProof, minimize: bool = True) -> Iterable[tuple[str, Iterable[str]]]:
         ret_lines = list(self.kcfg_show.pretty_segments(proof.kcfg, minimize=minimize))
@@ -73,7 +74,6 @@ class APRProofShow:
         node_deltas: Iterable[tuple[NodeIdLike, NodeIdLike]] = (),
         to_module: bool = False,
         minimize: bool = True,
-        sort_collections: bool = False,
         omit_cells: Iterable[str] = (),
     ) -> list[str]:
         res_lines = self.kcfg_show.show(
@@ -82,7 +82,6 @@ class APRProofShow:
             node_deltas=node_deltas,
             to_module=to_module,
             minimize=minimize,
-            sort_collections=sort_collections,
             omit_cells=omit_cells,
             module_name=f'SUMMARY-{proof.id.upper().replace("_", "-")}',
         )
