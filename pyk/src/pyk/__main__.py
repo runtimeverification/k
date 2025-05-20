@@ -16,6 +16,7 @@ from .cli.pyk import PrintInput, create_argument_parser, generate_options, parse
 from .cli.utils import LOG_FORMAT, loglevel
 from .coverage import get_rule_by_id, strip_coverage_logger
 from .cterm import CTerm
+from .cterm.show import CTermShow
 from .cterm.symbolic import cterm_symbolic
 from .kast import KAst
 from .kast.att import KAtt
@@ -275,8 +276,10 @@ def exec_prove(options: ProveOptions) -> None:
             if type(failure_info) is APRFailureInfo:
                 print('\n'.join(failure_info.print()))
         if options.show_kcfg and type(proof) is APRProof:
-            node_printer = APRProofNodePrinter(proof, kprove, full_printer=True, minimize=False)
-            show = APRProofShow(kprove, node_printer=node_printer)
+            node_printer = APRProofNodePrinter(
+                proof, CTermShow(PrettyPrinter(kprove.definition).print, minimize=False), full_printer=True
+            )
+            show = APRProofShow(kprove.definition, node_printer=node_printer)
             print('\n'.join(show.show(proof, minimize=False)))
     sys.exit(len([p.id for p in proofs if not p.passed]))
 

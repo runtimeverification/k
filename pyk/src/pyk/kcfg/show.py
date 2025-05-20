@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from graphviz import Digraph
 
+from ..cterm.show import CTermShow
 from ..kast.inner import KApply, KRewrite, top_down
 from ..kast.manip import (
     flatten_label,
@@ -19,6 +20,7 @@ from ..kast.manip import (
 from ..kast.outer import KRule
 from ..kast.prelude.k import DOTS
 from ..kast.prelude.ml import mlAnd
+from ..kast.pretty import PrettyPrinter
 from ..utils import add_indent, ensure_dir_path
 from .kcfg import KCFG
 
@@ -30,31 +32,26 @@ if TYPE_CHECKING:
     from ..cterm import CSubst
     from ..kast import KInner
     from ..kast.outer import KDefinition, KFlatModule, KImport, KSentence
-    from ..ktool.kprint import KPrint
     from .kcfg import NodeIdLike
 
 _LOGGER: Final = logging.getLogger(__name__)
 
 
 class NodePrinter:
-    kprint: KPrint
+    cterm_show: CTermShow
     full_printer: bool
     minimize: bool
 
-    def __init__(self, kprint: KPrint, full_printer: bool = False, minimize: bool = False):
-        self.kprint = kprint
+    def __init__(self, cterm_show: CTermShow, full_printer: bool = False):
+        self.cterm_show = cterm_show
         self.full_printer = full_printer
-        self.minimize = minimize
 
     def print_node(self, kcfg: KCFG, node: KCFG.Node) -> list[str]:
         attrs = self.node_attrs(kcfg, node)
         attr_str = ' (' + ', '.join(attrs) + ')' if attrs else ''
         node_strs = [f'{node.id}{attr_str}']
         if self.full_printer:
-            kast = node.cterm.kast
-            if self.minimize:
-                kast = minimize_term(kast)
-            node_strs.extend('  ' + line for line in self.kprint.pretty_print(kast).split('\n'))
+            node_strs.extend('  ' + line for line in self.cterm_show.show(node.cterm))
         return node_strs
 
     def node_attrs(self, kcfg: KCFG, node: KCFG.Node) -> list[str]:
@@ -74,12 +71,12 @@ class NodePrinter:
 
 
 class KCFGShow:
-    kprint: KPrint
+    pretty_printer: PrettyPrinter
     node_printer: NodePrinter
 
-    def __init__(self, kprint: KPrint, node_printer: NodePrinter | None = None):
-        self.kprint = kprint
-        self.node_printer = node_printer if node_printer is not None else NodePrinter(kprint)
+    def __init__(self, defn: KDefinition, node_printer: NodePrinter | None = None):
+        self.pretty_printer = PrettyPrinter(defn)
+        self.node_printer = node_printer if node_printer else NodePrinter(CTermShow(self.pretty_printer.print))
 
     def node_short_info(self, kcfg: KCFG, node: KCFG.Node) -> list[str]:
         return self.node_printer.print_node(kcfg, node)
@@ -140,7 +137,7 @@ class KCFGShow:
             csubst: CSubst, subst_first: bool = False, indent: int = 4, minimize: bool = False
         ) -> list[str]:
             _constraint_strs = [
-                self.kprint.pretty_print(ml_pred_to_bool(constraint, unsafe=True)) for constraint in csubst.constraints
+                self.pretty_printer.print(ml_pred_to_bool(constraint, unsafe=True)) for constraint in csubst.constraints
             ]
             constraint_strs = _multi_line_print('constraint', _constraint_strs, 'true')
             if len(csubst.subst.minimize()) > 0 and minimize:
@@ -149,7 +146,7 @@ class KCFGShow:
                 _subst_strs = [
                     line
                     for k, v in csubst.subst.minimize().items()
-                    for line in f'{k} <- {self.kprint.pretty_print(v)}'.split('\n')
+                    for line in f'{k} <- {self.pretty_printer.print(v)}'.split('\n')
                 ]
                 subst_strs = _multi_line_print('subst', _subst_strs, '.Subst')
             if subst_first:
@@ -325,7 +322,6 @@ class KCFGShow:
         node_deltas: Iterable[tuple[NodeIdLike, NodeIdLike]] = (),
         to_module: bool = False,
         minimize: bool = True,
-        sort_collections: bool = False,
         omit_cells: Iterable[str] = (),
         module_name: str | None = None,
     ) -> list[str]:
@@ -344,7 +340,7 @@ class KCFGShow:
             res_lines.append('')
             res_lines.append(f'Node {node_id}:')
             res_lines.append('')
-            res_lines.append(self.kprint.pretty_print(kast, sort_collections=sort_collections))
+            res_lines.append(self.pretty_printer.print(kast))
             res_lines.append('')
 
         for node_id_1, node_id_2 in node_deltas:
@@ -358,7 +354,7 @@ class KCFGShow:
             res_lines.append('')
             res_lines.append(f'State Delta {node_id_1} => {node_id_2}:')
             res_lines.append('')
-            res_lines.append(self.kprint.pretty_print(config_delta, sort_collections=sort_collections))
+            res_lines.append(self.pretty_printer.print(config_delta))
             res_lines.append('')
 
         if not (nodes_printed):
@@ -368,7 +364,7 @@ class KCFGShow:
 
         if to_module:
             module = self.to_module(cfg, module_name, omit_cells=omit_cells)
-            res_lines.append(self.kprint.pretty_print(module, sort_collections=sort_collections))
+            res_lines.append(self.pretty_printer.print(module))
 
         return res_lines
 
@@ -396,7 +392,7 @@ class KCFGShow:
 
         for cover in kcfg.covers():
             label = ', '.join(
-                f'{k} |-> {self.kprint.pretty_print(v)}' for k, v in cover.csubst.subst.minimize().items()
+                f'{k} |-> {self.pretty_printer.print(v)}' for k, v in cover.csubst.subst.minimize().items()
             )
             label = _short_label(label)
             attrs = {'class': 'abstraction', 'style': 'dashed'}
@@ -405,7 +401,7 @@ class KCFGShow:
         for split in kcfg.splits():
             for target_id, csubst in split.splits.items():
                 label = '\n#And'.join(
-                    f'{self.kprint.pretty_print(v)}' for v in split.source.cterm.constraints + csubst.constraints
+                    f'{self.pretty_printer.print(v)}' for v in split.source.cterm.constraints + csubst.constraints
                 )
                 graph.edge(tail_name=split.source.id, head_name=target_id, label=f'  {label}        ')
 
@@ -438,15 +434,15 @@ class KCFGShow:
 
             config = node.cterm.config
             if not node_file.exists():
-                node_file.write_text(self.kprint.pretty_print(config))
+                node_file.write_text(self.pretty_printer.print(config))
                 _LOGGER.info(f'Wrote node file {cfgid}: {node_file}')
             config = minimize_term(config)
             if not node_minimized_file.exists():
-                node_minimized_file.write_text(self.kprint.pretty_print(config))
+                node_minimized_file.write_text(self.pretty_printer.print(config))
                 _LOGGER.info(f'Wrote node file {cfgid}: {node_minimized_file}')
             if not node_constraint_file.exists():
                 constraint = mlAnd(node.cterm.constraints)
-                node_constraint_file.write_text(self.kprint.pretty_print(constraint))
+                node_constraint_file.write_text(self.pretty_printer.print(constraint))
                 _LOGGER.info(f'Wrote node file {cfgid}: {node_constraint_file}')
 
         edges_dir = dump_dir / 'edges'
@@ -457,11 +453,11 @@ class KCFGShow:
 
             config = push_down_rewrites(KRewrite(edge.source.cterm.config, edge.target.cterm.config))
             if not edge_file.exists():
-                edge_file.write_text(self.kprint.pretty_print(config))
+                edge_file.write_text(self.pretty_printer.print(config))
                 _LOGGER.info(f'Wrote edge file {cfgid}: {edge_file}')
             config = minimize_term(config)
             if not edge_minimized_file.exists():
-                edge_minimized_file.write_text(self.kprint.pretty_print(config))
+                edge_minimized_file.write_text(self.pretty_printer.print(config))
                 _LOGGER.info(f'Wrote edge file {cfgid}: {edge_minimized_file}')
 
         covers_dir = dump_dir / 'covers'
@@ -471,12 +467,12 @@ class KCFGShow:
             cover_constraint_file = covers_dir / f'constraint_{cover.source.id}_{cover.target.id}.txt'
 
             subst_equalities = flatten_label(
-                '#And', cover.csubst.pred(sort_with=self.kprint.definition, constraints=False)
+                '#And', cover.csubst.pred(sort_with=self.pretty_printer.definition, constraints=False)
             )
 
             if not cover_file.exists():
-                cover_file.write_text('\n'.join(self.kprint.pretty_print(se) for se in subst_equalities))
+                cover_file.write_text('\n'.join(self.pretty_printer.print(se) for se in subst_equalities))
                 _LOGGER.info(f'Wrote cover file {cfgid}: {cover_file}')
             if not cover_constraint_file.exists():
-                cover_constraint_file.write_text(self.kprint.pretty_print(cover.csubst.constraint))
+                cover_constraint_file.write_text(self.pretty_printer.print(cover.csubst.constraint))
                 _LOGGER.info(f'Wrote cover file {cfgid}: {cover_constraint_file}')
