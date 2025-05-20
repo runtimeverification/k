@@ -17,7 +17,6 @@ from = "src"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-cmd2 = "^2.4.2"
 coloredlogs = "^15.0.1"
 cookiecutter = "^2.6.0"
 filelock = "^3.9.0"

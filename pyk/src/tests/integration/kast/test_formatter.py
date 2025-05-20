@@ -8,7 +8,7 @@ import pytest
 
 from pyk.kast.formatter import Formatter
 from pyk.kast.inner import KApply, KSequence, KSort, KToken, KVariable
-from pyk.prelude.utils import token
+from pyk.kast.prelude.utils import token
 from pyk.testing import KompiledTest
 
 from ..utils import K_FILES

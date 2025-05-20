@@ -16,8 +16,8 @@ from ..kast import kast_term
 from ..kast.inner import KInner
 from ..kast.manip import flatten_label
 from ..kast.outer import KDefinition, KFlatModule, KFlatModuleList, KImport, KRequire
+from ..kast.prelude.ml import is_top
 from ..kore.rpc import KoreExecLogFormat
-from ..prelude.ml import is_top
 from ..utils import gen_file_timestamp, run_process_2
 from . import TypeInferenceMode
 from .claim_index import ClaimIndex
@@ -30,7 +30,6 @@ if TYPE_CHECKING:
 
     from ..kast.outer import KClaim, KRule, KRuleLike
     from ..kast.pretty import SymbolTable
-    from ..kcfg import KCFGExplore
     from ..utils import BugReport
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -160,7 +159,6 @@ class KProve(KPrint):
     main_file: Path | None
     prover: list[str]
     prover_args: list[str]
-    _kcfg_explore: KCFGExplore | None
 
     def __init__(
         self,
@@ -183,7 +181,6 @@ class KProve(KPrint):
         self.main_file = main_file
         self.prover = [command]
         self.prover_args = []
-        self._kcfg_explore = None
 
     def prove(
         self,
@@ -274,7 +271,7 @@ class KProve(KPrint):
                 temp_dir=self.use_directory,
                 dry_run=True,
                 type_inference_mode=type_inference_mode,
-                args=['--emit-json-spec', ntf.name],
+                args=['--emit-json-spec', ntf.name, '--allow-rules'],
             )
             json_data = json.loads(Path(ntf.name).read_text())
 

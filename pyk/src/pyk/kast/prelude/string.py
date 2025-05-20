@@ -1,7 +1,7 @@
 from typing import Final
 
-from ..dequote import dequote_string, enquote_string
-from ..kast.inner import KSort, KToken
+from ...dequote import dequote_string, enquote_string
+from ..inner import KSort, KToken
 
 STRING: Final = KSort('String')
 

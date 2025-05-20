@@ -8,6 +8,8 @@ from typing import TYPE_CHECKING, NamedTuple, final
 from ..cterm import CSubst, CTerm
 from ..kast.inner import KApply, KLabel, KRewrite, KToken, KVariable, Subst
 from ..kast.manip import flatten_label, is_spurious_constraint, sort_ac_collections
+from ..kast.prelude.k import GENERATED_TOP_CELL, K_ITEM
+from ..kast.prelude.ml import mlAnd
 from ..kast.pretty import PrettyPrinter
 from ..konvert import kast_to_kore, kflatmodule_to_kore, kore_to_kast
 from ..kore.rpc import (
@@ -17,13 +19,10 @@ from ..kore.rpc import (
     SatResult,
     SmtSolverError,
     StopReason,
-    TransportType,
     UnknownResult,
     UnsatResult,
     kore_server,
 )
-from ..prelude.k import GENERATED_TOP_CELL, K_ITEM
-from ..prelude.ml import mlAnd
 from ..utils import not_none
 
 if TYPE_CHECKING:
@@ -307,7 +306,6 @@ def cterm_symbolic(
     log_succ_rewrites: bool = True,
     log_fail_rewrites: bool = False,
     start_server: bool = True,
-    maude_port: int | None = None,
     fallback_on: Iterable[FallbackReason] | None = None,
     interim_simplification: int | None = None,
     no_post_exec_simplify: bool = False,
@@ -338,18 +336,7 @@ def cterm_symbolic(
     else:
         if port is None:
             raise ValueError('Missing port with start_server=False')
-        if maude_port is None:
-            dispatch = None
-        else:
-            dispatch = {
-                'execute': [('localhost', maude_port, TransportType.HTTP)],
-                'simplify': [('localhost', maude_port, TransportType.HTTP)],
-                'add-module': [
-                    ('localhost', maude_port, TransportType.HTTP),
-                    ('localhost', port, TransportType.SINGLE_SOCKET),
-                ],
-            }
-        with KoreClient('localhost', port, bug_report=bug_report, bug_report_id=id, dispatch=dispatch) as client:
+        with KoreClient('localhost', port, bug_report=bug_report, bug_report_id=id) as client:
             yield CTermSymbolic(
                 client, definition, log_succ_rewrites=log_succ_rewrites, log_fail_rewrites=log_fail_rewrites
             )

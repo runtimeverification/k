@@ -6,16 +6,15 @@ import re
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from pyk.kore.rpc import LogEntry
-
 from ..cterm.cterm import remove_useless_constraints
 from ..kast.inner import KInner, Subst
 from ..kast.manip import flatten_label, free_vars, ml_pred_to_bool
-from ..kast.outer import KFlatModule, KImport, KRule
+from ..kast.outer import KClaim, KFlatModule, KImport, KRule
+from ..kast.prelude.ml import mlAnd, mlTop
 from ..kcfg import KCFG, KCFGStore
 from ..kcfg.exploration import KCFGExploration
+from ..kore.rpc import LogEntry
 from ..ktool.claim_index import ClaimIndex
-from ..prelude.ml import mlAnd, mlTop
 from ..utils import FrozenDict, ensure_dir_path, hash_str, shorten_hashes, single
 from .implies import ProofSummary, Prover, RefutationProof
 from .proof import CompositeSummary, FailureInfo, Proof, ProofStatus
@@ -25,7 +24,7 @@ if TYPE_CHECKING:
     from pathlib import Path
     from typing import Any, Final, TypeVar
 
-    from ..kast.outer import KClaim, KDefinition, KFlatModuleList, KRuleLike
+    from ..kast.outer import KDefinition, KFlatModuleList, KRuleLike
     from ..kcfg import KCFGExplore
     from ..kcfg.explore import KCFGExtendResult
     from ..kcfg.kcfg import CSubst, NodeIdLike
@@ -460,6 +459,12 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         _rule = _edge.to_rule(self.rule_id, priority=priority)
         assert type(_rule) is KRule
         return _rule
+
+    def as_claim(self) -> KClaim:
+        _edge = KCFG.Edge(self.kcfg.node(self.init), self.kcfg.node(self.target), depth=0, rules=())
+        _claim = _edge.to_rule(self.rule_id, claim=True)
+        assert type(_claim) is KClaim
+        return _claim
 
     @staticmethod
     def from_spec_modules(

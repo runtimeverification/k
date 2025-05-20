@@ -4,8 +4,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from pyk.kast.inner import KApply, KLabel, KVariable
-from pyk.prelude.kint import geInt, intToken, ltInt
-from pyk.prelude.ml import mlEqualsTrue
+from pyk.kast.prelude.kint import geInt, intToken, ltInt
+from pyk.kast.prelude.ml import mlEqualsTrue
 
 if TYPE_CHECKING:
     from typing import Final

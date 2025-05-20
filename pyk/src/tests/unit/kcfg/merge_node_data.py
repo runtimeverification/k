@@ -5,10 +5,10 @@ from typing import TYPE_CHECKING, Final
 from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KLabel, KSort, KToken, KVariable
 from pyk.kast.manip import ml_pred_to_bool
+from pyk.kast.prelude.kbool import andBool
+from pyk.kast.prelude.kint import intToken
 from pyk.kcfg import KCFG
 from pyk.kcfg.semantics import DefaultSemantics
-from pyk.prelude.kbool import andBool
-from pyk.prelude.kint import intToken
 from pyk.utils import single
 
 from ..utils import ge_ml, k, lt_ml

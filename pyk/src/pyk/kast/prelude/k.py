@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from ..kast.inner import KApply, KLabel, KSort, KToken
+from ..inner import KApply, KLabel, KSort, KToken
 
 if TYPE_CHECKING:
     from typing import Final
 
-    from ..kast import KInner
+    from .. import KInner
 
 
 K: Final = KSort('K')

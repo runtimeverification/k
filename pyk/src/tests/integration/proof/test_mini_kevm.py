@@ -8,8 +8,8 @@ import pytest
 
 from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KVariable
+from pyk.kast.prelude.kint import intToken
 from pyk.kcfg.show import KCFGShow
-from pyk.prelude.kint import intToken
 from pyk.proof import APRProof, APRProver, ProofStatus
 from pyk.proof.show import APRProofNodePrinter
 from pyk.testing import KCFGExploreTest, KProveTest

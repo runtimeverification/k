@@ -17,8 +17,8 @@ from ..kast.manip import (
     sort_ac_collections,
 )
 from ..kast.outer import KRule
-from ..prelude.k import DOTS
-from ..prelude.ml import mlAnd
+from ..kast.prelude.k import DOTS
+from ..kast.prelude.ml import mlAnd
 from ..utils import add_indent, ensure_dir_path
 from .kcfg import KCFG
 
@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 
     from ..cterm import CSubst
     from ..kast import KInner
-    from ..kast.outer import KFlatModule, KSentence
+    from ..kast.outer import KDefinition, KFlatModule, KImport, KSentence
     from ..ktool.kprint import KPrint
     from .kcfg import NodeIdLike
 
@@ -127,25 +127,18 @@ class KCFGShow:
         processed_nodes: list[KCFG.Node] = []
         ret_lines: list[tuple[str, list[str]]] = []
 
-        def _multi_line_print(
-            label: str, lines: list[str], default: str = 'None', indent: int = 4, max_width: int | None = None
-        ) -> list[str]:
+        def _multi_line_print(label: str, lines: list[str], default: str = 'None', indent: int = 4) -> list[str]:
             ret_lines = []
             if len(lines) == 0:
                 ret_lines.append(f'{label}: {default}')
             else:
                 ret_lines.append(f'{label}:')
                 ret_lines.extend([f'{indent * " "}{line}' for line in lines])
-            if max_width is not None:
-                ret_lines = [
-                    ret_line if len(ret_line) <= max_width else ret_line[0:max_width] + '...' for ret_line in ret_lines
-                ]
             return ret_lines
 
         def _print_csubst(
             csubst: CSubst, subst_first: bool = False, indent: int = 4, minimize: bool = False
         ) -> list[str]:
-            max_width = 78 if minimize else None
             _constraint_strs = [
                 self.kprint.pretty_print(ml_pred_to_bool(constraint, unsafe=True)) for constraint in csubst.constraints
             ]
@@ -158,7 +151,7 @@ class KCFGShow:
                     for k, v in csubst.subst.minimize().items()
                     for line in f'{k} <- {self.kprint.pretty_print(v)}'.split('\n')
                 ]
-                subst_strs = _multi_line_print('subst', _subst_strs, '.Subst', max_width=max_width)
+                subst_strs = _multi_line_print('subst', _subst_strs, '.Subst')
             if subst_first:
                 return subst_strs + constraint_strs
             return constraint_strs + subst_strs
@@ -311,6 +304,8 @@ class KCFGShow:
         module_name: str | None = None,
         omit_cells: Iterable[str] = (),
         parseable_output: bool = True,
+        defunc_with: KDefinition | None = None,
+        imports: Iterable[KImport] = (),
     ) -> KFlatModule:
         def _process_sentence(sent: KSentence) -> KSentence:
             if type(sent) is KRule:
@@ -320,7 +315,7 @@ class KCFGShow:
                     sent = minimize_rule_like(sent)
             return sent
 
-        module = cfg.to_module(module_name)
+        module = cfg.to_module(module_name, defunc_with=defunc_with, imports=imports)
         return module.let(sentences=[_process_sentence(sent) for sent in module.sentences])
 
     def show(

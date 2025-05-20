@@ -21,7 +21,7 @@ from ..kast.manip import (
     sort_ac_collections,
 )
 from ..kast.outer import KFlatModule
-from ..prelude.kbool import andBool
+from ..kast.prelude.kbool import andBool
 from ..utils import ensure_dir_path, not_none
 
 if TYPE_CHECKING:
@@ -30,11 +30,10 @@ if TYPE_CHECKING:
     from types import TracebackType
     from typing import Any
 
-    from pyk.kore.rpc import LogEntry
-
     from ..kast import KAtt
     from ..kast.inner import KInner
     from ..kast.outer import KClaim, KDefinition, KImport, KRuleLike
+    from ..kore.rpc import LogEntry
 
 
 NodeIdLike = int | str
@@ -568,7 +567,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             result_info_message = f': {result_info}' if result_info else ''
             _LOGGER.log(
                 logging.WARNING if warning else logging.INFO,
-                f'Extending current KCFG with the following: {message}{result_info_message}',
+                f'Extending KCFG with: {message}{result_info_message}',
             )
 
         match extend_result:
@@ -711,9 +710,14 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
     def from_json(s: str, optimize_memory: bool = True) -> KCFG:
         return KCFG.from_dict(json.loads(s), optimize_memory=optimize_memory)
 
-    def to_rules(self, _id: str | None = None, priority: int = 20) -> list[KRuleLike]:
+    def to_rules(
+        self,
+        _id: str | None = None,
+        priority: int = 20,
+        defunc_with: KDefinition | None = None,
+    ) -> list[KRuleLike]:
         _id = 'BASIC-BLOCK' if _id is None else _id
-        return [e.to_rule(_id, priority=priority) for e in self.edges()] + [
+        return [e.to_rule(_id, priority=priority, defunc_with=defunc_with) for e in self.edges()] + [
             m.to_rule(_id, priority=priority) for m in self.merged_edges()
         ]
 
@@ -723,9 +727,12 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         imports: Iterable[KImport] = (),
         priority: int = 20,
         att: KAtt = EMPTY_ATT,
+        defunc_with: KDefinition | None = None,
     ) -> KFlatModule:
         module_name = 'KCFG' if module_name is None else module_name
-        return KFlatModule(module_name, self.to_rules(priority=priority), imports=imports, att=att)
+        return KFlatModule(
+            module_name, self.to_rules(priority=priority, defunc_with=defunc_with), imports=imports, att=att
+        )
 
     def _resolve_or_none(self, id_like: NodeIdLike) -> int | None:
         if type(id_like) is int:

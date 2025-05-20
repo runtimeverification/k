@@ -24,11 +24,11 @@ from pyk.kast.manip import (
     split_config_from,
 )
 from pyk.kast.outer import KDefinition, KFlatModule, KNonTerminal, KProduction, KTerminal
-from pyk.prelude.k import DOTS, GENERATED_TOP_CELL
-from pyk.prelude.kbool import BOOL, FALSE, TRUE, andBool, notBool
-from pyk.prelude.kint import INT, intToken
-from pyk.prelude.ml import mlAnd, mlBottom, mlEqualsFalse, mlEqualsTrue, mlNot, mlTop
-from pyk.prelude.utils import token
+from pyk.kast.prelude.k import DOTS, GENERATED_TOP_CELL
+from pyk.kast.prelude.kbool import BOOL, FALSE, TRUE, andBool, notBool
+from pyk.kast.prelude.kint import INT, intToken
+from pyk.kast.prelude.ml import mlAnd, mlBottom, mlEqualsFalse, mlEqualsTrue, mlNot, mlTop
+from pyk.kast.prelude.utils import token
 
 from ..utils import a, b, c, f, k, x
 
@@ -63,17 +63,15 @@ def test_push_down_rewrites(term: KInner, expected: KInner) -> None:
 
 STATE: Final = KLabel('<state>')
 PC: Final = KLabel('<pc>')
-MINIMIZE_TERM_TEST_DATA: Final[tuple[tuple[KInner, list[str], list[str], KInner], ...]] = (
-    (f(k(a), STATE(a), PC(a)), [], [], f(k(a), STATE(a), PC(a))),
-    (f(k(a), STATE(a), PC(a)), ['<k>'], [], f(STATE(a), PC(a), DOTS)),
-    (f(k(a), STATE(a), PC(a)), [], ['<state>'], f(STATE(a), DOTS)),
+MINIMIZE_TERM_TEST_DATA: Final[tuple[tuple[KInner, KInner], ...]] = (
+    (f(k(a), STATE(a), PC(a)), f(k(a), STATE(a), PC(a))),
 )
 
 
-@pytest.mark.parametrize('term,abstract_labels,keep_cells,expected', MINIMIZE_TERM_TEST_DATA, ids=count())
-def test_minimize_term(term: KInner, abstract_labels: list[str], keep_cells: list[str], expected: KInner) -> None:
+@pytest.mark.parametrize('term,expected', MINIMIZE_TERM_TEST_DATA, ids=count())
+def test_minimize_term(term: KInner, expected: KInner) -> None:
     # When
-    actual = minimize_term(term, abstract_labels=abstract_labels, keep_cells=keep_cells)
+    actual = minimize_term(term)
 
     # Then
     assert actual == expected

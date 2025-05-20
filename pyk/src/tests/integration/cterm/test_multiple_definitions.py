@@ -6,7 +6,7 @@ import pytest
 
 from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KSequence, KVariable
-from pyk.prelude.ml import mlTop
+from pyk.kast.prelude.ml import mlTop
 from pyk.testing import CTermSymbolicTest, KPrintTest
 
 if TYPE_CHECKING:

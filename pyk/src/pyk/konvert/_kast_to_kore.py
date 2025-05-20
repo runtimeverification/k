@@ -8,6 +8,11 @@ from ..kast import Atts
 from ..kast.inner import KApply, KLabel, KRewrite, KSequence, KSort, KToken, KVariable, top_down
 from ..kast.manip import bool_to_ml_pred, extract_lhs, extract_rhs, flatten_label, ml_pred_to_bool, var_occurrences
 from ..kast.outer import KRule
+from ..kast.prelude.bytes import BYTES, pretty_bytes_str
+from ..kast.prelude.k import K_ITEM, K, inj
+from ..kast.prelude.kbool import BOOL, TRUE, andBool
+from ..kast.prelude.ml import mlAnd
+from ..kast.prelude.string import STRING, pretty_string
 from ..kore.prelude import BOOL as KORE_BOOL
 from ..kore.prelude import SORT_K
 from ..kore.prelude import TRUE as KORE_TRUE
@@ -29,11 +34,6 @@ from ..kore.syntax import (
     String,
     Top,
 )
-from ..prelude.bytes import BYTES, pretty_bytes_str
-from ..prelude.k import K_ITEM, K, inj
-from ..prelude.kbool import BOOL, TRUE, andBool
-from ..prelude.ml import mlAnd
-from ..prelude.string import STRING, pretty_string
 from ._utils import munge
 
 if TYPE_CHECKING:

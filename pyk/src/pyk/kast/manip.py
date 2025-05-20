@@ -4,9 +4,9 @@ import logging
 from collections import Counter
 from typing import TYPE_CHECKING
 
-from ..prelude.k import DOTS, GENERATED_TOP_CELL
-from ..prelude.kbool import FALSE, TRUE, andBool, impliesBool, notBool, orBool
-from ..prelude.ml import is_top, mlAnd, mlBottom, mlEquals, mlEqualsTrue, mlImplies, mlOr, mlTop
+from ..kast.prelude.k import DOTS, GENERATED_TOP_CELL
+from ..kast.prelude.kbool import FALSE, TRUE, andBool, impliesBool, notBool, orBool
+from ..kast.prelude.ml import is_top, mlAnd, mlBottom, mlEquals, mlEqualsTrue, mlImplies, mlOr, mlTop
 from ..utils import find_common_items, hash_str, unique
 from .att import EMPTY_ATT, Atts, KAtt, WithKAtt
 from .inner import (
@@ -506,9 +506,7 @@ def on_attributes(kast: W, f: Callable[[KAtt], KAtt]) -> W:
     return kast
 
 
-def minimize_term(
-    term: KInner, keep_vars: Iterable[str] = (), abstract_labels: Collection[str] = (), keep_cells: Collection[str] = ()
-) -> KInner:
+def minimize_term(term: KInner, keep_vars: Iterable[str] = ()) -> KInner:
     """Minimize a K term for pretty-printing.
 
     - Variables only used once will be removed.
@@ -524,14 +522,7 @@ def minimize_term(
     term = inline_cell_maps(term)
     term = remove_semantic_casts(term)
     term = useless_vars_to_dots(term, keep_vars=keep_vars)
-
-    if keep_cells:
-        term = extract_cells(term, keep_cells)
-    else:
-        term = labels_to_dots(term, abstract_labels)
-
     term = collapse_dots(term)
-
     return term
 
 
