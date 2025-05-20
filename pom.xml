@@ -81,7 +81,7 @@
     <googleJavaFormat.version>1.18.1</googleJavaFormat.version>
     <scalafmt.version>3.7.17</scalafmt.version>
     <nativeDirs>**/src/main/native/**</nativeDirs>
-    <spotless.excludes>${nativeDirs},.idea/**,**/com/davekoelle/**,**/target/**,LICENSE.md,web/toc.md,web/k-web-theme/**,**/*-kompiled/*.kore,k-distribution/include/kframework/kore/*,**/.kompile-*/**,**/.git/**,result/**,pyk/**</spotless.excludes>
+    <spotless.excludes>${nativeDirs},.idea/**,**/com/davekoelle/**,**/target/**,LICENSE.md,web/toc.md,web/k-web-theme/**,**/*-kompiled/*.kore,k-distribution/include/kframework/kore/*,**/.kompile-*/**,**/.git/**,result/**,pyk/**,nix/resources/**</spotless.excludes>
   </properties>
 
   <dependencies>
