@@ -4,16 +4,18 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from pyk.cterm.show import CTermShow
 from pyk.kast.inner import KVariable
+from pyk.kast.outer import KDefinition, KFlatModule
 from pyk.kast.prelude.kint import geInt, intToken, ltInt
 from pyk.kast.prelude.ml import mlEqualsTrue, mlTop
+from pyk.kast.pretty import PrettyPrinter
 from pyk.kcfg import KCFG, KCFGShow
 from pyk.kcfg.minimize import KCFGMinimizer
 from pyk.kcfg.show import NodePrinter
 from pyk.utils import single
 
 from ..kcfg.merge_node_data import KCFG_MERGE_NODE_TEST_DATA
-from ..mock_kprint import MockKPrint
 from ..test_kcfg import edge_dicts, node_dicts, split_dicts, to_csubst_node, x_config, x_node, x_subst
 
 if TYPE_CHECKING:
@@ -337,7 +339,9 @@ def test_split_constraint_accumulation() -> None:
 
     minimizer.minimize()
 
-    kcfg_show = KCFGShow(MockKPrint(), node_printer=NodePrinter(MockKPrint()))
+    definition = KDefinition('MOCK', [KFlatModule('MOCK', [])], [])
+    cterm_show = CTermShow(PrettyPrinter(definition).print)
+    kcfg_show = KCFGShow(definition, node_printer=NodePrinter(cterm_show))
     actual = '\n'.join(kcfg_show.pretty(cfg)) + '\n'
 
     expected = (
