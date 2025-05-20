@@ -109,7 +109,7 @@
                 fileReplacements = [
                   {
                     replace = "com/google/code/gson/gson/maven-metadata-central.xml";
-                    replaceWith = ./nix/resources/maven-metadata-central.xml;
+                    replaceWith = ./nix/resources/maven-metadata-central-replacements/GSON.xml;
                     sha1 = "6761f9978777a91d499185a1516ea120f8f80a22";
                   }
                 ];
