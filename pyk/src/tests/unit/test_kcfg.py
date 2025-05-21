@@ -5,17 +5,19 @@ from typing import TYPE_CHECKING, Final
 import pytest
 
 from pyk.cterm import CSubst, CTerm
+from pyk.cterm.show import CTermShow
 from pyk.kast.inner import KApply, KRewrite, KToken, KVariable, Subst
 from pyk.kast.manip import no_cell_rewrite_to_dots
+from pyk.kast.outer import KDefinition, KFlatModule
 from pyk.kast.prelude.kint import INT
 from pyk.kast.prelude.ml import mlEquals, mlTop
 from pyk.kast.prelude.utils import token
+from pyk.kast.pretty import PrettyPrinter
 from pyk.kcfg import KCFG, KCFGShow
 from pyk.kcfg.kcfg import KCFGNodeAttr
 from pyk.kcfg.show import NodePrinter
 from pyk.utils import not_none, single
 
-from .mock_kprint import MockKPrint
 from .utils import ge_ml, k, lt_ml
 
 if TYPE_CHECKING:
@@ -821,8 +823,10 @@ def test_pretty_print() -> None:
     )
 
     # When
-    kcfg_show = KCFGShow(MockKPrint(), node_printer=NodePrinter(MockKPrint()))
-    kcfg_show_full_printer = KCFGShow(MockKPrint(), node_printer=NodePrinter(MockKPrint(), full_printer=True))
+    definition = KDefinition('MOCK', [KFlatModule('MOCK', [])], [])
+    cterm_show = CTermShow(PrettyPrinter(definition).print, minimize=False)
+    kcfg_show = KCFGShow(definition, node_printer=NodePrinter(cterm_show))
+    kcfg_show_full_printer = KCFGShow(definition, node_printer=NodePrinter(cterm_show, full_printer=True))
     actual = '\n'.join(kcfg_show.pretty(cfg)) + '\n'
     actual_full_printer = '\n'.join(kcfg_show_full_printer.pretty(cfg)) + '\n'
 

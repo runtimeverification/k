@@ -209,15 +209,11 @@ class PrintOptions(DefinitionOptions, OutputFileOptions, DisplayOptions, Logging
     term: IO[Any]
     input: PrintInput
     minimize: bool
-    omit_labels: str | None
-    keep_cells: str | None
 
     @staticmethod
     def default() -> dict[str, Any]:
         return {
             'input': PrintInput.KAST_JSON,
-            'omit_labels': None,
-            'keep_cells': None,
         }
 
     @staticmethod
@@ -402,8 +398,6 @@ def create_argument_parser() -> ArgumentParser:
     print_args.add_argument('definition_dir', type=dir_path, help='Path to definition directory.')
     print_args.add_argument('term', type=FileType('r'), help='Input term (in format specified with --input).')
     print_args.add_argument('--input', type=PrintInput, choices=list(PrintInput))
-    print_args.add_argument('--omit-labels', nargs='?', help='List of labels to omit from output.')
-    print_args.add_argument('--keep-cells', nargs='?', help='List of cells with primitive values to keep in output.')
     print_args.add_argument('--output-file', type=FileType('w'))
 
     rpc_print_args = pyk_args_command.add_parser(

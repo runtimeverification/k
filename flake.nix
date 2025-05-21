@@ -1,7 +1,7 @@
 {
   description = "K Framework";
   inputs = {
-    llvm-backend.url = "github:runtimeverification/llvm-backend/v0.1.131";
+    llvm-backend.url = "github:runtimeverification/llvm-backend/v0.1.132";
     haskell-backend = {
       url = "github:runtimeverification/haskell-backend/v0.1.124";
       inputs.rv-utils.follows = "llvm-backend/rv-utils";
@@ -86,7 +86,7 @@
 
             mk-k-framework = { haskell-backend-bins, llvm-kompile-libs }:
               prev.callPackage ./nix/k.nix {
-                mvnHash = "sha256-v/6tVTx3UgIn95r1KUeYTRbLnDlaNI/B9+g8NSPDx34=";
+                mvnHash = "sha256-aUomhCjSIBIQdavd3XojKJFdU74UURaKEVEKXiPTq1Q=";
                 manualMvnArtifacts = [
                   "org.scala-lang:scala-compiler:2.13.13"
                   "ant-contrib:ant-contrib:1.0b3"
@@ -94,9 +94,25 @@
                   "org.apache.maven.wagon:wagon-provider-api:1.0-alpha-6"
                   "org.checkerframework:checker-qual:3.33.0"
                   "com.google.errorprone:error_prone_annotations:2.18.0"
+                  "se.vandmo:dependency-lock-maven-plugin:1.2.2"
+                ];
+                manualMvnArtifactsJars = [
+                  # e.g., this is basically se.vandmo:dependency-lock-maven-plugin:1.2.2:jar, but this way it works with `mvn dependency:get`
+                  "se.vandmo:dependency-lock-maven-plugin:1.2.2"
+                  "com.runtimeverification.k:k-frontend:1.0-SNAPSHOT"
+                  "com.runtimeverification.k:llvm-backend-matching:1.0-SNAPSHOT"
+                  "com.runtimeverification.k:llvm-backend:1.0-SNAPSHOT"
+                  "com.runtimeverification.k:haskell-backend:1.0-SNAPSHOT"
                 ];
                 manualMvnSourceArtifacts =
                   [ "org.scala-sbt:compiler-bridge_2.13:1.8.0" ];
+                fileReplacements = [
+                  {
+                    replace = "com/google/code/gson/gson/maven-metadata-central.xml";
+                    replaceWith = ./nix/resources/maven-metadata-central-replacements/GSON.xml;
+                    sha1 = "6761f9978777a91d499185a1516ea120f8f80a22";
+                  }
+                ];
                 inherit (final) maven;
                 inherit (prev) llvm-backend;
                 clang = prev."clang_${toString final.llvm-version}";
@@ -121,6 +137,20 @@
                 secp256k1 = [ "-I${secp256k1}/include" "-L${secp256k1}/lib" ];
               };
             };
+
+            k-lock = final.k.overrideAttrs (finalAttrs: previousAttrs: {
+              nativeBuildInputs = previousAttrs.nativeBuildInputs ++ (with final; [
+                rsync
+              ]);
+              buildPhase = previousAttrs.buildPhase + ''
+                echo "now running lock plugin offline"
+                mvn -o -Dmaven.repo.local=.m2 se.vandmo:dependency-lock-maven-plugin:1.2.2:lock
+              '';
+              installPhase = previousAttrs.installPhase + ''
+                mkdir -p $out/lock
+                rsync -R dependencies-lock.json haskell-backend/dependencies-lock.json k-distribution/dependencies-lock.json k-frontend/dependencies-lock.json llvm-backend/dependencies-lock.json llvm-backend/src/main/native/llvm-backend/matching/dependencies-lock.json $out/lock/
+              '';
+            });
           })
       ];
     in flake-utils.lib.eachSystem [
@@ -148,7 +178,7 @@
           pkgs.lib.removeSuffix "\n" (builtins.readFile ./package/version);
 
         packages = rec {
-          inherit (pkgs) k pyk pyk-python310 pyk-python311;
+          inherit (pkgs) k k-lock pyk pyk-python310 pyk-python311 maven;
 
           check-submodules = rv-utils.lib.check-submodules pkgs {
             inherit llvm-backend haskell-backend;

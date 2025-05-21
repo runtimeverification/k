@@ -7,8 +7,10 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk.cterm import CTerm
+from pyk.cterm.show import CTermShow
 from pyk.kast.inner import KApply, KVariable
 from pyk.kast.prelude.kint import intToken
+from pyk.kast.pretty import PrettyPrinter
 from pyk.kcfg.show import KCFGShow
 from pyk.proof import APRProof, APRProver, ProofStatus
 from pyk.proof.show import APRProofNodePrinter
@@ -93,7 +95,12 @@ class TestMiniKEVM(KCFGExploreTest, KProveTest):
         )
         prover.advance_proof(proof, max_iterations=max_iterations)
 
-        kcfg_show = KCFGShow(kprove, node_printer=APRProofNodePrinter(proof, kprove, full_printer=True, minimize=False))
+        kcfg_show = KCFGShow(
+            kprove.definition,
+            node_printer=APRProofNodePrinter(
+                proof, CTermShow(PrettyPrinter(kprove.definition).print, minimize=False), full_printer=True
+            ),
+        )
         cfg_lines = kcfg_show.show(proof.kcfg)
         _LOGGER.info('\n'.join(cfg_lines))
 
