@@ -2109,11 +2109,15 @@ You can get a new `Bytes` object containing a range of bytes from the input
 `Bytes` in O(N) time (where N is the length of the substring). The range
 of bytes included is `[startIndex..endIndex)`. The resulting `Bytes` is
 a copy and mutations to it do not affect mutations to the original `Bytes`.
-The result is `#False` if `startIndex` or `endIndex` are not valid.
 
 ```k
   syntax Bytes ::= substrBytes(Bytes, startIndex: Int, endIndex: Int) [function, hook(BYTES.substr)]
 ```
+
+The function is not total: `substrBytes(B, startIndex, endIndex)` is `#False` if
+* `startIndex <Int 0` or
+* `endIndex <Int startIndex` or
+* `lengthBytes(B) <Int endIndex`.
 
 ### Multiple bytes update
 
