@@ -12,10 +12,8 @@ of productions, **brakets** and **tokens**.
 
 ## K's approach to parsing
 
-K's grammar is divided into two components: one **outer syntax** and one
-**inner syntax**.  Outer syntax refers to the parsing of **requires**,
-K's grammar is divided into two components: one **outer syntax** and one
-**inner syntax**.  Outer syntax refers to the parsing of **requires**,
+K's grammar is divided into two components: the **outer syntax** of K and the
+**inner syntax** of K. Outer syntax refers to the parsing of **requires**,
 **modules**, **imports**, and **sentences** in a K definition. Inner syntax
 refers to the parsing of **rules** and **programs**. Unlike the outer syntax of
 K, which is predetermined, much of the inner syntax of K is defined by you, the
@@ -32,8 +30,8 @@ programs in the language you defined.
 ## Basic BNF productions
 
 To illustrate how this works, let's consider the K module below which defines
-a logical calculator for evaluating Boolean expressions containing operations 
-AND, OR, NOT, and XOR.
+a calculator for evaluating Boolean expressions containing operations AND, OR, 
+NOT, and XOR.
 
 Save the code below in file `lesson-03-a.k`:
 
@@ -51,12 +49,12 @@ endmodule
 
 Observe that the productions in this module look a little different than
 what we have seen in the previous lesson. The reason is that K has two 
-mechanisms for defining productions:
-[BNF notation](https://en.wikipedia.org/wiki/Backus%E2%80%93Naur_form) and
-alphanumeric identifiers. In [Lesson 1.2](../02_basics/README.md) we presented 
-the latter, where the identifier was followed by a (possibly empty) list of 
-sorts in parentheses. In this lesson, we introduce the former, which is a more 
-generic mechanism for defining the syntax of productions.
+mechanisms for defining productions. A more generic one using a variant
+of [BNF notation](https://en.wikipedia.org/wiki/Backus%E2%80%93Naur_form)
+and its special case we have seen in [Lesson 1.2](../02_basics/README.md). 
+There the `::=` symbol was followed by an alphanumeric identifier and a 
+(possibly empty) list of sorts in parentheses. In this lesson, we focus on the 
+former.
 
 Recall the set of productions from the previous lesson:
 
@@ -85,18 +83,20 @@ endmodule
 Note that sort `Fruit` of the function's argument is unchanged, but
 everything else has been wrapped in double quotation marks. This is because
 in BNF notation, we distinguish between two types of **production items**:
-**terminals** and **non-terminals**. A terminal represents a literal string
-of characters that is a verbatim part of the syntax of that production.
-For example, `Banana` is part of the syntax. Conversely, non-terminals, refer 
-to a sort name, like `Fruit`, and the syntax of the production they 
-belong to accepts any valid term of that sort at that position.
+**terminals** and **non-terminals**. A terminal denotes a fixed sequence of
+characters that is a verbatim part of the syntax of that production. For 
+example, `Banana`, `(`, `)`, or `colorOf` are such a sequences of characters
+and all considered terminals. Conversely, non-terminals, refer to a sort name, 
+like `Fruit`, and the syntax of the production they belong to accepts any valid
+term of that sort at that position.
 
-In the previous lesson we executed successfully the program `colorOf(Banana())` 
-using `krun`. `krun` parses and interprets terms according to the grammar 
-defined. `Banana()` is a term of sort `Fruit`, hence a valid argument
-for function `colorOf`. Under the hood, the term is automatically converted
-into an AST (abstract syntax tree), and then the function `colorOf` is
-evaluated using the function rules provided in the definition.
+In the previous lesson we executed successfully the program `colorOf(Banana())`
+using `krun`. That is because the program represented a term of sort `Color`:
+indeed, `Banana()` is a term of sort `Fruit`, hence a valid argument for 
+function `colorOf`. `krun` parses and interprets terms according to the grammar
+you define. Under the hood, the term is automatically converted into an AST 
+(abstract syntax tree), and then the function `colorOf` is evaluated using the 
+function rules provided in the definition.
 
 How does K match the strings between the double quotes? The answer is that K 
 uses [Flex](https://github.com/westes/flex) to generate a 
@@ -204,8 +204,8 @@ yields the following output, minus the formatting:
 ```
 
 Comparing both outputs, you can observe that the former is largely a 
-name-mangled version of the latter. A notable difference is represented by the 
-`inj` attribute in the KORE output and you can learn more about it in the
+name-mangled version of the latter. A notable difference is the presence of the
+`inj` symbol in the KORE output and you can learn more about it in the
 [KORE tutorial](https://github.com/runtimeverification/haskell-backend/blob/master/docs/kore-syntax.md).
 
 Note that `kast` also takes expressions as arguments, not only file names, 
@@ -359,11 +359,10 @@ number, followed by an optional suffix that specifies the type of the literal.
 While it’s theoretically possible to define this syntax using a grammar, doing 
 so would be cumbersome and tedious. Additionally, you'd be faced with an AST 
 generated for the literal, which is not particularly convenient to work with. 
-
-As an alternative, K allows you to define **token** productions, which are
-[regular expressions](https://en.wikipedia.org/wiki/Regular_expression) followed 
-by the `token` attribute. The resulting AST would then consist of a typed string 
-containing the value recognized by the regular expression.
+As an alternative, K allows you to define **token** productions, which consist
+of a [regular expressions](https://en.wikipedia.org/wiki/Regular_expression) 
+followed by the `token` attribute. The resulting AST would then consist of a 
+typed string containing the value recognized by the regular expression.
 
 For example, the built-in integers in K are defined using the following
 production:
@@ -458,7 +457,7 @@ such, if your grammar is not LR(1), it may not parse exactly the same as if
 you were to use the just-in-time parser because Bison will automatically pick
 one of the possible branches whenever it encounters a shift-reduce or
 reduce-reduce conflict. In this case, you can either modify your grammar to be
-LR(1), or you can use Bison's GLR support by passing flag
+LR(1), or you can use Bison's GLR support by passing instead flag
 `--gen-glr-bison-parser` to `kompile`. Note that if your grammar is ambiguous,
 the ahead-of-time parser will not provide you with particularly readable error
 messages at this time.
@@ -473,14 +472,19 @@ LESSON-03-A as default.
 are not supported by Bison.
 ```
 
-We now have a second warning.
+We have seen the first warning before, and we discussed it in
+[Lesson 1.2](../02_basics/README.md). The second warning we get is a side 
+effect of the first one, informing that certain modules&mdash;e.g., for 
+parsing&mdash;were excluded from the grammar generation because they were 
+known to cause Bison to crash or behave incorrectly.
 
-Run
+Next, run
 
 `lesson-03-a-kompiled/parser_PGM and-or.bool`
 
-to see that now you don't get an error when parsing. The output, minus 
-formatting is the following:
+to see that now you don't get an error when parsing. Even though our grammar
+is ambiguous, the LR(1) algorithm generates a single parse tree. The output, 
+minus formatting, is the following:
 
 ```
 inj{SortBoolean{}, SortKItem{}}(
@@ -494,7 +498,7 @@ inj{SortBoolean{}, SortKItem{}}(
 )
 ```
 
-Here we get one AST.
+At closer look, you see it is the AST where `||` has higher priority (Fig. 3-B).
 
 Compare this with the output given when running the same command, but when the
 ahead-of-time parser has been enabled with flag `--gen-glr-bison-parser`:
@@ -520,11 +524,14 @@ inj{SortBoolean{}, SortKItem{}}(
 )
 ```
 
-In this case, we get both ASTs.
+In this case, we get both ASTs. Since our grammar is ambiguous, the GLR 
+algorithm produces the complete parse forest. The ambiguity is indicated in the
+above KORE output by node `Lblamb` and its two children, each a possible AST of
+the term `true && false || false`.
 
-In general, for a K definition named `foo.k`, and directory `foo-kompiled` created 
-when running `kompile`, you can invoke the ahead-of-time parser you generated by 
-executing `foo-kompiled/parser_PGM <file>` on a file.
+Finally, note that, for a K definition named `foo.k`, and directory 
+`foo-kompiled` created when running `kompile`, you can invoke the ahead-of-time
+parser you generated by executing `foo-kompiled/parser_PGM <file>` on a file.
 
 ## Exercises
 
