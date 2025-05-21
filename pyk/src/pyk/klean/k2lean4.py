@@ -51,25 +51,33 @@ if TYPE_CHECKING:
     from .model import Binder, Command, Declaration, DeclVal, FieldVal
 
 
-_PRELUDE_SORTS: Final = {'SortBool', 'SortBytes', 'SortId', 'SortInt', 'SortString', 'SortStringBuffer', 'SortEndianness'}
+_PRELUDE_SORTS: Final = {
+    'SortBool',
+    'SortBytes',
+    'SortId',
+    'SortInt',
+    'SortString',
+    'SortStringBuffer',
+    'SortEndianness',
+}
 _PRELUDE_FUNCS: Final = {
-    "Lbl'UndsPlus'Int'Unds'", # +Int
-    "Lbl'Unds'-Int'Unds'", # -Int
-    "Lbl'UndsStar'Int'Unds'", # *Int
-    "Lbl'UndsSlsh'Int'Unds'", # /Int
-    "LblmaxInt'LParUndsCommUndsRParUnds'INT-COMMON'Unds'Int'Unds'Int'Unds'Int", # maxInt
-    "Lbl'Tild'Int'Unds'", # ~Int
-    "Lbl'Unds-LT-Eqls'Int'Unds'", # <=Int
-    "Lbl'Unds-LT-'Int'Unds'", # <Int
-    "Lbl'Unds-GT-'Int'Unds'", # >Int
-    "Lbl'UndsEqlsEqls'Int'Unds'", # ==Int
-    "Lbl'Stop'Bytes'Unds'BYTES-HOOKED'Unds'Bytes", # Bytes.empty
-    "Lbllog2Int'LParUndsRParUnds'INT-COMMON'Unds'Int'Unds'Int", # Int.log2
-    "LblInt2Bytes'LParUndsCommUndsCommUndsRParUnds'BYTES-HOOKED'Unds'Bytes'Unds'Int'Unds'Int'Unds'Endianness", # Int2Bytes
-    "LblpadRightBytes'LParUndsCommUndsCommUndsRParUnds'BYTES-HOOKED'Unds'Bytes'Unds'Bytes'Unds'Int'Unds'Int", # padRight
-    "LblpadLeftBytes'LParUndsCommUndsCommUndsRParUnds'BYTES-HOOKED'Unds'Bytes'Unds'Bytes'Unds'Int'Unds'Int", # padLeft
-    "LbllengthBytes'LParUndsRParUnds'BYTES-HOOKED'Unds'Int'Unds'Bytes", # Bytes.length
-    "LblreplaceAtBytes'LParUndsCommUndsCommUndsRParUnds'BYTES-HOOKED'Unds'Bytes'Unds'Bytes'Unds'Int'Unds'Bytes", #Bytes.replaceAt
+    "Lbl'UndsPlus'Int'Unds'",  # +Int
+    "Lbl'Unds'-Int'Unds'",  # -Int
+    "Lbl'UndsStar'Int'Unds'",  # *Int
+    "Lbl'UndsSlsh'Int'Unds'",  # /Int
+    "LblmaxInt'LParUndsCommUndsRParUnds'INT-COMMON'Unds'Int'Unds'Int'Unds'Int",  # maxInt
+    "Lbl'Tild'Int'Unds'",  # ~Int
+    "Lbl'Unds-LT-Eqls'Int'Unds'",  # <=Int
+    "Lbl'Unds-LT-'Int'Unds'",  # <Int
+    "Lbl'Unds-GT-'Int'Unds'",  # >Int
+    "Lbl'UndsEqlsEqls'Int'Unds'",  # ==Int
+    "Lbl'Stop'Bytes'Unds'BYTES-HOOKED'Unds'Bytes",  # Bytes.empty
+    "Lbllog2Int'LParUndsRParUnds'INT-COMMON'Unds'Int'Unds'Int",  # Int.log2
+    "LblInt2Bytes'LParUndsCommUndsCommUndsRParUnds'BYTES-HOOKED'Unds'Bytes'Unds'Int'Unds'Int'Unds'Endianness",  # Int2Bytes
+    "LblpadRightBytes'LParUndsCommUndsCommUndsRParUnds'BYTES-HOOKED'Unds'Bytes'Unds'Bytes'Unds'Int'Unds'Int",  # padRight
+    "LblpadLeftBytes'LParUndsCommUndsCommUndsRParUnds'BYTES-HOOKED'Unds'Bytes'Unds'Bytes'Unds'Int'Unds'Int",  # padLeft
+    "LbllengthBytes'LParUndsRParUnds'BYTES-HOOKED'Unds'Int'Unds'Bytes",  # Bytes.length
+    "LblreplaceAtBytes'LParUndsCommUndsCommUndsRParUnds'BYTES-HOOKED'Unds'Bytes'Unds'Bytes'Unds'Int'Unds'Bytes",  # Bytes.replaceAt
 }
 
 _SYMBOL_OVERRIDES: Final = {
