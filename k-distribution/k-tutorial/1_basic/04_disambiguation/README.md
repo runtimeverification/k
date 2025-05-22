@@ -24,17 +24,17 @@ accept some ASTs in favor of others.
 
 In general, grammars can be rewritten to remove unwanted parses. However,
 in K, the grammar specification and AST generation are intrinsically linked,
-so we discourage this approach. You will still learn how to do this in K 
-towards the end of this lesson. Now we continue with showing you how to
-explicitly specify the relative precedence of operators in different 
-situations in order to resolve the ambiguity.
+so we discourage this approach. You will still learn how remove unwanted parses 
+in K towards the end of this lesson. Now we continue with showing you how to
+explicitly express the relative precedence of operators in different 
+situations in order to resolve grammar ambiguity.
 
 Recall that in C, `&&` binds tighter than `||`, meaning that it has higher
 precedence, meaning additionally that the expression `true && false || false` 
 has only one valid AST: `(true && false) || false`.
 
-Consider, then, the third iteration on the grammar of Boolean expressions 
-(`lesson-04-a.k`):
+Consider, then, the third iteration on the grammar of Boolean expressions and
+save the code below in file `lesson-04-a.k`:
 
 ```k
 module LESSON-04-A
@@ -68,38 +68,31 @@ productions in the production block, expressing their relative priority.
 To see this more concretely, let's look again at the program
 `true && false || false`. As noted before, this program was ambiguous because 
 the parser could either choose `&&` to be the child of `||` or vice versa. 
-(Recall figures 3-A and 3-B in previous lesson.)
-However, because a symbol with lesser priority (i.e., `||`)
-cannot appear as the direct child of a symbol with greater priority
-(i.e., `&&`), the parser will **reject** the parse where `||` is under the
-`&&` operator (Fig. 3-B). As a result, we are left with the unambiguous parse
-`(true && false) || false`. Similarly, `true || false && false` parses
-unambiguously as `true || (false && false)`. Conversely, if the user explicitly
-wants the other parse, they can express this using brackets by explicitly
-writing `true && (false || false)`. This still parses successfully because the
-`||` operator is no longer the **direct** child of the `&&` operator, but under
-the hood, is instead the direct child of the `()` operator, and the `&&` 
-operator is an **indirect** parent, which is not subject to the priority 
-restriction.
+Recall figures 3-A and 3-B in previous lesson. However, because a symbol 
+with lesser priority (i.e., `||`) cannot appear as the _direct_ child of a 
+symbol with greater priority (i.e., `&&`), the parser will **reject** the 
+parse where `||` is under the `&&` operator (Fig. 3-B). As a result, we are 
+left with the unambiguous parse `(true && false) || false`. Conversely, if 
+the user wants the other parse, they can express this with brackets by 
+explicitly writing `true && (false || false)`. This still parses successfully because the
+`||` operator is no longer the **direct** child of the `&&` operator, but of
+`()` operator, even if the bracket is not explicitly depicted in the AST.
+Internally, `&&` operator is viewed as an **indirect** parent, which is not 
+subject to the priority restriction.
 
 You must have noticed that `()` has been defined as having greater priority
-than `||` and we might have possibly reached a contradiction. One would think 
-that `||` cannot appear as a direct child of `()`. This is a problem because 
-priority groups are applied to every possible parse separately. That is to say, 
-even if the term is unambiguous, prior to this disambiguation rule, we still 
-reject that parse if it violates the rule of priority.
-
-However, we do not reject this program as a parse error because the rule for 
-priority is slightly more complex than previously described.
-In fact, it applies only conditionally. Specifically, it applies in
-cases where the child is either the first or last production item in the
-parent's production. For example, in the production `Bool "&&" Bool`, the
-first `Bool` non-terminal is not preceded by any terminals, and the last `Bool`
-non-terminal is not followed by any terminals. As a result, we apply the 
-priority rule to both children of `&&`. However, in the `()` operator, the 
-sole non-terminal is both preceded by and followed by terminals. Hence, the 
-priority rule is not applied when `()` is the parent. Because of this, the 
-program we mentioned above successfully parses.
+than `||` and we might have possibly reached a contradiction as `||` cannot 
+appear as a direct child of `()`. What we have not mentioned is that the
+priority rule is more complex and applies only _conditionally_. Specifically, 
+it applies in cases where the first child is either the first or last 
+production item in the parent's production. For example, in production 
+`Boolean "&&" Boolean`, the first `Boolean` non-terminal is not preceded by 
+any terminals, and the last `Boolean` is not followed by any terminals. As a 
+result, we apply the priority rule to both children of `&&`.
+In production `"(" Boolean ")"`, the non-terminal is both preceded and followed
+by terminals `"("` and `")"`. Thus, the priority rule does apply when `()` is 
+the parent. Because of this, program `true && (false || false)` parses 
+successfully.
 
 ### Exercise
 
@@ -117,10 +110,9 @@ still get an ambiguous grammar. Let's try to parse the following program
 true && false && false
 ```
 
-Priority blocks will not help us here: the problem comes between two parses
-where both possible ASTs (Figs. 4-A and 4-B) have a direct parent and child 
-which is within a single priority block (in this case, `&&` is in the same 
-block as itself):
+Priority blocks will not help us here. We have two possible parses with a
+direct parent and child which are within a single priority block (in this case, 
+`&&` is in the same block as itself):
 
 Fig. 4-A
 ```
@@ -150,9 +142,9 @@ symbol with equal priority; and
 * a non-associative symbol cannot appear as a direct leftmost **or** rightmost
 child of a symbol with equal priority.
 
-In C, binary operators are all left-associative, meaning that the expression
+In C, binary operators are all left-associative, meaning that expression
 `true && false && false` parses unambiguously as `(true && false) && false`,
-because `&&` cannot appear as the rightmost child of itself, i.e., only the AST 
+because `&&` cannot appear as the rightmost child of itself, only the AST 
 in Fig. 4-A is valid.
 
 Consider, then, the fourth iteration on the grammar of this definition
@@ -176,8 +168,8 @@ be followed by a literal representing the associativity of that priority group:
 either `left:` for left-associativity, `right:` for right-associativity, or
 `non-assoc:` for non-associativity. In this example, each priority group we
 apply associativity to has only a single production, but we could equally well
-write a priority block with multiple productions and an associativity.
-For example, consider the grammar below (`lesson-04-c.k`):
+write a priority block with multiple productions and one associativity.
+For example, consider the grammar below (file `lesson-04-c.k`):
 
 ```k
 module LESSON-04-C
@@ -231,6 +223,7 @@ module LESSON-04-D
   syntax left and
   syntax left xor
   syntax left or
+  
 endmodule
 ```
 
@@ -264,7 +257,10 @@ syntax left a
 syntax left b
 ```
 
-TODO: Explain how they are different.
+`syntax left a b` places `a` and `b` in the same associativity block, meaning
+that `a` and/or `b` cannot be the rightmost child of `a` and/or `b`. The latter
+sentences don't define this restriction, as `a` and `b` are not part of the
+same group.
 
 As a consequence, `syntax [left|right|non-assoc]` should not be used to
 group together labels with different priority.
@@ -304,14 +300,14 @@ symbol is both preceded and followed by a terminal, this will not work.
 
 Instead, we can resolve the ambiguity directly by telling the parser to
 "prefer" or "avoid" certain productions when ambiguities arise. For example,
-when we parse this program, we see the following ambiguity as an error message:
+when we parse this program with
 
 ```
 kompile lesson-04-e.k
 kast --output kore dangling-else.if
 ```
 
-gives the following output, minus the formatting:
+we get the following ambiguity as an error message, minus the formatting:
 
 ```
 [Error] Inner Parser: Parsing ambiguity.
@@ -343,7 +339,7 @@ gives the following output, minus the formatting:
 
 Roughly, we see that the ambiguity is between an `if` with an `else` or an `if`
 without an `else`. Since we want to pick the first parse, we can tell K to
-"avoid" the second parse with the `avoid` attribute. Consider the following
+**avoid** the second parse with the `avoid` attribute. Consider the following
 modified definition (`lesson-04-f.k`):
 
 ```k
@@ -353,6 +349,7 @@ module LESSON-04-F
   syntax Stmt ::= "if" "(" Exp ")" Stmt
                 | "if" "(" Exp ")" Stmt "else" Stmt [avoid]
                 | "{" "}"
+
 endmodule
 ```
 
