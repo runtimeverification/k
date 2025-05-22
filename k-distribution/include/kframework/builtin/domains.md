@@ -2114,7 +2114,7 @@ a copy and mutations to it do not affect mutations to the original `Bytes`.
   syntax Bytes ::= substrBytes(Bytes, startIndex: Int, endIndex: Int) [function, hook(BYTES.substr)]
 ```
 
-The function is not total: `substrBytes(B, startIndex, endIndex)` is `#False` if
+The function is not total: `substrBytes(B, startIndex, endIndex)` is `#Bottom` if
 * `startIndex <Int 0` or
 * `endIndex <Int startIndex` or
 * `lengthBytes(B) <Int endIndex`.
