@@ -4,8 +4,8 @@ copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 
 # Lesson 1.4: Disambiguating Parses
 
-In this lesson you will learn how to disambiguate a grammar by using K's 
-built-in features, rather than _artificial_ operators such as brackets. 
+In this lesson you will learn how to use K's built-in features to transform
+an ambiguous grammar into an unambiguous one that expresses the intended AST. 
 You will learn how to define a precedence order on operators and 
 associativity directions for them.
 
@@ -18,9 +18,9 @@ of natural language processing are ambiguous.
 Cluttering the code with brackets to remove ambiguity is not an ideal solution. 
 Instead, programming language designers have developed methods for 
 disambiguating language expressions by making use of operator precedence and 
-associativity directions for them. It is often possible to remove _all_ 
-ambiguities in a grammar with these methods, as they instruct the parser to 
-accept some ASTs in favor of others.
+associativity. It is often possible to remove _all_ ambiguities in a grammar 
+with these methods, as they instruct the parser to accept some ASTs instead
+of others.
 
 In general, grammars can be rewritten to remove unwanted parses. However,
 in K, the grammar specification and AST generation are intrinsically linked,
@@ -29,9 +29,9 @@ in K towards the end of this lesson. Now we continue with showing you how to
 explicitly express the relative precedence of operators in different 
 situations in order to resolve grammar ambiguity.
 
-Recall that in C, `&&` binds tighter than `||`, meaning that it has higher
-precedence, meaning additionally that the expression `true && false || false` 
-has only one valid AST: `(true && false) || false`.
+Recall that in C, `&&` binds tighter than `||`, i.e., it has higher 
+precedence, meaning that the expression `true && false || false` has only one 
+valid AST: `(true && false) || false`.
 
 Consider, then, the third iteration on the grammar of Boolean expressions and
 save the code below in file `lesson-04-a.k`:
@@ -66,33 +66,34 @@ one that **binds tighter**). In this case, the `>` operator can be seen as a
 productions in the production block, expressing their relative priority.
 
 To see this more concretely, let's look again at the program
-`true && false || false`. As noted before, this program was ambiguous because 
-the parser could either choose `&&` to be the child of `||` or vice versa. 
-Recall figures 3-A and 3-B in previous lesson. However, because a symbol 
-with lesser priority (i.e., `||`) cannot appear as the _direct_ child of a 
-symbol with greater priority (i.e., `&&`), the parser will **reject** the 
-parse where `||` is under the `&&` operator (Fig. 3-B). As a result, we are 
-left with the unambiguous parse `(true && false) || false`. Conversely, if 
-the user wants the other parse, they can express this with brackets by 
-explicitly writing `true && (false || false)`. This still parses successfully because the
-`||` operator is no longer the **direct** child of the `&&` operator, but of
-`()` operator, even if the bracket is not explicitly depicted in the AST.
+`true && false || false` with possible ASTs depicted in Figures 3-A and 3-B
+in previous lesson. As noted before, this program was ambiguous because the 
+parser could either choose `&&` to be the child of `||` or vice versa. 
+However, because a symbol with lesser priority (i.e., `||`) cannot appear as 
+the _direct_ child of a symbol with greater priority (i.e., `&&`), the parser 
+will **reject** the parse where `||` is under the `&&` operator (Fig. 3-B). 
+As a result, we are left with the unambiguous parse 
+`(true && false) || false`. Conversely, if the user wants the other parse, 
+they can express this with brackets by explicitly writing 
+`true && (false || false)`. This still parses successfully because the `||` 
+operator is no longer the **direct** child of the `&&` operator, but of `()` 
+operator, even if the bracket is not explicitly depicted in the AST.
 Internally, `&&` operator is viewed as an **indirect** parent, which is not 
 subject to the priority restriction.
 
 You must have noticed that `()` has been defined as having greater priority
-than `||` and we might have possibly reached a contradiction as `||` cannot 
-appear as a direct child of `()`. What we have not mentioned is that the
-priority rule is more complex and applies only _conditionally_. Specifically, 
-it applies in cases where the first child is either the first or last 
-production item in the parent's production. For example, in production 
-`Boolean "&&" Boolean`, the first `Boolean` non-terminal is not preceded by 
-any terminals, and the last `Boolean` is not followed by any terminals. As a 
-result, we apply the priority rule to both children of `&&`.
-In production `"(" Boolean ")"`, the non-terminal is both preceded and followed
-by terminals `"("` and `")"`. Thus, the priority rule does apply when `()` is 
-the parent. Because of this, program `true && (false || false)` parses 
-successfully.
+than `||`. However, in example `true && (false || false)`, `||` appears as
+a direct child of `()`, in what appears to be a contradiction to the priority
+rule. What we have not mentioned is that the priority rule is more complex 
+and applies only _conditionally_. Specifically, it applies in cases where the 
+child is either the first or last production item in the parent's 
+production. For example, in production `Boolean "&&" Boolean`, the first 
+`Boolean` non-terminal is not preceded by any terminals, and the last 
+`Boolean` is not followed by any terminals. As a result, we apply the priority 
+rule to both children of `&&`. In production `"(" Boolean ")"`, the 
+non-terminal is both preceded and followed by terminals `"("` and `")"`. 
+Thus, the priority rule is not applied when `()` is the parent. Because of 
+this, program `true && (false || false)` parses successfully.
 
 ### Exercise
 
@@ -142,10 +143,10 @@ symbol with equal priority; and
 * a non-associative symbol cannot appear as a direct leftmost **or** rightmost
 child of a symbol with equal priority.
 
-In C, binary operators are all left-associative, meaning that expression
+In C, binary operators are all left-associative, meaning that the expression
 `true && false && false` parses unambiguously as `(true && false) && false`,
-because `&&` cannot appear as the rightmost child of itself, only the AST 
-in Fig. 4-A is valid.
+because `&&` cannot appear as the rightmost child of itself, i.e., only the 
+AST in Fig. 4-A is valid.
 
 Consider, then, the fourth iteration on the grammar of this definition
 (`lesson-04-b.k`):
@@ -186,7 +187,7 @@ endmodule
 ```
 
 In this example, unlike the one above, `&&`, `^`, and `||` have the same
-priority, as are part of the same block. Addionally, the entire group is 
+priority, as they are part of the same block. Addionally, the entire group is 
 left-associative. This means that none of `&&`, `^`, and `||` can appear as the 
 right child of any of `&&`, `^`, or `||`. Hence, this grammar is also not 
 ambiguous. However, it expresses a different grammar, and you are encouraged
@@ -200,11 +201,12 @@ definition to generate the alternative parse.
 
 ## Explicit priority and associativity declarations
 
-Previously we have only considered the case where all productions expressing a 
-priority or associativity relation are co-located in the same block of 
-productions. However, in practice this is not always feasible or desirable, 
-especially as a definition grows in size across multiple modules. As a result, 
-K provides a second way of declaring priority and associativity relations.
+Previously we have only considered the case where all the productions which
+you wish to express a priority or associativity relation over are co-located 
+in the same block of productions. However, in practice this is not always 
+feasible or desirable, especially as a definition grows in size across 
+multiple modules. As a result, K provides a second way of declaring priority 
+and associativity relations.
 
 Consider the following grammar, which we name `lesson-04-d.k` and which 
 expresses the exact same grammar as `lesson-04-b.k`:
@@ -232,8 +234,8 @@ of a production is used to conceptually group together sets of sentences under
 a common user-defined name. For example, `literal` in the `syntax priority` 
 sentence is used to refer to all productions marked with the `group(literal)` 
 attribute, i.e., `true` and `false`, `atom` to all productions marked with 
-`group(atom)`, i.e., braket production, and so on and so fort. A production can 
-belong to multiple groups using syntax such as `group(myGrp1,myGrp2)`.
+`group(atom)`, i.e., braket production, and so on and so forth. A production 
+can belong to multiple groups using syntax such as `group(myGrp1,myGrp2)`.
 
 Once we understand this, it becomes relatively straightforward to understand
 the meaning of this grammar. Each `syntax priority` sentence defines a priority 
@@ -258,10 +260,10 @@ syntax left b
 ```
 
 `syntax left a b` places `a` and `b` in the same associativity block, meaning
-that `a` and/or `b` cannot be the rightmost child of `a` and/or `b`. The latter
-sentences don't define this restriction, as `a` and `b` are not part of the
-same group.
-
+that `a` and/or `b` cannot be the rightmost child of `a` and/or `b`. The 
+latter sentences instead mean that `a` cannot be the rightmost child of `a` and 
+`b` cannot be the rightmost child of `b`, but place no restriction on `a` 
+being the rightmost child of `b` or `b` being the rightmost child of `a`.
 As a consequence, `syntax [left|right|non-assoc]` should not be used to
 group together labels with different priority.
 
@@ -354,11 +356,11 @@ endmodule
 ```
 
 Here we have added the `avoid` attribute to the `else` production. As a result, 
-when an ambiguity occurs and any of the possible parses has that symbol at the 
-top of the ambiguous part of the parse, we discard those parses, and consider
-only the remaining ones. The `prefer` attribute behaves similarly, but instead 
-removes all parses which do not have that attribute. In both cases, no action 
-is taken if the parse is not ambiguous.
+when an ambiguity occurs and any of the possible parses has that attribute at 
+the top of the ambiguous part of the parse, we discard those parses, and 
+consider only the remaining ones. The `prefer` attribute behaves similarly, but 
+instead it discards all parses which do not have that attribute. In both cases, 
+no action is taken if the parse is not ambiguous.
 
 If we parse the program in `dangling-else.if` with this grammar,
 
