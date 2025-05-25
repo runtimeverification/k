@@ -53,8 +53,8 @@ mechanisms for defining productions. A more generic one using a variant
 of [BNF notation](https://en.wikipedia.org/wiki/Backus%E2%80%93Naur_form)
 and its special case we have seen in [Lesson 1.2](../02_basics/README.md). 
 There the `::=` symbol was followed by an alphanumeric identifier and a 
-(possibly empty) list of sorts in parentheses. In this lesson, we focus on the 
-former.
+(possibly empty) comma-separated list of sorts in parentheses. In this 
+lesson, we focus on the former.
 
 Recall the set of productions from the previous lesson:
 
@@ -85,8 +85,8 @@ everything else has been wrapped in double quotation marks. This is because
 in BNF notation, we distinguish between two types of **production items**:
 **terminals** and **non-terminals**. A terminal denotes a fixed sequence of
 characters that is a verbatim part of the syntax of that production. For 
-example, `Banana`, `(`, `)`, or `colorOf` are such a sequences of characters
-and all considered terminals. Conversely, non-terminals, refer to a sort name, 
+example, `Banana`, `(`, `)`, or `colorOf` are such sequences of characters and 
+all considered terminals. Conversely, non-terminals, refer to a sort name, 
 like `Fruit`, and the syntax of the production they belong to accepts any valid
 term of that sort at that position.
 
@@ -293,8 +293,8 @@ notion into a type of production called **bracket**.
 
 A bracket production is any production with the `bracket` attribute. It is 
 required that such a production only have a single non-terminal, and the sort 
-of the production must equal the sort of that non-terminal. Otherwise, K does 
-not impose any restrictions on the grammar provided for a bracket. 
+of the production must equal the sort of that non-terminal. K does not
+otherwise impose any restrictions on the grammar provided for a bracket. 
 
 Like in other languages, the most common type of bracket is one in which a 
 non-terminal is surrounded by terminals representing one of the following
@@ -457,8 +457,8 @@ such, if your grammar is not LR(1), it may not parse exactly the same as if
 you were to use the just-in-time parser because Bison will automatically pick
 one of the possible branches whenever it encounters a shift-reduce or
 reduce-reduce conflict. In this case, you can either modify your grammar to be
-LR(1), or you can use Bison's GLR support by passing instead flag
-`--gen-glr-bison-parser` to `kompile`. Note that if your grammar is ambiguous,
+LR(1), or you can use Bison's GLR support by passing flag
+`--gen-glr-bison-parser` to `kompile` instead. Note that if your grammar is ambiguous,
 the ahead-of-time parser will not provide you with particularly readable error
 messages at this time.
 
