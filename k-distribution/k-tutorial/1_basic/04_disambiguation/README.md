@@ -6,8 +6,8 @@ copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 
 In this lesson you will learn how to use K's built-in features to transform
 an ambiguous grammar into an unambiguous one that expresses the intended AST. 
-You will learn how to define a precedence order on operators and 
-associativity directions for them.
+You will learn how to define the precedence and associativity of operators 
+and how to favor certain parses over others.
 
 ## Priority blocks
 
@@ -24,9 +24,9 @@ of others.
 
 In general, grammars can be rewritten to remove unwanted parses. However,
 in K, the grammar specification and AST generation are intrinsically linked,
-so we discourage this approach. You will still learn how remove unwanted parses 
-in K towards the end of this lesson. Now we continue with showing you how to
-explicitly express the relative precedence of operators in different 
+so we discourage this approach. You will still learn how to remove unwanted 
+parses in K towards the end of this lesson. Now we continue with showing you 
+how to explicitly express the relative precedence of operators in different 
 situations in order to resolve grammar ambiguity.
 
 Recall that in C, `&&` binds tighter than `||`, i.e., it has higher 
@@ -76,14 +76,14 @@ As a result, we are left with the unambiguous parse
 `(true && false) || false`. Conversely, if the user wants the other parse, 
 they can express this with brackets by explicitly writing 
 `true && (false || false)`. This still parses successfully because the `||` 
-operator is no longer the **direct** child of the `&&` operator, but of `()` 
-operator, even if the bracket is not explicitly depicted in the AST.
+operator is no longer the **direct** child of the `&&` operator, but of the
+`()` operator, even if the bracket is not explicitly depicted in the AST.
 Internally, `&&` operator is viewed as an **indirect** parent, which is not 
 subject to the priority restriction.
 
 You must have noticed that `()` has been defined as having greater priority
 than `||`. However, in example `true && (false || false)`, `||` appears as
-a direct child of `()`, in what appears to be a contradiction to the priority
+a direct child of `()`, in what seems to be a contradiction to the priority
 rule. What we have not mentioned is that the priority rule is more complex 
 and applies only _conditionally_. Specifically, it applies in cases where the 
 child is either the first or last production item in the parent's 
@@ -144,9 +144,9 @@ symbol with equal priority; and
 child of a symbol with equal priority.
 
 In C, binary operators are all left-associative, meaning that the expression
-`true && false && false` parses unambiguously as `(true && false) && false`,
-because `&&` cannot appear as the rightmost child of itself, i.e., only the 
-AST in Fig. 4-A is valid.
+`true && false && false` parses unambiguously as `(true && false) && false`.
+Since `&&` cannot appear as the rightmost child of itself, only the AST in 
+Fig. 4-A is valid.
 
 Consider, then, the fourth iteration on the grammar of this definition
 (`lesson-04-b.k`):
@@ -288,7 +288,7 @@ module LESSON-04-E
 endmodule
 ```
 
-We can write the following program (`dangling-else.if`):
+and program `dangling-else.if` below:
 
 ```
 if (true) if (false) {} else {}
