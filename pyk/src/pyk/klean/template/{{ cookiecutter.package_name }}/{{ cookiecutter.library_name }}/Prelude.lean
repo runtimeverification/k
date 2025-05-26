@@ -215,11 +215,6 @@ class Inj (From To : Type) : Type where
 def inj {From To : Type} [inst : Inj From To] := inst.inj
 def retr {From To : Type} [inst : Inj From To] := inst.retr
 
-def «_+Int_» (x0 : SortInt) (x1 : SortInt) : Option SortInt := some (x0 + x1)
-def «_-Int_» (x0 : SortInt) (x1 : SortInt) : Option SortInt := some (x0 - x1)
-def «_*Int_» (x0 : SortInt) (x1 : SortInt) : Option SortInt := some (x0 * x1)
-def «_<=Int_» (x0 : SortInt) (x1 : SortInt) : Option SortBool := some (x0 <= x1)
-
 -- Instances
 
 instance: BEq UInt8 where
@@ -235,3 +230,77 @@ def ByteArray.decEq (a b : ByteArray) : Decidable (Eq a b) :=
     | isFalse f => isFalse (by simp [f])
 
 instance: DecidableEq SortBytes := ByteArray.decEq
+
+/-! ### Function Implementations -/
+
+-- `SortInt`
+
+-- Operations
+def «_+Int_» (x0 x1 : SortInt) : Option SortInt := some (x0 + x1)
+def «_-Int_» (x0 x1 : SortInt) : Option SortInt := some (x0 - x1)
+def «_*Int_» (x0 x1 : SortInt) : Option SortInt := some (x0 * x1)
+def «_/Int_» (x0 x1 : SortInt) : Option SortInt :=
+  if x1 == 0 then none else some (Int.tdiv x0 x1)
+def «maxInt(_,_)_INT-COMMON_Int_Int_Int» (x0 x1 : SortInt) :=
+  some (ite (x0 < x1) x1 x0)
+def «log2Int(_)_INT-COMMON_Int_Int» (x0 : SortInt) : Option SortInt :=
+  ite (0 < x0) (some (Nat.log2 x0.toNat)) none
+def «~Int_» (x0 : SortInt) : Option SortInt := some (.not x0)
+
+-- Comparisons
+def «_<=Int_» (x0 x1 : SortInt) : Option SortBool := some (x0 <= x1)
+def «_<Int_» (x0 x1 : SortInt) : Option SortBool := some (x0 < x1)
+def «_>Int_» (x0 x1 : SortInt) : Option SortBool := some (x0 > x1)
+def «_==Int_» (x0 x1 : SortInt) : Option SortBool := some (x0 == x1)
+
+-- `SortBytes`
+
+inductive SortEndianness : Type where
+  | bigEndianBytes : SortEndianness
+  | littleEndianBytes : SortEndianness
+  deriving BEq, DecidableEq
+
+def «.Bytes_BYTES-HOOKED_Bytes» : Option SortBytes := some .empty
+
+-- Adapted from https://github.com/runtimeverification/haskell-backend/blob/362dab30d6435ec117862fea722be67373572034/kore/src/Kore/Builtin/InternalBytes.hs#L496-L511
+def «Int2Bytes(_,_,_)_BYTES-HOOKED_Bytes_Int_Int_Endianness» (x0 x1 : SortInt) (x2 : SortEndianness) : Option SortBytes :=
+  match x2 with
+  | .littleEndianBytes => some littleEndian.toByteArray
+  | .bigEndianBytes => some littleEndian.reverse.toByteArray
+  where
+  littleEndian : List UInt8 :=
+    let pad := ite (x1 < 0) 0xFF 0x00
+    let rec bytes (len : Nat) (n : Int) : List UInt8 :=
+      match len, n with
+      | 0, _ => []
+      | .succ l, 0 => pad :: bytes l 0
+      | .succ l, n => ⟨(n % 256).toNat⟩ :: bytes l (n / 256)
+    bytes x0.toNat x1
+
+/--
+Pads to the right `len - b.length` bytes with specified `val` value
+-/
+def «padRightBytes(_,_,_)_BYTES-HOOKED_Bytes_Bytes_Int_Int» (b : SortBytes) (len val : SortInt) : Option SortBytes :=
+  if val < 0 ∨ 255 < val then none else
+  some { data := (Array.rightpad len.toNat (⟨val.toNat⟩ : UInt8) b.data)}
+
+/--
+Pads to the left `len - b.length` bytes with specified `val` value
+-/
+def «padLeftBytes(_,_,_)_BYTES-HOOKED_Bytes_Bytes_Int_Int» (b : SortBytes) (len val : SortInt) : Option SortBytes :=
+  if val < 0 ∨ 255 < val then none else
+  some { data := (Array.leftpad len.toNat (⟨val.toNat⟩ : UInt8) b.data)}
+
+def «lengthBytes(_)_BYTES-HOOKED_Int_Bytes» (x0 : SortBytes) : Option SortInt :=
+  Int.ofNat x0.size
+
+/--
+Replaces the contents of `dest` from index `index` with the contents of `src`
+If `dest.size < index + src.size` the result is `none`
+-/
+def «replaceAtBytes(_,_,_)_BYTES-HOOKED_Bytes_Bytes_Int_Bytes» (dest : SortBytes) (index : SortInt) (src : SortBytes) : Option SortBytes :=
+  if index < 0 then none else
+  if dest.size < index + src.size then none else
+  let init := dest.data.extract 0 index.toNat
+  let rem := dest.data.extract (index.toNat + src.size) dest.size
+  some { data := init ++ src.data ++ rem }
