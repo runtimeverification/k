@@ -282,16 +282,14 @@ Pads to the right `len - b.length` bytes with specified `val` value
 -/
 def «padRightBytes(_,_,_)_BYTES-HOOKED_Bytes_Bytes_Int_Int» (b : SortBytes) (len val : SortInt) : Option SortBytes :=
   if val < 0 ∨ 255 < val then none else
-  let Δ := len.toNat - b.size
-  some { data := (Array.rightpad Δ (⟨val.toNat⟩ : UInt8) b.data)}
+  some { data := (Array.rightpad len.toNat (⟨val.toNat⟩ : UInt8) b.data)}
 
 /--
 Pads to the left `len - b.length` bytes with specified `val` value
 -/
 def «padLeftBytes(_,_,_)_BYTES-HOOKED_Bytes_Bytes_Int_Int» (b : SortBytes) (len val : SortInt) : Option SortBytes :=
   if val < 0 ∨ 255 < val then none else
-  let Δ := len.toNat - b.size
-  some { data := (Array.leftpad Δ (⟨val.toNat⟩ : UInt8) b.data)}
+  some { data := (Array.leftpad len.toNat (⟨val.toNat⟩ : UInt8) b.data)}
 
 def «lengthBytes(_)_BYTES-HOOKED_Int_Bytes» (x0 : SortBytes) : Option SortInt :=
   Int.ofNat x0.size
