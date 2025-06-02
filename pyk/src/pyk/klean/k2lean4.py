@@ -59,25 +59,30 @@ _PRELUDE_SORTS: Final = {
     'SortString',
     'SortStringBuffer',
     'SortEndianness',
+    'SortSignedness',
 }
 _PRELUDE_FUNCS: Final = {
     "Lbl'UndsPlus'Int'Unds'",  # +Int
     "Lbl'Unds'-Int'Unds'",  # -Int
     "Lbl'UndsStar'Int'Unds'",  # *Int
     "Lbl'UndsSlsh'Int'Unds'",  # /Int
+    "Lbl'Unds'modInt'Unds'",  # modInt
     "LblmaxInt'LParUndsCommUndsRParUnds'INT-COMMON'Unds'Int'Unds'Int'Unds'Int",  # maxInt
     "Lbl'Tild'Int'Unds'",  # ~Int
     "Lbl'Unds-LT-Eqls'Int'Unds'",  # <=Int
+    "Lbl'Unds-GT-Eqls'Int'Unds'",  # >=Int
     "Lbl'Unds-LT-'Int'Unds'",  # <Int
     "Lbl'Unds-GT-'Int'Unds'",  # >Int
     "Lbl'UndsEqlsEqls'Int'Unds'",  # ==Int
     "Lbl'Stop'Bytes'Unds'BYTES-HOOKED'Unds'Bytes",  # Bytes.empty
     "Lbllog2Int'LParUndsRParUnds'INT-COMMON'Unds'Int'Unds'Int",  # Int.log2
     "LblInt2Bytes'LParUndsCommUndsCommUndsRParUnds'BYTES-HOOKED'Unds'Bytes'Unds'Int'Unds'Int'Unds'Endianness",  # Int2Bytes
+    "LblBytes2Int'LParUndsCommUndsCommUndsRParUnds'BYTES-HOOKED'Unds'Int'Unds'Bytes'Unds'Endianness'Unds'Signedness",  # Bytes2Int
     "LblpadRightBytes'LParUndsCommUndsCommUndsRParUnds'BYTES-HOOKED'Unds'Bytes'Unds'Bytes'Unds'Int'Unds'Int",  # padRight
     "LblpadLeftBytes'LParUndsCommUndsCommUndsRParUnds'BYTES-HOOKED'Unds'Bytes'Unds'Bytes'Unds'Int'Unds'Int",  # padLeft
     "LbllengthBytes'LParUndsRParUnds'BYTES-HOOKED'Unds'Int'Unds'Bytes",  # Bytes.length
     "LblreplaceAtBytes'LParUndsCommUndsCommUndsRParUnds'BYTES-HOOKED'Unds'Bytes'Unds'Bytes'Unds'Int'Unds'Bytes",  # Bytes.replaceAt
+    "LblsubstrBytes'LParUndsCommUndsCommUndsRParUnds'BYTES-HOOKED'Unds'Bytes'Unds'Bytes'Unds'Int'Unds'Int",  # Bytes.substr
 }
 
 _SYMBOL_OVERRIDES: Final = {

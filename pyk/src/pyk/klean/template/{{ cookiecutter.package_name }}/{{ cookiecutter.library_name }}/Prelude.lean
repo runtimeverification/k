@@ -240,15 +240,18 @@ def «_+Int_» (x0 x1 : SortInt) : Option SortInt := some (x0 + x1)
 def «_-Int_» (x0 x1 : SortInt) : Option SortInt := some (x0 - x1)
 def «_*Int_» (x0 x1 : SortInt) : Option SortInt := some (x0 * x1)
 def «_/Int_» (x0 x1 : SortInt) : Option SortInt :=
-  if x1 == 0 then none else some (Int.tdiv x0 x1)
+  ite (x1 == 0) none (Int.tdiv x0 x1)
+def _modInt_ (x0 : SortInt) (x1 : SortInt) : Option SortInt :=
+  ite (x1 == 0) none (Int.emod x0 x1)
 def «maxInt(_,_)_INT-COMMON_Int_Int_Int» (x0 x1 : SortInt) :=
   some (ite (x0 < x1) x1 x0)
 def «log2Int(_)_INT-COMMON_Int_Int» (x0 : SortInt) : Option SortInt :=
-  ite (0 < x0) (some (Nat.log2 x0.toNat)) none
+  ite (0 < x0) ((Nat.log2 x0.toNat) : Int) none
 def «~Int_» (x0 : SortInt) : Option SortInt := some (.not x0)
 
 -- Comparisons
 def «_<=Int_» (x0 x1 : SortInt) : Option SortBool := some (x0 <= x1)
+def «_>=Int_» (x0 x1 : SortInt) : Option SortBool := some (x0 >= x1)
 def «_<Int_» (x0 x1 : SortInt) : Option SortBool := some (x0 < x1)
 def «_>Int_» (x0 x1 : SortInt) : Option SortBool := some (x0 > x1)
 def «_==Int_» (x0 x1 : SortInt) : Option SortBool := some (x0 == x1)
@@ -258,6 +261,11 @@ def «_==Int_» (x0 x1 : SortInt) : Option SortBool := some (x0 == x1)
 inductive SortEndianness : Type where
   | bigEndianBytes : SortEndianness
   | littleEndianBytes : SortEndianness
+  deriving BEq, DecidableEq
+
+inductive SortSignedness : Type where
+  | signedBytes : SortSignedness
+  | unsignedBytes : SortSignedness
   deriving BEq, DecidableEq
 
 def «.Bytes_BYTES-HOOKED_Bytes» : Option SortBytes := some .empty
@@ -277,21 +285,44 @@ def «Int2Bytes(_,_,_)_BYTES-HOOKED_Bytes_Int_Int_Endianness» (x0 x1 : SortInt)
       | .succ l, n => ⟨(n % 256).toNat⟩ :: bytes l (n / 256)
     bytes x0.toNat x1
 
+-- Adapted from
+-- https://github.com/runtimeverification/haskell-backend/blob/362dab30d6435ec117862fea722be67373572034/kore/src/Kore/Builtin/InternalBytes.hs#L527-L543
+-- Note that we use `List.foldl` and not `ByteArray.foldl` for ease of reasoning
+def «Bytes2Int(_,_,_)_BYTES-HOOKED_Int_Bytes_Endianness_Signedness» (bytes : SortBytes) (endian : SortEndianness) (sign : SortSignedness) : Option SortInt :=
+  match sign with
+  | .unsignedBytes => Int.ofNat unsigned
+  | .signedBytes => if 2 * unsigned >= modulus then (Int.ofNat unsigned) - (Int.ofNat modulus)
+                    else Int.ofNat unsigned
+  where
+  modulus : Nat := res.1
+  unsigned : Nat := res.2
+  res : Nat×Nat :=
+    let littleEndian := match endian with
+                        | .littleEndianBytes => bytes.toList
+                            --match bytes with |⟨⟨l⟩⟩ => l
+                        | .bigEndianBytes => bytes.toList.reverse
+                            --match bytes with |⟨⟨l⟩⟩ => l.reverse
+    let go (res : Nat×Nat) (b : UInt8) : Nat×Nat :=
+      -- `place` is `res.1`
+      -- `acc` is `res.2`
+      let place := res.1 * 0x100
+      let acc := res.2 + res.1 * b.toNat
+      ⟨place, acc⟩
+    List.foldl go (1, 0) littleEndian
+
 /--
 Pads to the right `len - b.length` bytes with specified `val` value
 -/
 def «padRightBytes(_,_,_)_BYTES-HOOKED_Bytes_Bytes_Int_Int» (b : SortBytes) (len val : SortInt) : Option SortBytes :=
   if val < 0 ∨ 255 < val then none else
-  let Δ := len.toNat - b.size
-  some { data := (Array.rightpad Δ (⟨val.toNat⟩ : UInt8) b.data)}
+  some { data := (Array.rightpad len.toNat (⟨val.toNat⟩ : UInt8) b.data)}
 
 /--
 Pads to the left `len - b.length` bytes with specified `val` value
 -/
 def «padLeftBytes(_,_,_)_BYTES-HOOKED_Bytes_Bytes_Int_Int» (b : SortBytes) (len val : SortInt) : Option SortBytes :=
   if val < 0 ∨ 255 < val then none else
-  let Δ := len.toNat - b.size
-  some { data := (Array.leftpad Δ (⟨val.toNat⟩ : UInt8) b.data)}
+  some { data := (Array.leftpad len.toNat (⟨val.toNat⟩ : UInt8) b.data)}
 
 def «lengthBytes(_)_BYTES-HOOKED_Int_Bytes» (x0 : SortBytes) : Option SortInt :=
   Int.ofNat x0.size
@@ -306,3 +337,12 @@ def «replaceAtBytes(_,_,_)_BYTES-HOOKED_Bytes_Bytes_Int_Bytes» (dest : SortByt
   let init := dest.data.extract 0 index.toNat
   let rem := dest.data.extract (index.toNat + src.size) dest.size
   some { data := init ++ src.data ++ rem }
+
+/--
+Get a new `Bytes` object containing a range of bytes from the input `Bytes`
+-/
+def «substrBytes(_,_,_)_BYTES-HOOKED_Bytes_Bytes_Int_Int» (b : SortBytes) (startIndex : SortInt) (endIndex : SortInt) : Option SortBytes :=
+  if startIndex < 0 then none else
+  if endIndex < startIndex then none else
+  if b.size < endIndex then none else
+  b.extract startIndex.toNat endIndex.toNat
