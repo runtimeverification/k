@@ -55,12 +55,7 @@ def _kore_print(
     # ---
     input: str | None,
 ) -> str:
-    args = ['kore-print']
-
-    input_file = Path(input_file)
-    if not input_file.is_char_device():
-        check_file_path(input_file)
-    args += [str(input_file)]
+    args = ['kore-print', str(input_file)]
 
     if definition_dir is not None:
         definition_dir = Path(definition_dir)
