@@ -58,7 +58,7 @@ module LESSON-14-A
   rule <k> HOLE:Exp ~> freezer3(E) => E && HOLE ...</k> [cool]
   rule <k> HOLE:Exp ~> freezer4(E) => HOLE && E ...</k> [cool]
 
-  syntax Bool ::= isKResult(K) [function, symbol]
+  syntax Bool ::= isKResult(K) [function, symbol(isKResult)]
   rule isKResult(_:Int) => true
   rule isKResult(_:Bool) => true
   rule isKResult(_) => false [owise]
@@ -133,7 +133,7 @@ module LESSON-14-B
     requires isKResult(E)
   context <k> HOLE:Exp && _:Exp ...</k>
 
-  syntax Bool ::= isKResult(K) [function, symbol]
+  syntax Bool ::= isKResult(K) [function, symbol(isKResult)]
   rule isKResult(_:Int) => true
   rule isKResult(_:Bool) => true
   rule isKResult(_) => false [owise]
@@ -181,7 +181,7 @@ module LESSON-14-C
 
   context alias [exp]: <k> HERE ...</k>
 
-  syntax Bool ::= isKResult(K) [function, symbol]
+  syntax Bool ::= isKResult(K) [function, symbol(isKResult)]
   rule isKResult(_:Int) => true
   rule isKResult(_:Bool) => true
   rule isKResult(_) => false [owise]
@@ -251,7 +251,7 @@ module LESSON-14-D
   rule <k> I1:Int + I2:Int => I1 +Int I2 ...</k>
   rule <k> B1:Bool && B2:Bool => B1 andBool B2 ...</k>
 
-  syntax Bool ::= isKResult(K) [function, symbol]
+  syntax Bool ::= isKResult(K) [function, symbol(isKResult)]
   rule isKResult(_:Int) => true
   rule isKResult(_:Bool) => true
   rule isKResult(_) => false [owise]
