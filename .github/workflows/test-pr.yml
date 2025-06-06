@@ -209,6 +209,7 @@ jobs:
         uses: cachix/cachix-action@v14
         with:
           name: k-framework
+          authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
           skipPush: true
       - name: 'Build K Framework and push build time dependencies to cachix'
         env:
