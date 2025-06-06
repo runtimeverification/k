@@ -7,13 +7,13 @@ the use of the module on a simple example.
 
 ## Create a new Python project
 
-We'll use `poetry` for managing dependencies, but the approach works with any
+We'll use `uv` for managing dependencies, but the approach works with any
 build tool that supports entry points (in particular, with any
 [PEP 621](https://peps.python.org/pep-0621/) compilant build back-end).
 
 ```
 imp-semantics
-├── poetry.lock
+├── uv.lock
 ├── pyproject.toml
 └── src
     └── imp_semantics
@@ -24,28 +24,29 @@ imp-semantics
 
 ```toml
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
+[project]
 name = "imp-semantics"
 version = "0.1.0"
-authors = [
-    "Runtime Verification, Inc. <contact@runtimeverification.com>",
-]
 description = "K semantics for a simple imperative programing language"
+readme = "README.md"
+requires-python = "~=3.10"
+dependencies = [
+    "kframework",
+]
 
-[tool.poetry.dependencies]
-python = "^3.10"
-pyk = { git = "https://github.com/runtimeverification/pyk.git" }
+[[project.authors]]
+name = "Runtime Verification, Inc."
+email = "contact@runtimeverification.com"
 ```
 
-Notice that `pyk` is given as a dependency for the project. This setup already
-gives us access to the `kdist` command:
+Notice that `kframework` is given as a dependency for the project. This setup
+already gives us access to the `kdist` command:
 
 ```
-$ poetry install
-$ poetry run kdist list
+$ uv run kdist list
 ```
 
 Run `kdist --help` for the complete list of commands.
@@ -66,7 +67,7 @@ imp-semantics
 Add an entry point to `pyproject.toml` for `imp-semantics.kdist.plugin`:
 
 ```toml
-[tool.poetry.plugins.kdist]
+[project.entry-points.kdist]
 imp-semantics = "imp_semantics.kdist.plugin"
 ```
 
@@ -76,8 +77,7 @@ imp-semantics = "imp_semantics.kdist.plugin"
 Let's verify the current setup by running `kdist list` again:
 
 ```
-$ poetry install
-$ poetry run kdist list
+$ uv run kdist list
 WARNING 2024-01-08 10:56:04,971 pyk.kdist._cache - Module does not define __TARGETS__: imp_semantics.kdist.plugin
 ```
 
@@ -127,7 +127,7 @@ __TARGETS__: Final = {
 Command `kbuild list` now lists our build targets:
 
 ```
-$ poetry run kdist list
+$ uv run kdist list
 imp-semantics
 * llvm
 * haskell
@@ -137,7 +137,7 @@ imp-semantics
 ## Build targets
 
 ```
-$ poetry run kdist --verbose build -j2
+$ uv run kdist --verbose build -j2
 INFO 2024-01-08 12:18:04,651 pyk.kdist._cache - Loading target cache
 INFO 2024-01-08 12:18:04,663 pyk.kdist._cache - Loading plugin: imp-semantics
 INFO 2024-01-08 12:18:04,663 pyk.kdist._cache - Importing module: imp_semantics.kdist.plugin
@@ -151,7 +151,7 @@ INFO 2024-01-08 12:18:04,675 pyk.ktool.kompile - Running: kompile <path-to-imp-s
 Inspect the output:
 
 ```
-$ poetry run kdist which
+$ uv run kdist which
 /home/<user>/.cache/kdist-<digest>
 ```
 

@@ -329,6 +329,7 @@ jobs:
           distro: jammy
       - name: 'Run K regression tests'
         run: |
+          docker exec -u user k-pyk-regression-${{ github.sha }} uv sync
           docker exec -u user k-pyk-regression-${{ github.sha }} make test-regression-new -j4
       - name: 'Tear down Docker'
         if: always()
