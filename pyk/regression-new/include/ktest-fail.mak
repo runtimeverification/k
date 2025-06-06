@@ -1,12 +1,12 @@
 SHELL=/bin/bash
 
 ROOT=$(abspath $(MAKEFILE_PATH)/../..)
-POETRY_RUN?=poetry -P $(ROOT) run --
+UV_RUN?=uv --project $(ROOT) run --
 # path to the current makefile
 MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 # path to the kompile binary of this distribuition
-KOMPILE=$(POETRY_RUN) pyk kompile
-KAST=$(POETRY_RUN) pyk parse
+KOMPILE=$(UV_RUN) pyk kompile
+KAST=$(UV_RUN) pyk parse
 # path to put -kompiled directory in
 DEFDIR?=.
 # all tests in test directory with matching file extension

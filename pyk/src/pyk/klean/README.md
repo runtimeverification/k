@@ -39,13 +39,11 @@ In the following, all example commands assume the following:
 * The K Framework is installed, the correct version of `kompile` is on `$PATH`.
 * The `runtimeverification/k` repository is cloned, `$PWD` is the `pyk`
   directory.
-* Command `poetry install` has been run so that the `kframework` package is
-  installed in the virtual environment managed by Poetry.
 
 
 ```bash
 $ kompile src/tests/integration/test-data/k-files/imp.k  # kompile the IMP definition
-$ poetry run klean imp-kompiled klean-imp                # generate the Lean 4 project
+$ uv run klean imp-kompiled klean-imp                # generate the Lean 4 project
 ```
 
 The command produces the following files:
