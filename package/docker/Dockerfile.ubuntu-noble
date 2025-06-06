@@ -18,7 +18,7 @@ RUN    apt-get update                                                           
     && apt-get install --yes --no-install-recommends /kframework_amd64_ubuntu_noble.deb
 
 COPY pyk /pyk
-RUN pipx install poetry                               \
+RUN pipx install uv                                   \
     && pipx ensurepath                                \
     && . /root/.profile                               \
     && cd /pyk                                        \

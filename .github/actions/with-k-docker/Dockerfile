@@ -38,8 +38,8 @@ USER user
 WORKDIR /home/user
 
 ENV PATH=/home/user/.local/bin:${PATH}
-RUN    curl -sSL https://install.python-poetry.org | python3 - --version 2.1.1 \
-    && poetry --version
+RUN    curl -LsSf https://astral.sh/uv/install.sh | sh \
+    && uv --version
 
 ENV PATH=/home/user/.elan/bin:${PATH}
 RUN    curl -O https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \

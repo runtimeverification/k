@@ -91,7 +91,7 @@ class ProveRpc:
                 else:
                     assert type(proof) is APRProof
                     prover = APRProver(kcfg_explore, execute_depth=max_depth, assume_defined=assume_defined)
-                prover.advance_proof(proof, max_iterations=max_iterations)
+                prover.advance_proof(proof, max_iterations=max_iterations)  # type: ignore [arg-type]
 
         if proof.passed:
             _LOGGER.info(f'Proof passed: {proof.id}')
