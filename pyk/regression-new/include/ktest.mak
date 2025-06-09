@@ -3,29 +3,29 @@ SHELL=/bin/bash
 UNAME := $(shell uname)
 
 ROOT=$(abspath $(MAKEFILE_PATH)/../..)
-POETRY_RUN?=poetry -P $(ROOT) run --
+UV_RUN?=uv --project $(ROOT) run --
 # path to the current makefile
 MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 # path to the kompile binary of this distribuition
-KOMPILE=$(POETRY_RUN) pyk kompile
+KOMPILE=$(UV_RUN) pyk kompile
 # ditto for krun
-KRUN=$(POETRY_RUN) pyk run
+KRUN=$(UV_RUN) pyk run
 # and kdep
-KDEP=$(POETRY_RUN) pyk kdep
+KDEP=$(UV_RUN) pyk kdep
 # and kprove
-KPROVE=$(POETRY_RUN) pyk prove
+KPROVE=$(UV_RUN) pyk prove
 # and kast
-KAST=$(POETRY_RUN) pyk parse
+KAST=$(UV_RUN) pyk parse
 # and kparse
-KPARSE=$(POETRY_RUN) pyk parse
+KPARSE=$(UV_RUN) pyk parse
 # and kserver
-KSERVER=$(POETRY_RUN) pyk kserver
+KSERVER=$(UV_RUN) pyk kserver
 # and ksearch
 KSEARCH:=$(KRUN) --search-all
 # and kprint
-KPRINT=$(POETRY_RUN) pyk parse
+KPRINT=$(UV_RUN) pyk parse
 # and llvm-krun
-LLVM_KRUN=$(POETRY_RUN) pyk llvm-krun
+LLVM_KRUN=$(UV_RUN) pyk llvm-krun
 # path relative to current definition of test programs
 TESTDIR?=tests
 # path relative to current definition of output/input files
