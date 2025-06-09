@@ -67,7 +67,7 @@ jobs:
 
           RV_NIX_TOOLS_VERSION=$(cat deps/rv-nix-tools)
           sed -i 's!    rv-nix-tools.url = "github:runtimeverification/rv-nix-tools/[a-z0-9\.]*"!    rv-nix-tools.url = "github:runtimeverification/rv-nix-tools/'"${RV_NIX_TOOLS_VERSION}"'"!' flake.nix
-          if git add flake.nix && git commit -m "flake.nix, rv-nix-tools: update to revision ${RV_NIX_TOOLS_VERSIONs}"; then
+          if git add flake.nix && git commit -m "flake.nix, rv-nix-tools: update to revision ${RV_NIX_TOOLS_VERSION}"; then
             changed=true
           fi
 
