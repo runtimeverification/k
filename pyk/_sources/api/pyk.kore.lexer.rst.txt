@@ -1,0 +1,7 @@
+pyk.kore.lexer module
+=====================
+
+.. automodule:: pyk.kore.lexer
+   :members:
+   :undoc-members:
+   :show-inheritance:
