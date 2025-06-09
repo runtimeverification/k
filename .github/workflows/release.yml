@@ -129,7 +129,7 @@ jobs:
           version_tag=ubuntu-noble-${version}
           UV_VERSION=$(cat deps/uv_release)
           docker login --username rvdockerhub --password "${DOCKERHUB_PASSWORD}"
-          docker image build . --file package/docker/Dockerfile.ubuntu-noble --tag "${DOCKERHUB_REPO}:${version_tag}" --build-arg UV_VERSION=${UV_VERSION}
+          docker image build . --file package/docker/Dockerfile.ubuntu-noble --tag "${DOCKERHUB_REPO}:${version_tag}" --build-arg "UV_VERSION=${UV_VERSION}"
           docker run --name "k-package-docker-test-noble-${GITHUB_SHA}" --rm -it --detach "${DOCKERHUB_REPO}:${version_tag}"
           docker exec -t "k-package-docker-test-noble-${GITHUB_SHA}" bash -c 'cd ~ && echo "module TEST imports BOOL endmodule" > test.k'
           docker exec -t "k-package-docker-test-noble-${GITHUB_SHA}" bash -c 'cd ~ && kompile test.k --backend llvm'
@@ -190,7 +190,7 @@ jobs:
           version_tag=ubuntu-jammy-${version}
           UV_VERSION=$(cat deps/uv_release)
           docker login --username rvdockerhub --password "${DOCKERHUB_PASSWORD}"
-          docker image build . --file package/docker/Dockerfile.ubuntu-jammy --tag "${DOCKERHUB_REPO}:${version_tag}" --build-arg UV_VERSION=${UV_VERSION}
+          docker image build . --file package/docker/Dockerfile.ubuntu-jammy --tag "${DOCKERHUB_REPO}:${version_tag}" --build-arg "UV_VERSION=${UV_VERSION}"
           docker run --name "k-package-docker-test-jammy-${GITHUB_SHA}" --rm -it --detach "${DOCKERHUB_REPO}:${version_tag}"
           docker exec -t "k-package-docker-test-jammy-${GITHUB_SHA}" bash -c 'cd ~ && echo "module TEST imports BOOL endmodule" > test.k'
           docker exec -t "k-package-docker-test-jammy-${GITHUB_SHA}" bash -c 'cd ~ && kompile test.k --backend llvm'
@@ -494,7 +494,7 @@ jobs:
       - name: 'Get uv release'
         id: uv_release
         run: |
-          echo uv_version=$(cat deps/uv_release) >> "${GITHUB_OUTPUT}"
+          echo "uv_version=$(cat deps/uv_release)" >> "${GITHUB_OUTPUT}"
 
       - name: 'Install uv'
         uses: astral-sh/setup-uv@v6

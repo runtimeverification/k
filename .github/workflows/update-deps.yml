@@ -85,9 +85,9 @@ jobs:
             changed=true
           fi
 
-          UV_VERSION=$(curl -s https://raw.githubusercontent.com/pyproject-nix/uv2nix/$(cat deps/uv2nix)/pkgs/uv-bin/srcs.json | jq -r .version)
+          UV_VERSION=$(curl -s "https://raw.githubusercontent.com/pyproject-nix/uv2nix/$(cat deps/uv2nix)/pkgs/uv-bin/srcs.json" | jq -r .version)
           [[ "$UV_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
-          echo $UV_VERSION > deps/uv_release
+          echo "$UV_VERSION" > deps/uv_release
           if git add deps/uv_release && git commit -m "deps/uv_release: update to version ${UV_VERSION}"; then
             changed=true
           fi
