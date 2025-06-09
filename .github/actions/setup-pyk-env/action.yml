@@ -15,6 +15,7 @@ runs:
         python-version: ${{ inputs.python-version }}
     - name: 'Get uv release'
       id: uv_release
+      shell: bash
       run: |
         echo uv_version=$(cat deps/uv_release) >> "${GITHUB_OUTPUT}"
     - name: 'Install uv'
