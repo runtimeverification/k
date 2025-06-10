@@ -2102,6 +2102,7 @@ The result is `#False` if `index` is not a valid index (see above).
 
 ```k
   syntax Int ::= Bytes "[" Int "]" [function, hook(BYTES.get)]
+  syntax {64} MInt{64} ::= Bytes "[" MInt{64} "]" [function, hook(BYTES.get64)]
 ```
 
 ### Bytes substring
