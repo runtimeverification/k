@@ -2010,6 +2010,7 @@ endmodule
 module BYTES-HOOKED
   imports STRING-SYNTAX
   imports BYTES-SYNTAX
+  imports MINT-SYNTAX
   imports BYTES-STRING-ENCODE
 ```
 
@@ -2112,6 +2113,7 @@ a copy and mutations to it do not affect mutations to the original `Bytes`.
 
 ```k
   syntax Bytes ::= substrBytes(Bytes, startIndex: Int, endIndex: Int) [function, hook(BYTES.substr)]
+  syntax {64} Bytes ::= substrBytes(Bytes, startIndex: MInt{64}, endIndex: MInt{64}) [function, hook(BYTES.substr64)]
 ```
 
 The function is not total: `substrBytes(B, startIndex, endIndex)` is `#Bottom` if
@@ -2129,6 +2131,7 @@ object and will instead modify the original on concrete backends. The result is
 
 ```k
   syntax Bytes ::= replaceAtBytes(dest: Bytes, index: Int, src: Bytes) [function, hook(BYTES.replaceAt)]
+  syntax {64} Bytes ::= replaceAtBytes(dest: Bytes, index: MInt{64}, src: Bytes) [function, hook(BYTES.replaceAt64)]
 ```
 
 ### Multiple bytes update
@@ -2157,6 +2160,8 @@ long, and will instead return the input unchanged. The result is `#False` if
 ```k
   syntax Bytes ::= padRightBytes(Bytes, length: Int, value: Int) [function, hook(BYTES.padRight)]
                  | padLeftBytes(Bytes, length: Int, value: Int) [function, hook(BYTES.padLeft)]
+  syntax {64} Bytes ::= padRightBytes(Bytes, length: MInt{64}, value: Int) [function, hook(BYTES.padRight64)]
+                       | padLeftBytes(Bytes, length: MInt{64}, value: Int) [function, hook(BYTES.padLeft64)]
 ```
 
 ### Bytes reverse
@@ -2175,6 +2180,7 @@ You can get the length of a `Bytes` term in O(1) time.
 
 ```k
   syntax Int ::= lengthBytes(Bytes) [function, total, hook(BYTES.length), smtlib(lengthBytes)]
+  syntax {64} MInt{64} ::= lengthBytes(Bytes) [function, total, hook(BYTES.length64), smtlib(lengthBytes64)]
 ```
 
 
