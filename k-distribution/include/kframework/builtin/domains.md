@@ -2964,10 +2964,12 @@ You can:
 * Compute the bitwise inclusive or `|MInt` of two `MInt`s.
 
 ```k
+  syntax MInt{256}
   syntax {Width} MInt{Width} ::= "~MInt" MInt{Width} [function, total, hook(MINT.not), smt-hook(bvnot)]
                                | "--MInt" MInt{Width} [function, total, hook(MINT.neg), smt-hook(bvuminus)]
                                > left:
-                                 MInt{Width} "*MInt" MInt{Width} [function, total, hook(MINT.mul), smt-hook(bvmul)]
+                                 MInt{256} "^MInt" MInt{256} [function, total, hook(MINT.pow), smt-hook(bvpow)]
+                               | MInt{Width} "*MInt" MInt{Width} [function, total, hook(MINT.mul), smt-hook(bvmul)]
                                | MInt{Width} "/sMInt" MInt{Width} [function, hook(MINT.sdiv), smt-hook(bvsdiv)]
                                | MInt{Width} "%sMInt" MInt{Width} [function, hook(MINT.srem), smt-hook(bvsrem)]
                                | MInt{Width} "/uMInt" MInt{Width} [function, hook(MINT.udiv), smt-hook(bvudiv)]
