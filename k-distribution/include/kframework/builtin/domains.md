@@ -2872,6 +2872,7 @@ endmodule
 module MINT
   imports MINT-SYNTAX
   imports private INT
+  imports private BYTES
   imports private BOOL
 ```
 
@@ -2901,6 +2902,14 @@ has the correct bitwidth, as this will influence the width of the resulting
                        | MInt2Unsigned(MInt{Width})     [function, total, hook(MINT.uvalue), smt-hook(bv2int)]
 
   syntax {Width} MInt{Width} ::= Int2MInt(Int) [function, total, hook(MINT.integer), smt-hook(int2bv)]
+```
+
+### Mint and Bytes conversion
+You can convert from an `MInt` to a `Bytes` using the `MInt2Bytes` function.
+Currently we only support converting `MInt`s of width 256 to `Bytes` in a Big Endian format.
+```k
+  syntax Bytes ::= MInt2Bytes(MInt{256}) [function, total, hook(MINT.mint2bytes), smt-hook(bv2bytes)]
+  syntax MInt{256} ::= Bytes2MInt(Bytes) [function, total, hook(MINT.bytes2mint), smt-hook(bytes2bv)] 
 ```
 
 ### MInt min and max values
