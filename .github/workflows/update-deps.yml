@@ -4,6 +4,7 @@ on:
     branches:
       - '_update-deps/runtimeverification/llvm-backend'
       - '_update-deps/runtimeverification/haskell-backend'
+      - '_update-deps/runtimeverification/rv-nix-tools'
   workflow_dispatch:
 # Stop in progress workflows on the same branch and same workflow to use latest committed code
 concurrency:
@@ -61,6 +62,12 @@ jobs:
           cd -
           sed -i 's!    llvm-backend.url = "github:runtimeverification/llvm-backend/.*";!    llvm-backend.url = "github:runtimeverification/llvm-backend/'"${llvm_backend_version}"'";!' flake.nix
           if git add flake.nix llvm-backend/src/main/native/llvm-backend && git commit -m "flake.nix, llvm-backend/src/main/native/llvm-backend: update to version ${llvm_backend_version}"; then
+            changed=true
+          fi
+
+          RV_NIX_TOOLS_VERSION=$(cat deps/rv-nix-tools)
+          sed -i 's!    rv-nix-tools.url = "github:runtimeverification/rv-nix-tools/[a-z0-9\.]*"!    rv-nix-tools.url = "github:runtimeverification/rv-nix-tools/'"${RV_NIX_TOOLS_VERSION}"'"!' flake.nix
+          if git add flake.nix && git commit -m "flake.nix, rv-nix-tools: update to revision ${RV_NIX_TOOLS_VERSION}"; then
             changed=true
           fi
 

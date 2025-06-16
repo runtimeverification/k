@@ -1,24 +1,27 @@
 {
   description = "K Framework";
   inputs = {
-    llvm-backend.url = "github:runtimeverification/llvm-backend/v0.1.132";
+    rv-nix-tools.url = "github:runtimeverification/rv-nix-tools/854d4f05ea78547d46e807b414faad64cea10ae4";
+    nixpkgs.follows = "rv-nix-tools/nixpkgs";
+
+    llvm-backend.url = "github:runtimeverification/llvm-backend/v0.1.133";
+    llvm-backend.inputs.nixpkgs.follows = "nixpkgs";
+
     haskell-backend = {
-      url = "github:runtimeverification/haskell-backend/v0.1.127";
-      inputs.rv-utils.follows = "llvm-backend/rv-utils";
-      inputs.nixpkgs.follows = "llvm-backend/nixpkgs";
+      url = "github:runtimeverification/haskell-backend/v0.1.126";
+      inputs.rv-nix-tools.follows = "llvm-backend/rv-nix-tools";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     poetry2nix = {
       url = "github:nix-community/poetry2nix/2024.9.219347";
-      inputs.nixpkgs.follows = "llvm-backend/nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nixpkgs.follows = "llvm-backend/nixpkgs";
-    rv-utils.follows = "llvm-backend/rv-utils";
     flake-utils.follows = "llvm-backend/utils";
   };
 
-  outputs = { self, nixpkgs, flake-utils, rv-utils, haskell-backend
+  outputs = { self, nixpkgs, flake-utils, rv-nix-tools, haskell-backend
     , llvm-backend, poetry2nix }:
     let
       allOverlays = [
@@ -180,7 +183,7 @@
         packages = rec {
           inherit (pkgs) k k-lock pyk pyk-python310 pyk-python311 maven;
 
-          check-submodules = rv-utils.lib.check-submodules pkgs {
+          check-submodules = rv-nix-tools.lib.check-submodules pkgs {
             inherit llvm-backend haskell-backend;
           };
 
