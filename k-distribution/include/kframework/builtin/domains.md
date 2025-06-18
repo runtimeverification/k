@@ -2096,7 +2096,7 @@ of the `Bytes` term).
 
 ```k
   syntax Bytes ::= Bytes "[" index: Int "<-" value: Int "]" [function, hook(BYTES.update)]
-  syntax {64} Bytes ::= Bytes "[" index: MInt{64} "<-" value: Int "]" [function, hook(BYTES.update64)]
+  syntax {64} Bytes ::= Bytes "[" index: MInt{64} "<-" value: MInt{64} "]" [function, hook(BYTES.update64)]
 ```
 
 ### Bytes lookup
