@@ -963,6 +963,7 @@ words, 0 is the first element and -1 is the last element.
 
 ```k
   syntax KItem ::= List "[" Int "]"           [function, hook(LIST.get), symbol(List:get)]
+  syntax {64} KItem ::= List "[" MInt{64} "]" [function, hook(LIST.get64), symbol(List:get64)]
 ```
 
 ### List update
@@ -972,6 +973,7 @@ O(log(N)) time, or effectively constant.
 
 ```k
   syntax List ::= List "[" index: Int "<-" value: KItem "]" [function, hook(LIST.update), symbol(List:set)]
+  syntax {64} List ::= List "[" index: MInt{64} "<-" value: KItem "]" [function, hook(LIST.update64), symbol(List:set64)]
 ```
 
 ### List of identical elements
@@ -1026,7 +1028,8 @@ comparisons, it is much better to first convert to a set using `List2Set`.
 You can get the number of elements of a list in O(1) time.
 
 ```k
-  syntax Int ::= size(List)               [function, total, hook(LIST.size), symbol(sizeList), smtlib(smt_seq_len)]
+  syntax Int      ::= size(List)          [function, total, hook(LIST.size), symbol(sizeList), smtlib(smt_seq_len)]
+  syntax MInt{64} ::= size(List)          [function, total, hook(LIST.size64), symbol(sizeList64)]
 ```
 
 ```k
@@ -2093,6 +2096,7 @@ of the `Bytes` term).
 
 ```k
   syntax Bytes ::= Bytes "[" index: Int "<-" value: Int "]" [function, hook(BYTES.update)]
+  syntax {64} Bytes ::= Bytes "[" index: MInt{64} "<-" value: Int "]" [function, hook(BYTES.update64)]
 ```
 
 ### Bytes lookup
@@ -2103,6 +2107,7 @@ The result is `#False` if `index` is not a valid index (see above).
 ```k
   syntax Int ::= Bytes "[" Int "]" [function, hook(BYTES.get)]
   syntax {64} MInt{64} ::= Bytes "[" MInt{64} "]" [function, hook(BYTES.get64)]
+  syntax {64} Int ::= Bytes "[" index: MInt{64} "]" [function, hook(BYTES.get64_)]
 ```
 
 ### Bytes substring
@@ -2161,7 +2166,7 @@ long, and will instead return the input unchanged. The result is `#False` if
 ```k
   syntax Bytes ::= padRightBytes(Bytes, length: Int, value: Int) [function, hook(BYTES.padRight)]
                  | padLeftBytes(Bytes, length: Int, value: Int) [function, hook(BYTES.padLeft)]
-  syntax {64} Bytes ::= padRightBytes(Bytes, length: MInt{64}, value: Int) [function, hook(BYTES.padRight64)]
+  syntax {64} Bytes ::= padRightBytes(Bytes, length: MInt{64}, value: MInt{64}) [function, hook(BYTES.padRight64)]
                        | padLeftBytes(Bytes, length: MInt{64}, value: Int) [function, hook(BYTES.padLeft64)]
 ```
 
