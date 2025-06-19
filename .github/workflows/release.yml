@@ -95,7 +95,7 @@ jobs:
       - name: 'Get uv release'
         id: uv_release
         run: |
-          echo uv_version=$(cat deps/uv_release) >> "${GITHUB_OUTPUT}"
+          echo "uv_version=$(cat deps/uv_release)" >> "${GITHUB_OUTPUT}"
       - name: 'Install uv'
         uses: astral-sh/setup-uv@v6
         with:
