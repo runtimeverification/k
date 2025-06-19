@@ -13,10 +13,15 @@ runs:
       uses: actions/setup-python@v5
       with:
         python-version: ${{ inputs.python-version }}
-    - name: 'Install Poetry'
-      uses: Gr1N/setup-poetry@v9
+    - name: 'Get uv release'
+      id: uv_release
+      shell: bash
+      run: |
+        echo "uv_version=$(cat deps/uv_release)" >> "${GITHUB_OUTPUT}"
+    - name: 'Install uv'
+      uses: astral-sh/setup-uv@v6
       with:
-        poetry-version: '2.1.1'
+        version: ${{ steps.uv_release.outputs.uv_version }}
     - name: 'Install package'
       shell: bash
-      run: poetry -C pyk install
+      run: uv --project pyk sync
