@@ -38,7 +38,8 @@ USER user
 WORKDIR /home/user
 
 ENV PATH=/home/user/.local/bin:${PATH}
-RUN    curl -LsSf https://astral.sh/uv/install.sh | sh \
+ARG UV_VERSION
+RUN    curl -LsSf https://astral.sh/uv/${UV_VERSION}/install.sh | sh \
     && uv --version
 
 ENV PATH=/home/user/.elan/bin:${PATH}
