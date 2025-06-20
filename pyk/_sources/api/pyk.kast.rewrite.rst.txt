@@ -1,0 +1,7 @@
+pyk.kast.rewrite module
+=======================
+
+.. automodule:: pyk.kast.rewrite
+   :members:
+   :undoc-members:
+   :show-inheritance:
