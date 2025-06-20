@@ -87,9 +87,9 @@ jobs:
             kup publish --verbose k-framework-binary .#k --keep-days 180
             kup publish --verbose k-framework-binary .#k.openssl.procps.secp256k1 --keep-days 180
 
-  test-package-kframework-wheel:
-    name: 'K: Python wheel'
-    runs-on: [self-hosted, linux, normal]
+  pyk-build-wheel:
+    name: 'Pyk: Build Python wheel'
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: 'Get uv release'
@@ -115,7 +115,7 @@ jobs:
   ubuntu-noble:
     name: 'K Ubuntu Noble Package'
     runs-on: [self-hosted, linux, normal]
-    needs: 'test-package-kframework-wheel'
+    needs: 'pyk-build-wheel'
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
@@ -181,7 +181,7 @@ jobs:
   ubuntu-jammy:
     name: 'K Ubuntu Jammy Package'
     runs-on: [self-hosted, linux, normal]
-    needs: 'test-package-kframework-wheel'
+    needs: 'pyk-build-wheel'
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
