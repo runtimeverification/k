@@ -29,15 +29,17 @@ RUN apt-get -y clean
 RUN rm /llvm-backend.deb
 RUN rm /kframework.deb
 
+
 ARG USER_ID=9876
 ARG GROUP_ID=9876
-RUN    groupadd -g ${GROUP_ID} user \
+RUN    groupadd -g ${GROUP_ID} user                     \
     && useradd -m -u ${USER_ID} -s /bin/sh -g user user
 
 USER user
 WORKDIR /home/user
 
 ENV PATH=/home/user/.local/bin:${PATH}
+
 ARG UV_VERSION
 RUN    curl -LsSf https://astral.sh/uv/${UV_VERSION}/install.sh | sh \
     && uv --version
