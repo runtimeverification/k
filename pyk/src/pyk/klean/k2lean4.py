@@ -88,6 +88,7 @@ _PRELUDE_FUNCS: Final = {
 
 _SYMBOL_OVERRIDES: Final = {
     'Lblite': 'kite',
+    'Lblabs': 'kabs',
 }
 
 
