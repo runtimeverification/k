@@ -241,7 +241,7 @@ def «_-Int_» (x0 x1 : SortInt) : Option SortInt := some (x0 - x1)
 def «_*Int_» (x0 x1 : SortInt) : Option SortInt := some (x0 * x1)
 def «_/Int_» (x0 x1 : SortInt) : Option SortInt :=
   ite (x1 == 0) none (Int.tdiv x0 x1)
-def _modInt_ (x0 : SortInt) (x1 : SortInt) : Option SortInt :=
+def _modInt_ (x0 x1 : SortInt) : Option SortInt :=
   ite (x1 == 0) none (Int.emod x0 x1)
 def «maxInt(_,_)_INT-COMMON_Int_Int_Int» (x0 x1 : SortInt) :=
   some (ite (x0 < x1) x1 x0)
