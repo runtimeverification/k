@@ -64,16 +64,16 @@
         "z3": "z3"
       },
       "locked": {
-        "lastModified": 1750121565,
-        "narHash": "sha256-ivA6YiWDE8M5hiwPc/y2fT00yGr/T1Mxmwn/rrdmBWo=",
+        "lastModified": 1750471785,
+        "narHash": "sha256-QTKjOEdDdjAI/fCOk4ydwsI2mjEBlYkw3bqoyXVFSI8=",
         "owner": "runtimeverification",
         "repo": "haskell-backend",
-        "rev": "2707f1c115abdff0e1081c6571cd477f4cacfc47",
+        "rev": "6a778fbdd0b451b1b0c7539aac5ef8fb48763ad7",
         "type": "github"
       },
       "original": {
         "owner": "runtimeverification",
-        "ref": "v0.1.130",
+        "ref": "v0.1.131",
         "repo": "haskell-backend",
         "type": "github"
       }
@@ -157,22 +157,6 @@
     },
     "nixpkgs_3": {
       "locked": {
-        "lastModified": 1716457947,
-        "narHash": "sha256-Y+exebcqeprnhEpoPJrEUZmNeO60qeOxkVHhqG/OEwQ=",
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "69493a13eaea0dc4682fd07e8a084f17813dbeeb",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "69493a13eaea0dc4682fd07e8a084f17813dbeeb",
-        "type": "github"
-      }
-    },
-    "nixpkgs_4": {
-      "locked": {
         "lastModified": 1744306051,
         "narHash": "sha256-jWwqkmi8cplBu4CXUb4zdfpqKp3UJYVAs/b5m8M75sg=",
         "owner": "runtimeverification",
@@ -181,8 +165,8 @@
         "type": "github"
       },
       "original": {
-        "owner": "runtimeverification",
-        "ref": "libmatch",
+        "owner": "nixos",
+        "ref": "nixos-unstable",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -394,7 +378,7 @@
     },
     "uv2nix": {
       "inputs": {
-        "nixpkgs": "nixpkgs_4",
+        "nixpkgs": "nixpkgs_3",
         "pyproject-nix": "pyproject-nix"
       },
       "locked": {
