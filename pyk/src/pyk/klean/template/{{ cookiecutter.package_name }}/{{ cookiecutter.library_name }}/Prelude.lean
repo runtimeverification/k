@@ -241,8 +241,13 @@ def «_-Int_» (x0 x1 : SortInt) : Option SortInt := some (x0 - x1)
 def «_*Int_» (x0 x1 : SortInt) : Option SortInt := some (x0 * x1)
 def «_/Int_» (x0 x1 : SortInt) : Option SortInt :=
   ite (x1 == 0) none (Int.tdiv x0 x1)
-def _modInt_ (x0 : SortInt) (x1 : SortInt) : Option SortInt :=
+def _modInt_ (x0 x1 : SortInt) : Option SortInt :=
   ite (x1 == 0) none (Int.emod x0 x1)
+def «_^%Int__» (x0 x1 x2 : SortInt) : Option SortInt :=
+   if x2 == 0 then none else
+   match x1 with -- TODO: Revisit this implementation
+   | .ofNat n => some (Int.emod (Int.pow x0 n) x2)
+   | _ => none
 def «maxInt(_,_)_INT-COMMON_Int_Int_Int» (x0 x1 : SortInt) :=
   some (ite (x0 < x1) x1 x0)
 def «log2Int(_)_INT-COMMON_Int_Int» (x0 : SortInt) : Option SortInt :=

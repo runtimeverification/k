@@ -67,6 +67,7 @@ _PRELUDE_FUNCS: Final = {
     "Lbl'UndsStar'Int'Unds'",  # *Int
     "Lbl'UndsSlsh'Int'Unds'",  # /Int
     "Lbl'Unds'modInt'Unds'",  # modInt
+    "Lbl'UndsXor-Perc'Int'UndsUnds'",  # ^%Int
     "LblmaxInt'LParUndsCommUndsRParUnds'INT-COMMON'Unds'Int'Unds'Int'Unds'Int",  # maxInt
     "Lbl'Tild'Int'Unds'",  # ~Int
     "Lbl'Unds-LT-Eqls'Int'Unds'",  # <=Int
@@ -87,6 +88,7 @@ _PRELUDE_FUNCS: Final = {
 
 _SYMBOL_OVERRIDES: Final = {
     'Lblite': 'kite',
+    'Lblabs': 'kabs',
 }
 
 
