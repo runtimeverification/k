@@ -86,10 +86,37 @@ jobs:
             export PATH="$(nix build github:runtimeverification/kup --no-link --json | jq -r '.[].outputs | to_entries[].value')/bin:$PATH"
             kup publish --verbose k-framework-binary .#k --keep-days 180
             kup publish --verbose k-framework-binary .#k.openssl.procps.secp256k1 --keep-days 180
-      
+
+  pyk-build-wheel:
+    name: 'Pyk: Build Python wheel'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: 'Get uv release'
+        id: uv_release
+        run: |
+          echo "uv_version=$(cat deps/uv_release)" >> "${GITHUB_OUTPUT}"
+      - name: 'Install uv'
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: ${{ steps.uv_release.outputs.uv_version }}
+      - name: 'Build kframework wheel'
+        run: |
+          uv build --project pyk
+          cp pyk/dist/kframework-*.whl ./
+      - name: 'Upload kframework package wheel as artifact to the Summary Page'
+        uses: actions/upload-artifact@v4
+        with:
+          name: kframework.whl
+          path: kframework-*.whl
+          if-no-files-found: error
+          retention-days: 1
+
   ubuntu-noble:
     name: 'K Ubuntu Noble Package'
     runs-on: [self-hosted, linux, normal]
+    needs: 'pyk-build-wheel'
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
@@ -118,6 +145,10 @@ jobs:
           version=$(cat package/version)
           cp kframework_amd64_ubuntu_noble.deb "kframework_${version}_amd64_ubuntu_noble.deb"
           gh release upload --repo runtimeverification/k --clobber "v${version}" "kframework_${version}_amd64_ubuntu_noble.deb"
+      - name: 'Download kframework.whl'
+        uses: actions/download-artifact@v4
+        with:
+          name: kframework.whl
       - name: 'Build, Test, and Push Dockerhub Image'
         shell: bash {0}
         env:
@@ -151,6 +182,7 @@ jobs:
   ubuntu-jammy:
     name: 'K Ubuntu Jammy Package'
     runs-on: [self-hosted, linux, normal]
+    needs: 'pyk-build-wheel'
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
@@ -178,6 +210,10 @@ jobs:
           version=$(cat package/version)
           cp kframework_amd64_ubuntu_jammy.deb "kframework_${version}_amd64_ubuntu_jammy.deb"
           gh release upload --repo runtimeverification/k --clobber "v${version}" "kframework_${version}_amd64_ubuntu_jammy.deb"
+      - name: 'Download kframework.whl'
+        uses: actions/download-artifact@v4
+        with:
+          name: kframework.whl
       - name: 'Build, Test, and Push Dockerhub Image'
         shell: bash {0}
         env:
@@ -489,10 +525,15 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install Poetry
-        uses: Gr1N/setup-poetry@v9
+      - name: 'Get uv release'
+        id: uv_release
+        run: |
+          echo "uv_version=$(cat deps/uv_release)" >> "${GITHUB_OUTPUT}"
+
+      - name: 'Install uv'
+        uses: astral-sh/setup-uv@v6
         with:
-          poetry-version: '2.1.1'
+          version: ${{ steps.uv_release.outputs.uv_version }}
 
       - name: Build pyk
         working-directory: pyk
