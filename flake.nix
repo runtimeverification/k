@@ -1,26 +1,54 @@
 {
   description = "K Framework";
   inputs = {
-    llvm-backend.url = "github:runtimeverification/llvm-backend/v0.1.132";
+    rv-nix-tools.url = "github:runtimeverification/rv-nix-tools/854d4f05ea78547d46e807b414faad64cea10ae4";
+    nixpkgs.follows = "rv-nix-tools/nixpkgs";
+
+    llvm-backend.url = "github:runtimeverification/llvm-backend/v0.1.133";
+    llvm-backend.inputs.nixpkgs.follows = "nixpkgs";
+
     haskell-backend = {
-      url = "github:runtimeverification/haskell-backend/v0.1.126";
-      inputs.rv-utils.follows = "llvm-backend/rv-utils";
-      inputs.nixpkgs.follows = "llvm-backend/nixpkgs";
+      url = "github:runtimeverification/haskell-backend/v0.1.129";
+      inputs.rv-nix-tools.follows = "rv-nix-tools";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    poetry2nix = {
-      url = "github:nix-community/poetry2nix/2024.9.219347";
-      inputs.nixpkgs.follows = "llvm-backend/nixpkgs";
-    };
-
-    nixpkgs.follows = "llvm-backend/nixpkgs";
-    rv-utils.follows = "llvm-backend/rv-utils";
     flake-utils.follows = "llvm-backend/utils";
+
+    uv2nix.url = "github:pyproject-nix/uv2nix/680e2f8e637bc79b84268949d2f2b2f5e5f1d81c";
+    # stale nixpkgs is missing the alias `lib.match` -> `builtins.match`
+    # therefore point uv2nix to a patched nixpkgs, which introduces this alias
+    # this is a temporary solution until nixpkgs us up-to-date again
+    uv2nix.inputs.nixpkgs.url = "github:runtimeverification/nixpkgs/libmatch";
+    # uv2nix.inputs.nixpkgs.follows = "nixpkgs";
+    pyproject-build-systems.url = "github:pyproject-nix/build-system-pkgs/7dba6dbc73120e15b558754c26024f6c93015dd7";
+    pyproject-build-systems = {
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.uv2nix.follows = "uv2nix";
+      inputs.pyproject-nix.follows = "uv2nix/pyproject-nix";
+    };
+    pyproject-nix.follows = "uv2nix/pyproject-nix";
   };
 
-  outputs = { self, nixpkgs, flake-utils, rv-utils, haskell-backend
-    , llvm-backend, poetry2nix }:
+  outputs = { self, nixpkgs, flake-utils, rv-nix-tools, haskell-backend
+    , llvm-backend, pyproject-nix, pyproject-build-systems , uv2nix }:
     let
+      # due to the nixpkgs that we use in this flake being outdated, uv is also heavily outdated
+      # we can instead use the binary release of uv provided by uv2nix for now
+      uvOverlay = final: prev: {
+        uv = uv2nix.packages.${final.system}.uv-bin;
+      };
+      pykOverlay = final: prev: rec {
+        pyk-python310 = final.callPackage ./nix/pyk {
+          inherit pyproject-nix pyproject-build-systems uv2nix;
+          python = final."python310";
+        };
+        pyk-python311 = final.callPackage ./nix/pyk {
+          inherit pyproject-nix pyproject-build-systems uv2nix;
+          python = final."python311";
+        };
+        pyk = pyk-python310;
+      };
       allOverlays = [
         (_: _: {
           llvm-version = 17;
@@ -32,10 +60,8 @@
         haskell-backend.overlays.z3
         haskell-backend.overlays.integration-tests
 
-        (import ./nix/pyk-overlay.nix {
-          inherit poetry2nix;
-          projectDir = ./pyk;
-        })
+        uvOverlay
+        pykOverlay
 
         (final: prev:
           let
@@ -180,7 +206,7 @@
         packages = rec {
           inherit (pkgs) k k-lock pyk pyk-python310 pyk-python311 maven;
 
-          check-submodules = rv-utils.lib.check-submodules pkgs {
+          check-submodules = rv-nix-tools.lib.check-submodules pkgs {
             inherit llvm-backend haskell-backend;
           };
 
@@ -245,14 +271,32 @@
             inherit (pkgs) haskell-backend-bins;
             llvm-kompile-libs = { };
           });
+        devShells.uv = pkgs.mkShell {
+          name = "uv develop shell";
+          buildInputs = with pkgs; [
+            python310
+            uv
+          ];
+          env = {
+            # prevent uv from managing Python downloads and force use of specific 
+            UV_PYTHON_DOWNLOADS = "never";
+            UV_PYTHON = pkgs.python310.interpreter;
+          };
+          shellHook = ''
+            unset PYTHONPATH
+          '';
+        };
       }) // {
         overlays.llvm-backend = llvm-backend.overlays.default;
         overlays.z3 = haskell-backend.overlays.z3;
-        overlays.pyk = (import ./nix/pyk-overlay.nix {
-          inherit poetry2nix;
-          projectDir = ./pyk;
-        });
+        overlays.pyk = final: prev: {
+          inherit (self.packages.${final.system}) pyk pyk-python310 pyk-python311;
+        };
+        overlays.default = final: prev: {
+          inherit (self.packages.${final.system}) k;
+        };
 
+        # deprecated flake overlay output, please use `overlays.default` or `overlays.pyk` instead
         overlay = nixpkgs.lib.composeManyExtensions allOverlays;
       };
 }

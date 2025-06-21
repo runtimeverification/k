@@ -209,6 +209,7 @@ jobs:
         uses: cachix/cachix-action@v14
         with:
           name: k-framework
+          authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
           skipPush: true
       - name: 'Build K Framework and push build time dependencies to cachix'
         env:
@@ -328,6 +329,7 @@ jobs:
           distro: jammy
       - name: 'Run K regression tests'
         run: |
+          docker exec -u user k-pyk-regression-${{ github.sha }} uv sync
           docker exec -u user k-pyk-regression-${{ github.sha }} make test-regression-new -j4
       - name: 'Tear down Docker'
         if: always()
