@@ -1,0 +1,7 @@
+pyk.kcfg.minimize module
+========================
+
+.. automodule:: pyk.kcfg.minimize
+   :members:
+   :undoc-members:
+   :show-inheritance:
