@@ -2912,8 +2912,8 @@ has the correct bitwidth, as this will influence the width of the resulting
 You can convert from an `MInt` to a `Bytes` using the `MInt2Bytes` function.
 Currently we only support converting `MInt`s of width 256 to `Bytes` in a Big Endian format.
 ```k
-  syntax Bytes ::= MInt2Bytes(MInt{256}) [function, total, hook(MINT.mint2bytes), smt-hook(bv2bytes)]
-  syntax MInt{256} ::= Bytes2MInt(Bytes) [function, total, hook(MINT.bytes2mint), smt-hook(bytes2bv)] 
+  syntax {Width} Bytes ::= MInt2Bytes(MInt{Width}) [function, total, hook(MINT.MInt2bytes)]
+  syntax {Width} MInt{Width} ::= Bytes2MInt(Bytes) [function, total, hook(MINT.bytes2MInt)] 
 ```
 
 ### MInt min and max values
