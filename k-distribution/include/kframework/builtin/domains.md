@@ -2115,10 +2115,12 @@ You can get a new `Bytes` object containing a range of bytes from the input
 `Bytes` in O(N) time (where N is the length of the substring). The range
 of bytes included is `[startIndex..endIndex)`. The resulting `Bytes` is
 a copy and mutations to it do not affect mutations to the original `Bytes`.
+Both `startIndex` and `endIndex` can be either `Int` or `MInt` values, but,
+currently, only 64-bit and 256-bit `MInt` types are supported.
 
 ```k
   syntax Bytes ::= substrBytes(Bytes, startIndex: Int, endIndex: Int) [function, hook(BYTES.substr)]
-  syntax {64} Bytes ::= substrBytes(Bytes, startIndex: MInt{64}, endIndex: MInt{64}) [function, hook(BYTES.substr64)]
+  syntax {Width} Bytes ::= substrBytes(Bytes, startIndex: MInt{Width}, endIndex: MInt{Width}) [function, hook(BYTES.substrMInt)]
 ```
 
 The function is not total: `substrBytes(B, startIndex, endIndex)` is `#Bottom` if
