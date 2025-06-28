@@ -2101,13 +2101,12 @@ of the `Bytes` term).
 
 ### Bytes lookup
 
-You can get the value of a particular byte in a `Bytes` object in O(1) time.
+You can get the value of a particular byte in a `Bytes` object in O(1) time, either as an `Int` or as an `MInt`. Currently, only 64-bit and 256-bit `MInt` types are supported.
 The result is `#False` if `index` is not a valid index (see above).
 
 ```k
   syntax Int ::= Bytes "[" Int "]" [function, hook(BYTES.get)]
-  syntax {64} MInt{64} ::= Bytes "[" MInt{64} "]" [function, hook(BYTES.get64)]
-  syntax {64} Int ::= Bytes "[" index: MInt{64} "]" [function, hook(BYTES.get64_)]
+  syntax {Width} MInt{Width} ::= Bytes "[" MInt{Width} "]" [function, hook(BYTES.getMInt)]
 ```
 
 ### Bytes substring
