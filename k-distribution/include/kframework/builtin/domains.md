@@ -2187,7 +2187,7 @@ You can get the length of a `Bytes` term in O(1) time.
 
 ```k
   syntax Int ::= lengthBytes(Bytes) [function, total, hook(BYTES.length), smtlib(lengthBytes)]
-  syntax {64} MInt{64} ::= lengthBytes(Bytes) [function, total, hook(BYTES.length64), smtlib(lengthBytes64)]
+  syntax {Width} MInt{Width} ::= lengthBytes(Bytes) [function, total, hook(BYTES.lengthMInt)]
 ```
 
 
