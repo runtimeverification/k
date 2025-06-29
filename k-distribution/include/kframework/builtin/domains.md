@@ -2183,7 +2183,8 @@ original.
 
 ### Bytes length
 
-You can get the length of a `Bytes` term in O(1) time.
+You can get the length of a `Bytes` term in O(1) time. The lenghth can be either
+an `Int` or an `MInt`. Currently, only 64-bit and 256-bit `MInt` types are supported.
 
 ```k
   syntax Int ::= lengthBytes(Bytes) [function, total, hook(BYTES.length), smtlib(lengthBytes)]
