@@ -2013,7 +2013,7 @@ endmodule
 module BYTES-HOOKED
   imports STRING-SYNTAX
   imports BYTES-SYNTAX
- // imports MINT-SYNTAX
+  imports MINT-SYNTAX
   imports BYTES-STRING-ENCODE
 ```
 
@@ -2096,7 +2096,7 @@ of the `Bytes` term).
 
 ```k
   syntax Bytes ::= Bytes "[" index: Int "<-" value: Int "]" [function, hook(BYTES.update)]
- // syntax {Width} Bytes ::= Bytes "[" index: MInt{Width} "<-" value: MInt{Width} "]" [function, hook(BYTES.updateMInt)]
+  syntax {Width} Bytes ::= Bytes "[" index: MInt{Width} "<-" value: MInt{Width} "]" [function, hook(BYTES.updateMInt)]
 ```
 
 ### Bytes lookup
@@ -2106,7 +2106,7 @@ The result is `#False` if `index` is not a valid index (see above).
 
 ```k
   syntax Int ::= Bytes "[" Int "]" [function, hook(BYTES.get)]
-  //syntax {Width} MInt{Width} ::= Bytes "[" MInt{Width} "]" [function, hook(BYTES.getMInt)]
+  syntax {Width} MInt{Width} ::= Bytes "[" MInt{Width} "]" [function, hook(BYTES.getMInt)]
 ```
 
 ### Bytes substring
@@ -2120,7 +2120,7 @@ currently, only 64-bit and 256-bit `MInt` types are supported.
 
 ```k
   syntax Bytes ::= substrBytes(Bytes, startIndex: Int, endIndex: Int) [function, hook(BYTES.substr)]
- // syntax {Width} Bytes ::= substrBytes(Bytes, startIndex: MInt{Width}, endIndex: MInt{Width}) [function, hook(BYTES.substrMInt)]
+  syntax {Width} Bytes ::= substrBytes(Bytes, startIndex: MInt{Width}, endIndex: MInt{Width}) [function, hook(BYTES.substrMInt)]
 ```
 
 The function is not total: `substrBytes(B, startIndex, endIndex)` is `#Bottom` if
@@ -2140,7 +2140,7 @@ object and will instead modify the original on concrete backends. The result is
 
 ```k
   syntax Bytes ::= replaceAtBytes(dest: Bytes, index: Int, src: Bytes) [function, hook(BYTES.replaceAt)]
-//  syntax {Width} Bytes ::= replaceAtBytes(dest: Bytes, index: MInt{Width}, src: Bytes) [function, hook(BYTES.replaceAtMInt)]
+  syntax {Width} Bytes ::= replaceAtBytes(dest: Bytes, index: MInt{Width}, src: Bytes) [function, hook(BYTES.replaceAtMInt)]
 ```
 
 ### Multiple bytes update
@@ -2172,8 +2172,8 @@ We also provide a variant of this function which takes an `MInt` for the
 ```k
   syntax Bytes ::= padRightBytes(Bytes, length: Int, value: Int) [function, hook(BYTES.padRight)]
                  | padLeftBytes(Bytes, length: Int, value: Int) [function, hook(BYTES.padLeft)]
- // syntax {Width} Bytes ::= padRightBytes(Bytes, length: MInt{Width}, value: MInt{Width}) [function, hook(BYTES.padRightMInt)]
- //                        | padLeftBytes(Bytes, length: MInt{Width}, value: MInt{Width}) [function, hook(BYTES.padLeftMInt)]
+  syntax {Width} Bytes ::= padRightBytes(Bytes, length: MInt{Width}, value: MInt{Width}) [function, hook(BYTES.padRightMInt)]
+                        | padLeftBytes(Bytes, length: MInt{Width}, value: MInt{Width}) [function, hook(BYTES.padLeftMInt)]
 ```
 
 ### Bytes reverse
@@ -2193,7 +2193,7 @@ an `Int` or an `MInt`. Currently, only 64-bit and 256-bit `MInt` types are suppo
 
 ```k
   syntax Int ::= lengthBytes(Bytes) [function, total, hook(BYTES.length), smtlib(lengthBytes)]
- /// syntax {Width} MInt{Width} ::= lengthBytes(Bytes) [function, total, hook(BYTES.lengthMInt)]
+  syntax {Width} MInt{Width} ::= lengthBytes(Bytes) [function, total, hook(BYTES.lengthMInt)]
 ```
 
 
@@ -2920,8 +2920,8 @@ has the correct bitwidth, as this will influence the width of the resulting
 You can convert from an `MInt` to a `Bytes` using the `MInt2Bytes` function.
 Currently we only support converting `MInt`s of width 256 to `Bytes` in a Big Endian format.
 ```k
-  //syntax {Width} Bytes ::= MInt2Bytes(MInt{Width}) [function, total, hook(MINT.MInt2bytes)]
-  //syntax {Width} MInt{Width} ::= Bytes2MInt(Bytes) [function, total, hook(MINT.bytes2MInt)] 
+  syntax {Width} Bytes ::= MInt2Bytes(MInt{Width}) [function, total, hook(MINT.MInt2bytes)]
+  syntax {Width} MInt{Width} ::= Bytes2MInt(Bytes) [function, total, hook(MINT.bytes2MInt)] 
 ```
 
 ### MInt min and max values
@@ -2989,8 +2989,8 @@ You can:
   syntax {Width} MInt{Width} ::= "~MInt" MInt{Width} [function, total, hook(MINT.not), smt-hook(bvnot)]
                                | "--MInt" MInt{Width} [function, total, hook(MINT.neg), smt-hook(bvuminus)]
                                > left:
-                              //   MInt{Width} "^MInt" MInt{Width} [function, total, hook(MINT.pow)]
-                                MInt{Width} "*MInt" MInt{Width} [function, total, hook(MINT.mul), smt-hook(bvmul)]
+                                 MInt{Width} "^MInt" MInt{Width} [function, total, hook(MINT.pow)]
+                               | MInt{Width} "*MInt" MInt{Width} [function, total, hook(MINT.mul), smt-hook(bvmul)]
                                | MInt{Width} "/sMInt" MInt{Width} [function, hook(MINT.sdiv), smt-hook(bvsdiv)]
                                | MInt{Width} "%sMInt" MInt{Width} [function, hook(MINT.srem), smt-hook(bvsrem)]
                                | MInt{Width} "/uMInt" MInt{Width} [function, hook(MINT.udiv), smt-hook(bvudiv)]
