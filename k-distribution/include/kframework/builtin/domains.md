@@ -2881,6 +2881,7 @@ endmodule
 module MINT
   imports MINT-SYNTAX
   imports private INT
+  imports private BYTES
   imports private BOOL
 ```
 
@@ -2910,6 +2911,14 @@ has the correct bitwidth, as this will influence the width of the resulting
                        | MInt2Unsigned(MInt{Width})     [function, total, hook(MINT.uvalue), smt-hook(bv2int)]
 
   syntax {Width} MInt{Width} ::= Int2MInt(Int) [function, total, hook(MINT.integer), smt-hook(int2bv)]
+```
+
+### Mint and Bytes conversion
+You can convert from an `MInt` to a `Bytes` using the `MInt2Bytes` function.
+Currently we only support converting `MInt`s of width 256 to `Bytes` in a Big Endian format.
+```k
+  syntax {Width} Bytes ::= MInt2Bytes(MInt{Width}) [function, total, hook(MINT.MInt2bytes)]
+  syntax {Width} MInt{Width} ::= Bytes2MInt(Bytes) [function, total, hook(MINT.bytes2MInt)] 
 ```
 
 ### MInt min and max values
@@ -2954,6 +2963,7 @@ You can:
 
 * Compute the bitwise complement `~MInt` of an `MInt`.
 * Compute the unary negation `--MInt` of an `MInt`.
+* Compute the power `^MInt` of two `MInt`s. Currently. Currently, only 64 and 256-bits is supported.
 * Compute the product `*MInt` of two `MInt`s.
 * Compute the quotient `/sMInt` of two `MInt`s interpreted as signed integers.
 * Compute the modulus `%sMInt` of two `MInt`s interpreted as signed integers.
@@ -2976,7 +2986,8 @@ You can:
   syntax {Width} MInt{Width} ::= "~MInt" MInt{Width} [function, total, hook(MINT.not), smt-hook(bvnot)]
                                | "--MInt" MInt{Width} [function, total, hook(MINT.neg), smt-hook(bvuminus)]
                                > left:
-                                 MInt{Width} "*MInt" MInt{Width} [function, total, hook(MINT.mul), smt-hook(bvmul)]
+                                 MInt{Width} "^MInt" MInt{Width} [function, total, hook(MINT.pow)]
+                               | MInt{Width} "*MInt" MInt{Width} [function, total, hook(MINT.mul), smt-hook(bvmul)]
                                | MInt{Width} "/sMInt" MInt{Width} [function, hook(MINT.sdiv), smt-hook(bvsdiv)]
                                | MInt{Width} "%sMInt" MInt{Width} [function, hook(MINT.srem), smt-hook(bvsrem)]
                                | MInt{Width} "/uMInt" MInt{Width} [function, hook(MINT.udiv), smt-hook(bvudiv)]
