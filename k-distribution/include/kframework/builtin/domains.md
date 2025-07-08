@@ -2013,6 +2013,7 @@ endmodule
 module BYTES-HOOKED
   imports STRING-SYNTAX
   imports BYTES-SYNTAX
+ // imports MINT-SYNTAX
   imports BYTES-STRING-ENCODE
 ```
 
@@ -2095,15 +2096,17 @@ of the `Bytes` term).
 
 ```k
   syntax Bytes ::= Bytes "[" index: Int "<-" value: Int "]" [function, hook(BYTES.update)]
+ // syntax {Width} Bytes ::= Bytes "[" index: MInt{Width} "<-" value: MInt{Width} "]" [function, hook(BYTES.updateMInt)]
 ```
 
 ### Bytes lookup
 
-You can get the value of a particular byte in a `Bytes` object in O(1) time.
+You can get the value of a particular byte in a `Bytes` object in O(1) time, either as an `Int` or as an `MInt`. Currently, only 64-bit and 256-bit `MInt` types are supported.
 The result is `#False` if `index` is not a valid index (see above).
 
 ```k
   syntax Int ::= Bytes "[" Int "]" [function, hook(BYTES.get)]
+  //syntax {Width} MInt{Width} ::= Bytes "[" MInt{Width} "]" [function, hook(BYTES.getMInt)]
 ```
 
 ### Bytes substring
@@ -2112,9 +2115,12 @@ You can get a new `Bytes` object containing a range of bytes from the input
 `Bytes` in O(N) time (where N is the length of the substring). The range
 of bytes included is `[startIndex..endIndex)`. The resulting `Bytes` is
 a copy and mutations to it do not affect mutations to the original `Bytes`.
+Both `startIndex` and `endIndex` can be either `Int` or `MInt` values, but,
+currently, only 64-bit and 256-bit `MInt` types are supported.
 
 ```k
   syntax Bytes ::= substrBytes(Bytes, startIndex: Int, endIndex: Int) [function, hook(BYTES.substr)]
+ // syntax {Width} Bytes ::= substrBytes(Bytes, startIndex: MInt{Width}, endIndex: MInt{Width}) [function, hook(BYTES.substrMInt)]
 ```
 
 The function is not total: `substrBytes(B, startIndex, endIndex)` is `#Bottom` if
@@ -2128,10 +2134,13 @@ You can modify a `Bytes` to return a `Bytes` which is equal to `dest` except the
 `N` elements starting at `index` are replaced with the contents of `src` in O(N)
 time. If `--llvm-mutable-bytes` is active, this will not create a new `Bytes`
 object and will instead modify the original on concrete backends. The result is
-`#False` if `index` + `N` is not a valid index.
+`#False` if `index` + `N` is not a valid index. This function accepts both
+`Int` and `MInt` values for `index` and `N`. Currently, only 64-bit and
+256-bit `MInt` types are supported.
 
 ```k
   syntax Bytes ::= replaceAtBytes(dest: Bytes, index: Int, src: Bytes) [function, hook(BYTES.replaceAt)]
+//  syntax {Width} Bytes ::= replaceAtBytes(dest: Bytes, index: MInt{Width}, src: Bytes) [function, hook(BYTES.replaceAtMInt)]
 ```
 
 ### Multiple bytes update
@@ -2156,10 +2165,15 @@ left) with the specified `value`. If `--llvm-mutable-bytes` is active, this does
 not create a new `Bytes` object if the input is already at least `length` bytes
 long, and will instead return the input unchanged. The result is `#False` if
 `value` is not in the range `[0..255]`, or if the length is negative.
+We also provide a variant of this function which takes an `MInt` for the
+`length` and `value`. The current implementation only supports 64-bit and
+256-bit `MInt` types.
 
 ```k
   syntax Bytes ::= padRightBytes(Bytes, length: Int, value: Int) [function, hook(BYTES.padRight)]
                  | padLeftBytes(Bytes, length: Int, value: Int) [function, hook(BYTES.padLeft)]
+ // syntax {Width} Bytes ::= padRightBytes(Bytes, length: MInt{Width}, value: MInt{Width}) [function, hook(BYTES.padRightMInt)]
+ //                        | padLeftBytes(Bytes, length: MInt{Width}, value: MInt{Width}) [function, hook(BYTES.padLeftMInt)]
 ```
 
 ### Bytes reverse
@@ -2174,10 +2188,12 @@ original.
 
 ### Bytes length
 
-You can get the length of a `Bytes` term in O(1) time.
+You can get the length of a `Bytes` term in O(1) time. The lenghth can be either
+an `Int` or an `MInt`. Currently, only 64-bit and 256-bit `MInt` types are supported.
 
 ```k
   syntax Int ::= lengthBytes(Bytes) [function, total, hook(BYTES.length), smtlib(lengthBytes)]
+ /// syntax {Width} MInt{Width} ::= lengthBytes(Bytes) [function, total, hook(BYTES.lengthMInt)]
 ```
 
 
@@ -2868,6 +2884,7 @@ endmodule
 module MINT
   imports MINT-SYNTAX
   imports private INT
+ // imports private BYTES
   imports private BOOL
 ```
 
@@ -2897,6 +2914,14 @@ has the correct bitwidth, as this will influence the width of the resulting
                        | MInt2Unsigned(MInt{Width})     [function, total, hook(MINT.uvalue), smt-hook(bv2int)]
 
   syntax {Width} MInt{Width} ::= Int2MInt(Int) [function, total, hook(MINT.integer), smt-hook(int2bv)]
+```
+
+### Mint and Bytes conversion
+You can convert from an `MInt` to a `Bytes` using the `MInt2Bytes` function.
+Currently we only support converting `MInt`s of width 256 to `Bytes` in a Big Endian format.
+```k
+  //syntax {Width} Bytes ::= MInt2Bytes(MInt{Width}) [function, total, hook(MINT.MInt2bytes)]
+  //syntax {Width} MInt{Width} ::= Bytes2MInt(Bytes) [function, total, hook(MINT.bytes2MInt)] 
 ```
 
 ### MInt min and max values
@@ -2941,6 +2966,7 @@ You can:
 
 * Compute the bitwise complement `~MInt` of an `MInt`.
 * Compute the unary negation `--MInt` of an `MInt`.
+* Compute the power `^MInt` of two `MInt`s. Currently. Currently, only Width = 256-bits is supported.
 * Compute the product `*MInt` of two `MInt`s.
 * Compute the quotient `/sMInt` of two `MInt`s interpreted as signed integers.
 * Compute the modulus `%sMInt` of two `MInt`s interpreted as signed integers.
@@ -2963,7 +2989,8 @@ You can:
   syntax {Width} MInt{Width} ::= "~MInt" MInt{Width} [function, total, hook(MINT.not), smt-hook(bvnot)]
                                | "--MInt" MInt{Width} [function, total, hook(MINT.neg), smt-hook(bvuminus)]
                                > left:
-                                 MInt{Width} "*MInt" MInt{Width} [function, total, hook(MINT.mul), smt-hook(bvmul)]
+                              //   MInt{Width} "^MInt" MInt{Width} [function, total, hook(MINT.pow)]
+                                MInt{Width} "*MInt" MInt{Width} [function, total, hook(MINT.mul), smt-hook(bvmul)]
                                | MInt{Width} "/sMInt" MInt{Width} [function, hook(MINT.sdiv), smt-hook(bvsdiv)]
                                | MInt{Width} "%sMInt" MInt{Width} [function, hook(MINT.srem), smt-hook(bvsrem)]
                                | MInt{Width} "/uMInt" MInt{Width} [function, hook(MINT.udiv), smt-hook(bvudiv)]
