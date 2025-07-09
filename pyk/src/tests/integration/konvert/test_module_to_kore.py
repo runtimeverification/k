@@ -56,6 +56,7 @@ def kore_module(definition_dir: Path, definition_info: DefinitionInfo) -> Module
 IGNORED_SYMBOL_ATTRS: Final = {"symbol'Kywd'"}
 
 
+@pytest.mark.skip('TODO: https://github.com/runtimeverification/k/issues/4653')
 def test_module_to_kore(kast_defn: KDefinition, kore_module: Module) -> None:
     # Given
     expected = kore_module
