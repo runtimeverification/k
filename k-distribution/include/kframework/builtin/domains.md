@@ -908,6 +908,7 @@ patterns for doing so, refer to K's
 ```k
 module LIST
   imports private INT-SYNTAX
+  imports private MINT-SYNTAX
   imports private BASIC-K
 
   syntax List [hook(LIST.List)]
@@ -963,6 +964,7 @@ words, 0 is the first element and -1 is the last element.
 
 ```k
   syntax KItem ::= List "[" Int "]"           [function, hook(LIST.get), symbol(List:get)]
+  syntax {Width} KItem ::= List "[" MInt{Width} "]" [function, hook(LIST.getMInt), symbol(List:getMInt)]
 ```
 
 ### List update
@@ -972,6 +974,7 @@ O(log(N)) time, or effectively constant.
 
 ```k
   syntax List ::= List "[" index: Int "<-" value: KItem "]" [function, hook(LIST.update), symbol(List:set)]
+  syntax {Width} List ::= List "[" index: MInt{Width} "<-" value: KItem "]" [function, hook(LIST.updateMInt), symbol(List:setMInt)]
 ```
 
 ### List of identical elements
@@ -1027,6 +1030,7 @@ You can get the number of elements of a list in O(1) time.
 
 ```k
   syntax Int ::= size(List)               [function, total, hook(LIST.size), symbol(sizeList), smtlib(smt_seq_len)]
+  syntax {Width} MInt{Width} ::= size(List) [function, hook(LIST.sizeMInt), symbol(sizeMInt)]
 ```
 
 ```k
