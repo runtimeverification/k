@@ -187,7 +187,7 @@ def _to_dict(kore: Kore) -> Any:
 def _sort_from_dict(obj: Any) -> Sort:
     if isinstance(obj, str):
         return SortVar(obj)
-    return SortApp(name=obj['name'], sorts=tuple(_to_dict(sort) for sort in obj['sorts']))
+    return SortApp(name=obj['name'], sorts=tuple(_sort_from_dict(sort) for sort in obj['sorts']))
 
 
 def _symbol_decl_from_dict(dct: Any) -> SymbolDecl:
