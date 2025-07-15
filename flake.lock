@@ -105,20 +105,20 @@
         ],
         "pybind11-src": "pybind11-src",
         "rapidjson-src": "rapidjson-src",
-        "rv-utils": "rv-utils",
+        "rv-nix-tools": "rv-nix-tools",
         "utils": "utils"
       },
       "locked": {
-        "lastModified": 1749248627,
-        "narHash": "sha256-1Y9yIqnH6yCOuB2gP75P/3OhcbItTihtaaCdui2cvFo=",
+        "lastModified": 1752521186,
+        "narHash": "sha256-lAON13tJkIWgQrPZ9jtmU73OIpisiiIkchUNXM1VhRs=",
         "owner": "runtimeverification",
         "repo": "llvm-backend",
-        "rev": "74bf6385cea9835c7f59628e028b45d635b59c74",
+        "rev": "f1e8363e98264a449877672d5c21f674aeeb84cd",
         "type": "github"
       },
       "original": {
         "owner": "runtimeverification",
-        "ref": "v0.1.133",
+        "ref": "v0.1.136",
         "repo": "llvm-backend",
         "type": "github"
       }
@@ -271,13 +271,13 @@
           "uv2nix",
           "pyproject-nix"
         ],
-        "rv-nix-tools": "rv-nix-tools",
+        "rv-nix-tools": "rv-nix-tools_2",
         "uv2nix": "uv2nix"
       }
     },
     "rv-nix-tools": {
       "inputs": {
-        "nixpkgs": "nixpkgs_2"
+        "nixpkgs": "nixpkgs"
       },
       "locked": {
         "lastModified": 1726497185,
@@ -294,21 +294,22 @@
         "type": "github"
       }
     },
-    "rv-utils": {
+    "rv-nix-tools_2": {
       "inputs": {
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1716459074,
-        "narHash": "sha256-IpahO+EkWdGl9QP7B2YXfJWpSfghjxgpz4ab47nRJY4=",
+        "lastModified": 1726497185,
+        "narHash": "sha256-iN+5eLmDm/rLuIZezS5ZqiW1BtBpwrrM9CPPP7Z5Tog=",
         "owner": "runtimeverification",
         "repo": "rv-nix-tools",
-        "rev": "a65058865cda201de504f5546271b8e997a0be9c",
+        "rev": "854d4f05ea78547d46e807b414faad64cea10ae4",
         "type": "github"
       },
       "original": {
         "owner": "runtimeverification",
         "repo": "rv-nix-tools",
+        "rev": "854d4f05ea78547d46e807b414faad64cea10ae4",
         "type": "github"
       }
     },
