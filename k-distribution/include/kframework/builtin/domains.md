@@ -958,9 +958,11 @@ An element can be added to the front of a `List` using the `pushList` operator.
 ### List indexing
 
 You can get an element of a list by its integer offset in O(log(N)) time, or
-effectively constant. Positive indices are 0-indexed from the beginning of the
+effectively constant. Positive `Int` indices are 0-indexed from the beginning of the
 list, and negative indices are -1-indexed from the end of the list. In other
-words, 0 is the first element and -1 is the last element.
+words, 0 is the first element and -1 is the last element. The indice can also be
+`MInt`, which is interprested as an unsigned integer, and therefore, don't support
+negative indices feature. Currently, only 64-bit and 256-bit `MInt` types are supported.
 
 ```k
   syntax KItem ::= List "[" Int "]"           [function, hook(LIST.get), symbol(List:get)]
@@ -970,7 +972,7 @@ words, 0 is the first element and -1 is the last element.
 ### List update
 
 You can create a new `List` with a new value at a particular index in
-O(log(N)) time, or effectively constant.
+O(log(N)) time, or effectively constant. The index can be either as an `Int` or as an `MInt`. Currently, only 64-bit `MInt` type is supported.
 
 ```k
   syntax List ::= List "[" index: Int "<-" value: KItem "]" [function, hook(LIST.update), symbol(List:set)]
@@ -1026,7 +1028,12 @@ comparisons, it is much better to first convert to a set using `List2Set`.
 
 ### List size
 
-You can get the number of elements of a list in O(1) time.
+You can get the number of elements of a list in O(1) time. The output
+size can be either as an `Int` or as an `MInt`. Currently, only 64-bit
+and 256-bit `MInt` types are supported. When using `MInt`, the size is
+interpreted as an unsigned integer, and the size of the list must match
+the bounds of this `MInt` type, that is the size can't be larger than
+`2^64 - 1` for `MInt{64}` and `2^256 - 1` for `MInt{256}`.
 
 ```k
   syntax Int ::= size(List)               [function, total, hook(LIST.size), symbol(sizeList), smtlib(smt_seq_len)]
@@ -2090,10 +2097,11 @@ mutations of the input or output value.
 
 ### Bytes update
 
-You can set the value of a particular byte in a `Bytes` object in O(1) time.
-The result is `#False` if `value` is not in the range [0..255] or if `index`
-is not a valid index (ie, less than zero or greater than or equal to the length
-of the `Bytes` term).
+You can set the value of a particular byte in a `Bytes` object in O(1) time,
+either with index and value as `Int` or as an `MInt`. Currently, only 64-bit
+and 256-bit `MInt` types are supported. The result is `#False` if `value` is
+not in the range [0..255] or if `index` is not a valid index (ie, less than
+zero or greater than or equal to the length of the `Bytes` term).
 
 ```k
   syntax Bytes ::= Bytes "[" index: Int "<-" value: Int "]" [function, hook(BYTES.update)]
@@ -2967,7 +2975,8 @@ You can:
 
 * Compute the bitwise complement `~MInt` of an `MInt`.
 * Compute the unary negation `--MInt` of an `MInt`.
-* Compute the power `^MInt` of two `MInt`s. Currently. Currently, only 64 and 256-bits is supported.
+* Compute the power `^MInt` of two `MInt`s interpreted as unsigned integers.
+  Currently, only 64 and 256-bits is supported.
 * Compute the product `*MInt` of two `MInt`s.
 * Compute the quotient `/sMInt` of two `MInt`s interpreted as signed integers.
 * Compute the modulus `%sMInt` of two `MInt`s interpreted as signed integers.
