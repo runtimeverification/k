@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import pyk.kllvm.load  # noqa: F401
-from pyk.kllvm.parser import parse_pattern
+import pytest
+
 from pyk.testing import RuntimeTest
 
 if TYPE_CHECKING:
@@ -23,8 +23,8 @@ class TestStep(RuntimeTest):
     KOMPILE_MAIN_MODULE = 'STEPS'
     KOMPILE_ARGS = {'syntax_module': 'STEPS'}
 
-    def test_steps_1(self, runtime: Runtime) -> None:
-        term = runtime.term(start_pattern())
+    def test_steps_1(self, runtime: Runtime, start_pattern: Pattern) -> None:
+        term = runtime.term(start_pattern)
         term.step(0)
         assert str(term) == foo_output(0)
         term.step()
@@ -33,27 +33,30 @@ class TestStep(RuntimeTest):
         term.step(200)
         assert str(term) == bar_output()
 
-    def test_steps_2(self, runtime: Runtime) -> None:
-        term = runtime.term(start_pattern())
+    def test_steps_2(self, runtime: Runtime, start_pattern: Pattern) -> None:
+        term = runtime.term(start_pattern)
         assert str(term) == foo_output(0)
         term.step(50)
         assert str(term) == foo_output(50)
         term.step(-1)
         assert str(term) == bar_output()
 
-    def test_steps_3(self, runtime: Runtime) -> None:
-        term = runtime.term(start_pattern())
+    def test_steps_3(self, runtime: Runtime, start_pattern: Pattern) -> None:
+        term = runtime.term(start_pattern)
         term.run()
         assert str(term) == bar_output()
 
-    def test_steps_to_pattern(self, runtime: Runtime) -> None:
-        term = runtime.term(start_pattern())
+    def test_steps_to_pattern(self, runtime: Runtime, start_pattern: Pattern) -> None:
+        term = runtime.term(start_pattern)
         term.run()
         pattern = term.pattern
         assert str(pattern) == bar_output()
 
 
-def start_pattern() -> Pattern:
+@pytest.fixture
+def start_pattern(load_kllvm: None) -> Pattern:
+    from pyk.kllvm.parser import parse_pattern
+
     """
     <k> foo(100) </k>
     """

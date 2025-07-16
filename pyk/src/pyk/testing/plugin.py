@@ -60,3 +60,13 @@ def profile(tmp_path: Path) -> Profiler:
 @pytest.fixture(scope='session')
 def kompile(tmp_path_factory: TempPathFactory) -> Kompiler:
     return Kompiler(tmp_path_factory)
+
+
+@pytest.fixture(scope='session')
+def load_kllvm(tmp_path_factory: TempPathFactory) -> None:
+    from ..kllvm.compiler import compile_kllvm
+    from ..kllvm.importer import import_kllvm
+
+    tmp_dir = tmp_path_factory.mktemp('kllvm')
+    module_file = compile_kllvm(tmp_dir)
+    import_kllvm(module_file)
