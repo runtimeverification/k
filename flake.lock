@@ -64,16 +64,16 @@
         "z3": "z3"
       },
       "locked": {
-        "lastModified": 1752539472,
-        "narHash": "sha256-eVmVyXRLMPNsXWigjToQqyHIbdBasQOqfeRLzAhzN9o=",
+        "lastModified": 1752670883,
+        "narHash": "sha256-stjppFylsIaOfTLBQDF62CEu6p3JN22s0U+pfmRewjA=",
         "owner": "runtimeverification",
         "repo": "haskell-backend",
-        "rev": "f7ba02666c12136e7fa4cf9c0065fa747931defa",
+        "rev": "b811bc3a939aaa9f65adfd858e87a402c363ab06",
         "type": "github"
       },
       "original": {
         "owner": "runtimeverification",
-        "ref": "v0.1.133",
+        "ref": "v0.1.134",
         "repo": "haskell-backend",
         "type": "github"
       }
@@ -165,8 +165,8 @@
         "type": "github"
       },
       "original": {
-        "owner": "runtimeverification",
-        "ref": "libmatch",
+        "owner": "nixos",
+        "ref": "nixos-unstable",
         "repo": "nixpkgs",
         "type": "github"
       }
