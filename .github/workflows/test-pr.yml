@@ -219,7 +219,7 @@ jobs:
           nix --version
           JQ=$(nix-build '<nixpkgs>' -A jq --no-link)/bin/jq
           export JQ
-          k=$(nix build . --print-build-logs --json | $JQ -r '.[].outputs | to_entries[].value')
+          k=$(nix build . --print-build-logs --json --no-update-lock-file | $JQ -r '.[].outputs | to_entries[].value')
           drv=$(nix-store --query --deriver "$k")
           nix-store --query --requisites "$drv" | cachix push k-framework
       - name: 'Smoke test K'
