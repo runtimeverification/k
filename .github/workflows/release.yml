@@ -85,6 +85,7 @@ jobs:
           script: |
             export PATH="$(nix build github:runtimeverification/kup --no-link --json | jq -r '.[].outputs | to_entries[].value')/bin:$PATH"
             kup publish --verbose k-framework-binary .#k --keep-days 180
+            kup publish --verbose k-framework-binary .#k.openssl.secp256k1 --keep-days 180
             kup publish --verbose k-framework-binary .#k.openssl.procps.secp256k1 --keep-days 180
 
   cachix-release-dependencies:
@@ -129,6 +130,11 @@ jobs:
             K=$(nix build --extra-experimental-features 'nix-command flakes' .#k --json | jq -r '.[].outputs | to_entries[].value')
             DRV_K=$(nix-store --query --deriver ${K})
             nix-store --query --requisites --include-outputs ${DRV_K} | cachix push k-framework
+
+            K_OPENSSL_SECP256K1=$(nix build --extra-experimental-features 'nix-command flakes' .#k.openssl.secp256k1 --json | jq -r '.[].outputs | to_entries[].value')
+            DRV_K_OPENSSL_SECP256K1=$(nix-store --query --deriver ${K_OPENSSL_SECP256K1})
+            nix-store --query --requisites --include-outputs ${DRV_K_OPENSSL_SECP256K1} | cachix push k-framework
+
             K_OPENSSL_PROCPS_SECP256K1=$(nix build --extra-experimental-features 'nix-command flakes' .#k.openssl.procps.secp256k1 --json | jq -r '.[].outputs | to_entries[].value')
             DRV_K_OPENSSL_PROCPS_SECP256K1=$(nix-store --query --deriver ${K_OPENSSL_PROCPS_SECP256K1})
             nix-store --query --requisites --include-outputs ${DRV_K_OPENSSL_PROCPS_SECP256K1} | cachix push k-framework
