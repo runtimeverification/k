@@ -64,6 +64,21 @@ def kompile(tmp_path_factory: TempPathFactory) -> Kompiler:
 
 @pytest.fixture(scope='session')
 def load_kllvm(tmp_path_factory: TempPathFactory) -> None:
+    """Generate and import the ``_kllvm`` bindings module.
+
+    Use this fixture in all tests that import from ``pyk.kllvm``.
+    It ensures transitive imports of ``_kllvm`` are successful.
+
+    Example:
+        .. code-block:: python
+
+            def test_symbol_name(load_kllvm: None) -> None:
+                from pyk.kllvm.ast import Symbol
+
+                name = "Lbl'UndsPlus'Int'Unds'"
+                symbol = Symbol(name)
+                assert symbol.name == name
+    """
     from ..kllvm.compiler import compile_kllvm
     from ..kllvm.importer import import_kllvm
 
