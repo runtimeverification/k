@@ -1,35 +1,29 @@
-from __future__ import annotations
+def test_str(load_kllvm: None) -> None:
+    from pyk.kllvm.ast import CompositeSort, Symbol
 
-from typing import TYPE_CHECKING
+    # Given
+    s1 = Symbol("Lbl'Plus")
 
-import pytest
-
-import pyk.kllvm.load  # noqa: F401
-from pyk.kllvm.ast import CompositeSort, Symbol, Variable
-
-if TYPE_CHECKING:
-    from typing import Final
-
-s1 = Symbol("Lbl'Plus")
-s2 = Symbol("Lbl'Plus")
-s2.add_formal_argument(CompositeSort('A'))
-
-STR_TEST_DATA: Final = (
-    (s1, "Lbl'Plus{}"),
-    (s2, "Lbl'Plus{A{}}"),
-)
-
-
-@pytest.mark.parametrize('symbol,expected', STR_TEST_DATA, ids=[expected for _, expected in STR_TEST_DATA])
-def test_str(symbol: Symbol, expected: str) -> None:
     # When
-    actual = str(symbol)
+    s1_str = str(s1)
 
     # Then
-    assert actual == expected
+    assert s1_str == "Lbl'Plus{}"
+
+    # And given
+    s2 = Symbol("Lbl'Plus")
+    s2.add_formal_argument(CompositeSort('A'))
+
+    # When
+    s2_str = str(s2)
+
+    # Then
+    assert s2_str == "Lbl'Plus{A{}}"
 
 
-def test_equal() -> None:
+def test_equal(load_kllvm: None) -> None:
+    from pyk.kllvm.ast import Symbol
+
     # Given
     a1 = Symbol('A')
     a2 = Symbol('A')
@@ -41,7 +35,9 @@ def test_equal() -> None:
     assert a1 != b
 
 
-def test_variable() -> None:
+def test_variable(load_kllvm: None) -> None:
+    from pyk.kllvm.ast import Variable
+
     # When
     a = Variable('A')
 

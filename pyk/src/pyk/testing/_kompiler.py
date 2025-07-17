@@ -352,7 +352,7 @@ class RuntimeTest(KompiledTest):
     KOMPILE_BACKEND = 'llvm'
 
     @pytest.fixture(scope='class')
-    def runtime(self, definition_dir: Path) -> Runtime:
+    def runtime(self, load_kllvm: None, definition_dir: Path) -> Runtime:
         compile_runtime(definition_dir)
         return import_runtime(definition_dir)
 
