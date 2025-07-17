@@ -4,9 +4,6 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-import pyk.kllvm.load  # noqa: F401
-from pyk.kllvm.ast import CompositePattern, CompositeSort, Pattern, StringPattern, VariablePattern
-
 if TYPE_CHECKING:
     from pathlib import Path
 
@@ -19,7 +16,9 @@ if TYPE_CHECKING:
         'XYZ : ABC',
     ),
 )
-def test_file_load(tmp_path: Path, kore_text: str) -> None:
+def test_file_load(load_kllvm: None, tmp_path: Path, kore_text: str) -> None:
+    from pyk.kllvm.ast import Pattern
+
     # Given
     kore_file = tmp_path / 'test.kore'
     kore_file.write_text(kore_text)
@@ -31,7 +30,9 @@ def test_file_load(tmp_path: Path, kore_text: str) -> None:
     assert str(actual) == kore_text
 
 
-def test_composite() -> None:
+def test_composite(load_kllvm: None) -> None:
+    from pyk.kllvm.ast import CompositePattern, CompositeSort, VariablePattern
+
     # Given
     pattern = CompositePattern('F')
     pattern.add_argument(CompositePattern('A'))
@@ -44,7 +45,9 @@ def test_composite() -> None:
     assert str(actual) == 'F{}(A{}(),B{}())'
 
 
-def test_string() -> None:
+def test_string(load_kllvm: None) -> None:
+    from pyk.kllvm.ast import StringPattern
+
     # Given
     pattern = StringPattern('abc')
 
@@ -53,7 +56,9 @@ def test_string() -> None:
     assert pattern.contents.decode('latin-1') == 'abc'
 
 
-def test_variable() -> None:
+def test_variable(load_kllvm: None) -> None:
+    from pyk.kllvm.ast import CompositePattern, CompositeSort, VariablePattern
+
     # Given
     pattern = VariablePattern('X', CompositeSort('S'))
 

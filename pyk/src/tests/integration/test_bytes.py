@@ -88,9 +88,7 @@ def definition_dir(request: FixtureRequest, backend: str) -> Path:
 
 
 @pytest.fixture(scope='module')
-def runtime(llvm_dir: Path) -> Runtime:
-    import pyk.kllvm.load  # noqa: F401
-
+def runtime(load_kllvm: None, llvm_dir: Path) -> Runtime:
     compile_runtime(llvm_dir)
     return import_runtime(llvm_dir)
 

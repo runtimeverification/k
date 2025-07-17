@@ -4,8 +4,6 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-import pyk.kllvm.load  # noqa: F401
-from pyk.kllvm import parser
 from pyk.testing import RuntimeTest
 
 from ..utils import K_FILES
@@ -39,6 +37,8 @@ class TestEvaluate(RuntimeTest):
         ids=[test_id for test_id, *_ in EVALUATE_TEST_DATA],
     )
     def test_simplify(self, runtime: Runtime, test_id: str, pattern_text: str, expected: str) -> None:
+        from pyk.kllvm import parser
+
         # Given
         pattern = parser.parse_pattern(pattern_text)
 

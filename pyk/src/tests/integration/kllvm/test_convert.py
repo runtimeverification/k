@@ -4,8 +4,6 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-import pyk.kllvm.load  # noqa: F401
-from pyk.kllvm.convert import definition_to_llvm, llvm_to_definition, llvm_to_pattern, pattern_to_llvm
 from pyk.kore.parser import KoreParser
 
 if TYPE_CHECKING:
@@ -66,7 +64,9 @@ DEF_TEST_DATA: Final = (
 
 
 @pytest.mark.parametrize('test_id,kore_text', PAT_TEST_DATA, ids=[test_id for test_id, *_ in PAT_TEST_DATA])
-def test_pattern_to_llvm(test_id: str, kore_text: str) -> None:
+def test_pattern_to_llvm(load_kllvm: None, test_id: str, kore_text: str) -> None:
+    from pyk.kllvm.convert import llvm_to_pattern, pattern_to_llvm
+
     # Given
     expected = KoreParser(kore_text).pattern()
 
@@ -85,7 +85,9 @@ def test_pattern_to_llvm(test_id: str, kore_text: str) -> None:
 
 
 @pytest.mark.parametrize('test_id,kore_text', DEF_TEST_DATA, ids=[test_id for test_id, *_ in DEF_TEST_DATA])
-def test_definition_to_llvm(test_id: str, kore_text: str) -> None:
+def test_definition_to_llvm(load_kllvm: None, test_id: str, kore_text: str) -> None:
+    from pyk.kllvm.convert import definition_to_llvm, llvm_to_definition
+
     # Given
     expected = KoreParser(kore_text).definition()
 

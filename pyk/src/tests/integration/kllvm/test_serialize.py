@@ -4,10 +4,6 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-import pyk.kllvm.load  # noqa: F401
-from pyk.kllvm import parser
-from pyk.kllvm.ast import Pattern
-from pyk.kllvm.convert import pattern_to_llvm
 from pyk.kore.parser import KoreParser
 from pyk.testing import RuntimeTest
 
@@ -31,7 +27,10 @@ TEST_DATA = (
 
 
 @pytest.mark.parametrize('kore_text', TEST_DATA)
-def test_serialize(kore_text: str) -> None:
+def test_serialize(load_kllvm: None, kore_text: str) -> None:
+    from pyk.kllvm.ast import Pattern
+    from pyk.kllvm.convert import pattern_to_llvm
+
     # Given
     _pattern = KoreParser(kore_text).pattern()
     pattern = pattern_to_llvm(_pattern)
@@ -49,6 +48,9 @@ class TestSerializeRaw(RuntimeTest):
     KOMPILE_MAIN_FILE = K_FILES / 'imp.k'
 
     def test_serialize_raw(self, runtime: Runtime, tmp_path: Path) -> None:
+        from pyk.kllvm import parser
+        from pyk.kllvm.ast import Pattern
+
         # Given
         kore_text = r"""Lbl'UndsPlus'Int'Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))"""
         pattern = parser.parse_pattern(kore_text)

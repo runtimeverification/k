@@ -4,8 +4,6 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-import pyk.kllvm.load  # noqa: F401
-from pyk.kllvm.utils import get_requires
 from pyk.kore.parser import KoreParser
 
 if TYPE_CHECKING:
@@ -28,7 +26,9 @@ AXIOM_TEST_DATA: Final = (
 @pytest.mark.parametrize(
     'test_id,kore_requires,kore_axiom', AXIOM_TEST_DATA, ids=[test_id for test_id, *_ in AXIOM_TEST_DATA]
 )
-def test_get_requires(test_id: str, kore_requires: str, kore_axiom: str) -> None:
+def test_get_requires(load_kllvm: None, test_id: str, kore_requires: str, kore_axiom: str) -> None:
+    from pyk.kllvm.utils import get_requires
+
     # Given
     axiom = KoreParser(kore_axiom).axiom()
 
