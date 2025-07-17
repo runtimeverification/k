@@ -2,15 +2,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import pyk.kllvm.load  # noqa: F401
-import pyk.kllvm.load_static  # noqa: F401
-from pyk.kllvm.compiler import compile_kllvm
-
 if TYPE_CHECKING:
     from typing import Final
 
 
 def test_kllvm_module() -> None:
+    import pyk.kllvm.load  # noqa: F401
+    import pyk.kllvm.load_static  # noqa: F401
+    from pyk.kllvm.compiler import compile_kllvm
 
     # Given
     kllvm_module_dir: Final = pyk.kllvm.load.KLLVM_MODULE_DIR

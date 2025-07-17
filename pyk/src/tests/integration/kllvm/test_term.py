@@ -4,8 +4,6 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-import pyk.kllvm.load  # noqa: F401
-from pyk.kllvm.ast import CompositePattern
 from pyk.testing import RuntimeTest
 
 if TYPE_CHECKING:
@@ -25,6 +23,8 @@ class TestTerm(RuntimeTest):
 
     @pytest.mark.parametrize('ctor', ('one', 'two', 'three'))
     def test_construct(self, runtime: Runtime, ctor: str) -> None:
+        from pyk.kllvm.ast import CompositePattern
+
         # Given
         label = f"Lbl{ctor}'LParRParUnds'CTOR'Unds'Foo"
         pattern = CompositePattern(label)

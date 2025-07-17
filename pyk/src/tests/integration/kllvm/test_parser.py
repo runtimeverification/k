@@ -2,14 +2,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import pyk.kllvm.load  # noqa: F401
-from pyk.kllvm import parser
-
 if TYPE_CHECKING:
     from pathlib import Path
 
 
-def test_parse_pattern_file(tmp_path: Path) -> None:
+def test_parse_pattern_file(load_kllvm: None, tmp_path: Path) -> None:
+    from pyk.kllvm import parser
+
     # Given
     kore_text = 'A{}(B{}(),C{}())'
     kore_file = tmp_path / 'test.kore'
@@ -22,7 +21,9 @@ def test_parse_pattern_file(tmp_path: Path) -> None:
     assert str(actual) == kore_text
 
 
-def test_parse_pattern() -> None:
+def test_parse_pattern(load_kllvm: None) -> None:
+    from pyk.kllvm import parser
+
     # Given
     kore_text = 'A{}(X : S,Y : Z,Int{}())'
 
@@ -33,7 +34,9 @@ def test_parse_pattern() -> None:
     assert str(actual) == kore_text
 
 
-def test_parse_sort_file(tmp_path: Path) -> None:
+def test_parse_sort_file(load_kllvm: None, tmp_path: Path) -> None:
+    from pyk.kllvm import parser
+
     # Given
     kore_text = 'Foo{Bar,Baz}'
     kore_file = tmp_path / 'test.kore'
@@ -46,7 +49,9 @@ def test_parse_sort_file(tmp_path: Path) -> None:
     assert str(actual) == kore_text
 
 
-def test_parse_sort() -> None:
+def test_parse_sort(load_kllvm: None) -> None:
+    from pyk.kllvm import parser
+
     # Given
     kore_text = 'Foo{Bar,Baz}'
 
@@ -57,9 +62,10 @@ def test_parse_sort() -> None:
     assert str(actual) == kore_text
 
 
-def test_parse_definition_file(tmp_path: Path) -> None:
-    # Given
+def test_parse_definition_file(load_kllvm: None, tmp_path: Path) -> None:
+    from pyk.kllvm import parser
 
+    # Given
     # fmt: off
     kore_text = (
         '[]\n'
@@ -81,10 +87,10 @@ def test_parse_definition_file(tmp_path: Path) -> None:
     assert str(actual) == kore_text
 
 
-def test_parse_definition() -> None:
-    # Given
+def test_parse_definition(load_kllvm: None) -> None:
+    from pyk.kllvm import parser
 
-    # fmt: off
+    # Given
     kore_text = (
         '[]\n'
         '\n'
@@ -93,7 +99,6 @@ def test_parse_definition() -> None:
         'endmodule\n'
         '[concrete{}()]\n'
     )
-    # fmt: on
 
     # When
     actual = parser.parse_definition(kore_text)
