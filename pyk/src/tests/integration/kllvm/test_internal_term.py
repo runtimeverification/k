@@ -4,8 +4,6 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-import pyk.kllvm.load  # noqa: F401
-from pyk.kllvm.parser import Parser
 from pyk.testing import RuntimeTest
 
 from ..utils import K_FILES
@@ -21,15 +19,18 @@ if TYPE_CHECKING:
 class TestInternalTerm(RuntimeTest):
     KOMPILE_MAIN_FILE = K_FILES / 'imp.k'
 
-    def test_str_llvm_backend_issue_724(self, runtime: Runtime) -> None:
+    def test_str_llvm_backend_issue_724(self, runtime: Runtime, start_pattern: Pattern) -> None:
         for _ in range(10000):
-            term = runtime._module.InternalTerm(start_pattern())
+            term = runtime._module.InternalTerm(start_pattern)
             term.step(-1)
             # just checking that str doesn't crash
             str(term)
 
 
-def start_pattern() -> Pattern:
+@pytest.fixture
+def start_pattern(load_kllvm: None) -> Pattern:
+    from pyk.kllvm.parser import Parser
+
     """
     <k> int x ; x = 1 </k>
     """
