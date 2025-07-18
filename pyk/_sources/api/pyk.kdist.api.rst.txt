@@ -1,0 +1,7 @@
+pyk.kdist.api module
+====================
+
+.. automodule:: pyk.kdist.api
+   :members:
+   :undoc-members:
+   :show-inheritance:

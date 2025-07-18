@@ -1,0 +1,7 @@
+pyk.cterm.show module
+=====================
+
+.. automodule:: pyk.cterm.show
+   :members:
+   :undoc-members:
+   :show-inheritance:
