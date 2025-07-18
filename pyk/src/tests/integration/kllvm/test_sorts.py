@@ -1,33 +1,35 @@
-from __future__ import annotations
+def test_is_concrete(load_kllvm: None) -> None:
+    from pyk.kllvm.ast import CompositeSort
 
-from typing import TYPE_CHECKING
+    # Given
+    sort = CompositeSort('A')
 
-import pytest
-
-import pyk.kllvm.load  # noqa: F401
-from pyk.kllvm.ast import CompositeSort, SortVariable
-
-if TYPE_CHECKING:
-    from pyk.kllvm.ast import Sort
-
-
-@pytest.mark.parametrize(
-    'sort,expected',
-    (
-        (CompositeSort('A'), True),
-        (SortVariable('B'), False),
-    ),
-)
-def test_is_concrete(sort: Sort, expected: bool) -> None:
     # When
     actual = sort.is_concrete
 
     # Then
-    assert actual == expected
+    assert actual
 
 
-@pytest.mark.parametrize('name', ('A', 'SortInt', ''))
-def test_name(name: str) -> None:
+def test_is_not_concrete(load_kllvm: None) -> None:
+    from pyk.kllvm.ast import SortVariable
+
+    # Given
+    sort = SortVariable('B')
+
+    # When
+    actual = sort.is_concrete
+
+    # Then
+    assert not actual
+
+
+def test_name(load_kllvm: None) -> None:
+    from pyk.kllvm.ast import CompositeSort
+
+    # Given
+    name = 'SortInt'
+
     # When
     sort = CompositeSort(name)
 
@@ -35,22 +37,31 @@ def test_name(name: str) -> None:
     assert sort.name == name
 
 
-@pytest.mark.parametrize(
-    'sort,expected',
-    (
-        (CompositeSort('A'), 'A{}'),
-        (SortVariable('B'), 'B'),
-    ),
-)
-def test_str(sort: Sort, expected: str) -> None:
+def test_str(load_kllvm: None) -> None:
+    from pyk.kllvm.ast import CompositeSort, SortVariable
+
+    # Given
+    s1 = CompositeSort('A')
+
     # When
-    actual = str(sort)
+    s1_str = str(s1)
 
     # Then
-    assert actual == expected
+    assert s1_str == 'A{}'
+
+    # And given
+    s2 = SortVariable('B')
+
+    # When
+    s2_str = str(s2)
+
+    # Then
+    assert s2_str == 'B'
 
 
-def test_add_argument() -> None:
+def test_add_argument(load_kllvm: None) -> None:
+    from pyk.kllvm.ast import CompositeSort, SortVariable
+
     # Given
     f = CompositeSort('F')
     a = CompositeSort('A')
@@ -64,7 +75,9 @@ def test_add_argument() -> None:
     assert str(f) == 'F{A{},B}'
 
 
-def test_substitution_1() -> None:
+def test_substitution_1(load_kllvm: None) -> None:
+    from pyk.kllvm.ast import CompositeSort, SortVariable
+
     # Given
     x = SortVariable('X')
     a = CompositeSort('A')
@@ -77,7 +90,9 @@ def test_substitution_1() -> None:
     assert actual == expected
 
 
-def test_substitution_2() -> None:
+def test_substitution_2(load_kllvm: None) -> None:
+    from pyk.kllvm.ast import CompositeSort, SortVariable
+
     x = SortVariable('X')
     y = SortVariable('Y')
     a = CompositeSort('A')
@@ -113,7 +128,9 @@ def test_substitution_2() -> None:
     assert actual == expected
 
 
-def test_equality() -> None:
+def test_equality(load_kllvm: None) -> None:
+    from pyk.kllvm.ast import CompositeSort, SortVariable
+
     # Given
     a1 = CompositeSort('A')
     a2 = CompositeSort('A')

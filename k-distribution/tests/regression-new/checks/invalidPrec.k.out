@@ -1,5 +1,5 @@
 [Error] Compiler: Inconsistent token precedence detected.
 	Source(domains.md)
-	Location(1199,18,1199,52)
-	1199 |	  syntax Int ::= r"[0-9]+" [prefer, token, prec(2)]
+	Location(1210,18,1210,52)
+	1210 |	  syntax Int ::= r"[0-9]+" [prefer, token, prec(2)]
 	     .	                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
