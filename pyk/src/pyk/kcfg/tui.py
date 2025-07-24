@@ -82,7 +82,7 @@ class NavWidget(ScrollableContainer, can_focus=True):
         yield Static(self.text)
 
     def watch_text(self) -> None:
-        self.query_one(Static).update(self.text)
+        self.query_one(Static).update(self.text, markup=False)
 
 
 class Info(Widget, can_focus=False):
@@ -98,7 +98,7 @@ class Info(Widget, can_focus=False):
         yield Static(self.text)
 
     def watch_text(self) -> None:
-        self.query_one(Static).update(self.text)
+        self.query_one(Static).update(self.text, markup=False)
 
 
 class Status(NavWidget):
