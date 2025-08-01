@@ -79,10 +79,10 @@ class NavWidget(ScrollableContainer, can_focus=True):
         self.text = text
 
     def compose(self) -> ComposeResult:
-        yield Static(self.text)
+        yield Static(self.text, markup=False)
 
     def watch_text(self) -> None:
-        self.query_one(Static).update(self.text, markup=False)
+        self.query_one(Static).update(self.text)
 
 
 class Info(Widget, can_focus=False):
@@ -95,10 +95,10 @@ class Info(Widget, can_focus=False):
         self.text = text
 
     def compose(self) -> ComposeResult:
-        yield Static(self.text)
+        yield Static(self.text, markup=False)
 
     def watch_text(self) -> None:
-        self.query_one(Static).update(self.text, markup=False)
+        self.query_one(Static).update(self.text)
 
 
 class Status(NavWidget):
