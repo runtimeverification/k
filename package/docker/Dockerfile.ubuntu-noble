@@ -22,5 +22,5 @@ RUN    apt-get update                                                           
 COPY kframework-*.whl ./
 RUN    pipx ensurepath                                       \
     && . /root/.profile                                      \
-    && pip install /kframework-*.whl --break-system-packages \
+    && pip install /kframework-*.whl --break-system-packages --force-reinstall \
     && rm /kframework-*.whl
