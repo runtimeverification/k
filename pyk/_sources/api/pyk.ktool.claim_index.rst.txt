@@ -1,0 +1,7 @@
+pyk.ktool.claim\_index module
+=============================
+
+.. automodule:: pyk.ktool.claim_index
+   :members:
+   :undoc-members:
+   :show-inheritance:
