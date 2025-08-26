@@ -19,8 +19,6 @@ RUN    apt-get update                                                           
     && apt-get install --yes --no-install-recommends /kframework_amd64_ubuntu_noble.deb \
     && rm /kframework_amd64_ubuntu_noble.deb
 
+ENV PIPX_HOME=/opt/pipx PIPX_BIN_DIR=/usr/local/bin
 COPY kframework-*.whl ./
-RUN    pipx ensurepath                                       \
-    && . /root/.profile                                      \
-    && pip install /kframework-*.whl --break-system-packages \
-    && rm /kframework-*.whl
+RUN pipx install /kframework-*.whl && rm /kframework-*.whl
