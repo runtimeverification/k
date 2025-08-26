@@ -162,9 +162,9 @@ jobs:
       - name: 'Check out code'
         uses: actions/checkout@v4
       - name: 'Install Nix'
-        uses: cachix/install-nix-action@v22
+        uses: cachix/install-nix-action@v31.5.1
         with:
-          install_url: https://releases.nixos.org/nix/nix-2.13.3/install
+          install_url: https://releases.nixos.org/nix/nix-2.30.1/install
           extra_nix_config: |
             substituters = http://cache.nixos.org https://hydra.iohk.io
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
@@ -198,9 +198,9 @@ jobs:
         run: brew install bash
       - name: 'Install Nix'
         if: ${{ !startsWith(matrix.os, 'self') }}
-        uses: cachix/install-nix-action@v22
+        uses: cachix/install-nix-action@v31.5.1
         with:
-          install_url: https://releases.nixos.org/nix/nix-2.13.3/install
+          install_url: https://releases.nixos.org/nix/nix-2.30.1/install
           extra_nix_config: |
             substituters = http://cache.nixos.org https://hydra.iohk.io
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
