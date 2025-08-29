@@ -2088,10 +2088,11 @@ to the nearest byte.
 
 You can convert between a `Bytes` and a `String` in O(N) time. The resulting
 value is a copy of the original and will not be affected by subsequent
-mutations of the input or output value.
+mutations of the input or output value. `Bytes2Hex` uses hexadecimal encoding.
 
 ```k
   syntax String ::= Bytes2String(Bytes) [function, total, hook(BYTES.bytes2string)]
+                  | Bytes2Hex(Bytes)    [function, total, hook(BYTES.bytes2hex)]
   syntax Bytes ::= String2Bytes(String) [function, total, hook(BYTES.string2bytes)]
 ```
 
