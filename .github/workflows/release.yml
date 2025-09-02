@@ -347,6 +347,9 @@ jobs:
           # shellcheck disable=SC2162
           brew list -1 | grep python | while read formula; do brew unlink "$formula"; brew link --overwrite "$formula"; done
 
+          # uninstall pre-installed cmake
+          brew uninstall cmake
+
       - name: Build brew bottle
         id: build
         env:
