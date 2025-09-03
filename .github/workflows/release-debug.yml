@@ -178,6 +178,7 @@ jobs:
           # explicitly instead.
           JAVA_HOME: ${{ env.JAVA_HOME_17_X64 }}
           HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
+          HOMEBREW_INTERNAL_ALLOW_PACKAGES_FROM_PATHS: 1
         run: |
           # The macOS public runners are prone to flakiness when running this
           # test suite, so the PL-tutorial is disabled for now.
