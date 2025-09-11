@@ -177,7 +177,7 @@ jobs:
         with:
           os: ubuntu
           distro: noble
-          llvm: 16
+          llvm: 17
           jdk: 21
           pkg-name: kframework_amd64_ubuntu_noble.deb
           build-package: package/debian/build-package noble kframework
@@ -243,7 +243,7 @@ jobs:
         with:
           os: ubuntu
           distro: jammy
-          llvm: 15
+          llvm: 17
           pkg-name: kframework_amd64_ubuntu_jammy.deb
           build-package: package/debian/build-package jammy kframework
           test-package: package/debian/test-package
@@ -535,7 +535,7 @@ jobs:
           tag: k-release-ci-${{ github.sha }}
           os: ubuntu
           distro: jammy
-          llvm: 15
+          llvm: 17
 
       - name: 'Push Maven Packages'
         shell: bash {0}
