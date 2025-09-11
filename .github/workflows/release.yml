@@ -511,7 +511,7 @@ jobs:
     name: 'Publish Release'
     runs-on: [self-hosted, linux, normal]
     environment: production
-    needs: [cachix-release, cachix-release-dependencies, macos-test, source-tarball, ubuntu-jammy, ubuntu-noble, set-release-id]
+    needs: [cachix-release, cachix-release-dependencies, source-tarball, ubuntu-jammy, ubuntu-noble, set-release-id]
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v4
