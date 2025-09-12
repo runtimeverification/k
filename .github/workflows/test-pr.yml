@@ -413,15 +413,12 @@ jobs:
         run: |
           # Test the Homebrew formula validation and basic functionality
           cd homebrew-k
-          # brew tap expects a git repository, so we initialise the current folder as a dummy repo
-          git init
-          brew tap runtimeverification/k "file:///$(pwd)"
           
-          # Validate the formula syntax
+          # Validate the formula syntax directly
           brew audit --strict Formula/kframework.rb
           
-          # Test formula installation from source (not bottle)
-          brew install --build-from-source kframework -v
+          # Test formula installation from source using the local formula
+          brew install --build-from-source Formula/kframework.rb -v
           
           # Basic functionality test
           echo 'module TEST imports BOOL endmodule' > test.k
