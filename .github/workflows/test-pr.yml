@@ -414,11 +414,12 @@ jobs:
           # Test the Homebrew formula validation and basic functionality
           cd homebrew-k
           
-          # Validate the formula syntax directly
-          brew audit --strict Formula/kframework.rb
+          # Validate the formula syntax by installing it as a local tap
+          brew tap --force-local runtimeverification/k .
+          brew audit --strict kframework
           
-          # Test formula installation from source using the local formula
-          brew install --build-from-source Formula/kframework.rb -v
+          # Test formula installation from source
+          brew install --build-from-source kframework -v
           
           # Basic functionality test
           echo 'module TEST imports BOOL endmodule' > test.k
