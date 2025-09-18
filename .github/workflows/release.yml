@@ -177,7 +177,7 @@ jobs:
         with:
           os: ubuntu
           distro: noble
-          llvm: 16
+          llvm: 17
           jdk: 21
           pkg-name: kframework_amd64_ubuntu_noble.deb
           build-package: package/debian/build-package noble kframework
