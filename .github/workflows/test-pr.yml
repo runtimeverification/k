@@ -434,4 +434,3 @@ jobs:
           name: macos-formula-test
           path: homebrew-k/Formula/kframework.rb
           retention-days: 1
-
