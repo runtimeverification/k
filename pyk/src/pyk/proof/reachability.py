@@ -773,10 +773,10 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
             if isinstance(subproof, APRProof)
             for rule in subproof.as_rules(priority=20, direct_rule=self.direct_subproof_rules)
         ]
-        circularity_rule = proof.as_rule(priority=20)
-
         _inject_module(proof.dependencies_module_name, main_module_name, dependencies_as_rules)
+
         if proof.circularity:
+            circularity_rule = proof.as_rule(priority=20)
             _inject_module(proof.circularities_module_name, proof.dependencies_module_name, [circularity_rule])
 
         for node_id in [proof.init, proof.target]:
