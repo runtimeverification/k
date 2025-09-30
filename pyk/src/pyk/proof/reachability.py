@@ -776,7 +776,8 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         circularity_rule = proof.as_rule(priority=20)
 
         _inject_module(proof.dependencies_module_name, main_module_name, dependencies_as_rules)
-        _inject_module(proof.circularities_module_name, proof.dependencies_module_name, [circularity_rule])
+        if proof.circularity:
+            _inject_module(proof.circularities_module_name, proof.dependencies_module_name, [circularity_rule])
 
         for node_id in [proof.init, proof.target]:
             if self.kcfg_explore.kcfg_semantics.is_terminal(proof.kcfg.node(node_id).cterm):
