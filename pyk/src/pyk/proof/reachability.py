@@ -188,7 +188,9 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
                         shortest_path.append(succ.source)
 
             nonzero_depth = self.nonzero_depth(node)
-            module_name = self.circularities_module_name if nonzero_depth else self.dependencies_module_name
+            module_name = (
+                self.circularities_module_name if nonzero_depth and self.circularity else self.dependencies_module_name
+            )
 
             predecessor_edges = self.kcfg.edges(target_id=node.id)
             predecessor_node_id: NodeIdLike | None = (
