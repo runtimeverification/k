@@ -39,12 +39,16 @@
         uv = uv2nix.packages.${final.system}.uv-bin;
       };
       pykOverlay = final: prev: rec {
+        pyk-pyproject = final.callPackage ./nix/pyk-pyproject {
+          inherit uv2nix;
+        };
+
         pyk-python310 = final.callPackage ./nix/pyk {
-          inherit pyproject-nix pyproject-build-systems uv2nix;
+          inherit pyproject-nix pyproject-build-systems pyk-pyproject;
           python = final."python310";
         };
         pyk-python311 = final.callPackage ./nix/pyk {
-          inherit pyproject-nix pyproject-build-systems uv2nix;
+          inherit pyproject-nix pyproject-build-systems pyk-pyproject;
           python = final."python311";
         };
         pyk = pyk-python310;
@@ -204,7 +208,7 @@
           pkgs.lib.removeSuffix "\n" (builtins.readFile ./package/version);
 
         packages = rec {
-          inherit (pkgs) k k-lock pyk pyk-python310 pyk-python311 maven;
+          inherit (pkgs) k k-lock pyk pyk-python310 pyk-python311 pyk-pyproject maven;
 
           check-submodules = rv-nix-tools.lib.check-submodules pkgs {
             inherit llvm-backend haskell-backend;
@@ -247,7 +251,8 @@
                 patchShebangs tests/regression-new/*
                 substituteInPlace tests/regression-new/append/kparse-twice \
                   --replace '"$(dirname "$0")/../../../bin/kparse"' '"${k}/bin/kparse"'
-              '';
+              '';        inherit (pkgs) kontrol-pyk-debug;
+
               buildFlags = [
                 "K_BIN=${k}/bin"
                 "KLLVMLIB=${k}/lib/kllvm"
@@ -294,6 +299,11 @@
         };
         overlays.default = final: prev: {
           inherit (self.packages.${final.system}) k;
+        };
+        # this pyproject-nix overlay allows for overriding the python packages that are otherwise locked in `uv.lock`
+        # by using this overlay in dependant nix flakes, you ensure that nix overrides also override the python package         
+        overlays.pyk-pyproject = system: final: prev: {
+          inherit (self.packages.${system}.pyk-pyproject.lockFileOverlay final prev) kframework;
         };
 
         # deprecated flake overlay output, please use `overlays.default` or `overlays.pyk` instead
