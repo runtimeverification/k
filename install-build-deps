@@ -11,7 +11,7 @@ inst_Debian() {
     sudo apt-get install -q     \
         bison                   \
         build-essential         \
-        clang-15                \
+        clang-17                \
         cmake                   \
         curl                    \
         flex                    \
@@ -26,8 +26,8 @@ inst_Debian() {
         libunwind-dev           \
         libyaml-dev             \
         libz3-dev               \
-        lld-15                  \
-        llvm-15-tools           \
+        lld-17                  \
+        llvm-17-tools           \
         m4                      \
         maven                   \
         openjdk-17-jdk          \

@@ -3,5 +3,5 @@
 
 PATH_add `brew --prefix bison`/bin
 PATH_add `brew --prefix flex`/bin
-PATH_add `brew --prefix llvm@15`/bin
+PATH_add `brew --prefix llvm@17`/bin
 PATH_add `brew --prefix openjdk`/bin
