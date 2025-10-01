@@ -1,0 +1,7 @@
+pyk.kcfg.tui module
+===================
+
+.. automodule:: pyk.kcfg.tui
+   :members:
+   :undoc-members:
+   :show-inheritance:
