@@ -51,8 +51,8 @@ jobs:
         include:
           - runner: ubuntu-24.04
             os: ubuntu-24.04
-          - runner: MacM1
-            os: self-macos-12
+          - runner: self-macos-latest
+            os: self-macos-latest
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 120
     steps:
@@ -95,8 +95,8 @@ jobs:
         include:
           - runner: ubuntu-24.04
             os: ubuntu-24.04
-          - runner: MacM1
-            os: self-macos-12
+          - runner: self-macos-latest
+            os: self-macos-latest
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 120
     steps:
@@ -298,7 +298,7 @@ jobs:
 
   macos-build:
     name: 'Build MacOS Package'
-    runs-on: macos-14
+    runs-on: macos-26
     timeout-minutes: 120
     environment: production
     needs: [set-release-id, source-tarball]
@@ -396,7 +396,7 @@ jobs:
 
   macos-test:
     name: 'Test MacOS Package'
-    runs-on: macos-14
+    runs-on: macos-26
     timeout-minutes: 60
     environment: production
     needs: [macos-build, set-release-id]
