@@ -251,7 +251,7 @@
                 patchShebangs tests/regression-new/*
                 substituteInPlace tests/regression-new/append/kparse-twice \
                   --replace '"$(dirname "$0")/../../../bin/kparse"' '"${k}/bin/kparse"'
-              '';        inherit (pkgs) kontrol-pyk-debug;
+              '';
 
               buildFlags = [
                 "K_BIN=${k}/bin"
