@@ -1,37 +1,19 @@
 {
   lib,
   callPackage,
-  nix-gitignore,
 
-  pyproject-nix,
   pyproject-build-systems,
-  uv2nix,
+  pyproject-nix,
+  pyk-pyproject,
 
-  python
+  python,
 }:
 let
+  inherit (pyk-pyproject) lockFileOverlay workspace;
+
   pyproject-util = callPackage pyproject-nix.build.util {};
   pyproject-packages = callPackage pyproject-nix.build.packages {
     inherit python;
-  };
-
-  # load a uv workspace from a workspace root
-  workspace = uv2nix.lib.workspace.loadWorkspace {
-    workspaceRoot = lib.cleanSource (nix-gitignore.gitignoreSourcePure [
-        ../../.gitignore
-        ".github/"
-        "result*"
-        "/deps/"
-        # do not include submodule directories that might be initilized empty or non-existent
-      ] ../../pyk/.
-    );
-  };
-
-  # create overlay
-  lockFileOverlay = workspace.mkPyprojectOverlay {
-    # prefer "wheel" over "sdist" due to maintance overhead
-    # there is no bundled set of overlays for "sdist" in uv2nix, in contrast to poetry2nix
-    sourcePreference = "wheel";
   };
 
   buildSystemsOverlay = import ./build-systems-overlay.nix;
@@ -45,7 +27,8 @@ let
     # add build system overrides to certain python packages
     buildSystemsOverlay
   ]);
-in pyproject-util.mkApplication {
+in
+pyproject-util.mkApplication {
   # default dependancy group enables no optional dependencies and no dependency-groups
   venv = pythonSet.mkVirtualEnv "pyk-env" workspace.deps.default;
   package = pythonSet.kframework;
