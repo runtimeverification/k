@@ -374,7 +374,7 @@ jobs:
           # uninstall pre-installed cmake
           brew uninstall cmake
 
-      - name: 'Prepare Homebrew formula for testing'
+      - name: 'Build brew bottle'
         id: build
         env:
           HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
@@ -399,7 +399,22 @@ jobs:
           
           cd homebrew-k
           ../kframework/package/macos/brew-update-to-local "${PACKAGE}" "${VERSION}"
-          echo "Formula prepared for testing"
+          git commit "Formula/$PACKAGE.rb" -m "Update ${PACKAGE} to ${VERSION}: part 1"
+          ../kframework/package/macos/brew-build-and-update-to-local-bottle "${PACKAGE}" "${VERSION}" "${ROOT_URL}"
+          git reset HEAD^
+          LOCAL_BOTTLE_NAME=$(basename "$(find . -name "kframework--${VERSION}.arm64_sonoma.bottle*.tar.gz")")
+          # shellcheck disable=2001
+          BOTTLE_NAME=$(echo "${LOCAL_BOTTLE_NAME#./}" | sed 's!kframework--!kframework-!')
+          ../kframework/package/macos/brew-update-to-final "${PACKAGE}" "${VERSION}" "${ROOT_URL}"
+          echo "path=${LOCAL_BOTTLE_NAME}" >> "${GITHUB_OUTPUT}"
+          echo "path_remote=${BOTTLE_NAME}" >> "${GITHUB_OUTPUT}"
+
+      - name: 'Upload bottle'
+        uses: actions/upload-artifact@v4
+        with:
+          name: homebrew-bottle
+          path: homebrew-k
+          retention-days: 1
 
       - name: 'Test Homebrew formula validation'
         id: test
@@ -415,7 +430,7 @@ jobs:
           cd homebrew-k
           
           # Validate the formula syntax by installing it as a local tap
-          brew tap --force-local runtimeverification/k .
+          brew tap runtimeverification/k .
           brew audit --strict kframework
           
           # Test formula installation from source
