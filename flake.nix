@@ -116,7 +116,7 @@
 
             mk-k-framework = { haskell-backend-bins, llvm-kompile-libs }:
               prev.callPackage ./nix/k.nix {
-                mvnHash = "sha256-aUomhCjSIBIQdavd3XojKJFdU74UURaKEVEKXiPTq1Q=";
+                mvnHash = "sha256-AHFgK7RVIb151u4X52PzZL84e3Z0fVa9Q8iSxk3u2uA=";
                 manualMvnArtifacts = [
                   "org.scala-lang:scala-compiler:2.13.13"
                   "ant-contrib:ant-contrib:1.0b3"
