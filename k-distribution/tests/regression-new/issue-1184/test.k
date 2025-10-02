@@ -7,4 +7,3 @@ module TEST
   configuration <k> $PGM:Val </k> <cell> {$PGM}:>K </cell>
 
 endmodule
-

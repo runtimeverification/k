@@ -1,3 +1,4 @@
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 module OVERLOADKLABEL
   imports ID
   syntax Exp  ::= LVal

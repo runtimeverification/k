@@ -12,4 +12,3 @@ rule a1 => #unparseKORE(a1)
 rule a2 => #unparseKORE(a2)
 rule a1 A => #unparseKORE(a1 A)
 endmodule
-

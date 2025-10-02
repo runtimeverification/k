@@ -73,5 +73,3 @@ module LAMBDA
   rule if false then _ else E => E
   rule mu X . E => E[(mu X . E) / X]
 endmodule
-
-

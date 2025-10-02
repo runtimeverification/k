@@ -2,7 +2,7 @@
 module TEST-SYNTAX
     syntax Exp ::= r"1"   [token, prec(-1)]
                  | r"0?1" [token]
-		 | "foo"  [token]
+         | "foo"  [token]
 endmodule
 
 module TEST

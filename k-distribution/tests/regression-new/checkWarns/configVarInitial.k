@@ -1,3 +1,4 @@
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 module CONFIGVARINITIAL-SYNTAX
 endmodule
 
@@ -6,10 +7,10 @@ imports CONFIGVARINITIAL-SYNTAX
 
 configuration <k> $PGM </k>
               <goods>
-	        <good multiplicity="*" type="Set" initial=""> $FOO </good>
-	      </goods>
-	      <bads>
-	        <bad multiplicity="*" type="Set"> $FOO </bad>
-	      </bads> 
-	      
+            <good multiplicity="*" type="Set" initial=""> $FOO </good>
+          </goods>
+          <bads>
+            <bad multiplicity="*" type="Set"> $FOO </bad>
+          </bads>
+
 endmodule

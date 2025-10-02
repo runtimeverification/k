@@ -13,4 +13,3 @@ module TEST
   rule 0 => record2descr(x |-> 0)
   syntax Id ::= "x" [token]
 endmodule
-

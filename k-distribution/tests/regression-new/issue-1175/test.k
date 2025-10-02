@@ -9,4 +9,3 @@ module TEST
   rule <k> inc I:Int => I +Int 1 ... </k>
 
 endmodule
-

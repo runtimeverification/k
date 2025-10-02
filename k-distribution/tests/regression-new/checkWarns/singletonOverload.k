@@ -1,3 +1,4 @@
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 module SINGLETONOVERLOAD-SYNTAX
 endmodule
 
@@ -15,7 +16,7 @@ module NOWARNS
 
   syntax Foo  ::= "foo" | "bar"
   syntax Foos ::= List{Foo, ","}
-  
+
   syntax Bool ::= test(Foo)   [function, overload(test)]
                 | test(Foos)  [function, overload(test)]
 

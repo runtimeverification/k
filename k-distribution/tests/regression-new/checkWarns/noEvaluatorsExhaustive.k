@@ -1,3 +1,4 @@
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 module NOEVALUATORSEXHAUSTIVE-SYNTAX
     imports INT-SYNTAX
     syntax Int ::= foo ( Int ) [function, total, no-evaluators]
