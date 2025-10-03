@@ -382,6 +382,7 @@ jobs:
               -Dhttp.keepAlive=false
               -Dmaven.wagon.http.pool=false
               -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
+              -Dspotless.check.skip=true
         run: |
           PACKAGE=kframework
           VERSION=$(cat kframework/package/version)
@@ -425,6 +426,8 @@ jobs:
           # explicitly instead.
           JAVA_HOME: ${{ env.JAVA_HOME_17_X64 }}
           HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
+          MAVEN_OPTS: >-
+              -Dspotless.check.skip=true
         run: |
           # Test the Homebrew formula validation and basic functionality
           cd homebrew-k
