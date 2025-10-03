@@ -16,10 +16,13 @@
     flake-utils.follows = "llvm-backend/utils";
 
     uv2nix.url = "github:pyproject-nix/uv2nix/be511633027f67beee87ab499f7b16d0a2f7eceb";
-    # stale nixpkgs is missing the alias `lib.match` -> `builtins.match`
-    # therefore point uv2nix to a patched nixpkgs, which introduces this alias
-    # this is a temporary solution until nixpkgs us up-to-date again
-    uv2nix.inputs.nixpkgs.url = "github:runtimeverification/nixpkgs/libmatch";
+    # uv2nix requires a newer version of nixpkgs
+    # therefore, we pin uv2nix specifically to a newer version of nixpkgs
+    # until we replaced our stale version of nixpkgs with an upstream one as well
+    # but also uv2nix requires us to call it with `callPackage`, so we add stuff
+    # from the newer nixpkgs to our stale nixpkgs via an overlay
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    uv2nix.inputs.nixpkgs.follows = "nixpkgs-unstable";
     # uv2nix.inputs.nixpkgs.follows = "nixpkgs";
     pyproject-build-systems.url = "github:pyproject-nix/build-system-pkgs/7dba6dbc73120e15b558754c26024f6c93015dd7";
     pyproject-build-systems = {
@@ -31,7 +34,7 @@
   };
 
   outputs = { self, nixpkgs, flake-utils, rv-nix-tools, haskell-backend
-    , llvm-backend, pyproject-nix, pyproject-build-systems , uv2nix }:
+    , llvm-backend, pyproject-nix, pyproject-build-systems, uv2nix, nixpkgs-unstable }:
     let
       # due to the nixpkgs that we use in this flake being outdated, uv is also heavily outdated
       # we can instead use the binary release of uv provided by uv2nix for now
@@ -190,6 +193,13 @@
       "aarch64-darwin"
     ] (system:
       let
+        pkgs-unstable = import nixpkgs-unstable {
+          inherit system;
+        };
+        # for uv2nix, remove this once we updated to a newer version of nixpkgs
+        staleNixpkgsOverlay = final: prev: {
+          inherit (pkgs-unstable) replaceVars;
+        };
         pkgs = nixpkgs.lib.trivial.warnIf (llvm-backend.inputs.nixpkgs.rev
           != haskell-backend.inputs.nixpkgs.rev)
           "The version of nixpkgs in Haskell backend and LLVM backend has diverged!"
@@ -200,7 +210,10 @@
             config.allowBroken = system == "aarch64-darwin";
             overlays =
               [ (final: prev: { llvm-backend-build-type = "FastBuild"; }) ]
-              ++ allOverlays;
+              ++ allOverlays
+              ++ [
+                staleNixpkgsOverlay
+              ];
           };
 
       in rec {
