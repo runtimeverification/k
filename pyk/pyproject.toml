@@ -7,7 +7,7 @@ name = "kframework"
 version = "7.1.0"
 description = ""
 readme = "README.md"
-requires-python = "~=3.10"
+requires-python = ">=3.10"
 dependencies = [
     "coloredlogs>=15.0.1,<16",
     "cookiecutter>=2.6.0,<3",
