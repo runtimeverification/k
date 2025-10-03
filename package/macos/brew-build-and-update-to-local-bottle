@@ -4,6 +4,14 @@ version="$1"  ; shift
 root_url="$1" ; shift
 brew update
 brew tap runtimeverification/k "file://$(pwd)"
+
+# Modify the formula to skip Spotless for PR testing
+if [ -f "Formula/$package.rb" ]; then
+  # Replace spotless:apply with spotless:check -Dspotless.check.skip=true
+  sed -i "" -e 's/spotless:apply/spotless:check -Dspotless.check.skip=true/g' "Formula/$package.rb"
+  echo "Modified formula to skip Spotless formatting"
+fi
+
 MAVEN_OPTS="-Dspotless.check.skip=true" brew install $package --build-bottle -v
 brew bottle --json $package --root-url="$root_url/v$version/"
 cat *.bottle.json

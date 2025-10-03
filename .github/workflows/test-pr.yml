@@ -436,6 +436,12 @@ jobs:
           brew tap runtimeverification/k .
           brew audit --strict kframework
           
+          # Modify formula to skip Spotless for PR testing
+          if [ -f "Formula/kframework.rb" ]; then
+            sed -i "" -e 's/spotless:apply/spotless:check -Dspotless.check.skip=true/g' "Formula/kframework.rb"
+            echo "Modified formula to skip Spotless formatting"
+          fi
+          
           # Test formula installation from source
           MAVEN_OPTS="-Dspotless.check.skip=true" brew install --build-from-source kframework -v
           
