@@ -437,7 +437,7 @@ jobs:
           brew audit --strict kframework
           
           # Test formula installation from source
-          brew install --build-from-source kframework -v
+          MAVEN_OPTS="-Dspotless.check.skip=true" brew install --build-from-source kframework -v
           
           # Basic functionality test
           echo 'module TEST imports BOOL endmodule' > test.k
