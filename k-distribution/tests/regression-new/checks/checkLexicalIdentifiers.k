@@ -1,3 +1,4 @@
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 module CHECKLEXICALIDENTIFIERS-SYNTAX
 syntax lexical Foo1 = r"{Foo2}"
 syntax lexical Foo2 = r"{Foo3}"

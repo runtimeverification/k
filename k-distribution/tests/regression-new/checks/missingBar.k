@@ -7,4 +7,3 @@ module MISSINGBAR
   rule foo () => bar ()
 
 endmodule
-

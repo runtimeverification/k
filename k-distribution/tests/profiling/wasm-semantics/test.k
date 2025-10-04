@@ -2331,5 +2331,3 @@ module WASM-TEST
          <modIdx> IDX </modIdx>
          <moduleRegistry> ... REGNAME |-> IDX ...  </moduleRegistry>
 endmodule
-
-

@@ -77,11 +77,11 @@
     <scala.majorVersion>2.13</scala.majorVersion>
     <scala.minorVersion>13</scala.minorVersion>
     <scala.version>${scala.majorVersion}.${scala.minorVersion}</scala.version>
-    <spotless.version>2.41.1</spotless.version>
+    <spotless.version>2.43.0</spotless.version>
     <googleJavaFormat.version>1.18.1</googleJavaFormat.version>
     <scalafmt.version>3.7.17</scalafmt.version>
     <nativeDirs>**/src/main/native/**</nativeDirs>
-    <spotless.excludes>${nativeDirs},.idea/**,**/com/davekoelle/**,**/target/**,LICENSE.md,web/toc.md,web/k-web-theme/**,**/*-kompiled/*.kore,k-distribution/include/kframework/kore/*,**/.kompile-*/**,**/.git/**,result/**,pyk/**,nix/resources/**</spotless.excludes>
+    <spotless.excludes>${nativeDirs},.idea/**,**/com/davekoelle/**,**/target/**,LICENSE.md,web/toc.md,web/k-web-theme/**,**/*-kompiled/*.kore,k-distribution/include/kframework/kore/*,**/.kompile-*/**,**/.git/**,result/**,pyk/**,nix/resources/**,**/node_modules/**,**/ROADMAP.md</spotless.excludes>
   </properties>
 
   <dependencies>

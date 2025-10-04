@@ -5,4 +5,3 @@ module TEST
 
     syntax KItem ::= "foo"
 endmodule
-

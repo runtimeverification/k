@@ -23,4 +23,3 @@ module UNION
 
   configuration <k> $PGM:Pgm </k>
 endmodule
-

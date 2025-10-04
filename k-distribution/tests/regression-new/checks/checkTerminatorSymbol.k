@@ -1,3 +1,4 @@
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 module CHECKTERMINATORSYMBOL
   imports INT
   syntax KItem ::= foo()

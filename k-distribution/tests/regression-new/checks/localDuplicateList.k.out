@@ -1,5 +1,5 @@
-[Error] Compiler: Sort Foo previously declared as a user list at Source(localDuplicateList.k) and Location(8,18,8,33)
+[Error] Compiler: Sort Foo previously declared as a user list at Source(localDuplicateList.k) and Location(9,18,9,33)
 	Source(localDuplicateList.k)
-	Location(9,18,9,32)
-	9 |	  syntax Foo ::= List{Int, ";"}
-	  .	                 ^~~~~~~~~~~~~~
+	Location(10,18,10,32)
+	10 |	  syntax Foo ::= List{Int, ";"}
+	   .	                 ^~~~~~~~~~~~~~

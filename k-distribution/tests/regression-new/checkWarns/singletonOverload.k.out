@@ -1,11 +1,11 @@
 [Error] Compiler: Production has an `overload(_)` attribute but is not an overload of any other production.
 	Source(singletonOverload.k)
-	Location(8,19,8,53)
-	8 |	                | LVal "." Id [unused, overload(_.)]
+	Location(9,19,9,53)
+	9 |	                | LVal "." Id [unused, overload(_.)]
 	  .	                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Production has an `overload(_)` attribute but is not an overload of any other production.
 	Source(singletonOverload.k)
-	Location(10,19,10,54)
-	10 |	                | Exp  "." Id [unused, overload(_._)]
+	Location(11,19,11,54)
+	11 |	                | Exp  "." Id [unused, overload(_._)]
 	   .	                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Had 2 errors after compilation.
