@@ -344,6 +344,11 @@ jobs:
     needs: code-quality
     continue-on-error: true # Do not fail PRs due to MacOS builds at this time. Oct. 6, 2025
     steps:
+      - name: 'Set up Java 17'
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: 17
       - name: 'Check out code'
         uses: actions/checkout@v4
         with:
