@@ -1,5 +1,6 @@
 self-hosted-runner:
   labels:
+    - self-macos-latest
     - MacM1
     - normal
     - performance
