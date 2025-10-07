@@ -102,10 +102,11 @@ public class LLVMBackend extends KoreBackend {
     String llvmType =
         switch (options.llvmKompileType) {
           case "main", "search", "static", "library", "python", "c" -> options.llvmKompileType;
-          default -> throw KEMException.criticalError(
-              "Non-valid argument for --llvm-kompile-type: "
-                  + options.llvmKompileType
-                  + ". Expected [main|search|library|static|python|c]");
+          default ->
+              throw KEMException.criticalError(
+                  "Non-valid argument for --llvm-kompile-type: "
+                      + options.llvmKompileType
+                      + ". Expected [main|search|library|static|python|c]");
         };
 
     String llvmOutput = "interpreter";
@@ -238,11 +239,11 @@ public class LLVMBackend extends KoreBackend {
             getLocation(ex).orElse(null));
       }
 
-      case INTERNAL_ERROR -> throw KEMException.internalError(
-          ex.getMessage(), ex, getLocation(ex), getSource(ex));
+      case INTERNAL_ERROR ->
+          throw KEMException.internalError(ex.getMessage(), ex, getLocation(ex), getSource(ex));
 
-      case COMPILER_ERROR -> throw KEMException.compilerError(
-          ex.getMessage(), ex, getLocation(ex), getSource(ex));
+      case COMPILER_ERROR ->
+          throw KEMException.compilerError(ex.getMessage(), ex, getLocation(ex), getSource(ex));
     }
 
     throw KEMException.criticalError("Unhandled pattern matching exception", ex);
