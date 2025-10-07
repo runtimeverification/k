@@ -349,6 +349,7 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: 17
+
       - name: 'Check out code'
         uses: actions/checkout@v4
         with:
