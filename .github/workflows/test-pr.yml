@@ -439,8 +439,11 @@ jobs:
           # Test the Homebrew formula validation and basic functionality
           cd homebrew-k
           
+          # Remove any existing tap to avoid remote mismatch errors
+          brew untap runtimeverification/k 2>/dev/null || true
+          
           # Validate the formula syntax by installing it as a local tap
-          brew tap runtimeverification/k .
+          brew tap runtimeverification/k "file://$(pwd)"
           brew audit --strict kframework
           
           # Test formula installation from source
