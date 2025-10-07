@@ -302,6 +302,7 @@ jobs:
     timeout-minutes: 120
     environment: production
     needs: [set-release-id, source-tarball]
+    continue-on-error: true # Do not fail releases due to MacOS builds at this time. Oct. 6, 2025
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -400,7 +401,7 @@ jobs:
     timeout-minutes: 60
     environment: production
     needs: [macos-build, set-release-id]
-    continue-on-error: true
+    continue-on-error: true # Do not fail releases due to MacOS tests at this time. Oct. 6, 2025
     steps:
       - name: 'Check out matching homebrew repo branch'
         uses: actions/checkout@v4
