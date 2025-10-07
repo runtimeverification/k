@@ -254,8 +254,8 @@ public class TypeInferencer implements AutoCloseable {
           print(constraint.smt);
           println("))");
         }
-        case UNKNOWN -> throw KEMException.internalError(
-            "Could not solve sort constraints.", currentTerm);
+        case UNKNOWN ->
+            throw KEMException.internalError("Could not solve sort constraints.", currentTerm);
         case UNSATISFIABLE -> {
           println("(pop)");
           computeStatus();
@@ -866,8 +866,8 @@ public class TypeInferencer implements AutoCloseable {
         case "sat" -> Status.SATISFIABLE;
         case "unsat" -> Status.UNSATISFIABLE;
         case "unknown", "timeout" -> Status.UNKNOWN;
-        default -> throw KEMException.internalError(
-            "Unexpected result from z3: " + result, currentTerm);
+        default ->
+            throw KEMException.internalError("Unexpected result from z3: " + result, currentTerm);
       };
     } catch (IOException e) {
       throw KEMException.internalError("Could not read from z3 process", e, currentTerm);
