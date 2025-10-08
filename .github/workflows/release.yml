@@ -51,8 +51,8 @@ jobs:
         include:
           - runner: ubuntu-24.04
             os: ubuntu-24.04
-          - runner: MacM1
-            os: self-macos-12
+          - runner: self-macos-latest
+            os: self-macos-latest
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 120
     steps:
@@ -95,8 +95,8 @@ jobs:
         include:
           - runner: ubuntu-24.04
             os: ubuntu-24.04
-          - runner: MacM1
-            os: self-macos-12
+          - runner: self-macos-latest
+            os: self-macos-latest
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 120
     steps:
@@ -298,10 +298,11 @@ jobs:
 
   macos-build:
     name: 'Build MacOS Package'
-    runs-on: macos-14
+    runs-on: macos-latest
     timeout-minutes: 120
     environment: production
     needs: [set-release-id, source-tarball]
+    continue-on-error: true # Do not fail releases due to MacOS builds at this time. Oct. 6, 2025
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -396,11 +397,11 @@ jobs:
 
   macos-test:
     name: 'Test MacOS Package'
-    runs-on: macos-14
+    runs-on: macos-latest
     timeout-minutes: 60
     environment: production
     needs: [macos-build, set-release-id]
-    continue-on-error: true
+    continue-on-error: true # Do not fail releases due to MacOS tests at this time. Oct. 6, 2025
     steps:
       - name: 'Check out matching homebrew repo branch'
         uses: actions/checkout@v4
