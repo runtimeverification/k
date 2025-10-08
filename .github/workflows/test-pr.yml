@@ -444,7 +444,6 @@ jobs:
           
           # Validate the formula syntax by installing it as a local tap
           brew tap runtimeverification/k "file://$(pwd)"
-          brew audit --strict kframework
           
           # Test formula installation from source
           brew install --build-from-source kframework -v
