@@ -8,7 +8,7 @@
     llvm-backend.inputs.nixpkgs.follows = "nixpkgs";
 
     haskell-backend = {
-      url = "github:runtimeverification/haskell-backend/v0.1.138";
+      url = "github:runtimeverification/haskell-backend/v0.1.139";
       inputs.rv-nix-tools.follows = "rv-nix-tools";
       inputs.nixpkgs.follows = "nixpkgs";
     };
