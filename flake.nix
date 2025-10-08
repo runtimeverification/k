@@ -4,7 +4,7 @@
     rv-nix-tools.url = "github:runtimeverification/rv-nix-tools/854d4f05ea78547d46e807b414faad64cea10ae4";
     nixpkgs.follows = "rv-nix-tools/nixpkgs";
 
-    llvm-backend.url = "github:runtimeverification/llvm-backend/v0.1.137";
+    llvm-backend.url = "github:runtimeverification/llvm-backend/v0.1.138";
     llvm-backend.inputs.nixpkgs.follows = "nixpkgs";
 
     haskell-backend = {
@@ -15,13 +15,16 @@
 
     flake-utils.follows = "llvm-backend/utils";
 
-    uv2nix.url = "github:pyproject-nix/uv2nix/680e2f8e637bc79b84268949d2f2b2f5e5f1d81c";
-    # stale nixpkgs is missing the alias `lib.match` -> `builtins.match`
-    # therefore point uv2nix to a patched nixpkgs, which introduces this alias
-    # this is a temporary solution until nixpkgs us up-to-date again
-    uv2nix.inputs.nixpkgs.url = "github:runtimeverification/nixpkgs/libmatch";
+    uv2nix.url = "github:pyproject-nix/uv2nix/be511633027f67beee87ab499f7b16d0a2f7eceb";
+    # uv2nix requires a newer version of nixpkgs
+    # therefore, we pin uv2nix specifically to a newer version of nixpkgs
+    # until we replaced our stale version of nixpkgs with an upstream one as well
+    # but also uv2nix requires us to call it with `callPackage`, so we add stuff
+    # from the newer nixpkgs to our stale nixpkgs via an overlay
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    uv2nix.inputs.nixpkgs.follows = "nixpkgs-unstable";
     # uv2nix.inputs.nixpkgs.follows = "nixpkgs";
-    pyproject-build-systems.url = "github:pyproject-nix/build-system-pkgs/7dba6dbc73120e15b558754c26024f6c93015dd7";
+    pyproject-build-systems.url = "github:pyproject-nix/build-system-pkgs/dbfc0483b5952c6b86e36f8b3afeb9dde30ea4b5";
     pyproject-build-systems = {
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.uv2nix.follows = "uv2nix";
@@ -31,7 +34,7 @@
   };
 
   outputs = { self, nixpkgs, flake-utils, rv-nix-tools, haskell-backend
-    , llvm-backend, pyproject-nix, pyproject-build-systems , uv2nix }:
+    , llvm-backend, pyproject-nix, pyproject-build-systems, uv2nix, nixpkgs-unstable }:
     let
       # due to the nixpkgs that we use in this flake being outdated, uv is also heavily outdated
       # we can instead use the binary release of uv provided by uv2nix for now
@@ -39,12 +42,16 @@
         uv = uv2nix.packages.${final.system}.uv-bin;
       };
       pykOverlay = final: prev: rec {
+        pyk-pyproject = final.callPackage ./nix/pyk-pyproject {
+          inherit uv2nix;
+        };
+
         pyk-python310 = final.callPackage ./nix/pyk {
-          inherit pyproject-nix pyproject-build-systems uv2nix;
+          inherit pyproject-nix pyproject-build-systems pyk-pyproject;
           python = final."python310";
         };
         pyk-python311 = final.callPackage ./nix/pyk {
-          inherit pyproject-nix pyproject-build-systems uv2nix;
+          inherit pyproject-nix pyproject-build-systems pyk-pyproject;
           python = final."python311";
         };
         pyk = pyk-python310;
@@ -186,6 +193,13 @@
       "aarch64-darwin"
     ] (system:
       let
+        pkgs-unstable = import nixpkgs-unstable {
+          inherit system;
+        };
+        # for uv2nix, remove this once we updated to a newer version of nixpkgs
+        staleNixpkgsOverlay = final: prev: {
+          inherit (pkgs-unstable) replaceVars;
+        };
         pkgs = nixpkgs.lib.trivial.warnIf (llvm-backend.inputs.nixpkgs.rev
           != haskell-backend.inputs.nixpkgs.rev)
           "The version of nixpkgs in Haskell backend and LLVM backend has diverged!"
@@ -196,7 +210,10 @@
             config.allowBroken = system == "aarch64-darwin";
             overlays =
               [ (final: prev: { llvm-backend-build-type = "FastBuild"; }) ]
-              ++ allOverlays;
+              ++ allOverlays
+              ++ [
+                staleNixpkgsOverlay
+              ];
           };
 
       in rec {
@@ -204,7 +221,7 @@
           pkgs.lib.removeSuffix "\n" (builtins.readFile ./package/version);
 
         packages = rec {
-          inherit (pkgs) k k-lock pyk pyk-python310 pyk-python311 maven;
+          inherit (pkgs) k k-lock pyk pyk-python310 pyk-python311 pyk-pyproject maven;
 
           check-submodules = rv-nix-tools.lib.check-submodules pkgs {
             inherit llvm-backend haskell-backend;
@@ -248,6 +265,7 @@
                 substituteInPlace tests/regression-new/append/kparse-twice \
                   --replace '"$(dirname "$0")/../../../bin/kparse"' '"${k}/bin/kparse"'
               '';
+
               buildFlags = [
                 "K_BIN=${k}/bin"
                 "KLLVMLIB=${k}/lib/kllvm"
@@ -294,6 +312,11 @@
         };
         overlays.default = final: prev: {
           inherit (self.packages.${final.system}) k;
+        };
+        # this pyproject-nix overlay allows for overriding the python packages that are otherwise locked in `uv.lock`
+        # by using this overlay in dependant nix flakes, you ensure that nix overrides also override the python package         
+        overlays.pyk-pyproject = system: final: prev: {
+          inherit (self.packages.${system}.pyk-pyproject.lockFileOverlay final prev) kframework;
         };
 
         # deprecated flake overlay output, please use `overlays.default` or `overlays.pyk` instead

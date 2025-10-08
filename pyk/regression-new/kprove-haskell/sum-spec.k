@@ -13,4 +13,5 @@ module SUM-SPEC
       N >=Int 0
     ensures
       ?S ==Int S +Int N *Int C +Int (N -Int 1) *Int N /Int 2
+    [circularity]
 endmodule
