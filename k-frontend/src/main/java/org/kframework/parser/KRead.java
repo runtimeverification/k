@@ -56,10 +56,12 @@ public record KRead(
     return switch (inputMode) {
       case JSON, KAST -> deserialize(stringToParse, inputMode, source);
       case KORE -> new KoreParser(mod.sortAttributesFor()).parseString(stringToParse);
-      case PROGRAM -> def.parseSingleTerm(
-          mod, sort, startSymbolLocation, kem, files, stringToParse, source, partialParseDebug);
-      case RULE -> throw KEMException.internalError(
-          "Should have been handled directly by the kast front end: " + inputMode);
+      case PROGRAM ->
+          def.parseSingleTerm(
+              mod, sort, startSymbolLocation, kem, files, stringToParse, source, partialParseDebug);
+      case RULE ->
+          throw KEMException.internalError(
+              "Should have been handled directly by the kast front end: " + inputMode);
     };
   }
 
@@ -170,8 +172,9 @@ public record KRead(
     return switch (inputMode) {
       case JSON -> JsonParser.parse(stringToParse);
       case KAST -> KastParser.parse(stringToParse, source);
-      default -> throw KEMException.criticalError(
-          "Unsupported input mode for deserialization: " + inputMode);
+      default ->
+          throw KEMException.criticalError(
+              "Unsupported input mode for deserialization: " + inputMode);
     };
   }
 }

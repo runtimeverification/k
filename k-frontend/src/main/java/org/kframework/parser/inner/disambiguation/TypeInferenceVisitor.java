@@ -113,8 +113,8 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException
               inferencer.pop();
             }
             case UNKNOWN ->
-            // constraints coiuld not be solved, so error
-            throw KEMException.internalError("Could not solve sortconstraints.", t);
+                // constraints coiuld not be solved, so error
+                throw KEMException.internalError("Could not solve sortconstraints.", t);
             case UNSATISFIABLE -> {
               isMaximal = true;
               inferencer.pop();
@@ -127,14 +127,14 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException
         hasAnotherSolution =
             switch (inferencer.status()) {
               case SATISFIABLE ->
-              // found another solution, keep going
-              true;
+                  // found another solution, keep going
+                  true;
               case UNKNOWN ->
-              // constraints could not be solved, so error
-              throw KEMException.internalError("Could not solve sort constraints.", t);
+                  // constraints could not be solved, so error
+                  throw KEMException.internalError("Could not solve sort constraints.", t);
               case UNSATISFIABLE ->
-              // no more solutions, terminate loop
-              false;
+                  // no more solutions, terminate loop
+                  false;
             };
       } while (hasAnotherSolution);
       // remove all models that are not maximal
