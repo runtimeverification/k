@@ -734,8 +734,7 @@ public class TextDocumentSyncHandler {
                         }
                       } else if (mi
                           instanceof
-                          StringSentence
-                          ss) { // if we have caches, find the deepest term
+                          StringSentence ss) { // if we have caches, find the deepest term
                         String suffix =
                             ss.getType().equals(DefinitionParsing.configuration)
                                 ? "-" + RuleGrammarGenerator.CONFIG_CELLS

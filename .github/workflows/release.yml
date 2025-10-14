@@ -382,15 +382,6 @@ jobs:
           name: homebrew
           path: homebrew-k
 
-      - name: Delete Release
-        if: failure()
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            const { owner, repo } = context.repo
-            await github.rest.repos.deleteRelease({ owner, repo, release_id: ${{ needs.set-release-id.outputs.release_id }} })
-
     outputs:
       bottle_path: ${{ steps.build.outputs.path }}
       bottle_path_remote: ${{ steps.build.outputs.path_remote }}

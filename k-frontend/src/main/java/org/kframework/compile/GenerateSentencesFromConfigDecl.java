@@ -571,7 +571,7 @@ public class GenerateSentencesFromConfigDecl {
       switch (type) {
         case "Set":
           bagAtt = bagAtt.add(Att.IDEM(), "");
-          // fall through
+        // fall through
         case "Map":
           bagAtt = bagAtt.add(Att.COMM(), "");
           break;

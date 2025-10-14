@@ -272,8 +272,9 @@ public class JsonParser {
         }
         return new Production(klabel, immutable(params), sort, immutable(pItems), att);
       }
-      default -> throw KEMException.criticalError(
-          "Unexpected node found in KAST Json term: " + data.getString("node"));
+      default ->
+          throw KEMException.criticalError(
+              "Unexpected node found in KAST Json term: " + data.getString("node"));
     }
   }
 
@@ -306,8 +307,9 @@ public class JsonParser {
         String value = data.getString("value");
         return new Terminal(value);
       }
-      default -> throw KEMException.criticalError(
-          "Unexpected node found in ProductionItem Json term: " + data.getString("node"));
+      default ->
+          throw KEMException.criticalError(
+              "Unexpected node found in ProductionItem Json term: " + data.getString("node"));
     }
   }
 

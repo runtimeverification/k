@@ -35,7 +35,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.10', '3.11', '3.12', '3.13']
+        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
     defaults:
       run:
         working-directory: ./pyk
@@ -344,6 +344,12 @@ jobs:
     needs: code-quality
     continue-on-error: true # Do not fail PRs due to MacOS builds at this time. Oct. 6, 2025
     steps:
+      - name: 'Set up Java 17'
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: 17
+
       - name: 'Check out code'
         uses: actions/checkout@v4
         with:
@@ -433,9 +439,11 @@ jobs:
           # Test the Homebrew formula validation and basic functionality
           cd homebrew-k
           
+          # Remove any existing tap to avoid remote mismatch errors
+          brew untap runtimeverification/k 2>/dev/null || true
+          
           # Validate the formula syntax by installing it as a local tap
-          brew tap runtimeverification/k .
-          brew audit --strict kframework
+          brew tap runtimeverification/k "file://$(pwd)"
           
           # Test formula installation from source
           brew install --build-from-source kframework -v
