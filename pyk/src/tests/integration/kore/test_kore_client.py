@@ -971,6 +971,7 @@ START_BOOSTER_SERVER_TEST_DATA: Final[tuple[dict[str, Any], ...]] = (
     {},
     {'fallback_on': ['Aborted', 'Stuck']},
     {'interim_simplification': 3},
+    {'simplify_each': 5},
     {'no_post_exec_simpify': True},
     {'log_context': ['booster*']},
     {'log_context': ['kore*', '!detail']},
