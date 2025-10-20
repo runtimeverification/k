@@ -308,6 +308,7 @@ def cterm_symbolic(
     start_server: bool = True,
     fallback_on: Iterable[FallbackReason] | None = None,
     interim_simplification: int | None = None,
+    simplify_each: int | None = None,
     no_post_exec_simplify: bool = False,
 ) -> Iterator[CTermSymbolic]:
     if start_server:
@@ -327,6 +328,7 @@ def cterm_symbolic(
             log_axioms_file=log_axioms_file,
             fallback_on=fallback_on,
             interim_simplification=interim_simplification,
+            simplify_each=simplify_each,
             no_post_exec_simplify=no_post_exec_simplify,
         ) as server:
             with KoreClient('localhost', server.port, bug_report=bug_report, bug_report_id=id) as client:
