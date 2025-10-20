@@ -1267,6 +1267,7 @@ class BoosterServerArgs(KoreServerArgs, total=False):
     llvm_kompiled_dir: Required[str | Path]
     fallback_on: Iterable[str | FallbackReason] | None
     interim_simplification: int | None
+    simplify_each: int | None
     no_post_exec_simplify: bool | None
     log_context: Iterable[str] | None
     not_log_context: Iterable[str] | None
@@ -1280,6 +1281,7 @@ class BoosterServer(KoreServer):
 
     _fallback_on: list[FallbackReason] | None
     _interim_simplification: int | None
+    _simplify_each: int | None
     _no_post_exec_simplify: bool
     _log_context: list[str]
     _not_log_context: list[str]
@@ -1306,6 +1308,7 @@ class BoosterServer(KoreServer):
             self._fallback_on = None
 
         self._interim_simplification = args.get('interim_simplification')
+        self._simplify_each = args.get('simplify_each')
         self._no_post_exec_simplify = bool(args.get('no_post_exec_simplify'))
         self._log_context = list(args.get('log_context') or [])
         self._not_log_context = list(args.get('not_log_context') or [])
@@ -1326,6 +1329,10 @@ class BoosterServer(KoreServer):
 
         if self._interim_simplification and self._interim_simplification < 0:
             raise ValueError(f"'interim_simplification' must not be negative, got: {self._interim_simplification}")
+
+        if self._simplify_each and self._simplify_each < 0:
+            raise ValueError(f"'simplify_each' must not be negative, got: {self._simplify_each}")
+
         super()._validate()
 
     def _extra_args(self) -> list[str]:
@@ -1335,6 +1342,8 @@ class BoosterServer(KoreServer):
             res += ['--fallback-on', ','.join(reason.value for reason in self._fallback_on)]
         if self._interim_simplification is not None:
             res += ['--interim-simplification', str(self._interim_simplification)]
+        if self._simplify_each is not None:
+            res += ['--simplify-each', str(self._simplify_each)]
         if self._no_post_exec_simplify:
             res += ['--no-post-exec-simplify']
         res += [arg for glob in self._log_context for arg in ['--log-context', glob]]
@@ -1365,6 +1374,7 @@ def kore_server(
     llvm_definition_dir: Path | None = None,
     fallback_on: Iterable[str | FallbackReason] | None = None,
     interim_simplification: int | None = None,
+    simplify_each: int | None = None,
     no_post_exec_simplify: bool | None = None,
     # ---
     bug_report: BugReport | None = None,
@@ -1388,6 +1398,7 @@ def kore_server(
             'llvm_kompiled_dir': llvm_definition_dir,
             'fallback_on': fallback_on,
             'interim_simplification': interim_simplification,
+            'simplify_each': simplify_each,
             'no_post_exec_simplify': no_post_exec_simplify,
             **kore_args,
         }
