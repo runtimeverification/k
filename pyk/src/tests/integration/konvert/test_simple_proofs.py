@@ -212,6 +212,59 @@ BIDIRECTIONAL_TEST_DATA: Final = (
         KSequence([KApply('foo_SIMPLE-PROOFS_KItem'), KApply('foo-bar_SIMPLE-PROOFS_Baz')]),
     ),
     (
+        'kseq-with-k-head',
+        KSort('K'),
+        r'append{}(VarX : SortK{}, kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("1")), dotk{}()))',
+        KSequence(KVariable('X', 'K'), intToken(1)),
+    ),
+    (
+        'kseq-with-k-middle',
+        KSort('K'),
+        r"""
+        kseq{}(
+            inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("1")),
+            append{}(
+                VarX : SortK{},
+                kseq{}(
+                    inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("2")),
+                    dotk{}()
+                )
+            )
+        )
+        """,
+        KSequence(intToken(1), KVariable('X', 'K'), intToken(2)),
+    ),
+    (
+        'kseq-with-multiple-ks',
+        KSort('K'),
+        r"""
+        kseq{}(
+            inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("1")),
+            append{}(
+                VarX1 : SortK{},
+                append{}(
+                    VarX2 : SortK{},
+                    append{}(
+                        VarX3 : SortK{},
+                        kseq{}(
+                            inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("2")),
+                            VarX4 : SortK{}
+                        )
+                    )
+                )
+            )
+        )
+        """,
+        KSequence(
+            intToken(1),
+            KVariable('X1', 'K'),
+            KVariable('X2', 'K'),
+            KVariable('X3', 'K'),
+            intToken(2),
+            KVariable('X4', 'K'),
+        ),
+    ),
+    (
         'if-then-else',
         KSort('K'),
         r'Lblite{SortK{}}(VarC : SortBool{}, VarB1 : SortK{}, VarB2 : SortK {})',
