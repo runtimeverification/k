@@ -699,20 +699,20 @@ class TestKonvertSimpleProofs(KPrintTest):
         kast: KInner,
     ) -> None:
         # Given
-        kore = KoreParser(kore_text).pattern()
+        expected_kore = KoreParser(kore_text).pattern()
 
         # When
         actual_kore = kast_to_kore(definition, kast, sort=sort)
 
         # Then
-        assert actual_kore == kore
+        assert actual_kore == expected_kore
 
     @pytest.mark.parametrize(
         'test_id,sort,kore_text,kast',
         KAST_TO_KORE_TEST_DATA,
         ids=[test_id for test_id, *_ in KAST_TO_KORE_TEST_DATA],
     )
-    def test_kast_to_kore_frontend_comp(
+    def test_kast_to_kore_frontend(
         self,
         definition: KDefinition,
         test_id: str,
@@ -725,13 +725,13 @@ class TestKonvertSimpleProofs(KPrintTest):
             pytest.skip()
 
         # Given
-        frontend_kore = kprint.kast_to_kore(kast=kast, sort=sort, force_kast=True)
+        expected_kore = KoreParser(kore_text).pattern()
 
         # When
-        actual_kore = kast_to_kore(definition, kast, sort=sort)
+        actual_kore = kprint.kast_to_kore(kast=kast, sort=sort, force_kast=True)
 
         # Then
-        assert actual_kore == frontend_kore
+        assert actual_kore == expected_kore
 
     @pytest.mark.parametrize(
         'test_id,_sort,kore_text,kast',
