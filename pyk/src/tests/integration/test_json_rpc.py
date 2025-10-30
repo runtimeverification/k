@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+from collections.abc import Iterator
 import json
 from http.client import HTTPConnection
 from threading import Thread
 from time import sleep
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterator
 
 from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KSequence, KSort, KToken
@@ -154,6 +155,7 @@ class StatefulJsonRpcServer(JsonRpcServer):
         self.register_method('set_x', self.exec_set_x)
         self.register_method('set_y', self.exec_set_y)
         self.register_method('add', self.exec_add)
+        self.register_method('streaming', self.exec_streaming)
 
     def exec_get_x(self) -> int:
         return self.x
@@ -169,6 +171,11 @@ class StatefulJsonRpcServer(JsonRpcServer):
 
     def exec_add(self) -> int:
         return self.x + self.y
+    
+    def exec_streaming(self) -> Iterator[bytes]:
+        yield b'{'
+        yield b'"foo": "bar"'
+        yield b'}'
 
 
 class TestJsonRPCServer(KRunTest):
@@ -220,6 +227,9 @@ class TestJsonRPCServer(KRunTest):
         res = rpc_client.batch_request(('set_x', [1]), ('set_y', [2]), ('add', []))
         assert len(res) == 3
         assert res[2]['result'] == 1 + 2
+
+        res = rpc_client.request('streaming', [])
+        assert res == {'foo': 'bar'}
 
         server.shutdown()
         thread.join()
