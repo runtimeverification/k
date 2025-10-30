@@ -3,10 +3,11 @@ from __future__ import annotations
 import json
 import logging
 from abc import ABC, abstractmethod
+from collections.abc import Iterator
 from dataclasses import dataclass
 from functools import partial
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import TYPE_CHECKING, Iterator, NamedTuple
+from typing import TYPE_CHECKING, NamedTuple
 
 from typing_extensions import Protocol
 
@@ -138,8 +139,7 @@ class JsonRpcBatchResult(JsonRpcResult):
                 yield b','
             else:
                 first = False
-            for chunk in result.encode():
-                yield chunk
+            yield from result.encode()
         yield b']'
 
 

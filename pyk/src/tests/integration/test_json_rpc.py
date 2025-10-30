@@ -4,7 +4,7 @@ import json
 from http.client import HTTPConnection
 from threading import Thread
 from time import sleep
-from typing import TYPE_CHECKING, Iterator
+from typing import TYPE_CHECKING
 
 from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KSequence, KSort, KToken
@@ -15,6 +15,7 @@ from pyk.rpc.rpc import JsonRpcServer, ServeRpcOptions
 from pyk.testing import KRunTest
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
     from typing import Any
 
 
