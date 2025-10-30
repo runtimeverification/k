@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from functools import partial
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING, Iterator, NamedTuple
 
 from typing_extensions import Protocol
 
@@ -15,7 +15,7 @@ from ..cli.cli import Options
 if TYPE_CHECKING:
     from collections.abc import Callable
     from pathlib import Path
-    from typing import Any, Final, Iterator
+    from typing import Any, Final
 
 
 _LOGGER: Final = logging.getLogger(__name__)

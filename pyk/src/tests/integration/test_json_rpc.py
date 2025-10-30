@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-from collections.abc import Iterator
 from http.client import HTTPConnection
 from threading import Thread
 from time import sleep
