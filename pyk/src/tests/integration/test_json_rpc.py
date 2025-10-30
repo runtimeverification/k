@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from collections.abc import Iterator
 import json
+from collections.abc import Iterator
 from http.client import HTTPConnection
 from threading import Thread
 from time import sleep
@@ -171,7 +171,7 @@ class StatefulJsonRpcServer(JsonRpcServer):
 
     def exec_add(self) -> int:
         return self.x + self.y
-    
+
     def exec_streaming(self) -> Iterator[bytes]:
         yield b'{'
         yield b'"foo": "bar"'

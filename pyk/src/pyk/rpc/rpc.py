@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from functools import partial
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import TYPE_CHECKING, NamedTuple
+
 from typing_extensions import Protocol
 
 from ..cli.cli import Options
@@ -86,8 +87,7 @@ class JsonRpcBatchRequest(NamedTuple):
 class JsonRpcResult(ABC):
 
     @abstractmethod
-    def encode(self) -> Iterator[bytes]:
-        ...
+    def encode(self) -> Iterator[bytes]: ...
 
 
 @dataclass(frozen=True)
