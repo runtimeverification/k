@@ -4,6 +4,9 @@ if-then-else-no-sort-param-k
 kseq-empty
 kseq-singleton
 kseq-two-element
+kseq-with-k-head
+kseq-with-k-middle
+kseq-with-multiple-ks
 ksequence-duo-var-1
 ksequence-duo-var-2
 ksequence-empty

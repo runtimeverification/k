@@ -30,6 +30,7 @@ from .inner import (
     top_down,
 )
 from .kast import kast_term
+from .prelude.k import K_ITEM, K
 from .rewrite import indexed_rewrite
 
 if TYPE_CHECKING:
@@ -1460,13 +1461,15 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
                         for t, a in zip(prod.argument_sorts, term.args, strict=True):
                             if type(a) is KVariable:
                                 occurrences[a.name].append(a.let_sort(t))
-            elif isinstance(term, KSequence) and term.arity > 0:
-                for a in term.items[0:-1]:
-                    if type(a) is KVariable:
-                        occurrences[a.name].append(a.let_sort(KSort('KItem')))
-                last_a = term.items[-1]
-                if type(last_a) is KVariable:
-                    occurrences[last_a.name].append(last_a.let_sort(KSort('K')))
+            elif isinstance(term, KSequence):
+                for i, item in enumerate(term.items):
+                    if isinstance(item, KVariable):
+                        if item.sort is not None:
+                            occurrences[item.name].append(item)
+                        elif i == term.arity - 1:
+                            occurrences[item.name].append(item.let_sort(K))
+                        else:
+                            occurrences[item.name].append(item.let_sort(K_ITEM))
             return (term, occurrences)
 
         (new_term, var_occurrences) = bottom_up_with_summary(transform, kast)
