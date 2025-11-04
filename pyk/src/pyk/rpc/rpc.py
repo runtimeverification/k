@@ -3,10 +3,12 @@ from __future__ import annotations
 import json
 import logging
 from abc import ABC, abstractmethod
+from collections.abc import Iterator
 from dataclasses import dataclass
 from functools import partial
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import TYPE_CHECKING, NamedTuple
+
 from typing_extensions import Protocol
 
 from ..cli.cli import Options
@@ -14,7 +16,7 @@ from ..cli.cli import Options
 if TYPE_CHECKING:
     from collections.abc import Callable
     from pathlib import Path
-    from typing import Any, Final, Iterator
+    from typing import Any, Final
 
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -86,8 +88,7 @@ class JsonRpcBatchRequest(NamedTuple):
 class JsonRpcResult(ABC):
 
     @abstractmethod
-    def encode(self) -> Iterator[bytes]:
-        ...
+    def encode(self) -> Iterator[bytes]: ...
 
 
 @dataclass(frozen=True)
@@ -138,8 +139,7 @@ class JsonRpcBatchResult(JsonRpcResult):
                 yield b','
             else:
                 first = False
-            for chunk in result.encode():
-                yield chunk
+            yield from result.encode()
         yield b']'
 
 
