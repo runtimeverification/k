@@ -212,6 +212,59 @@ BIDIRECTIONAL_TEST_DATA: Final = (
         KSequence([KApply('foo_SIMPLE-PROOFS_KItem'), KApply('foo-bar_SIMPLE-PROOFS_Baz')]),
     ),
     (
+        'kseq-with-k-head',
+        KSort('K'),
+        r'append{}(VarX : SortK{}, kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("1")), dotk{}()))',
+        KSequence(KVariable('X', 'K'), intToken(1)),
+    ),
+    (
+        'kseq-with-k-middle',
+        KSort('K'),
+        r"""
+        kseq{}(
+            inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("1")),
+            append{}(
+                VarX : SortK{},
+                kseq{}(
+                    inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("2")),
+                    dotk{}()
+                )
+            )
+        )
+        """,
+        KSequence(intToken(1), KVariable('X', 'K'), intToken(2)),
+    ),
+    (
+        'kseq-with-multiple-ks',
+        KSort('K'),
+        r"""
+        kseq{}(
+            inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("1")),
+            append{}(
+                VarX1 : SortK{},
+                append{}(
+                    VarX2 : SortK{},
+                    append{}(
+                        VarX3 : SortK{},
+                        kseq{}(
+                            inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("2")),
+                            VarX4 : SortK{}
+                        )
+                    )
+                )
+            )
+        )
+        """,
+        KSequence(
+            intToken(1),
+            KVariable('X1', 'K'),
+            KVariable('X2', 'K'),
+            KVariable('X3', 'K'),
+            intToken(2),
+            KVariable('X4', 'K'),
+        ),
+    ),
+    (
         'if-then-else',
         KSort('K'),
         r'Lblite{SortK{}}(VarC : SortBool{}, VarB1 : SortK{}, VarB2 : SortK {})',
@@ -699,20 +752,20 @@ class TestKonvertSimpleProofs(KPrintTest):
         kast: KInner,
     ) -> None:
         # Given
-        kore = KoreParser(kore_text).pattern()
+        expected_kore = KoreParser(kore_text).pattern()
 
         # When
         actual_kore = kast_to_kore(definition, kast, sort=sort)
 
         # Then
-        assert actual_kore == kore
+        assert actual_kore == expected_kore
 
     @pytest.mark.parametrize(
         'test_id,sort,kore_text,kast',
         KAST_TO_KORE_TEST_DATA,
         ids=[test_id for test_id, *_ in KAST_TO_KORE_TEST_DATA],
     )
-    def test_kast_to_kore_frontend_comp(
+    def test_kast_to_kore_frontend(
         self,
         definition: KDefinition,
         test_id: str,
@@ -725,13 +778,13 @@ class TestKonvertSimpleProofs(KPrintTest):
             pytest.skip()
 
         # Given
-        frontend_kore = kprint.kast_to_kore(kast=kast, sort=sort, force_kast=True)
+        expected_kore = KoreParser(kore_text).pattern()
 
         # When
-        actual_kore = kast_to_kore(definition, kast, sort=sort)
+        actual_kore = kprint.kast_to_kore(kast=kast, sort=sort, force_kast=True)
 
         # Then
-        assert actual_kore == frontend_kore
+        assert actual_kore == expected_kore
 
     @pytest.mark.parametrize(
         'test_id,_sort,kore_text,kast',

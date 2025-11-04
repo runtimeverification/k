@@ -82,24 +82,26 @@ def kast_to_kore(definition: KDefinition, kast: KInner, sort: KSort | None = Non
     kast = definition.sort_vars(kast, sort)
     kast = definition.add_cell_map_items(kast)
     kast = definition.add_sort_params(kast)
-    kast = _replace_ksequence_by_kapply(kast)
+    kast = _replace_ksequence_by_kapply(definition, kast)
     kast = _add_sort_injections(definition, kast, sort)
     kore = _kast_to_kore(kast)
     return kore
 
 
-def _replace_ksequence_by_kapply(term: KInner) -> KInner:
+def _replace_ksequence_by_kapply(definition: KDefinition, term: KInner) -> KInner:
     dotk = KApply('dotk')
     kseq = KLabel('kseq')
+    append = KLabel('append')
 
-    def transform(term: KInner) -> KInner:
-        match term:
-            case KSequence(items):
-                return transform_items(items)
-            case _:
-                return term
+    def kapply(x: KInner, y: KInner) -> KApply:
+        return append(x, y) if definition.sort_strict(x) == K else kseq(x, y)
 
-    def transform_items(items: tuple[KInner, ...]) -> KInner:
+    def ksequence_to_kapply(term: KInner) -> KInner:
+        if not isinstance(term, KSequence):
+            return term
+
+        items = term.items
+
         if not items:
             return dotk
 
@@ -107,16 +109,16 @@ def _replace_ksequence_by_kapply(term: KInner) -> KInner:
         args: tuple[KInner, ...]
 
         last = items[-1]
-        if isinstance(last, KVariable) and last.sort == K:
+        if definition.sort_strict(last) == K:
             unit = last
             args = items[:-1]
         else:
             unit = dotk
             args = items
 
-        return reduce(lambda x, y: kseq(y, x), reversed(args), unit)
+        return reduce(lambda x, y: kapply(y, x), reversed(args), unit)
 
-    return top_down(transform, term)
+    return top_down(ksequence_to_kapply, term)
 
 
 def _add_sort_injections(definition: KDefinition, term: KInner, sort: KSort) -> KInner:
@@ -179,6 +181,8 @@ def _argument_sorts(definition: KDefinition, term: KInner) -> tuple[KSort, ...]:
                     return (K_ITEM, K)
                 case 'dotk':
                     return ()
+                case 'append':
+                    return (K, K)
                 case '#Forall' | '#Exists':
                     _, argument_sorts = definition.resolve_sorts(term.label)
                     _, argument_sort = argument_sorts
@@ -202,7 +206,7 @@ def _let_arguments(term: KInner, args: list[KInner]) -> KInner:
 def _inject(definition: KDefinition, term: KInner, sort: KSort) -> KInner:
     actual_sort: KSort
     match term:
-        case KApply(KLabel('kseq' | 'dotk')):  # Special case: pseudo-labels
+        case KApply(KLabel('kseq' | 'dotk' | 'append')):  # Special case: pseudo-labels
             actual_sort = K
         case _:
             actual_sort = definition.sort_strict(term)
@@ -437,7 +441,7 @@ def _kapply_to_pattern(kapply: KApply, patterns: list[Pattern]) -> Pattern:
 
 
 def _label_to_kore(label: str) -> str:
-    if label in ['inj', 'kseq', 'dotk']:  # pseudo-labels introduced during KAST-to-KORE tranformation
+    if label in ['inj', 'kseq', 'dotk', 'append']:  # pseudo-labels introduced during KAST-to-KORE tranformation
         return label
 
     if label in ML_PATTERN_LABELS:
