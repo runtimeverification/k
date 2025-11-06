@@ -109,7 +109,7 @@ class JsonRpcError(JsonRpcResult):
         }
 
     def encode(self) -> Iterator[bytes]:
-        yield json.dumps(self.wrap_response()).encode('ascii')
+        yield json.dumps(self.wrap_response()).encode('utf-8')
 
 
 @dataclass(frozen=True)
@@ -118,13 +118,13 @@ class JsonRpcSuccess(JsonRpcResult):
     id: Any
 
     def encode(self) -> Iterator[bytes]:
-        yield f'{{"jsonrpc":"2.0", "id": {self.id}, "result": '.encode('ascii')
+        yield f'{{"jsonrpc":"2.0", "id": {self.id}, "result": '.encode('utf-8')
         if isinstance(self.payload, Iterator):
             for chunk in self.payload:
-                yield chunk.encode('ascii')
+                yield chunk
         else:
-            yield json.dumps(self.payload).encode('ascii')
-        yield b'}'
+            yield json.dumps(self.payload).encode('utf-8')
+        yield '}'.encode('utf-8')
 
 
 @dataclass(frozen=True)
