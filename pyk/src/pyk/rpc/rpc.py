@@ -132,15 +132,15 @@ class JsonRpcBatchResult(JsonRpcResult):
     results: tuple[JsonRpcError | JsonRpcSuccess, ...]
 
     def encode(self) -> Iterator[bytes]:
-        yield b'['
+        yield '['.encode('utf-8')
         first = True
         for result in self.results:
             if not first:
-                yield b','
+                yield ','.encode('utf-8')
             else:
                 first = False
             yield from result.encode()
-        yield b']'
+        yield ']'.encode('utf-8')
 
 
 class JsonRpcRequestHandler(BaseHTTPRequestHandler):

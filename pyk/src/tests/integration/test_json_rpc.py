@@ -231,6 +231,12 @@ class TestJsonRPCServer(KRunTest):
         res = rpc_client.request('streaming', [])
         assert res == {'foo': 'bar'}
 
+        res = rpc_client.batch_request(('streaming', []), ('set_x', [10]), ('streaming', []))
+        assert len(res) == 3
+        assert res[0]['result'] == {'foo': 'bar'}
+        assert res[1]['result'] == 10
+        assert res[2]['result'] == {'foo': 'bar'}
+
         server.shutdown()
         thread.join()
 
