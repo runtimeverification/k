@@ -118,13 +118,12 @@ class JsonRpcSuccess(JsonRpcResult):
     id: Any
 
     def encode(self) -> Iterator[bytes]:
-        yield f'{{"jsonrpc":"2.0", "id": {self.id}, "result": '.encode('utf-8')
+        yield f'{{"jsonrpc":"2.0", "id": {self.id}, "result": '.encode()
         if isinstance(self.payload, Iterator):
-            for chunk in self.payload:
-                yield chunk
+            yield from self.payload
         else:
             yield json.dumps(self.payload).encode('utf-8')
-        yield '}'.encode('utf-8')
+        yield b'}'
 
 
 @dataclass(frozen=True)
@@ -132,15 +131,15 @@ class JsonRpcBatchResult(JsonRpcResult):
     results: tuple[JsonRpcError | JsonRpcSuccess, ...]
 
     def encode(self) -> Iterator[bytes]:
-        yield '['.encode('utf-8')
+        yield b'['
         first = True
         for result in self.results:
             if not first:
-                yield ','.encode('utf-8')
+                yield b','
             else:
                 first = False
             yield from result.encode()
-        yield ']'.encode('utf-8')
+        yield b']'
 
 
 class JsonRpcRequestHandler(BaseHTTPRequestHandler):
