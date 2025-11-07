@@ -118,8 +118,8 @@ class JsonRpcSuccess(JsonRpcResult):
     id: Any
 
     def encode(self) -> Iterator[bytes]:
-        id_encoded = json.dumps(self.id).encode('utf-8')
-        version_encoded = json.dumps(JsonRpcServer.JSONRPC_VERSION).encode('utf-8')
+        id_encoded = json.dumps(self.id)
+        version_encoded = json.dumps(JsonRpcServer.JSONRPC_VERSION)
         yield f'{{"jsonrpc": {version_encoded}, "id": {id_encoded}, "result": '.encode()
         if isinstance(self.payload, Iterator):
             yield from self.payload
