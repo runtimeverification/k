@@ -386,7 +386,7 @@ def _mangle_app(definition: KDefinition, sort: Sort, app: KApply) -> tuple[Patte
 
     ksorts = _argument_sorts(definition, app)
     assert len(ksorts) == len(app.args)
-    var_names = [f'F_ARG_{i}' for i in range(1, 42)]  # arbitrary limit
+    var_names = [f'F-ARG-{i}' for i in range(1, 42)]  # arbitrary limit
     assert len(ksorts) <= len(var_names)  # fail if too many arguments
 
     preds = [
