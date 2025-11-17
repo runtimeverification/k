@@ -339,15 +339,15 @@ def krule_to_kore(definition: KDefinition, krule: KRule) -> Axiom:
         if not kast_lhs_body.args:
             kore_fct_antecedent: Pattern = kore_requires_antecedent
         else:
-            arg_predicates, arg_vars = _mk_arg_vars(definition, top_level_kore_sort, kast_lhs_body.args)
+            kore_arg_predicates, new_kore_app = _mangle_app(definition, top_level_kore_sort, kast_lhs_body)
             kore_fct_antecedent = And(
                 axiom_sort,
                 (
                     kore_requires_antecedent,
-                    arg_predicates,
+                    kore_arg_predicates,
                 ),
             )
-            kore_lhs_body = kast_to_kore(definition, KApply(kast_lhs_body.label, arg_vars), sort=top_level_k_sort)
+            kore_lhs_body = new_kore_app
 
         kore_ensures = Top(top_level_kore_sort)
         if kast_rhs_constraints:
@@ -382,21 +382,32 @@ def krule_to_kore(definition: KDefinition, krule: KRule) -> Axiom:
     return Axiom(vars=axiom_vars, pattern=kore_axiom, attrs=attrs)
 
 
-def _mk_arg_vars(definition: KDefinition, sort: Sort, args: tuple[KInner, ...]) -> tuple[Pattern, list[KInner]]:
+def _mangle_app(definition: KDefinition, sort: Sort, app: KApply) -> tuple[Pattern, Pattern]:
 
-    def sort_of(arg: KInner) -> Sort:
-        return sort  # fixme!
-
-    def ksort_of(arg: KInner) -> KSort:
-        raise Exception('FIXME')
+    ksorts = _argument_sorts(definition, app)
+    assert len(ksorts) == len(app.args)
+    var_names = [f'F_ARG_{i}' for i in range(1, 42)]  # arbitrary limit
+    assert len(ksorts) <= len(var_names)  # fail if too many arguments
 
     preds = [
-        In(sort_of(arg), sort, EVar(name, sort_of(arg)), kast_to_kore(definition, arg, ksort_of(arg)))
-        for (arg, name) in zip(args, [f'var_{i}' for i in range(1, 43)], strict=False)
+        In(
+            _ksort_to_kore(ksort),
+            sort,
+            EVar(name, _ksort_to_kore(ksort)),
+            kast_to_kore(definition, arg, ksort),
+        )
+        for (arg, ksort, name) in zip(app.args, ksorts, var_names, strict=False)
     ]
 
-    # fixme!
-    return (Top(sort), [])
+    new_app = kast_to_kore(
+        definition,
+        KApply(
+            app.label,
+            [KVariable(name, sort) for (sort, name) in zip(ksorts, var_names, strict=False)],
+        ),
+    )
+
+    return (And(sort, preds), new_app)
 
 
 def kflatmodule_to_kore(definition: KDefinition, kflatmodule: KFlatModule) -> Module:
