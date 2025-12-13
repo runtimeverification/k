@@ -3,10 +3,11 @@ from __future__ import annotations
 import json
 import logging
 from abc import ABC, abstractmethod
+from collections.abc import Iterator
 from dataclasses import dataclass
 from functools import partial
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import TYPE_CHECKING, Any, Final, NamedTuple
+from typing import TYPE_CHECKING, NamedTuple
 
 from typing_extensions import Protocol
 
@@ -15,6 +16,7 @@ from ..cli.cli import Options
 if TYPE_CHECKING:
     from collections.abc import Callable
     from pathlib import Path
+    from typing import Any, Final
 
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -86,7 +88,7 @@ class JsonRpcBatchRequest(NamedTuple):
 class JsonRpcResult(ABC):
 
     @abstractmethod
-    def encode(self) -> bytes: ...
+    def encode(self) -> Iterator[bytes]: ...
 
 
 @dataclass(frozen=True)
@@ -96,7 +98,7 @@ class JsonRpcError(JsonRpcResult):
     message: str
     id: str | int | None
 
-    def to_json(self) -> dict[str, Any]:
+    def wrap_response(self) -> dict[str, Any]:
         return {
             'jsonrpc': JsonRpcServer.JSONRPC_VERSION,
             'error': {
@@ -106,8 +108,8 @@ class JsonRpcError(JsonRpcResult):
             'id': self.id,
         }
 
-    def encode(self) -> bytes:
-        return json.dumps(self.to_json()).encode('ascii')
+    def encode(self) -> Iterator[bytes]:
+        yield json.dumps(self.wrap_response()).encode('utf-8')
 
 
 @dataclass(frozen=True)
@@ -115,23 +117,31 @@ class JsonRpcSuccess(JsonRpcResult):
     payload: Any
     id: Any
 
-    def to_json(self) -> dict[str, Any]:
-        return {
-            'jsonrpc': JsonRpcServer.JSONRPC_VERSION,
-            'result': self.payload,
-            'id': self.id,
-        }
-
-    def encode(self) -> bytes:
-        return json.dumps(self.to_json()).encode('ascii')
+    def encode(self) -> Iterator[bytes]:
+        id_encoded = json.dumps(self.id)
+        version_encoded = json.dumps(JsonRpcServer.JSONRPC_VERSION)
+        yield f'{{"jsonrpc": {version_encoded}, "id": {id_encoded}, "result": '.encode()
+        if isinstance(self.payload, Iterator):
+            yield from self.payload
+        else:
+            yield json.dumps(self.payload).encode('utf-8')
+        yield b'}'
 
 
 @dataclass(frozen=True)
 class JsonRpcBatchResult(JsonRpcResult):
     results: tuple[JsonRpcError | JsonRpcSuccess, ...]
 
-    def encode(self) -> bytes:
-        return json.dumps([result.to_json() for result in self.results]).encode('ascii')
+    def encode(self) -> Iterator[bytes]:
+        yield b'['
+        first = True
+        for result in self.results:
+            if not first:
+                yield b','
+            else:
+                first = False
+            yield from result.encode()
+        yield b']'
 
 
 class JsonRpcRequestHandler(BaseHTTPRequestHandler):
@@ -143,8 +153,10 @@ class JsonRpcRequestHandler(BaseHTTPRequestHandler):
 
     def _send_response(self, response: JsonRpcResult) -> None:
         self.send_response_headers()
-        response_bytes = response.encode()
-        self.wfile.write(response_bytes)
+        response_body = response.encode()
+        for chunk in response_body:
+            self.wfile.write(chunk)
+        self.wfile.flush()
 
     def send_response_headers(self) -> None:
         self.send_response(200)

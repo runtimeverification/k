@@ -93,6 +93,10 @@ def _pattern_to_kast(pattern: Pattern, terms: list[KInner]) -> KInner:
                     _, _ = terms
                     return KSequence(terms)
 
+                elif symbol == 'append':
+                    _, _ = terms
+                    return KSequence(terms)
+
                 else:
                     klabel = KLabel(unmunge(symbol[3:]))
                     return KApply(klabel, terms)

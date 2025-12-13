@@ -15,6 +15,7 @@ from pyk.rpc.rpc import JsonRpcServer, ServeRpcOptions
 from pyk.testing import KRunTest
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
     from typing import Any
 
 
@@ -154,6 +155,7 @@ class StatefulJsonRpcServer(JsonRpcServer):
         self.register_method('set_x', self.exec_set_x)
         self.register_method('set_y', self.exec_set_y)
         self.register_method('add', self.exec_add)
+        self.register_method('streaming', self.exec_streaming)
 
     def exec_get_x(self) -> int:
         return self.x
@@ -169,6 +171,11 @@ class StatefulJsonRpcServer(JsonRpcServer):
 
     def exec_add(self) -> int:
         return self.x + self.y
+
+    def exec_streaming(self) -> Iterator[bytes]:
+        yield b'{'
+        yield b'"foo": "bar"'
+        yield b'}'
 
 
 class TestJsonRPCServer(KRunTest):
@@ -220,6 +227,15 @@ class TestJsonRPCServer(KRunTest):
         res = rpc_client.batch_request(('set_x', [1]), ('set_y', [2]), ('add', []))
         assert len(res) == 3
         assert res[2]['result'] == 1 + 2
+
+        res = rpc_client.request('streaming', [])
+        assert res == {'foo': 'bar'}
+
+        res = rpc_client.batch_request(('streaming', []), ('set_x', [10]), ('streaming', []))
+        assert len(res) == 3
+        assert res[0]['result'] == {'foo': 'bar'}
+        assert res[1]['result'] == None
+        assert res[2]['result'] == {'foo': 'bar'}
 
         server.shutdown()
         thread.join()
