@@ -71,7 +71,7 @@ jobs:
 
       - name: 'Install Cachix'
         if: ${{ !startsWith(matrix.os, 'self') }}
-        uses: cachix/cachix-action@v14
+        uses: cachix/cachix-action@v16
         with:
           name: k-framework-binary
 
@@ -115,7 +115,7 @@ jobs:
 
       - name: 'Install Cachix'
         if: ${{ !startsWith(matrix.os, 'self') }}
-        uses: cachix/cachix-action@v14
+        uses: cachix/cachix-action@v16
         with:
           name: k-framework-binary
 

@@ -39,7 +39,7 @@ jobs:
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
 
       - name: 'Install Cachix'
-        uses: cachix/cachix-action@v14
+        uses: cachix/cachix-action@v16
         with:
           name: k-framework
           authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
