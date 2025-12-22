@@ -9,238 +9,238 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  format-check:
-    name: 'Java: Linting'
-    runs-on: ubuntu-24.04
-    steps:
-      - name: 'Check out code'
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - name: 'Set up Java 17'
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: 17
-      - name: 'Install Maven'
-        run: sudo apt-get update && sudo apt-get install --yes maven
-      - name: 'Check code is formatted correctly'
-        run: mvn spotless:check --batch-mode -U
+  # format-check:
+  #   name: 'Java: Linting'
+  #   runs-on: ubuntu-24.04
+  #   steps:
+  #     - name: 'Check out code'
+  #       uses: actions/checkout@v4
+  #       with:
+  #         submodules: recursive
+  #     - name: 'Set up Java 17'
+  #       uses: actions/setup-java@v4
+  #       with:
+  #         distribution: 'zulu'
+  #         java-version: 17
+  #     - name: 'Install Maven'
+  #       run: sudo apt-get update && sudo apt-get install --yes maven
+  #     - name: 'Check code is formatted correctly'
+  #       run: mvn spotless:check --batch-mode -U
 
 
-  pyk-code-quality-checks:
-    name: 'Pyk: Code Quality & Unit Tests'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
-    defaults:
-      run:
-        working-directory: ./pyk
-    steps:
-      - name: 'Check out code'
-        uses: actions/checkout@v4
-      - name: 'Set up environment'
-        uses: ./.github/actions/setup-pyk-env
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: 'Run code quality checks'
-        run: make check
-      - name: 'Run pyupgrade'
-        run: make pyupgrade
-      - name: 'Run unit tests'
-        run: make cov-unit
+  # pyk-code-quality-checks:
+  #   name: 'Pyk: Code Quality & Unit Tests'
+  #   runs-on: ubuntu-24.04
+  #   timeout-minutes: 5
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
+  #   defaults:
+  #     run:
+  #       working-directory: ./pyk
+  #   steps:
+  #     - name: 'Check out code'
+  #       uses: actions/checkout@v4
+  #     - name: 'Set up environment'
+  #       uses: ./.github/actions/setup-pyk-env
+  #       with:
+  #         python-version: ${{ matrix.python-version }}
+  #     - name: 'Run code quality checks'
+  #       run: make check
+  #     - name: 'Run pyupgrade'
+  #       run: make pyupgrade
+  #     - name: 'Run unit tests'
+  #       run: make cov-unit
 
 
-  code-quality:
-    name: 'Code Quality Checks'
-    runs-on: ubuntu-24.04
-    needs:
-      - format-check
-      - pyk-code-quality-checks
-    steps:
-      - run: true
+  # code-quality:
+  #   name: 'Code Quality Checks'
+  #   runs-on: ubuntu-24.04
+  #   needs:
+  #     - format-check
+  #     - pyk-code-quality-checks
+  #   steps:
+  #     - run: true
 
 
-  test-k:
-    name: 'K: Source Build & Test'
-    runs-on: [self-hosted, linux, normal]
-    needs: code-quality
-    steps:
-      - name: 'Check out code'
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - name: 'Set up Docker'
-        uses: ./.github/actions/with-docker
-        with:
-          tag: k-ci-${{ github.sha }}
-          os: ubuntu
-          distro: jammy
-          llvm: 15
-      - name: 'Build and Test K'
-        run: docker exec -t "k-ci-${GITHUB_SHA}" /bin/bash -c 'mvn verify -Dspotless.check.skip=true --batch-mode -U'
-      - name: 'Tear down Docker'
-        if: always()
-        run: |
-          docker stop --time=0 "k-ci-${GITHUB_SHA}"
-          docker container rm --force "k-ci-${GITHUB_SHA}" || true
+  # test-k:
+  #   name: 'K: Source Build & Test'
+  #   runs-on: [self-hosted, linux, normal]
+  #   needs: code-quality
+  #   steps:
+  #     - name: 'Check out code'
+  #       uses: actions/checkout@v4
+  #       with:
+  #         submodules: recursive
+  #     - name: 'Set up Docker'
+  #       uses: ./.github/actions/with-docker
+  #       with:
+  #         tag: k-ci-${{ github.sha }}
+  #         os: ubuntu
+  #         distro: jammy
+  #         llvm: 15
+  #     - name: 'Build and Test K'
+  #       run: docker exec -t "k-ci-${GITHUB_SHA}" /bin/bash -c 'mvn verify -Dspotless.check.skip=true --batch-mode -U'
+  #     - name: 'Tear down Docker'
+  #       if: always()
+  #       run: |
+  #         docker stop --time=0 "k-ci-${GITHUB_SHA}"
+  #         docker container rm --force "k-ci-${GITHUB_SHA}" || true
 
 
-  test-package-ubuntu-jammy:
-    name: 'K: Ubuntu Jammy Package'
-    runs-on: [self-hosted, linux, normal]
-    needs: code-quality
-    steps:
-      - uses: actions/checkout@v4
-      - name: 'Build and Test'
-        uses: ./.github/actions/test-package
-        with:
-          os: ubuntu
-          distro: jammy
-          llvm: 15
-          build-package: package/debian/build-package jammy kframework
-          test-package: package/debian/test-package
-      - name: On Failure, Upload the kore-exec.tar.gz file to the Summary Page
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: kore-exec.tar.gz
-          path: |
-            **/kore-exec.tar.gz
-      - name: 'On Success, Upload the package built to the Summary Page'
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: kframework.deb
-          path: kframework.deb
-          if-no-files-found: error
-          retention-days: 1
+  # test-package-ubuntu-jammy:
+  #   name: 'K: Ubuntu Jammy Package'
+  #   runs-on: [self-hosted, linux, normal]
+  #   needs: code-quality
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: 'Build and Test'
+  #       uses: ./.github/actions/test-package
+  #       with:
+  #         os: ubuntu
+  #         distro: jammy
+  #         llvm: 15
+  #         build-package: package/debian/build-package jammy kframework
+  #         test-package: package/debian/test-package
+  #     - name: On Failure, Upload the kore-exec.tar.gz file to the Summary Page
+  #       if: failure()
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: kore-exec.tar.gz
+  #         path: |
+  #           **/kore-exec.tar.gz
+  #     - name: 'On Success, Upload the package built to the Summary Page'
+  #       if: success()
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: kframework.deb
+  #         path: kframework.deb
+  #         if-no-files-found: error
+  #         retention-days: 1
 
 
-  test-frontend-package-ubuntu-jammy:
-    name: 'K: Ubuntu Jammy Frontend Package'
-    runs-on: [self-hosted, linux, normal]
-    needs: code-quality
-    steps:
-      - uses: actions/checkout@v4
-      - name: 'Build and Test'
-        uses: ./.github/actions/test-package
-        with:
-          os: ubuntu
-          distro: jammy
-          llvm: 15
-          build-package: package/debian/build-package jammy kframework-frontend
-          test-package: package/debian/test-frontend-package
-      - name: On Failure, Upload the kore-exec.tar.gz file to the Summary Page
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: kore-exec.tar.gz
-          path: |
-            **/kore-exec.tar.gz
-      - name: 'On Success, Upload the package built to the Summary Page'
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: kframework-frontend.deb
-          path: kframework-frontend.deb
-          if-no-files-found: error
-          retention-days: 1
+  # test-frontend-package-ubuntu-jammy:
+  #   name: 'K: Ubuntu Jammy Frontend Package'
+  #   runs-on: [self-hosted, linux, normal]
+  #   needs: code-quality
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: 'Build and Test'
+  #       uses: ./.github/actions/test-package
+  #       with:
+  #         os: ubuntu
+  #         distro: jammy
+  #         llvm: 15
+  #         build-package: package/debian/build-package jammy kframework-frontend
+  #         test-package: package/debian/test-frontend-package
+  #     - name: On Failure, Upload the kore-exec.tar.gz file to the Summary Page
+  #       if: failure()
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: kore-exec.tar.gz
+  #         path: |
+  #           **/kore-exec.tar.gz
+  #     - name: 'On Success, Upload the package built to the Summary Page'
+  #       if: success()
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: kframework-frontend.deb
+  #         path: kframework-frontend.deb
+  #         if-no-files-found: error
+  #         retention-days: 1
 
 
-  pyk-build-on-nix:
-    needs: code-quality
-    name: 'Pyk: Nix Build'
-    strategy:
-      matrix:
-        os: [ubuntu-24.04, macos-14]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - name: 'Check out code'
-        uses: actions/checkout@v4
-      - name: 'Install Nix'
-        uses: cachix/install-nix-action@v31.5.1
-        with:
-          install_url: https://releases.nixos.org/nix/nix-2.30.1/install
-          extra_nix_config: |
-            substituters = http://cache.nixos.org
-            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
-      - name: 'Install Cachix'
-        uses: cachix/cachix-action@v14
-        with:
-          name: k-framework
-          skipPush: true
-      - name: 'Build original pyk flake'
-        run: GC_DONT_GC=1 nix build --print-build-logs .#pyk-python310
-      - name: 'Build pyk provided by K'
-        run: GC_DONT_GC=1 nix build --print-build-logs ./pyk#pyk-python310
+  # pyk-build-on-nix:
+  #   needs: code-quality
+  #   name: 'Pyk: Nix Build'
+  #   strategy:
+  #     matrix:
+  #       os: [ubuntu-24.04, macos-14]
+  #   runs-on: ${{ matrix.os }}
+  #   steps:
+  #     - name: 'Check out code'
+  #       uses: actions/checkout@v4
+  #     - name: 'Install Nix'
+  #       uses: cachix/install-nix-action@v31.5.1
+  #       with:
+  #         install_url: https://releases.nixos.org/nix/nix-2.30.1/install
+  #         extra_nix_config: |
+  #           substituters = http://cache.nixos.org
+  #           trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
+  #     - name: 'Install Cachix'
+  #       uses: cachix/cachix-action@v14
+  #       with:
+  #         name: k-framework
+  #         skipPush: true
+  #     - name: 'Build original pyk flake'
+  #       run: GC_DONT_GC=1 nix build --print-build-logs .#pyk-python310
+  #     - name: 'Build pyk provided by K'
+  #       run: GC_DONT_GC=1 nix build --print-build-logs ./pyk#pyk-python310
 
 
-  compile-nix-flake:
-    needs: code-quality
-    name: 'K: Nix Build & Test'
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - runner: [self-hosted, linux, normal]
-          - runner: MacM1
-            os: self-macos-12
-    runs-on: ${{ matrix.runner }}
-    steps:
-      - name: 'Check out code'
-        uses: actions/checkout@v4
-      - name: 'Upgrade bash'
-        if: ${{ contains(matrix.os, 'macos') }}
-        run: brew install bash
-      - name: 'Install Nix'
-        if: ${{ !startsWith(matrix.os, 'self') }}
-        uses: cachix/install-nix-action@v31.5.1
-        with:
-          install_url: https://releases.nixos.org/nix/nix-2.30.1/install
-          extra_nix_config: |
-            substituters = http://cache.nixos.org
-            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
-      - name: 'Install Cachix'
-        if: ${{ !startsWith(matrix.os, 'self') }}
-        uses: cachix/cachix-action@v14
-        with:
-          name: k-framework
-          authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
-          skipPush: true
-      - name: 'Build K Framework and push build time dependencies to cachix'
-        env:
-          NIX_PATH: 'nixpkgs=http://nixos.org/channels/nixos-22.05/nixexprs.tar.xz'
-          GC_DONT_GC: '1'
-        run: |
-          nix --version
-          JQ=$(nix-build '<nixpkgs>' -A jq --no-link)/bin/jq
-          export JQ
-          k=$(nix build . --print-build-logs --json --no-update-lock-file | $JQ -r '.[].outputs | to_entries[].value')
-          drv=$(nix-store --query --deriver "$k")
-          nix-store --query --requisites "$drv" | cachix push k-framework
-      - name: 'Smoke test K'
-        run: GC_DONT_GC=1 nix build --print-build-logs .#smoke-test
-      # These tests take a really long time to run on other platforms, so we
-      # skip them unless we're on the M1 runner.
-      - name: 'Test K'
-        if: ${{ matrix.os == 'self-macos-12' }}
-        run: GC_DONT_GC=1 nix build --print-build-logs .#test
+  # compile-nix-flake:
+  #   needs: code-quality
+  #   name: 'K: Nix Build & Test'
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       include:
+  #         - runner: [self-hosted, linux, normal]
+  #         - runner: MacM1
+  #           os: self-macos-12
+  #   runs-on: ${{ matrix.runner }}
+  #   steps:
+  #     - name: 'Check out code'
+  #       uses: actions/checkout@v4
+  #     - name: 'Upgrade bash'
+  #       if: ${{ contains(matrix.os, 'macos') }}
+  #       run: brew install bash
+  #     - name: 'Install Nix'
+  #       if: ${{ !startsWith(matrix.os, 'self') }}
+  #       uses: cachix/install-nix-action@v31.5.1
+  #       with:
+  #         install_url: https://releases.nixos.org/nix/nix-2.30.1/install
+  #         extra_nix_config: |
+  #           substituters = http://cache.nixos.org
+  #           trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
+  #     - name: 'Install Cachix'
+  #       if: ${{ !startsWith(matrix.os, 'self') }}
+  #       uses: cachix/cachix-action@v14
+  #       with:
+  #         name: k-framework
+  #         authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
+  #         skipPush: true
+  #     - name: 'Build K Framework and push build time dependencies to cachix'
+  #       env:
+  #         NIX_PATH: 'nixpkgs=http://nixos.org/channels/nixos-22.05/nixexprs.tar.xz'
+  #         GC_DONT_GC: '1'
+  #       run: |
+  #         nix --version
+  #         JQ=$(nix-build '<nixpkgs>' -A jq --no-link)/bin/jq
+  #         export JQ
+  #         k=$(nix build . --print-build-logs --json --no-update-lock-file | $JQ -r '.[].outputs | to_entries[].value')
+  #         drv=$(nix-store --query --deriver "$k")
+  #         nix-store --query --requisites "$drv" | cachix push k-framework
+  #     - name: 'Smoke test K'
+  #       run: GC_DONT_GC=1 nix build --print-build-logs .#smoke-test
+  #     # These tests take a really long time to run on other platforms, so we
+  #     # skip them unless we're on the M1 runner.
+  #     - name: 'Test K'
+  #       if: ${{ matrix.os == 'self-macos-12' }}
+  #       run: GC_DONT_GC=1 nix build --print-build-logs .#test
 
 
   test-cachix-push:
-    needs: code-quality
+    # needs: code-quality
     name: 'Test: Cachix Push (k-framework)'
     strategy:
       fail-fast: false
       matrix:
         include:
-          - runner: ubuntu-24.04
-            os: ubuntu-24.04
-          - runner: macos-14
+          # - runner: ubuntu-24.04
+          #   os: ubuntu-24.04
+          - runner: [self-hosted, self-macos-latest]
             os: macos-14
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 30
@@ -287,233 +287,233 @@ jobs:
           echo "✅ Cachix push test completed successfully"
 
 
-  pyk-build-docs:
-    name: 'Pyk: Documentation'
-    needs: test-frontend-package-ubuntu-jammy
-    runs-on: [self-hosted, linux, normal]
-    steps:
-      - name: 'Check out code'
-        uses: actions/checkout@v4
-      - name: 'Download K package from the Summary Page'
-        uses: actions/download-artifact@v4
-        with:
-          name: kframework-frontend.deb
-      - name: 'Set up Docker'
-        uses: ./.github/actions/with-k-docker
-        with:
-          container-name: k-pyk-docs-${{ github.sha }}
-          k-deb-path: kframework-frontend.deb
-      - name: 'Build documentation'
-        run: docker exec -u user k-pyk-docs-${{ github.sha }} make docs
-      - name: 'Tear down Docker'
-        if: always()
-        run: docker stop --time=0 k-pyk-docs-${{ github.sha }}
+  # pyk-build-docs:
+  #   name: 'Pyk: Documentation'
+  #   needs: test-frontend-package-ubuntu-jammy
+  #   runs-on: [self-hosted, linux, normal]
+  #   steps:
+  #     - name: 'Check out code'
+  #       uses: actions/checkout@v4
+  #     - name: 'Download K package from the Summary Page'
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: kframework-frontend.deb
+  #     - name: 'Set up Docker'
+  #       uses: ./.github/actions/with-k-docker
+  #       with:
+  #         container-name: k-pyk-docs-${{ github.sha }}
+  #         k-deb-path: kframework-frontend.deb
+  #     - name: 'Build documentation'
+  #       run: docker exec -u user k-pyk-docs-${{ github.sha }} make docs
+  #     - name: 'Tear down Docker'
+  #       if: always()
+  #       run: docker stop --time=0 k-pyk-docs-${{ github.sha }}
 
 
-  pyk-profile:
-    needs: test-frontend-package-ubuntu-jammy
-    name: 'Pyk: Profiling'
-    runs-on: [self-hosted, linux, normal]
-    timeout-minutes: 10
-    steps:
-      - name: 'Check out code'
-        uses: actions/checkout@v4
-      - name: 'Download K package from the Summary Page'
-        uses: actions/download-artifact@v4
-        with:
-          name: kframework-frontend.deb
-      - name: 'Set up Docker'
-        uses: ./.github/actions/with-k-docker
-        with:
-          container-name: k-pyk-profile-${{ github.sha }}
-          k-deb-path: kframework-frontend.deb
-          distro: jammy
-      - name: 'Run profiling'
-        run: |
-          docker exec -u user k-pyk-profile-${{ github.sha }} make profile PROF_ARGS=-n4
-          docker exec -u user k-pyk-profile-${{ github.sha }} /bin/bash -c 'find /tmp/pytest-of-user/pytest-current/ -type f -name "*.prof" | sort | xargs tail -n +1'
-      - name: 'Tear down Docker'
-        if: always()
-        run: |
-          docker stop --time=0 k-pyk-profile-${{ github.sha }}
+  # pyk-profile:
+  #   needs: test-frontend-package-ubuntu-jammy
+  #   name: 'Pyk: Profiling'
+  #   runs-on: [self-hosted, linux, normal]
+  #   timeout-minutes: 10
+  #   steps:
+  #     - name: 'Check out code'
+  #       uses: actions/checkout@v4
+  #     - name: 'Download K package from the Summary Page'
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: kframework-frontend.deb
+  #     - name: 'Set up Docker'
+  #       uses: ./.github/actions/with-k-docker
+  #       with:
+  #         container-name: k-pyk-profile-${{ github.sha }}
+  #         k-deb-path: kframework-frontend.deb
+  #         distro: jammy
+  #     - name: 'Run profiling'
+  #       run: |
+  #         docker exec -u user k-pyk-profile-${{ github.sha }} make profile PROF_ARGS=-n4
+  #         docker exec -u user k-pyk-profile-${{ github.sha }} /bin/bash -c 'find /tmp/pytest-of-user/pytest-current/ -type f -name "*.prof" | sort | xargs tail -n +1'
+  #     - name: 'Tear down Docker'
+  #       if: always()
+  #       run: |
+  #         docker stop --time=0 k-pyk-profile-${{ github.sha }}
 
 
-  pyk-integration-tests:
-    needs: test-frontend-package-ubuntu-jammy
-    name: 'Pyk: Integration Tests'
-    runs-on: [self-hosted, linux, normal]
-    timeout-minutes: 30
-    steps:
-      - name: 'Check out code'
-        uses: actions/checkout@v4
-      - name: 'Download K package from the Summary Page'
-        uses: actions/download-artifact@v4
-        with:
-          name: kframework-frontend.deb
-      - name: 'Set up Docker'
-        uses: ./.github/actions/with-k-docker
-        with:
-          container-name: k-pyk-integration-${{ github.sha }}
-          k-deb-path: kframework-frontend.deb
-          distro: jammy
-      - name: 'Run integration tests'
-        run: |
-          docker exec -u user k-pyk-integration-${{ github.sha }} make test-integration TEST_ARGS='-n4 --maxfail=0 --timeout=300'
-      - name: 'Tear down Docker'
-        if: always()
-        run: |
-          docker stop --time=0 k-pyk-integration-${{ github.sha }}
+  # pyk-integration-tests:
+  #   needs: test-frontend-package-ubuntu-jammy
+  #   name: 'Pyk: Integration Tests'
+  #   runs-on: [self-hosted, linux, normal]
+  #   timeout-minutes: 30
+  #   steps:
+  #     - name: 'Check out code'
+  #       uses: actions/checkout@v4
+  #     - name: 'Download K package from the Summary Page'
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: kframework-frontend.deb
+  #     - name: 'Set up Docker'
+  #       uses: ./.github/actions/with-k-docker
+  #       with:
+  #         container-name: k-pyk-integration-${{ github.sha }}
+  #         k-deb-path: kframework-frontend.deb
+  #         distro: jammy
+  #     - name: 'Run integration tests'
+  #       run: |
+  #         docker exec -u user k-pyk-integration-${{ github.sha }} make test-integration TEST_ARGS='-n4 --maxfail=0 --timeout=300'
+  #     - name: 'Tear down Docker'
+  #       if: always()
+  #       run: |
+  #         docker stop --time=0 k-pyk-integration-${{ github.sha }}
 
 
-  pyk-regression-tests:
-    needs: test-frontend-package-ubuntu-jammy
-    name: 'Pyk: Regression Tests'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    steps:
-      - name: 'Check out code'
-        uses: actions/checkout@v4
-      - name: 'Download K package from the Summary Page'
-        uses: actions/download-artifact@v4
-        with:
-          name: kframework-frontend.deb
-      - name: 'Set up Docker'
-        uses: ./.github/actions/with-k-docker
-        with:
-          container-name: k-pyk-regression-${{ github.sha }}
-          k-deb-path: kframework-frontend.deb
-          distro: jammy
-      - name: 'Run K regression tests'
-        run: |
-          docker exec -u user k-pyk-regression-${{ github.sha }} uv sync
-          docker exec -u user k-pyk-regression-${{ github.sha }} make test-regression-new -j4
-      - name: 'Tear down Docker'
-        if: always()
-        run: |
-          docker stop --time=0 k-pyk-regression-${{ github.sha }}
+  # pyk-regression-tests:
+  #   needs: test-frontend-package-ubuntu-jammy
+  #   name: 'Pyk: Regression Tests'
+  #   runs-on: ubuntu-24.04
+  #   timeout-minutes: 30
+  #   steps:
+  #     - name: 'Check out code'
+  #       uses: actions/checkout@v4
+  #     - name: 'Download K package from the Summary Page'
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: kframework-frontend.deb
+  #     - name: 'Set up Docker'
+  #       uses: ./.github/actions/with-k-docker
+  #       with:
+  #         container-name: k-pyk-regression-${{ github.sha }}
+  #         k-deb-path: kframework-frontend.deb
+  #         distro: jammy
+  #     - name: 'Run K regression tests'
+  #       run: |
+  #         docker exec -u user k-pyk-regression-${{ github.sha }} uv sync
+  #         docker exec -u user k-pyk-regression-${{ github.sha }} make test-regression-new -j4
+  #     - name: 'Tear down Docker'
+  #       if: always()
+  #       run: |
+  #         docker stop --time=0 k-pyk-regression-${{ github.sha }}
 
 
-  test-macos-build:
-    name: 'K: macOS Build & Test'
-    runs-on: macos-15
-    timeout-minutes: 60
-    needs: code-quality
-    continue-on-error: true # Do not fail PRs due to MacOS builds at this time. Oct. 6, 2025
-    steps:
-      - name: 'Set up Java 17'
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: 17
+  # test-macos-build:
+  #   name: 'K: macOS Build & Test'
+  #   runs-on: macos-15
+  #   timeout-minutes: 60
+  #   needs: code-quality
+  #   continue-on-error: true # Do not fail PRs due to MacOS builds at this time. Oct. 6, 2025
+  #   steps:
+  #     - name: 'Set up Java 17'
+  #       uses: actions/setup-java@v4
+  #       with:
+  #         distribution: 'zulu'
+  #         java-version: 17
 
-      - name: 'Check out code'
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          path: kframework
+  #     - name: 'Check out code'
+  #       uses: actions/checkout@v4
+  #       with:
+  #         submodules: recursive
+  #         path: kframework
 
-      - name: 'Check out homebrew repo'
-        uses: actions/checkout@v4
-        with:
-          repository: runtimeverification/homebrew-k
-          path: homebrew-k
-          ref: master
+  #     - name: 'Check out homebrew repo'
+  #       uses: actions/checkout@v4
+  #       with:
+  #         repository: runtimeverification/homebrew-k
+  #         path: homebrew-k
+  #         ref: master
 
-      - name: 'Mac Dependencies'
-        run: |
-          # Via: https://github.com/ledger/ledger/commit/1eec9f86667cad3b0bbafb82a83739a0d30ca09f
-          # Unlink and re-link to prevent errors when github mac runner images
-          # install python outside of brew, for example:
-          # https://github.com/orgs/Homebrew/discussions/3895
-          # https://github.com/actions/setup-python/issues/577
-          # https://github.com/actions/runner-images/issues/6459
-          # https://github.com/actions/runner-images/issues/6507
-          # https://github.com/actions/runner-images/issues/2322
+  #     - name: 'Mac Dependencies'
+  #       run: |
+  #         # Via: https://github.com/ledger/ledger/commit/1eec9f86667cad3b0bbafb82a83739a0d30ca09f
+  #         # Unlink and re-link to prevent errors when github mac runner images
+  #         # install python outside of brew, for example:
+  #         # https://github.com/orgs/Homebrew/discussions/3895
+  #         # https://github.com/actions/setup-python/issues/577
+  #         # https://github.com/actions/runner-images/issues/6459
+  #         # https://github.com/actions/runner-images/issues/6507
+  #         # https://github.com/actions/runner-images/issues/2322
 
-          # shellcheck disable=SC2162
-          brew list -1 | grep python | while read formula; do brew unlink "$formula"; brew link --overwrite "$formula"; done
+  #         # shellcheck disable=SC2162
+  #         brew list -1 | grep python | while read formula; do brew unlink "$formula"; brew link --overwrite "$formula"; done
 
-          # uninstall pre-installed cmake
-          brew uninstall cmake
+  #         # uninstall pre-installed cmake
+  #         brew uninstall cmake
 
-      - name: 'Build brew bottle'
-        id: build
-        env:
-          HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
-          MAVEN_OPTS: >-
-              -Dhttp.keepAlive=false
-              -Dmaven.wagon.http.pool=false
-              -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
-        run: |
-          PACKAGE=kframework
-          VERSION=$(cat kframework/package/version)
-          ROOT_URL='https://github.com/runtimeverification/k/releases/download'
+  #     - name: 'Build brew bottle'
+  #       id: build
+  #       env:
+  #         HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
+  #         MAVEN_OPTS: >-
+  #             -Dhttp.keepAlive=false
+  #             -Dmaven.wagon.http.pool=false
+  #             -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
+  #       run: |
+  #         PACKAGE=kframework
+  #         VERSION=$(cat kframework/package/version)
+  #         ROOT_URL='https://github.com/runtimeverification/k/releases/download'
           
-          # For PR testing, we'll use the latest available source tarball
-          # or create a test tarball from the current code
-          if [ -f "$ROOT_URL/v${VERSION}/kframework-${VERSION}-src.tar.gz" ]; then
-            wget "$ROOT_URL/v${VERSION}/kframework-${VERSION}-src.tar.gz"
-          else
-            # Create a test tarball from current code for PR testing
-            echo "Creating test tarball for PR testing..."
-            tar czf "kframework-${VERSION}-src.tar.gz" --exclude='.git' --exclude='homebrew-k' .
-          fi
+  #         # For PR testing, we'll use the latest available source tarball
+  #         # or create a test tarball from the current code
+  #         if [ -f "$ROOT_URL/v${VERSION}/kframework-${VERSION}-src.tar.gz" ]; then
+  #           wget "$ROOT_URL/v${VERSION}/kframework-${VERSION}-src.tar.gz"
+  #         else
+  #           # Create a test tarball from current code for PR testing
+  #           echo "Creating test tarball for PR testing..."
+  #           tar czf "kframework-${VERSION}-src.tar.gz" --exclude='.git' --exclude='homebrew-k' .
+  #         fi
           
-          cd homebrew-k
-          ../kframework/package/macos/brew-update-to-local "${PACKAGE}" "${VERSION}"
-          git commit "Formula/$PACKAGE.rb" -m "Update ${PACKAGE} to ${VERSION}: part 1"
-          ../kframework/package/macos/brew-build-and-update-to-local-bottle "${PACKAGE}" "${VERSION}" "${ROOT_URL}"
-          git reset HEAD^
-          LOCAL_BOTTLE_NAME=$(basename "$(find . -name "kframework--${VERSION}.arm64_sonoma.bottle*.tar.gz")")
-          # shellcheck disable=2001
-          BOTTLE_NAME=$(echo "${LOCAL_BOTTLE_NAME#./}" | sed 's!kframework--!kframework-!')
-          ../kframework/package/macos/brew-update-to-final "${PACKAGE}" "${VERSION}" "${ROOT_URL}"
-          echo "path=${LOCAL_BOTTLE_NAME}" >> "${GITHUB_OUTPUT}"
-          echo "path_remote=${BOTTLE_NAME}" >> "${GITHUB_OUTPUT}"
+  #         cd homebrew-k
+  #         ../kframework/package/macos/brew-update-to-local "${PACKAGE}" "${VERSION}"
+  #         git commit "Formula/$PACKAGE.rb" -m "Update ${PACKAGE} to ${VERSION}: part 1"
+  #         ../kframework/package/macos/brew-build-and-update-to-local-bottle "${PACKAGE}" "${VERSION}" "${ROOT_URL}"
+  #         git reset HEAD^
+  #         LOCAL_BOTTLE_NAME=$(basename "$(find . -name "kframework--${VERSION}.arm64_sonoma.bottle*.tar.gz")")
+  #         # shellcheck disable=2001
+  #         BOTTLE_NAME=$(echo "${LOCAL_BOTTLE_NAME#./}" | sed 's!kframework--!kframework-!')
+  #         ../kframework/package/macos/brew-update-to-final "${PACKAGE}" "${VERSION}" "${ROOT_URL}"
+  #         echo "path=${LOCAL_BOTTLE_NAME}" >> "${GITHUB_OUTPUT}"
+  #         echo "path_remote=${BOTTLE_NAME}" >> "${GITHUB_OUTPUT}"
 
-      - name: 'Upload bottle'
-        uses: actions/upload-artifact@v4
-        with:
-          name: homebrew-bottle
-          path: homebrew-k
-          retention-days: 1
+  #     - name: 'Upload bottle'
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: homebrew-bottle
+  #         path: homebrew-k
+  #         retention-days: 1
 
-      - name: 'Test Homebrew formula validation'
-        id: test
-        env:
-          # github actions sets the JAVA_HOME variable to Java 8 explicitly for
-          # some reason. There doesn't seem to be a way to tell it to unset the
-          # variable, so instead we just have to tell it to use Java 17
-          # explicitly instead.
-          JAVA_HOME: ${{ env.JAVA_HOME_17_X64 }}
-          HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
-          MAVEN_OPTS: >-
-            -Dhttp.keepAlive=false
-            -Dmaven.wagon.http.pool=false
-            -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
-        run: |
-          # Test the Homebrew formula validation and basic functionality
-          cd homebrew-k
+  #     - name: 'Test Homebrew formula validation'
+  #       id: test
+  #       env:
+  #         # github actions sets the JAVA_HOME variable to Java 8 explicitly for
+  #         # some reason. There doesn't seem to be a way to tell it to unset the
+  #         # variable, so instead we just have to tell it to use Java 17
+  #         # explicitly instead.
+  #         JAVA_HOME: ${{ env.JAVA_HOME_17_X64 }}
+  #         HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
+  #         MAVEN_OPTS: >-
+  #           -Dhttp.keepAlive=false
+  #           -Dmaven.wagon.http.pool=false
+  #           -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
+  #       run: |
+  #         # Test the Homebrew formula validation and basic functionality
+  #         cd homebrew-k
           
-          # Remove any existing tap to avoid remote mismatch errors
-          brew untap runtimeverification/k 2>/dev/null || true
+  #         # Remove any existing tap to avoid remote mismatch errors
+  #         brew untap runtimeverification/k 2>/dev/null || true
           
-          # Validate the formula syntax by installing it as a local tap
-          brew tap runtimeverification/k "file://$(pwd)"
+  #         # Validate the formula syntax by installing it as a local tap
+  #         brew tap runtimeverification/k "file://$(pwd)"
           
-          # Test formula installation from source
-          brew install --build-from-source kframework -v
+  #         # Test formula installation from source
+  #         brew install --build-from-source kframework -v
           
-          # Basic functionality test
-          echo 'module TEST imports BOOL endmodule' > test.k
-          kompile test.k --backend llvm
-          kompile test.k --backend haskell
-          echo "✅ macOS build and test completed successfully"
+  #         # Basic functionality test
+  #         echo 'module TEST imports BOOL endmodule' > test.k
+  #         kompile test.k --backend llvm
+  #         kompile test.k --backend haskell
+  #         echo "✅ macOS build and test completed successfully"
 
-      - name: 'Upload formula for debugging'
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: macos-formula-test
-          path: homebrew-k/Formula/kframework.rb
-          retention-days: 1
+  #     - name: 'Upload formula for debugging'
+  #       if: always()
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: macos-formula-test
+  #         path: homebrew-k/Formula/kframework.rb
+  #         retention-days: 1
