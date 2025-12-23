@@ -240,7 +240,7 @@ jobs:
         include:
           # - runner: ubuntu-24.04
           #   os: ubuntu-24.04
-          - runner: [self-hosted, self-macos-latest]
+          - runner: macos-14
             os: macos-14
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 30
