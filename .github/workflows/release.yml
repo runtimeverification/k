@@ -51,8 +51,8 @@ jobs:
         include:
           - runner: ubuntu-24.04
             os: ubuntu-24.04
-          - runner: self-macos-latest
-            os: self-macos-latest
+          - runner: macos-latest
+            os: macos-15
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 120
     steps:
