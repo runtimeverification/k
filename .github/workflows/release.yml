@@ -96,7 +96,7 @@ jobs:
           echo "Largest paths:"
           echo "${STORE_PATHS}" | xargs -I {} du -sh {} 2>/dev/null | sort -rh | head -5 || true
           
-          # Push to cachix using direct cachix push (no kup, no retries)
+          # Push to cachix using direct cachix push
           echo "Pushing all ${TOTAL_PATHS} store paths for .#k to k-framework-binary cache..."
           echo "${STORE_PATHS}" | cachix push k-framework-binary
           echo "✅ .#k push completed successfully"
@@ -139,13 +139,6 @@ jobs:
           echo "Pinning .#k.openssl.procps.secp256k1 output path with 180-day retention..."
           cachix pin k-framework-binary "${PLATFORM}.k.openssl.procps.secp256k1" "${K_OPENSSL_PROCPS_SECP256K1_PATH}" --keep-days 180
           echo "✅ .#k.openssl.procps.secp256k1 pinned successfully"
-          
-          # TEMPORARY: Old kup publish commands commented out - replaced with direct cachix push
-          # to avoid multipart upload timeout issues on macOS. Using cachix push directly.
-          # export PATH="$(nix build github:runtimeverification/kup --no-link --json | jq -r '.[].outputs | to_entries[].value')/bin:$PATH"
-          # kup publish --verbose k-framework-binary .#k --keep-days 180
-          # kup publish --verbose k-framework-binary .#k.openssl.secp256k1 --keep-days 180
-          # kup publish --verbose k-framework-binary .#k.openssl.procps.secp256k1 --keep-days 180
 
   cachix-release-dependencies:
     name: 'k-framework cachix release'
