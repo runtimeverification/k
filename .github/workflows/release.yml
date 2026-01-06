@@ -51,6 +51,10 @@ jobs:
         include:
           - runner: ubuntu-24.04
             os: ubuntu-24.04
+          # Using macos-latest (public runner) instead of self-macos-latest (self-hosted)
+          # because the public runner has proven more reliable for large file uploads.
+          # The condition !startsWith(matrix.os, 'self') ensures Nix/Cachix are installed
+          # on public runners (they're pre-installed on self-hosted runners).
           - runner: macos-latest
             os: macos-15
     runs-on: ${{ matrix.runner }}
@@ -80,65 +84,14 @@ jobs:
           CACHIX_AUTH_TOKEN: '${{ secrets.CACHIX_PRIVATE_KFB_TOKEN }}'
           GC_DONT_GC: '1'
         run: |
-          # Detect platform
-          PLATFORM=$(nix eval --impure --expr 'builtins.currentSystem' --raw)
-          echo "Publishing to k-framework-binary cache on platform: ${PLATFORM}"
+          # Install kup
+          export PATH="$(nix build github:runtimeverification/kup --no-link --json | jq -r '.[].outputs | to_entries[].value')/bin:$PATH"
           
-          # Build and push .#k
-          echo "Building full .#k package with all dependencies..."
-          K_PATH=$(nix build ".#packages.${PLATFORM}.k" --no-link --json | jq -r '.[].outputs.out')
-          DRV_K=$(nix-store --query --deriver "${K_PATH}")
-          STORE_PATHS=$(nix-store --query --requisites --include-outputs "${DRV_K}")
-          
-          # Show some stats about what we're pushing
-          TOTAL_PATHS=$(echo "${STORE_PATHS}" | wc -l | tr -d ' ')
-          echo "Total store paths to push for .#k: ${TOTAL_PATHS}"
-          echo "Largest paths:"
-          echo "${STORE_PATHS}" | xargs -I {} du -sh {} 2>/dev/null | sort -rh | head -5 || true
-          
-          # Push to cachix using direct cachix push
-          echo "Pushing all ${TOTAL_PATHS} store paths for .#k to k-framework-binary cache..."
-          echo "${STORE_PATHS}" | cachix push k-framework-binary
-          echo "✅ .#k push completed successfully"
-          
-          # Pin the main output path (equivalent to kup publish --keep-days 180)
-          echo "Pinning .#k output path with 180-day retention..."
-          cachix pin k-framework-binary "${PLATFORM}.k" "${K_PATH}" --keep-days 180
-          echo "✅ .#k pinned successfully"
-          
-          # Build and push .#k.openssl.secp256k1
-          echo "Building full .#k.openssl.secp256k1 package with all dependencies..."
-          K_OPENSSL_SECP256K1_PATH=$(nix build ".#packages.${PLATFORM}.k.openssl.secp256k1" --no-link --json | jq -r '.[].outputs.out')
-          DRV_K_OPENSSL_SECP256K1=$(nix-store --query --deriver "${K_OPENSSL_SECP256K1_PATH}")
-          STORE_PATHS_K_OPENSSL_SECP256K1=$(nix-store --query --requisites --include-outputs "${DRV_K_OPENSSL_SECP256K1}")
-          
-          TOTAL_PATHS_K_OPENSSL=$(echo "${STORE_PATHS_K_OPENSSL_SECP256K1}" | wc -l | tr -d ' ')
-          echo "Total store paths to push for .#k.openssl.secp256k1: ${TOTAL_PATHS_K_OPENSSL}"
-          echo "Pushing all ${TOTAL_PATHS_K_OPENSSL} store paths for .#k.openssl.secp256k1 to k-framework-binary cache..."
-          echo "${STORE_PATHS_K_OPENSSL_SECP256K1}" | cachix push k-framework-binary
-          echo "✅ .#k.openssl.secp256k1 push completed successfully"
-          
-          # Pin the main output path
-          echo "Pinning .#k.openssl.secp256k1 output path with 180-day retention..."
-          cachix pin k-framework-binary "${PLATFORM}.k.openssl.secp256k1" "${K_OPENSSL_SECP256K1_PATH}" --keep-days 180
-          echo "✅ .#k.openssl.secp256k1 pinned successfully"
-          
-          # Build and push .#k.openssl.procps.secp256k1
-          echo "Building full .#k.openssl.procps.secp256k1 package with all dependencies..."
-          K_OPENSSL_PROCPS_SECP256K1_PATH=$(nix build ".#packages.${PLATFORM}.k.openssl.procps.secp256k1" --no-link --json | jq -r '.[].outputs.out')
-          DRV_K_OPENSSL_PROCPS_SECP256K1=$(nix-store --query --deriver "${K_OPENSSL_PROCPS_SECP256K1_PATH}")
-          STORE_PATHS_K_OPENSSL_PROCPS_SECP256K1=$(nix-store --query --requisites --include-outputs "${DRV_K_OPENSSL_PROCPS_SECP256K1}")
-          
-          TOTAL_PATHS_K_PROCPS=$(echo "${STORE_PATHS_K_OPENSSL_PROCPS_SECP256K1}" | wc -l | tr -d ' ')
-          echo "Total store paths to push for .#k.openssl.procps.secp256k1: ${TOTAL_PATHS_K_PROCPS}"
-          echo "Pushing all ${TOTAL_PATHS_K_PROCPS} store paths for .#k.openssl.procps.secp256k1 to k-framework-binary cache..."
-          echo "${STORE_PATHS_K_OPENSSL_PROCPS_SECP256K1}" | cachix push k-framework-binary
-          echo "✅ .#k.openssl.procps.secp256k1 push completed successfully"
-          
-          # Pin the main output path
-          echo "Pinning .#k.openssl.procps.secp256k1 output path with 180-day retention..."
-          cachix pin k-framework-binary "${PLATFORM}.k.openssl.procps.secp256k1" "${K_OPENSSL_PROCPS_SECP256K1_PATH}" --keep-days 180
-          echo "✅ .#k.openssl.procps.secp256k1 pinned successfully"
+          # Publish all three package variants using kup publish
+          # Using public macOS runner has proven reliable for large file uploads
+          kup publish --verbose k-framework-binary .#k --keep-days 180
+          kup publish --verbose k-framework-binary .#k.openssl.secp256k1 --keep-days 180
+          kup publish --verbose k-framework-binary .#k.openssl.procps.secp256k1 --keep-days 180
 
   cachix-release-dependencies:
     name: 'k-framework cachix release'
