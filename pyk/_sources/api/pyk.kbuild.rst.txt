@@ -1,0 +1,18 @@
+pyk.kbuild package
+==================
+
+.. automodule:: pyk.kbuild
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pyk.kbuild.config
+   pyk.kbuild.kbuild
+   pyk.kbuild.project
+   pyk.kbuild.utils

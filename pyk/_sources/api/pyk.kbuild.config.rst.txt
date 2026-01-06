@@ -1,0 +1,7 @@
+pyk.kbuild.config module
+========================
+
+.. automodule:: pyk.kbuild.config
+   :members:
+   :undoc-members:
+   :show-inheritance:

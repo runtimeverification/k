@@ -1,0 +1,7 @@
+pyk.kore.manip module
+=====================
+
+.. automodule:: pyk.kore.manip
+   :members:
+   :undoc-members:
+   :show-inheritance:
