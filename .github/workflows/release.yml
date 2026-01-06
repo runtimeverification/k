@@ -51,8 +51,12 @@ jobs:
         include:
           - runner: ubuntu-24.04
             os: ubuntu-24.04
-          - runner: self-macos-latest
-            os: self-macos-latest
+          # Using macos-latest (public runner) instead of self-macos-latest (self-hosted)
+          # because the public runner has proven more reliable for large file uploads.
+          # The condition !startsWith(matrix.os, 'self') ensures Nix/Cachix are installed
+          # on public runners (they're pre-installed on self-hosted runners).
+          - runner: macos-latest
+            os: macos-15
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 120
     steps:
@@ -83,7 +87,11 @@ jobs:
         with:
           packages: jq
           script: |
+            # Install kup
             export PATH="$(nix build github:runtimeverification/kup --no-link --json | jq -r '.[].outputs | to_entries[].value')/bin:$PATH"
+            
+            # Publish all three package variants using kup publish
+            # Using public macOS runner has proven reliable for large file uploads
             kup publish --verbose k-framework-binary .#k --keep-days 180
             kup publish --verbose k-framework-binary .#k.openssl.secp256k1 --keep-days 180
             kup publish --verbose k-framework-binary .#k.openssl.procps.secp256k1 --keep-days 180
