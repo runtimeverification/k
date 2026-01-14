@@ -15,7 +15,7 @@
 
     flake-utils.follows = "llvm-backend/utils";
 
-    uv2nix.url = "github:pyproject-nix/uv2nix/4cca323a547a1aaa9b94929c4901bed5343eafe8";
+    uv2nix.url = "github:pyproject-nix/uv2nix/9d357f0d2ce6f5f35ec7959d7e704452352eb4da";
     # uv2nix requires a newer version of nixpkgs
     # therefore, we pin uv2nix specifically to a newer version of nixpkgs
     # until we replaced our stale version of nixpkgs with an upstream one as well
