@@ -2,7 +2,7 @@ name = "{{ cookiecutter.package_name }}"
 version = "0.1.0"
 defaultTargets = ["{{ cookiecutter.library_name }}"]
 weakLeanArgs = [
-    "-D maxHeartbeats=10000000"
+    "-D", "maxHeartbeats=10000000",
 ]
 
 [[lean_lib]]
