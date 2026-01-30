@@ -1,0 +1,7 @@
+pyk.kdist.utils module
+======================
+
+.. automodule:: pyk.kdist.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:

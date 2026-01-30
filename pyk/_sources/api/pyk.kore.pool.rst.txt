@@ -1,0 +1,7 @@
+pyk.kore.pool module
+====================
+
+.. automodule:: pyk.kore.pool
+   :members:
+   :undoc-members:
+   :show-inheritance:

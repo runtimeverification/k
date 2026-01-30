@@ -1,0 +1,22 @@
+pyk.kast.prelude package
+========================
+
+.. automodule:: pyk.kast.prelude
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pyk.kast.prelude.bytes
+   pyk.kast.prelude.collections
+   pyk.kast.prelude.k
+   pyk.kast.prelude.kbool
+   pyk.kast.prelude.kint
+   pyk.kast.prelude.ml
+   pyk.kast.prelude.string
+   pyk.kast.prelude.utils

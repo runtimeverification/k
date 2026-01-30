@@ -1,0 +1,7 @@
+pyk.dequote module
+==================
+
+.. automodule:: pyk.dequote
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,742 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyk.proof.reachability module &mdash; pyk 7.1.313 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=9c1be6d9"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyk.proof.show module" href="pyk.proof.show.html" />
+    <link rel="prev" title="pyk.proof.prove_rpc module" href="pyk.proof.prove_rpc.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            pyk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">pyk</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pyk.html">pyk package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="pyk.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="pyk.cterm.html">pyk.cterm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kast.html">pyk.kast package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kbuild.html">pyk.kbuild package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.html">pyk.kcfg package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kdist.html">pyk.kdist package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.klean.html">pyk.klean package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kllvm.html">pyk.kllvm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.konvert.html">pyk.konvert package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kore.html">pyk.kore package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kore_exec_covr.html">pyk.kore_exec_covr package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.ktool.html">pyk.ktool package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="pyk.proof.html">pyk.proof package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.testing.html">pyk.testing package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">pyk</a></li>
+          <li class="breadcrumb-item"><a href="pyk.html">pyk package</a></li>
+          <li class="breadcrumb-item"><a href="pyk.proof.html">pyk.proof package</a></li>
+      <li class="breadcrumb-item active">pyk.proof.reachability module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/pyk.proof.reachability.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pyk.proof.reachability">
+<span id="pyk-proof-reachability-module"></span><h1>pyk.proof.reachability module<a class="headerlink" href="#module-pyk.proof.reachability" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRFailureInfo">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">APRFailureInfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">failing_nodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Iterable[int]'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pending_nodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Iterable[int]'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_conditions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Mapping[int,</span> <span class="pre">str]'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">failure_reasons</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Mapping[int,</span> <span class="pre">str]'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Mapping[int,</span> <span class="pre">Iterable[tuple[str,</span> <span class="pre">str]]]'</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRFailureInfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRFailureInfo" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.FailureInfo" title="pyk.proof.proof.FailureInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">FailureInfo</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRFailureInfo.failing_nodes">
+<span class="sig-name descname"><span class="pre">failing_nodes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">frozenset</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.proof.reachability.APRFailureInfo.failing_nodes" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRFailureInfo.failure_reasons">
+<span class="sig-name descname"><span class="pre">failure_reasons</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.utils.html#pyk.utils.FrozenDict" title="pyk.utils.FrozenDict"><span class="pre">FrozenDict</span></a><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.proof.reachability.APRFailureInfo.failure_reasons" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRFailureInfo.from_proof">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_proof</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proof</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pyk.proof.reachability.APRProof" title="pyk.proof.reachability.APRProof"><span class="pre">APRProof</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">kcfg_explore</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kcfg.explore.html#pyk.kcfg.explore.KCFGExplore" title="pyk.kcfg.explore.KCFGExplore"><span class="pre">KCFGExplore</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">counterexample_info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assume_defined</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.proof.reachability.APRFailureInfo" title="pyk.proof.reachability.APRFailureInfo"><span class="pre">APRFailureInfo</span></a></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRFailureInfo.from_proof"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRFailureInfo.from_proof" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRFailureInfo.models">
+<span class="sig-name descname"><span class="pre">models</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.utils.html#pyk.utils.FrozenDict" title="pyk.utils.FrozenDict"><span class="pre">FrozenDict</span></a><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">frozenset</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.proof.reachability.APRFailureInfo.models" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRFailureInfo.path_conditions">
+<span class="sig-name descname"><span class="pre">path_conditions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.utils.html#pyk.utils.FrozenDict" title="pyk.utils.FrozenDict"><span class="pre">FrozenDict</span></a><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.proof.reachability.APRFailureInfo.path_conditions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRFailureInfo.pending_nodes">
+<span class="sig-name descname"><span class="pre">pending_nodes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">frozenset</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.proof.reachability.APRFailureInfo.pending_nodes" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRFailureInfo.print">
+<span class="sig-name descname"><span class="pre">print</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRFailureInfo.print"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRFailureInfo.print" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">APRProof</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kcfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG" title="pyk.kcfg.kcfg.KCFG"><span class="pre">KCFG</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">terminal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NodeIdLike</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NodeIdLike</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kore.rpc.html#pyk.kore.rpc.LogEntry" title="pyk.kore.rpc.LogEntry"><span class="pre">LogEntry</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bmc_depth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounded</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proof_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_refutations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subproof_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">circularity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">admitted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_exec_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Exception</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_loops_cache</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProof"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProof" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof" title="pyk.proof.proof.Proof"><code class="xref py py-class docutils literal notranslate"><span class="pre">Proof</span></code></a>[<a class="reference internal" href="#pyk.proof.reachability.APRProofStep" title="pyk.proof.reachability.APRProofStep"><code class="xref py py-class docutils literal notranslate"><span class="pre">APRProofStep</span></code></a>, <a class="reference internal" href="#pyk.proof.reachability.APRProofResult" title="pyk.proof.reachability.APRProofResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">APRProofResult</span></code></a>], <a class="reference internal" href="pyk.kcfg.exploration.html#pyk.kcfg.exploration.KCFGExploration" title="pyk.kcfg.exploration.KCFGExploration"><code class="xref py py-class docutils literal notranslate"><span class="pre">KCFGExploration</span></code></a></p>
+<p>Represent an all-path reachability proof.</p>
+<p>APRProof and APRProver implement all-path reachability logic,
+as introduced by A. Stefanescu and others in their paper ‘All-Path Reachability Logic’:
+<a class="reference external" href="https://doi.org/10.23638/LMCS-15(2:5)2019">https://doi.org/10.23638/LMCS-15(2:5)2019</a></p>
+<p>Note that reachability logic formula <cite>phi =&gt;A psi</cite> has <em>not</em> the same meaning
+as CTL/CTL*’s <cite>phi -&gt; AF psi</cite>, since reachability logic ignores infinite traces.
+This implementation extends the above with bounded model checking, allowing the user
+to specify an optional loop iteration bound for each loop in execution.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.add_bounded">
+<span class="sig-name descname"><span class="pre">add_bounded</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NodeIdLike</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProof.add_bounded"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProof.add_bounded" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.add_exec_time">
+<span class="sig-name descname"><span class="pre">add_exec_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exec_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProof.add_exec_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProof.add_exec_time" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.as_claim">
+<span class="sig-name descname"><span class="pre">as_claim</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.outer.html#pyk.kast.outer.KClaim" title="pyk.kast.outer.KClaim"><span class="pre">KClaim</span></a></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProof.as_claim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProof.as_claim" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.as_rule">
+<span class="sig-name descname"><span class="pre">as_rule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">priority</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.outer.html#pyk.kast.outer.KRule" title="pyk.kast.outer.KRule"><span class="pre">KRule</span></a></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProof.as_rule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProof.as_rule" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.as_rules">
+<span class="sig-name descname"><span class="pre">as_rules</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">priority</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direct_rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.outer.html#pyk.kast.outer.KRule" title="pyk.kast.outer.KRule"><span class="pre">KRule</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProof.as_rules"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProof.as_rules" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.bmc_depth">
+<span class="sig-name descname"><span class="pre">bmc_depth</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.proof.reachability.APRProof.bmc_depth" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.bounded">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bounded</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Node" title="pyk.kcfg.kcfg.KCFG.Node"><span class="pre">Node</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.proof.reachability.APRProof.bounded" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.can_progress">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">can_progress</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyk.proof.reachability.APRProof.can_progress" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.circularities_module_name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">circularities_module_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.proof.reachability.APRProof.circularities_module_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.circularity">
+<span class="sig-name descname"><span class="pre">circularity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyk.proof.reachability.APRProof.circularity" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.commit">
+<span class="sig-name descname"><span class="pre">commit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pyk.proof.reachability.APRProofResult" title="pyk.proof.reachability.APRProofResult"><span class="pre">APRProofResult</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProof.commit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProof.commit" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.construct_node_refutation">
+<span class="sig-name descname"><span class="pre">construct_node_refutation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Node" title="pyk.kcfg.kcfg.KCFG.Node"><span class="pre">Node</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.RefutationProof" title="pyk.proof.implies.RefutationProof"><span class="pre">RefutationProof</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProof.construct_node_refutation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProof.construct_node_refutation" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.dependencies_module_name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dependencies_module_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.proof.reachability.APRProof.dependencies_module_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.dict">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dict</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.proof.reachability.APRProof.dict" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.error_info">
+<span class="sig-name descname"><span class="pre">error_info</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Exception</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.proof.reachability.APRProof.error_info" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.exec_time">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">exec_time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#pyk.proof.reachability.APRProof.exec_time" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.failing">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">failing</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Node" title="pyk.kcfg.kcfg.KCFG.Node"><span class="pre">Node</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.proof.reachability.APRProof.failing" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.formatted_exec_time">
+<span class="sig-name descname"><span class="pre">formatted_exec_time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProof.formatted_exec_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProof.formatted_exec_time" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.from_claim">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_claim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">defn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.outer.html#pyk.kast.outer.KDefinition" title="pyk.kast.outer.KDefinition"><span class="pre">KDefinition</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">claim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.outer.html#pyk.kast.outer.KClaim" title="pyk.kast.outer.KClaim"><span class="pre">KClaim</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">logs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kore.rpc.html#pyk.kore.rpc.LogEntry" title="pyk.kore.rpc.LogEntry"><span class="pre">LogEntry</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proof_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bmc_depth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.proof.reachability.APRProof" title="pyk.proof.reachability.APRProof"><span class="pre">APRProof</span></a></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProof.from_claim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProof.from_claim" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.from_dict">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dct</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proof_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.proof.reachability.APRProof" title="pyk.proof.reachability.APRProof"><span class="pre">APRProof</span></a></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProof.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProof.from_dict" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.from_spec_modules">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_spec_modules</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">defn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.outer.html#pyk.kast.outer.KDefinition" title="pyk.kast.outer.KDefinition"><span class="pre">KDefinition</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">spec_modules</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.outer.html#pyk.kast.outer.KFlatModuleList" title="pyk.kast.outer.KFlatModuleList"><span class="pre">KFlatModuleList</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">logs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kore.rpc.html#pyk.kore.rpc.LogEntry" title="pyk.kore.rpc.LogEntry"><span class="pre">LogEntry</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proof_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spec_labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pyk.proof.reachability.APRProof" title="pyk.proof.reachability.APRProof"><span class="pre">APRProof</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProof.from_spec_modules"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProof.from_spec_modules" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.get_refutation_id">
+<span class="sig-name descname"><span class="pre">get_refutation_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProof.get_refutation_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProof.get_refutation_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.get_steps">
+<span class="sig-name descname"><span class="pre">get_steps</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pyk.proof.reachability.APRProofStep" title="pyk.proof.reachability.APRProofStep"><span class="pre">APRProofStep</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProof.get_steps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProof.get_steps" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.init">
+<span class="sig-name descname"><span class="pre">init</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pyk.proof.reachability.APRProof.init" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.is_bounded">
+<span class="sig-name descname"><span class="pre">is_bounded</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NodeIdLike</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProof.is_bounded"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProof.is_bounded" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.is_failing">
+<span class="sig-name descname"><span class="pre">is_failing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NodeIdLike</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProof.is_failing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProof.is_failing" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.is_init">
+<span class="sig-name descname"><span class="pre">is_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NodeIdLike</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProof.is_init"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProof.is_init" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.is_pending">
+<span class="sig-name descname"><span class="pre">is_pending</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NodeIdLike</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProof.is_pending"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProof.is_pending" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.is_refuted">
+<span class="sig-name descname"><span class="pre">is_refuted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NodeIdLike</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProof.is_refuted"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProof.is_refuted" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.is_target">
+<span class="sig-name descname"><span class="pre">is_target</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NodeIdLike</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProof.is_target"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProof.is_target" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.logs">
+<span class="sig-name descname"><span class="pre">logs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kore.rpc.html#pyk.kore.rpc.LogEntry" title="pyk.kore.rpc.LogEntry"><span class="pre">LogEntry</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.proof.reachability.APRProof.logs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.module_name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">module_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.proof.reachability.APRProof.module_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.node_refutations">
+<span class="sig-name descname"><span class="pre">node_refutations</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.RefutationProof" title="pyk.proof.implies.RefutationProof"><span class="pre">RefutationProof</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.proof.reachability.APRProof.node_refutations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.nonzero_depth">
+<span class="sig-name descname"><span class="pre">nonzero_depth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Node" title="pyk.kcfg.kcfg.KCFG.Node"><span class="pre">Node</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProof.nonzero_depth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProof.nonzero_depth" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.one_line_summary">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">one_line_summary</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.proof.reachability.APRProof.one_line_summary" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.own_status">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">own_status</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.ProofStatus" title="pyk.proof.proof.ProofStatus"><span class="pre">ProofStatus</span></a></em><a class="headerlink" href="#pyk.proof.reachability.APRProof.own_status" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.path_constraints">
+<span class="sig-name descname"><span class="pre">path_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">final_node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NodeIdLike</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_with</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.outer.html#pyk.kast.outer.KDefinition" title="pyk.kast.outer.KDefinition"><span class="pre">KDefinition</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProof.path_constraints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProof.path_constraints" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.pending">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pending</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Node" title="pyk.kcfg.kcfg.KCFG.Node"><span class="pre">Node</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.proof.reachability.APRProof.pending" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.prior_loops_cache">
+<span class="sig-name descname"><span class="pre">prior_loops_cache</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.proof.reachability.APRProof.prior_loops_cache" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.prune">
+<span class="sig-name descname"><span class="pre">prune</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NodeIdLike</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_nodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">NodeIdLike</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProof.prune"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProof.prune" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.read_proof">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_proof</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proof_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.proof.reachability.APRProof" title="pyk.proof.reachability.APRProof"><span class="pre">APRProof</span></a></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProof.read_proof"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProof.read_proof" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.read_proof_data">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_proof_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proof_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.proof.reachability.APRProof" title="pyk.proof.reachability.APRProof"><span class="pre">APRProof</span></a></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProof.read_proof_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProof.read_proof_data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.refute_node">
+<span class="sig-name descname"><span class="pre">refute_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Node" title="pyk.kcfg.kcfg.KCFG.Node"><span class="pre">Node</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.RefutationProof" title="pyk.proof.implies.RefutationProof"><span class="pre">RefutationProof</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProof.refute_node"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProof.refute_node" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.rule_id">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rule_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.proof.reachability.APRProof.rule_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.set_exec_time">
+<span class="sig-name descname"><span class="pre">set_exec_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exec_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProof.set_exec_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProof.set_exec_time" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.shortest_path_to">
+<span class="sig-name descname"><span class="pre">shortest_path_to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NodeIdLike</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Successor" title="pyk.kcfg.kcfg.KCFG.Successor"><span class="pre">KCFG.Successor</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProof.shortest_path_to"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProof.shortest_path_to" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.summary">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">summary</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.CompositeSummary" title="pyk.proof.proof.CompositeSummary"><span class="pre">CompositeSummary</span></a></em><a class="headerlink" href="#pyk.proof.reachability.APRProof.summary" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.target">
+<span class="sig-name descname"><span class="pre">target</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pyk.proof.reachability.APRProof.target" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.unrefute_node">
+<span class="sig-name descname"><span class="pre">unrefute_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Node" title="pyk.kcfg.kcfg.KCFG.Node"><span class="pre">Node</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProof.unrefute_node"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProof.unrefute_node" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProof.write_proof_data">
+<span class="sig-name descname"><span class="pre">write_proof_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProof.write_proof_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProof.write_proof_data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProofBoundedResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">APRProofBoundedResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'int'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_loops_cache_update</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'tuple[int,</span> <span class="pre">...]'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize_kcfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'bool'</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProofBoundedResult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProofBoundedResult" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.proof.reachability.APRProofResult" title="pyk.proof.reachability.APRProofResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">APRProofResult</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProofExtendAndCacheResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">APRProofExtendAndCacheResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_loops_cache_update</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize_kcfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension_to_apply</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFGExtendResult" title="pyk.kcfg.kcfg.KCFGExtendResult"><span class="pre">KCFGExtendResult</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension_to_cache</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFGExtendResult" title="pyk.kcfg.kcfg.KCFGExtendResult"><span class="pre">KCFGExtendResult</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProofExtendAndCacheResult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProofExtendAndCacheResult" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.proof.reachability.APRProofExtendResult" title="pyk.proof.reachability.APRProofExtendResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">APRProofExtendResult</span></code></a></p>
+<p>Proof extension to be cached.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProofExtendAndCacheResult.extension_to_cache">
+<span class="sig-name descname"><span class="pre">extension_to_cache</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFGExtendResult" title="pyk.kcfg.kcfg.KCFGExtendResult"><span class="pre">KCFGExtendResult</span></a></em><a class="headerlink" href="#pyk.proof.reachability.APRProofExtendAndCacheResult.extension_to_cache" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProofExtendResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">APRProofExtendResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_loops_cache_update</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize_kcfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension_to_apply</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFGExtendResult" title="pyk.kcfg.kcfg.KCFGExtendResult"><span class="pre">KCFGExtendResult</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProofExtendResult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProofExtendResult" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.proof.reachability.APRProofResult" title="pyk.proof.reachability.APRProofResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">APRProofResult</span></code></a></p>
+<p>Proof extension to be applied.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProofExtendResult.extension_to_apply">
+<span class="sig-name descname"><span class="pre">extension_to_apply</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFGExtendResult" title="pyk.kcfg.kcfg.KCFGExtendResult"><span class="pre">KCFGExtendResult</span></a></em><a class="headerlink" href="#pyk.proof.reachability.APRProofExtendResult.extension_to_apply" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProofResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">APRProofResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'int'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_loops_cache_update</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'tuple[int,</span> <span class="pre">...]'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize_kcfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'bool'</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProofResult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProofResult" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProofResult.node_id">
+<span class="sig-name descname"><span class="pre">node_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pyk.proof.reachability.APRProofResult.node_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProofResult.optimize_kcfg">
+<span class="sig-name descname"><span class="pre">optimize_kcfg</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyk.proof.reachability.APRProofResult.optimize_kcfg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProofResult.prior_loops_cache_update">
+<span class="sig-name descname"><span class="pre">prior_loops_cache_update</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.proof.reachability.APRProofResult.prior_loops_cache_update" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProofStep">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">APRProofStep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'KCFG.Node'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'KCFG.Node'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proof_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bmc_depth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'int</span> <span class="pre">|</span> <span class="pre">None'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_cache</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'NodeIdLike</span> <span class="pre">|</span> <span class="pre">None'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shortest_path_to_node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'tuple[KCFG.Node,</span> <span class="pre">...]'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_loops_cache</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'FrozenDict[int,</span> <span class="pre">tuple[int,</span> <span class="pre">...]]'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">circularity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'bool'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nonzero_depth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'bool'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">circularity_rule_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str'</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProofStep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProofStep" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProofStep.bmc_depth">
+<span class="sig-name descname"><span class="pre">bmc_depth</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.proof.reachability.APRProofStep.bmc_depth" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProofStep.circularity">
+<span class="sig-name descname"><span class="pre">circularity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyk.proof.reachability.APRProofStep.circularity" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProofStep.circularity_rule_id">
+<span class="sig-name descname"><span class="pre">circularity_rule_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.proof.reachability.APRProofStep.circularity_rule_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProofStep.module_name">
+<span class="sig-name descname"><span class="pre">module_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.proof.reachability.APRProofStep.module_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProofStep.node">
+<span class="sig-name descname"><span class="pre">node</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Node" title="pyk.kcfg.kcfg.KCFG.Node"><span class="pre">KCFG.Node</span></a></em><a class="headerlink" href="#pyk.proof.reachability.APRProofStep.node" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProofStep.nonzero_depth">
+<span class="sig-name descname"><span class="pre">nonzero_depth</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyk.proof.reachability.APRProofStep.nonzero_depth" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProofStep.prior_loops_cache">
+<span class="sig-name descname"><span class="pre">prior_loops_cache</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.utils.html#pyk.utils.FrozenDict" title="pyk.utils.FrozenDict"><span class="pre">FrozenDict</span></a><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.proof.reachability.APRProofStep.prior_loops_cache" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProofStep.proof_id">
+<span class="sig-name descname"><span class="pre">proof_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.proof.reachability.APRProofStep.proof_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProofStep.shortest_path_to_node">
+<span class="sig-name descname"><span class="pre">shortest_path_to_node</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Node" title="pyk.kcfg.kcfg.KCFG.Node"><span class="pre">KCFG.Node</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.proof.reachability.APRProofStep.shortest_path_to_node" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProofStep.target">
+<span class="sig-name descname"><span class="pre">target</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Node" title="pyk.kcfg.kcfg.KCFG.Node"><span class="pre">KCFG.Node</span></a></em><a class="headerlink" href="#pyk.proof.reachability.APRProofStep.target" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProofStep.use_cache">
+<span class="sig-name descname"><span class="pre">use_cache</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">NodeIdLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.proof.reachability.APRProofStep.use_cache" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProofSubsumeResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">APRProofSubsumeResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'int'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_loops_cache_update</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'tuple[int,</span> <span class="pre">...]'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize_kcfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'bool'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csubst</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'CSubst'</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProofSubsumeResult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProofSubsumeResult" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.proof.reachability.APRProofResult" title="pyk.proof.reachability.APRProofResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">APRProofResult</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProofSubsumeResult.csubst">
+<span class="sig-name descname"><span class="pre">csubst</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.cterm.cterm.html#pyk.cterm.cterm.CSubst" title="pyk.cterm.cterm.CSubst"><span class="pre">CSubst</span></a></em><a class="headerlink" href="#pyk.proof.reachability.APRProofSubsumeResult.csubst" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProofTerminalResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">APRProofTerminalResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'int'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_loops_cache_update</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'tuple[int,</span> <span class="pre">...]'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize_kcfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'bool'</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProofTerminalResult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProofTerminalResult" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.proof.reachability.APRProofResult" title="pyk.proof.reachability.APRProofResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">APRProofResult</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProofUseCacheResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">APRProofUseCacheResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_loops_cache_update</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize_kcfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cached_node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NodeIdLike</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProofUseCacheResult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProofUseCacheResult" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.proof.reachability.APRProofResult" title="pyk.proof.reachability.APRProofResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">APRProofResult</span></code></a></p>
+<p>Proof extension to be applied using the extension cache.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProofUseCacheResult.cached_node_id">
+<span class="sig-name descname"><span class="pre">cached_node_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">NodeIdLike</span></em><a class="headerlink" href="#pyk.proof.reachability.APRProofUseCacheResult.cached_node_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProver">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">APRProver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kcfg_explore</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kcfg.explore.html#pyk.kcfg.explore.KCFGExplore" title="pyk.kcfg.explore.KCFGExplore"><span class="pre">KCFGExplore</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">execute_depth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cut_point_rules</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">terminal_rules</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">counterexample_info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fast_check_subsumption</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direct_subproof_rules</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assume_defined</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_module</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.outer.html#pyk.kast.outer.KFlatModule" title="pyk.kast.outer.KFlatModule"><span class="pre">KFlatModule</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize_kcfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProver" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Prover" title="pyk.proof.proof.Prover"><code class="xref py py-class docutils literal notranslate"><span class="pre">Prover</span></code></a>[<a class="reference internal" href="#pyk.proof.reachability.APRProof" title="pyk.proof.reachability.APRProof"><code class="xref py py-class docutils literal notranslate"><span class="pre">APRProof</span></code></a>, <a class="reference internal" href="#pyk.proof.reachability.APRProofStep" title="pyk.proof.reachability.APRProofStep"><code class="xref py py-class docutils literal notranslate"><span class="pre">APRProofStep</span></code></a>, <a class="reference internal" href="#pyk.proof.reachability.APRProofResult" title="pyk.proof.reachability.APRProofResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">APRProofResult</span></code></a>]</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProver.assume_defined">
+<span class="sig-name descname"><span class="pre">assume_defined</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyk.proof.reachability.APRProver.assume_defined" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProver.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProver.close"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProver.close" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProver.counterexample_info">
+<span class="sig-name descname"><span class="pre">counterexample_info</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyk.proof.reachability.APRProver.counterexample_info" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProver.cut_point_rules">
+<span class="sig-name descname"><span class="pre">cut_point_rules</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.proof.reachability.APRProver.cut_point_rules" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProver.direct_subproof_rules">
+<span class="sig-name descname"><span class="pre">direct_subproof_rules</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyk.proof.reachability.APRProver.direct_subproof_rules" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProver.execute_depth">
+<span class="sig-name descname"><span class="pre">execute_depth</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.proof.reachability.APRProver.execute_depth" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProver.extra_module">
+<span class="sig-name descname"><span class="pre">extra_module</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.outer.html#pyk.kast.outer.KFlatModule" title="pyk.kast.outer.KFlatModule"><span class="pre">KFlatModule</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.proof.reachability.APRProver.extra_module" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProver.failure_info">
+<span class="sig-name descname"><span class="pre">failure_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proof</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pyk.proof.reachability.APRProof" title="pyk.proof.reachability.APRProof"><span class="pre">APRProof</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.FailureInfo" title="pyk.proof.proof.FailureInfo"><span class="pre">FailureInfo</span></a></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProver.failure_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProver.failure_info" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProver.fast_check_subsumption">
+<span class="sig-name descname"><span class="pre">fast_check_subsumption</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyk.proof.reachability.APRProver.fast_check_subsumption" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProver.init_proof">
+<span class="sig-name descname"><span class="pre">init_proof</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proof</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pyk.proof.reachability.APRProof" title="pyk.proof.reachability.APRProof"><span class="pre">APRProof</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProver.init_proof"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProver.init_proof" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProver.kcfg_explore">
+<span class="sig-name descname"><span class="pre">kcfg_explore</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kcfg.explore.html#pyk.kcfg.explore.KCFGExplore" title="pyk.kcfg.explore.KCFGExplore"><span class="pre">KCFGExplore</span></a></em><a class="headerlink" href="#pyk.proof.reachability.APRProver.kcfg_explore" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProver.main_module_name">
+<span class="sig-name descname"><span class="pre">main_module_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.proof.reachability.APRProver.main_module_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProver.optimize_kcfg">
+<span class="sig-name descname"><span class="pre">optimize_kcfg</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyk.proof.reachability.APRProver.optimize_kcfg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProver.step_proof">
+<span class="sig-name descname"><span class="pre">step_proof</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pyk.proof.reachability.APRProofStep" title="pyk.proof.reachability.APRProofStep"><span class="pre">APRProofStep</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pyk.proof.reachability.APRProofResult" title="pyk.proof.reachability.APRProofResult"><span class="pre">APRProofResult</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRProver.step_proof"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRProver.step_proof" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRProver.terminal_rules">
+<span class="sig-name descname"><span class="pre">terminal_rules</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.proof.reachability.APRProver.terminal_rules" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRSummary">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">APRSummary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'ProofStatus'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">admitted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'bool'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'int'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pending</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'int'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">failing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'int'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vacuous</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'int'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stuck</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'int'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">terminal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'int'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refuted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'int'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bmc_depth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'int</span> <span class="pre">|</span> <span class="pre">None'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounded</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'int'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subproofs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'int'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">formatted_exec_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str'</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/proof/reachability.html#APRSummary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.reachability.APRSummary" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.ProofSummary" title="pyk.proof.proof.ProofSummary"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProofSummary</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRSummary.admitted">
+<span class="sig-name descname"><span class="pre">admitted</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyk.proof.reachability.APRSummary.admitted" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRSummary.bmc_depth">
+<span class="sig-name descname"><span class="pre">bmc_depth</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.proof.reachability.APRSummary.bmc_depth" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRSummary.bounded">
+<span class="sig-name descname"><span class="pre">bounded</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pyk.proof.reachability.APRSummary.bounded" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRSummary.failing">
+<span class="sig-name descname"><span class="pre">failing</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pyk.proof.reachability.APRSummary.failing" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRSummary.formatted_exec_time">
+<span class="sig-name descname"><span class="pre">formatted_exec_time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.proof.reachability.APRSummary.formatted_exec_time" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRSummary.id">
+<span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.proof.reachability.APRSummary.id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRSummary.lines">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">lines</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.proof.reachability.APRSummary.lines" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRSummary.nodes">
+<span class="sig-name descname"><span class="pre">nodes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pyk.proof.reachability.APRSummary.nodes" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRSummary.pending">
+<span class="sig-name descname"><span class="pre">pending</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pyk.proof.reachability.APRSummary.pending" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRSummary.refuted">
+<span class="sig-name descname"><span class="pre">refuted</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pyk.proof.reachability.APRSummary.refuted" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRSummary.status">
+<span class="sig-name descname"><span class="pre">status</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.ProofStatus" title="pyk.proof.proof.ProofStatus"><span class="pre">ProofStatus</span></a></em><a class="headerlink" href="#pyk.proof.reachability.APRSummary.status" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRSummary.stuck">
+<span class="sig-name descname"><span class="pre">stuck</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pyk.proof.reachability.APRSummary.stuck" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRSummary.subproofs">
+<span class="sig-name descname"><span class="pre">subproofs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pyk.proof.reachability.APRSummary.subproofs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRSummary.terminal">
+<span class="sig-name descname"><span class="pre">terminal</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pyk.proof.reachability.APRSummary.terminal" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.reachability.APRSummary.vacuous">
+<span class="sig-name descname"><span class="pre">vacuous</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pyk.proof.reachability.APRSummary.vacuous" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pyk.proof.prove_rpc.html" class="btn btn-neutral float-left" title="pyk.proof.prove_rpc module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pyk.proof.show.html" class="btn btn-neutral float-right" title="pyk.proof.show module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Runtime Verification, Inc.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

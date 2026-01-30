@@ -1,0 +1,899 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyk.kllvm.hints.prooftrace module &mdash; pyk 7.1.313 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=9c1be6d9"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyk.kllvm.ast module" href="pyk.kllvm.ast.html" />
+    <link rel="prev" title="pyk.kllvm.hints package" href="pyk.kllvm.hints.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            pyk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">pyk</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pyk.html">pyk package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="pyk.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="pyk.cterm.html">pyk.cterm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kast.html">pyk.kast package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kbuild.html">pyk.kbuild package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.html">pyk.kcfg package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kdist.html">pyk.kdist package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.klean.html">pyk.klean package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="pyk.kllvm.html">pyk.kllvm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.konvert.html">pyk.konvert package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kore.html">pyk.kore package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kore_exec_covr.html">pyk.kore_exec_covr package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.ktool.html">pyk.ktool package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.proof.html">pyk.proof package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.testing.html">pyk.testing package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">pyk</a></li>
+          <li class="breadcrumb-item"><a href="pyk.html">pyk package</a></li>
+          <li class="breadcrumb-item"><a href="pyk.kllvm.html">pyk.kllvm package</a></li>
+          <li class="breadcrumb-item"><a href="pyk.kllvm.hints.html">pyk.kllvm.hints package</a></li>
+      <li class="breadcrumb-item active">pyk.kllvm.hints.prooftrace module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/pyk.kllvm.hints.prooftrace.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pyk.kllvm.hints.prooftrace">
+<span id="pyk-kllvm-hints-prooftrace-module"></span><h1>pyk.kllvm.hints.prooftrace module<a class="headerlink" href="#module-pyk.kllvm.hints.prooftrace" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.KoreHeader">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">KoreHeader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kore_header</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">kore_header</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#KoreHeader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.KoreHeader" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Represents the Kore header.</p>
+<p>The Kore header is a file that contains the version of the Binary KORE used to serialize/deserialize the
+Proof Trace and all the aditional information needed make this process faster the Proof Trace.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.KoreHeader._kore_header">
+<span class="sig-name descname"><span class="pre">_kore_header</span></span><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.KoreHeader._kore_header" title="Link to this definition"></a></dt>
+<dd><p>The underlying KORE Header object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>kore_header</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.KoreHeader.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kore_header</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">kore_header</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#KoreHeader.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.KoreHeader.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize a new instance of the KoreHeader class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kore_header</strong> (<em>kore_header</em>) – The KORE Header object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.KoreHeader.create">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.kllvm.hints.prooftrace.KoreHeader" title="pyk.kllvm.hints.prooftrace.KoreHeader"><span class="pre">KoreHeader</span></a></span></span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#KoreHeader.create"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.KoreHeader.create" title="Link to this definition"></a></dt>
+<dd><p>Create a new KoreHeader object from the given header file path.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMArgument">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LLVMArgument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argument</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Argument</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMArgument"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMArgument" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Represents an LLVM argument.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMArgument._argument">
+<span class="sig-name descname"><span class="pre">_argument</span></span><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMArgument._argument" title="Link to this definition"></a></dt>
+<dd><p>The underlying Argument object. An argument is a wrapper object containing either a step</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Argument</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">event</span> <span class="pre">or</span> <span class="pre">a</span> <span class="pre">KORE</span> <span class="pre">pattern.</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMArgument.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argument</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Argument</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMArgument.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMArgument.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize the LLVMArgument object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>argument</strong> (<em>Argument</em>) – The Argument object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMArgument.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMArgument.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMArgument.__repr__" title="Link to this definition"></a></dt>
+<dd><p>Return a string representation of the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Returns a string representation of the LLVMArgument object using the AST printing method.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMArgument.is_kore_pattern">
+<span class="sig-name descname"><span class="pre">is_kore_pattern</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMArgument.is_kore_pattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMArgument.is_kore_pattern" title="Link to this definition"></a></dt>
+<dd><p>Check if the argument is a KORE Pattern.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMArgument.is_step_event">
+<span class="sig-name descname"><span class="pre">is_step_event</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMArgument.is_step_event"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMArgument.is_step_event" title="Link to this definition"></a></dt>
+<dd><p>Check if the argument is a step event.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMArgument.kore_pattern">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kore_pattern</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Pattern</span></em><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMArgument.kore_pattern" title="Link to this definition"></a></dt>
+<dd><p>Return the KORE Pattern associated with the argument if any.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMArgument.step_event">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">step_event</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.kllvm.hints.prooftrace.LLVMStepEvent" title="pyk.kllvm.hints.prooftrace.LLVMStepEvent"><span class="pre">LLVMStepEvent</span></a></em><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMArgument.step_event" title="Link to this definition"></a></dt>
+<dd><p>Returns the LLVMStepEvent associated with the argument if any.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMEventAnnotated">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LLVMEventAnnotated</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">annotated_llvm_event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">annotated_llvm_event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMEventAnnotated"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMEventAnnotated" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Represents an annotated LLVM event.</p>
+<p>This class is used to wrap an llvm_event and its corresponding event type.
+This class is used to iterate over the LLVM rewrite trace events.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMEventAnnotated._annotated_llvm_event">
+<span class="sig-name descname"><span class="pre">_annotated_llvm_event</span></span><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMEventAnnotated._annotated_llvm_event" title="Link to this definition"></a></dt>
+<dd><p>The underlying annotated LLVM event object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>annotated_llvm_event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMEventAnnotated.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">annotated_llvm_event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">annotated_llvm_event</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMEventAnnotated.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMEventAnnotated.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize a new instance of the LLVMEventAnnotated class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>annotated_llvm_event</strong> (<em>annotated_llvm_event</em>) – The annotated LLVM event object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMEventAnnotated.event">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">event</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.kllvm.hints.prooftrace.LLVMArgument" title="pyk.kllvm.hints.prooftrace.LLVMArgument"><span class="pre">LLVMArgument</span></a></em><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMEventAnnotated.event" title="Link to this definition"></a></dt>
+<dd><p>Returns the LLVM event as an LLVMArgument object.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMEventAnnotated.type">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.kllvm.hints.prooftrace.LLVMEventType" title="pyk.kllvm.hints.prooftrace.LLVMEventType"><span class="pre">LLVMEventType</span></a></em><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMEventAnnotated.type" title="Link to this definition"></a></dt>
+<dd><p>Returns the LLVM event type.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMEventType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LLVMEventType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">EventType</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMEventType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMEventType" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Represents an LLVM event type.</p>
+<p>This works as a wrapper around the EventType enum.
+It also provides properties to check the type of the event.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMEventType._event_type">
+<span class="sig-name descname"><span class="pre">_event_type</span></span><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMEventType._event_type" title="Link to this definition"></a></dt>
+<dd><p>The underlying EventType object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>EventType</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMEventType.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">EventType</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMEventType.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMEventType.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize a new instance of the LLVMEventType class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event_type</strong> (<em>EventType</em>) – The EventType object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMEventType.is_initial_config">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_initial_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMEventType.is_initial_config" title="Link to this definition"></a></dt>
+<dd><p>Checks if the event type is an initial configuration event.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMEventType.is_pre_trace">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_pre_trace</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMEventType.is_pre_trace" title="Link to this definition"></a></dt>
+<dd><p>Checks if the event type is a pre-trace event.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMEventType.is_trace">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_trace</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMEventType.is_trace" title="Link to this definition"></a></dt>
+<dd><p>Checks if the event type is a trace event.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMFunctionEvent">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LLVMFunctionEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function_event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">llvm_function_event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMFunctionEvent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMFunctionEvent" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.kllvm.hints.prooftrace.LLVMStepEvent" title="pyk.kllvm.hints.prooftrace.LLVMStepEvent"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLVMStepEvent</span></code></a></p>
+<p>Represent an LLVM function event in a proof trace.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMFunctionEvent._function_event">
+<span class="sig-name descname"><span class="pre">_function_event</span></span><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMFunctionEvent._function_event" title="Link to this definition"></a></dt>
+<dd><p>The underlying LLVM function event object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>llvm_function_event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMFunctionEvent.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function_event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">llvm_function_event</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMFunctionEvent.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMFunctionEvent.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize a new instance of the LLVMFunctionEvent class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>function_event</strong> (<em>llvm_function_event</em>) – The LLVM function event object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMFunctionEvent.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMFunctionEvent.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMFunctionEvent.__repr__" title="Link to this definition"></a></dt>
+<dd><p>Return a string representation of the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A string representation of the LLVMFunctionEvent object using the AST printing method.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMFunctionEvent.args">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">args</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pyk.kllvm.hints.prooftrace.LLVMArgument" title="pyk.kllvm.hints.prooftrace.LLVMArgument"><span class="pre">LLVMArgument</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMFunctionEvent.args" title="Link to this definition"></a></dt>
+<dd><p>Return a list of LLVMArgument objects representing the arguments of the LLVM function.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMFunctionEvent.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMFunctionEvent.name" title="Link to this definition"></a></dt>
+<dd><p>Return the name of the LLVM function as a KORE Symbol Name.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMFunctionEvent.relative_position">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">relative_position</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMFunctionEvent.relative_position" title="Link to this definition"></a></dt>
+<dd><p>Return the relative position of the LLVM function event in the proof trace.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMFunctionExitEvent">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LLVMFunctionExitEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function_exit_event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">llvm_function_exit_event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMFunctionExitEvent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMFunctionExitEvent" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.kllvm.hints.prooftrace.LLVMStepEvent" title="pyk.kllvm.hints.prooftrace.LLVMStepEvent"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLVMStepEvent</span></code></a></p>
+<p>Represent an LLVM function exit event in a proof trace.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMFunctionExitEvent._function_exit_event">
+<span class="sig-name descname"><span class="pre">_function_exit_event</span></span><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMFunctionExitEvent._function_exit_event" title="Link to this definition"></a></dt>
+<dd><p>The underlying LLVM function exit event object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>llvm_function_exit_event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMFunctionExitEvent.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function_exit_event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">llvm_function_exit_event</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMFunctionExitEvent.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMFunctionExitEvent.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize a new instance of the LLVMFunctionExitEvent class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>function_exit_event</strong> (<em>llvm_function_exit_event</em>) – The LLVM function exit event object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMFunctionExitEvent.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMFunctionExitEvent.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMFunctionExitEvent.__repr__" title="Link to this definition"></a></dt>
+<dd><p>Return a string representation of the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A string representation of the LLVMFunctionExitEvent object using the AST printing method.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMFunctionExitEvent.is_tail">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_tail</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMFunctionExitEvent.is_tail" title="Link to this definition"></a></dt>
+<dd><p>Return True if the function exit event is a tail call.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMFunctionExitEvent.rule_ordinal">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rule_ordinal</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMFunctionExitEvent.rule_ordinal" title="Link to this definition"></a></dt>
+<dd><p>Return the axiom ordinal number associated with the function exit event.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMHookEvent">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LLVMHookEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hook_event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">llvm_hook_event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMHookEvent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMHookEvent" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.kllvm.hints.prooftrace.LLVMStepEvent" title="pyk.kllvm.hints.prooftrace.LLVMStepEvent"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLVMStepEvent</span></code></a></p>
+<p>Represents a hook event in LLVM execution.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMHookEvent._hook_event">
+<span class="sig-name descname"><span class="pre">_hook_event</span></span><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMHookEvent._hook_event" title="Link to this definition"></a></dt>
+<dd><p>The underlying hook event object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>llvm_hook_event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMHookEvent.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hook_event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">llvm_hook_event</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMHookEvent.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMHookEvent.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize a new instance of the LLVMHookEvent class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>hook_event</strong> (<em>llvm_hook_event</em>) – The LLVM hook event object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMHookEvent.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMHookEvent.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMHookEvent.__repr__" title="Link to this definition"></a></dt>
+<dd><p>Return a string representation of the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A string representation of the LLVMHookEvent object using the AST printing method.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMHookEvent.args">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">args</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pyk.kllvm.hints.prooftrace.LLVMArgument" title="pyk.kllvm.hints.prooftrace.LLVMArgument"><span class="pre">LLVMArgument</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMHookEvent.args" title="Link to this definition"></a></dt>
+<dd><p>Return a list of LLVMArgument objects representing the arguments of the hook event.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMHookEvent.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMHookEvent.name" title="Link to this definition"></a></dt>
+<dd><p>“INT.add”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Return the attribute name of the hook event. Ex.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMHookEvent.relative_position">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">relative_position</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMHookEvent.relative_position" title="Link to this definition"></a></dt>
+<dd><p>Return the relative position of the hook event in the proof trace.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMHookEvent.result">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">result</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Pattern</span></em><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMHookEvent.result" title="Link to this definition"></a></dt>
+<dd><p>Return the result pattern of the hook event evaluation.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMPatternMatchingFailureEvent">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LLVMPatternMatchingFailureEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern_matching_failure_event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">llvm_pattern_matching_failure_event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMPatternMatchingFailureEvent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMPatternMatchingFailureEvent" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.kllvm.hints.prooftrace.LLVMStepEvent" title="pyk.kllvm.hints.prooftrace.LLVMStepEvent"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLVMStepEvent</span></code></a></p>
+<p>Represents an LLVM pattern matching failure event.</p>
+<p>This event is used to indicate that the pattern matching failed during the rewriting process.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMPatternMatchingFailureEvent._pattern_matching_failure_event">
+<span class="sig-name descname"><span class="pre">_pattern_matching_failure_event</span></span><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMPatternMatchingFailureEvent._pattern_matching_failure_event" title="Link to this definition"></a></dt>
+<dd><p>The underlying pattern matching failure event.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>llvm_pattern_matching_failure_event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMPatternMatchingFailureEvent.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern_matching_failure_event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">llvm_pattern_matching_failure_event</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMPatternMatchingFailureEvent.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMPatternMatchingFailureEvent.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize a new instance of the LLVMPatternMatchingFailureEvent class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pattern_matching_failure_event</strong> (<em>llvm_pattern_matching_failure_event</em>) – The LLVM pattern matching failure event object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMPatternMatchingFailureEvent.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMPatternMatchingFailureEvent.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMPatternMatchingFailureEvent.__repr__" title="Link to this definition"></a></dt>
+<dd><p>Return a string representation of the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A string representation of the LLVMPatternMatchingFailureEvent object using the AST printing method.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMPatternMatchingFailureEvent.function_name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">function_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMPatternMatchingFailureEvent.function_name" title="Link to this definition"></a></dt>
+<dd><p>Return the name of the function that failed to match the pattern.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMRewriteEvent">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LLVMRewriteEvent</span></span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMRewriteEvent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMRewriteEvent" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.kllvm.hints.prooftrace.LLVMStepEvent" title="pyk.kllvm.hints.prooftrace.LLVMStepEvent"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLVMStepEvent</span></code></a></p>
+<p>Represents LLVM rewrite event.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMRewriteEvent.rule_ordinal">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rule_ordinal</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMRewriteEvent.rule_ordinal" title="Link to this definition"></a></dt>
+<dd><p>Return the axiom ordinal number of the rewrite rule.</p>
+<p>The rule ordinal represents the <cite>nth</cite> axiom in the kore definition.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMRewriteEvent.substitution">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">substitution</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Pattern</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMRewriteEvent.substitution" title="Link to this definition"></a></dt>
+<dd><p>Returns the substitution dictionary used to perform the rewrite represented by this event.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMRewriteTrace">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LLVMRewriteTrace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rewrite_trace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">llvm_rewrite_trace</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMRewriteTrace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMRewriteTrace" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Represents an LLVM rewrite trace.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMRewriteTrace._rewrite_trace">
+<span class="sig-name descname"><span class="pre">_rewrite_trace</span></span><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMRewriteTrace._rewrite_trace" title="Link to this definition"></a></dt>
+<dd><p>The underlying LLVM rewrite trace object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>llvm_rewrite_trace</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMRewriteTrace.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rewrite_trace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">llvm_rewrite_trace</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMRewriteTrace.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMRewriteTrace.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize a new instance of the LLVMRewriteTrace class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rewrite_trace</strong> (<em>llvm_rewrite_trace</em>) – The LLVM rewrite trace object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMRewriteTrace.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMRewriteTrace.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMRewriteTrace.__repr__" title="Link to this definition"></a></dt>
+<dd><p>Return a string representation of the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A string representation of the LLVMRewriteTrace object using the AST printing method.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMRewriteTrace.initial_config">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">initial_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.kllvm.hints.prooftrace.LLVMArgument" title="pyk.kllvm.hints.prooftrace.LLVMArgument"><span class="pre">LLVMArgument</span></a></em><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMRewriteTrace.initial_config" title="Link to this definition"></a></dt>
+<dd><p>Returns the initial configuration as an LLVMArgument object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMRewriteTrace.parse">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pyk.kllvm.hints.prooftrace.KoreHeader" title="pyk.kllvm.hints.prooftrace.KoreHeader"><span class="pre">KoreHeader</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.kllvm.hints.prooftrace.LLVMRewriteTrace" title="pyk.kllvm.hints.prooftrace.LLVMRewriteTrace"><span class="pre">LLVMRewriteTrace</span></a></span></span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMRewriteTrace.parse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMRewriteTrace.parse" title="Link to this definition"></a></dt>
+<dd><p>Parse the given proof hints byte string using the given kore_header object.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMRewriteTrace.pre_trace">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pre_trace</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pyk.kllvm.hints.prooftrace.LLVMArgument" title="pyk.kllvm.hints.prooftrace.LLVMArgument"><span class="pre">LLVMArgument</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMRewriteTrace.pre_trace" title="Link to this definition"></a></dt>
+<dd><p>Returns a list of events that occurred before the initial configuration was constructed.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMRewriteTrace.trace">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">trace</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pyk.kllvm.hints.prooftrace.LLVMArgument" title="pyk.kllvm.hints.prooftrace.LLVMArgument"><span class="pre">LLVMArgument</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMRewriteTrace.trace" title="Link to this definition"></a></dt>
+<dd><p>Returns the trace.</p>
+<p>The trace is the list of events that occurred after the initial configurarion was constructed until the end of the
+proof trace when the final configuration is reached.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMRewriteTrace.version">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMRewriteTrace.version" title="Link to this definition"></a></dt>
+<dd><p>Returns the version of the binary hints format used by this trace.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMRewriteTraceIterator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LLVMRewriteTraceIterator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rewrite_trace_iterator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">llvm_rewrite_trace_iterator</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMRewriteTraceIterator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMRewriteTraceIterator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Represents an LLVM rewrite trace iterator.</p>
+<p>This class is used to iterate over the LLVM rewrite trace events in the stream parser.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMRewriteTraceIterator._rewrite_trace_iterator">
+<span class="sig-name descname"><span class="pre">_rewrite_trace_iterator</span></span><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMRewriteTraceIterator._rewrite_trace_iterator" title="Link to this definition"></a></dt>
+<dd><p>The underlying LLVM rewrite trace iterator object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>llvm_rewrite_trace_iterator</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMRewriteTraceIterator.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rewrite_trace_iterator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">llvm_rewrite_trace_iterator</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMRewriteTraceIterator.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMRewriteTraceIterator.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize a new instance of the LLVMRewriteTraceIterator class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rewrite_trace_iterator</strong> (<em>llvm_rewrite_trace_iterator</em>) – The LLVM rewrite trace iterator object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMRewriteTraceIterator.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pyk.kllvm.hints.prooftrace.LLVMEventAnnotated" title="pyk.kllvm.hints.prooftrace.LLVMEventAnnotated"><span class="pre">LLVMEventAnnotated</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMRewriteTraceIterator.__iter__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMRewriteTraceIterator.__iter__" title="Link to this definition"></a></dt>
+<dd><p>Yield LLVMEventAnnotated options.</p>
+<p>This method is an iterator that yields LLVMEventAnnotated options.
+It iterates over the events in the trace and returns the next event as an LLVMEventAnnotated object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Yields<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>LLVMEventAnnotated</em> – The next LLVMEventAnnotated option.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMRewriteTraceIterator.__next__">
+<span class="sig-name descname"><span class="pre">__next__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.kllvm.hints.prooftrace.LLVMEventAnnotated" title="pyk.kllvm.hints.prooftrace.LLVMEventAnnotated"><span class="pre">LLVMEventAnnotated</span></a></span></span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMRewriteTraceIterator.__next__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMRewriteTraceIterator.__next__" title="Link to this definition"></a></dt>
+<dd><p>Yield the next LLVMEventAnnotated object from the iterator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The next LLVMEventAnnotated object.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pyk.kllvm.hints.prooftrace.LLVMEventAnnotated" title="pyk.kllvm.hints.prooftrace.LLVMEventAnnotated">LLVMEventAnnotated</a></p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>StopIteration</strong> – If there are no more events in the iterator.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMRewriteTraceIterator.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMRewriteTraceIterator.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMRewriteTraceIterator.__repr__" title="Link to this definition"></a></dt>
+<dd><p>Return a string representation of the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A string representation of the LLVMRewriteTraceIterator object using the AST printing method.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMRewriteTraceIterator.from_file">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trace_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pyk.kllvm.hints.prooftrace.KoreHeader" title="pyk.kllvm.hints.prooftrace.KoreHeader"><span class="pre">KoreHeader</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.kllvm.hints.prooftrace.LLVMRewriteTraceIterator" title="pyk.kllvm.hints.prooftrace.LLVMRewriteTraceIterator"><span class="pre">LLVMRewriteTraceIterator</span></a></span></span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMRewriteTraceIterator.from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMRewriteTraceIterator.from_file" title="Link to this definition"></a></dt>
+<dd><p>Create a new LLVMRewriteTraceIterator object from the given trace and header file paths.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMRewriteTraceIterator.version">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMRewriteTraceIterator.version" title="Link to this definition"></a></dt>
+<dd><p>Return the version of the HINTS format.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMRuleEvent">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LLVMRuleEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule_event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">llvm_rule_event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMRuleEvent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMRuleEvent" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.kllvm.hints.prooftrace.LLVMRewriteEvent" title="pyk.kllvm.hints.prooftrace.LLVMRewriteEvent"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLVMRewriteEvent</span></code></a></p>
+<p>Represents an LLVM rule event.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMRuleEvent._rule_event">
+<span class="sig-name descname"><span class="pre">_rule_event</span></span><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMRuleEvent._rule_event" title="Link to this definition"></a></dt>
+<dd><p>The underlying LLVM rule event.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>llvm_rule_event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMRuleEvent.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule_event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">llvm_rule_event</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMRuleEvent.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMRuleEvent.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize a new instance of the LLVMRuleEvent class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rule_event</strong> (<em>llvm_rule_event</em>) – The LLVM rule event object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMRuleEvent.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMRuleEvent.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMRuleEvent.__repr__" title="Link to this definition"></a></dt>
+<dd><p>Return a string representation of the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A string representation of the LLVMRuleEvent object using the AST printing method.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMRuleEvent.rule_ordinal">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rule_ordinal</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMRuleEvent.rule_ordinal" title="Link to this definition"></a></dt>
+<dd><p>Returns the axiom ordinal number of the rule event.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMRuleEvent.substitution">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">substitution</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Pattern</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMRuleEvent.substitution" title="Link to this definition"></a></dt>
+<dd><p>Returns the substitution dictionary used to perform the rewrite represented by this rule event.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMSideConditionEventEnter">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LLVMSideConditionEventEnter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">side_condition_event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">llvm_side_condition_event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMSideConditionEventEnter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMSideConditionEventEnter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.kllvm.hints.prooftrace.LLVMRewriteEvent" title="pyk.kllvm.hints.prooftrace.LLVMRewriteEvent"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLVMRewriteEvent</span></code></a></p>
+<p>Represents an event that enters a side condition in LLVM rewriting.</p>
+<p>This event is used to check the side condition of a rule. Mostly used in ensures/requires clauses.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMSideConditionEventEnter._side_condition_event">
+<span class="sig-name descname"><span class="pre">_side_condition_event</span></span><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMSideConditionEventEnter._side_condition_event" title="Link to this definition"></a></dt>
+<dd><p>The underlying side condition event.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>llvm_side_condition_event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMSideConditionEventEnter.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">side_condition_event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">llvm_side_condition_event</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMSideConditionEventEnter.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMSideConditionEventEnter.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize a new instance of the LLVMSideConditionEventEnter class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>side_condition_event</strong> (<em>llvm_side_condition_event</em>) – The LLVM side condition event object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMSideConditionEventEnter.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMSideConditionEventEnter.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMSideConditionEventEnter.__repr__" title="Link to this definition"></a></dt>
+<dd><p>Return a string representation of the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A string representation of the LLVMSideConditionEventEnter object using the AST printing method.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMSideConditionEventEnter.rule_ordinal">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rule_ordinal</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMSideConditionEventEnter.rule_ordinal" title="Link to this definition"></a></dt>
+<dd><p>Returns the axiom ordinal number associated with the side condition event.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMSideConditionEventEnter.substitution">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">substitution</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Pattern</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMSideConditionEventEnter.substitution" title="Link to this definition"></a></dt>
+<dd><p>Returns the substitution dictionary used to perform the rewrite represented by this side condition event.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMSideConditionEventExit">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LLVMSideConditionEventExit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">side_condition_end_event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">llvm_side_condition_end_event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMSideConditionEventExit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMSideConditionEventExit" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.kllvm.hints.prooftrace.LLVMStepEvent" title="pyk.kllvm.hints.prooftrace.LLVMStepEvent"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLVMStepEvent</span></code></a></p>
+<p>Represents an LLVM side condition event indicating the exit of a side condition.</p>
+<p>This event contains the result of the side condition evaluation.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMSideConditionEventExit._side_condition_end_event">
+<span class="sig-name descname"><span class="pre">_side_condition_end_event</span></span><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMSideConditionEventExit._side_condition_end_event" title="Link to this definition"></a></dt>
+<dd><p>The underlying side condition end event.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>llvm_side_condition_end_event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMSideConditionEventExit.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">side_condition_end_event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">llvm_side_condition_end_event</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMSideConditionEventExit.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMSideConditionEventExit.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize a new instance of the LLVMSideConditionEventExit class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>side_condition_end_event</strong> (<em>llvm_side_condition_end_event</em>) – The LLVM side condition end event object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMSideConditionEventExit.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMSideConditionEventExit.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMSideConditionEventExit.__repr__" title="Link to this definition"></a></dt>
+<dd><p>Return a string representation of the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A string representation of the LLVMSideConditionEventExit object using the AST printing method.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMSideConditionEventExit.check_result">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_result</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMSideConditionEventExit.check_result" title="Link to this definition"></a></dt>
+<dd><p>Return the boolean result of the evaluation of the side condition that corresponds to this event.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMSideConditionEventExit.rule_ordinal">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rule_ordinal</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMSideConditionEventExit.rule_ordinal" title="Link to this definition"></a></dt>
+<dd><p>Return the axiom ordinal number associated with the side condition event.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kllvm.hints.prooftrace.LLVMStepEvent">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LLVMStepEvent</span></span><a class="reference internal" href="../_modules/pyk/kllvm/hints/prooftrace.html#LLVMStepEvent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kllvm.hints.prooftrace.LLVMStepEvent" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Abstract base class representing an LLVM step event.</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pyk.kllvm.hints.html" class="btn btn-neutral float-left" title="pyk.kllvm.hints package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pyk.kllvm.ast.html" class="btn btn-neutral float-right" title="pyk.kllvm.ast module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Runtime Verification, Inc.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

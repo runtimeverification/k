@@ -1,0 +1,467 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyk.proof package &mdash; pyk 7.1.313 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=9c1be6d9"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyk.proof.implies module" href="pyk.proof.implies.html" />
+    <link rel="prev" title="pyk.ktool.utils module" href="pyk.ktool.utils.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            pyk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">pyk</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pyk.html">pyk package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="pyk.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="pyk.cterm.html">pyk.cterm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kast.html">pyk.kast package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kbuild.html">pyk.kbuild package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.html">pyk.kcfg package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kdist.html">pyk.kdist package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.klean.html">pyk.klean package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kllvm.html">pyk.kllvm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.konvert.html">pyk.konvert package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kore.html">pyk.kore package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kore_exec_covr.html">pyk.kore_exec_covr package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.ktool.html">pyk.ktool package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">pyk.proof package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.testing.html">pyk.testing package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">pyk</a></li>
+          <li class="breadcrumb-item"><a href="pyk.html">pyk package</a></li>
+      <li class="breadcrumb-item active">pyk.proof package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/pyk.proof.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pyk.proof">
+<span id="pyk-proof-package"></span><h1>pyk.proof package<a class="headerlink" href="#module-pyk.proof" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pyk.proof.implies.html">pyk.proof.implies module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.EqualityProof"><code class="docutils literal notranslate"><span class="pre">EqualityProof</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.EqualityProof.constraint"><code class="docutils literal notranslate"><span class="pre">EqualityProof.constraint</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.EqualityProof.constraints"><code class="docutils literal notranslate"><span class="pre">EqualityProof.constraints</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.EqualityProof.dict"><code class="docutils literal notranslate"><span class="pre">EqualityProof.dict</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.EqualityProof.equality"><code class="docutils literal notranslate"><span class="pre">EqualityProof.equality</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.EqualityProof.from_claim"><code class="docutils literal notranslate"><span class="pre">EqualityProof.from_claim()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.EqualityProof.from_dict"><code class="docutils literal notranslate"><span class="pre">EqualityProof.from_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.EqualityProof.lhs_body"><code class="docutils literal notranslate"><span class="pre">EqualityProof.lhs_body</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.EqualityProof.pretty"><code class="docutils literal notranslate"><span class="pre">EqualityProof.pretty()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.EqualityProof.read_proof_data"><code class="docutils literal notranslate"><span class="pre">EqualityProof.read_proof_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.EqualityProof.rhs_body"><code class="docutils literal notranslate"><span class="pre">EqualityProof.rhs_body</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.EqualityProof.simplified_constraints"><code class="docutils literal notranslate"><span class="pre">EqualityProof.simplified_constraints</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.EqualityProof.simplified_equality"><code class="docutils literal notranslate"><span class="pre">EqualityProof.simplified_equality</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.EqualityProof.sort"><code class="docutils literal notranslate"><span class="pre">EqualityProof.sort</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.EqualityProof.summary"><code class="docutils literal notranslate"><span class="pre">EqualityProof.summary</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.EqualitySummary"><code class="docutils literal notranslate"><span class="pre">EqualitySummary</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.EqualitySummary.admitted"><code class="docutils literal notranslate"><span class="pre">EqualitySummary.admitted</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.EqualitySummary.id"><code class="docutils literal notranslate"><span class="pre">EqualitySummary.id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.EqualitySummary.lines"><code class="docutils literal notranslate"><span class="pre">EqualitySummary.lines</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.EqualitySummary.status"><code class="docutils literal notranslate"><span class="pre">EqualitySummary.status</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.ImpliesProof"><code class="docutils literal notranslate"><span class="pre">ImpliesProof</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.ImpliesProof.antecedent"><code class="docutils literal notranslate"><span class="pre">ImpliesProof.antecedent</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.ImpliesProof.bind_universally"><code class="docutils literal notranslate"><span class="pre">ImpliesProof.bind_universally</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.ImpliesProof.can_progress"><code class="docutils literal notranslate"><span class="pre">ImpliesProof.can_progress</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.ImpliesProof.commit"><code class="docutils literal notranslate"><span class="pre">ImpliesProof.commit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.ImpliesProof.consequent"><code class="docutils literal notranslate"><span class="pre">ImpliesProof.consequent</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.ImpliesProof.csubst"><code class="docutils literal notranslate"><span class="pre">ImpliesProof.csubst</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.ImpliesProof.dict"><code class="docutils literal notranslate"><span class="pre">ImpliesProof.dict</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.ImpliesProof.from_dict"><code class="docutils literal notranslate"><span class="pre">ImpliesProof.from_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.ImpliesProof.get_steps"><code class="docutils literal notranslate"><span class="pre">ImpliesProof.get_steps()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.ImpliesProof.own_status"><code class="docutils literal notranslate"><span class="pre">ImpliesProof.own_status</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.ImpliesProof.simplified_antecedent"><code class="docutils literal notranslate"><span class="pre">ImpliesProof.simplified_antecedent</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.ImpliesProof.simplified_consequent"><code class="docutils literal notranslate"><span class="pre">ImpliesProof.simplified_consequent</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.ImpliesProof.write_proof_data"><code class="docutils literal notranslate"><span class="pre">ImpliesProof.write_proof_data()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.ImpliesProofResult"><code class="docutils literal notranslate"><span class="pre">ImpliesProofResult</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.ImpliesProofResult.csubst"><code class="docutils literal notranslate"><span class="pre">ImpliesProofResult.csubst</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.ImpliesProofResult.simplified_antecedent"><code class="docutils literal notranslate"><span class="pre">ImpliesProofResult.simplified_antecedent</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.ImpliesProofResult.simplified_consequent"><code class="docutils literal notranslate"><span class="pre">ImpliesProofResult.simplified_consequent</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.ImpliesProofStep"><code class="docutils literal notranslate"><span class="pre">ImpliesProofStep</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.ImpliesProofStep.proof"><code class="docutils literal notranslate"><span class="pre">ImpliesProofStep.proof</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.ImpliesProver"><code class="docutils literal notranslate"><span class="pre">ImpliesProver</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.ImpliesProver.assume_defined"><code class="docutils literal notranslate"><span class="pre">ImpliesProver.assume_defined</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.ImpliesProver.close"><code class="docutils literal notranslate"><span class="pre">ImpliesProver.close()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.ImpliesProver.failure_info"><code class="docutils literal notranslate"><span class="pre">ImpliesProver.failure_info()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.ImpliesProver.init_proof"><code class="docutils literal notranslate"><span class="pre">ImpliesProver.init_proof()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.ImpliesProver.kcfg_explore"><code class="docutils literal notranslate"><span class="pre">ImpliesProver.kcfg_explore</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.ImpliesProver.proof"><code class="docutils literal notranslate"><span class="pre">ImpliesProver.proof</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.ImpliesProver.step_proof"><code class="docutils literal notranslate"><span class="pre">ImpliesProver.step_proof()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.RefutationProof"><code class="docutils literal notranslate"><span class="pre">RefutationProof</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.RefutationProof.dict"><code class="docutils literal notranslate"><span class="pre">RefutationProof.dict</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.RefutationProof.from_dict"><code class="docutils literal notranslate"><span class="pre">RefutationProof.from_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.RefutationProof.last_constraint"><code class="docutils literal notranslate"><span class="pre">RefutationProof.last_constraint</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.RefutationProof.pre_constraints"><code class="docutils literal notranslate"><span class="pre">RefutationProof.pre_constraints</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.RefutationProof.pretty"><code class="docutils literal notranslate"><span class="pre">RefutationProof.pretty()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.RefutationProof.read_proof_data"><code class="docutils literal notranslate"><span class="pre">RefutationProof.read_proof_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.RefutationProof.simplified_constraints"><code class="docutils literal notranslate"><span class="pre">RefutationProof.simplified_constraints</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.RefutationProof.summary"><code class="docutils literal notranslate"><span class="pre">RefutationProof.summary</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.RefutationProof.to_claim"><code class="docutils literal notranslate"><span class="pre">RefutationProof.to_claim()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.RefutationSummary"><code class="docutils literal notranslate"><span class="pre">RefutationSummary</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.RefutationSummary.id"><code class="docutils literal notranslate"><span class="pre">RefutationSummary.id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.RefutationSummary.lines"><code class="docutils literal notranslate"><span class="pre">RefutationSummary.lines</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.implies.html#pyk.proof.implies.RefutationSummary.status"><code class="docutils literal notranslate"><span class="pre">RefutationSummary.status</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pyk.proof.proof.html">pyk.proof.proof module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.CompositeSummary"><code class="docutils literal notranslate"><span class="pre">CompositeSummary</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.CompositeSummary.lines"><code class="docutils literal notranslate"><span class="pre">CompositeSummary.lines</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.CompositeSummary.summaries"><code class="docutils literal notranslate"><span class="pre">CompositeSummary.summaries</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.FailureInfo"><code class="docutils literal notranslate"><span class="pre">FailureInfo</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof"><code class="docutils literal notranslate"><span class="pre">Proof</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.add_subproof"><code class="docutils literal notranslate"><span class="pre">Proof.add_subproof()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.admit"><code class="docutils literal notranslate"><span class="pre">Proof.admit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.admitted"><code class="docutils literal notranslate"><span class="pre">Proof.admitted</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.can_progress"><code class="docutils literal notranslate"><span class="pre">Proof.can_progress</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.commit"><code class="docutils literal notranslate"><span class="pre">Proof.commit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.dict"><code class="docutils literal notranslate"><span class="pre">Proof.dict</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.digest"><code class="docutils literal notranslate"><span class="pre">Proof.digest</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.failed"><code class="docutils literal notranslate"><span class="pre">Proof.failed</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.failure_info"><code class="docutils literal notranslate"><span class="pre">Proof.failure_info</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.fetch_subproof"><code class="docutils literal notranslate"><span class="pre">Proof.fetch_subproof()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.fetch_subproof_data"><code class="docutils literal notranslate"><span class="pre">Proof.fetch_subproof_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.from_dict"><code class="docutils literal notranslate"><span class="pre">Proof.from_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.get_steps"><code class="docutils literal notranslate"><span class="pre">Proof.get_steps()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.id"><code class="docutils literal notranslate"><span class="pre">Proof.id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.json"><code class="docutils literal notranslate"><span class="pre">Proof.json</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.one_line_summary"><code class="docutils literal notranslate"><span class="pre">Proof.one_line_summary</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.own_status"><code class="docutils literal notranslate"><span class="pre">Proof.own_status</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.passed"><code class="docutils literal notranslate"><span class="pre">Proof.passed</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.proof_data_exists"><code class="docutils literal notranslate"><span class="pre">Proof.proof_data_exists()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.proof_dir"><code class="docutils literal notranslate"><span class="pre">Proof.proof_dir</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.proof_exists"><code class="docutils literal notranslate"><span class="pre">Proof.proof_exists()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.proof_subdir"><code class="docutils literal notranslate"><span class="pre">Proof.proof_subdir</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.read_proof"><code class="docutils literal notranslate"><span class="pre">Proof.read_proof()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.read_proof_data"><code class="docutils literal notranslate"><span class="pre">Proof.read_proof_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.read_subproof"><code class="docutils literal notranslate"><span class="pre">Proof.read_subproof()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.read_subproof_data"><code class="docutils literal notranslate"><span class="pre">Proof.read_subproof_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.remove_subproof"><code class="docutils literal notranslate"><span class="pre">Proof.remove_subproof()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.status"><code class="docutils literal notranslate"><span class="pre">Proof.status</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.subproof_ids"><code class="docutils literal notranslate"><span class="pre">Proof.subproof_ids</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.subproofs"><code class="docutils literal notranslate"><span class="pre">Proof.subproofs</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.subproofs_status"><code class="docutils literal notranslate"><span class="pre">Proof.subproofs_status</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.summary"><code class="docutils literal notranslate"><span class="pre">Proof.summary</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.up_to_date"><code class="docutils literal notranslate"><span class="pre">Proof.up_to_date</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.write_proof"><code class="docutils literal notranslate"><span class="pre">Proof.write_proof()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof.write_proof_data"><code class="docutils literal notranslate"><span class="pre">Proof.write_proof_data()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.ProofStatus"><code class="docutils literal notranslate"><span class="pre">ProofStatus</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.ProofStatus.FAILED"><code class="docutils literal notranslate"><span class="pre">ProofStatus.FAILED</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.ProofStatus.PASSED"><code class="docutils literal notranslate"><span class="pre">ProofStatus.PASSED</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.ProofStatus.PENDING"><code class="docutils literal notranslate"><span class="pre">ProofStatus.PENDING</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.ProofSummary"><code class="docutils literal notranslate"><span class="pre">ProofSummary</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.ProofSummary.id"><code class="docutils literal notranslate"><span class="pre">ProofSummary.id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.ProofSummary.lines"><code class="docutils literal notranslate"><span class="pre">ProofSummary.lines</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.ProofSummary.status"><code class="docutils literal notranslate"><span class="pre">ProofSummary.status</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Prover"><code class="docutils literal notranslate"><span class="pre">Prover</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Prover.advance_proof"><code class="docutils literal notranslate"><span class="pre">Prover.advance_proof()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Prover.close"><code class="docutils literal notranslate"><span class="pre">Prover.close()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Prover.failure_info"><code class="docutils literal notranslate"><span class="pre">Prover.failure_info()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Prover.init_proof"><code class="docutils literal notranslate"><span class="pre">Prover.init_proof()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Prover.step_proof"><code class="docutils literal notranslate"><span class="pre">Prover.step_proof()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.parallel_advance_proof"><code class="docutils literal notranslate"><span class="pre">parallel_advance_proof()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pyk.proof.prove_rpc.html">pyk.proof.prove_rpc module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pyk.proof.prove_rpc.html#pyk.proof.prove_rpc.ProveRpc"><code class="docutils literal notranslate"><span class="pre">ProveRpc</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.prove_rpc.html#pyk.proof.prove_rpc.ProveRpc.prove_rpc"><code class="docutils literal notranslate"><span class="pre">ProveRpc.prove_rpc()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pyk.proof.reachability.html">pyk.proof.reachability module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRFailureInfo"><code class="docutils literal notranslate"><span class="pre">APRFailureInfo</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRFailureInfo.failing_nodes"><code class="docutils literal notranslate"><span class="pre">APRFailureInfo.failing_nodes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRFailureInfo.failure_reasons"><code class="docutils literal notranslate"><span class="pre">APRFailureInfo.failure_reasons</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRFailureInfo.from_proof"><code class="docutils literal notranslate"><span class="pre">APRFailureInfo.from_proof()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRFailureInfo.models"><code class="docutils literal notranslate"><span class="pre">APRFailureInfo.models</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRFailureInfo.path_conditions"><code class="docutils literal notranslate"><span class="pre">APRFailureInfo.path_conditions</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRFailureInfo.pending_nodes"><code class="docutils literal notranslate"><span class="pre">APRFailureInfo.pending_nodes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRFailureInfo.print"><code class="docutils literal notranslate"><span class="pre">APRFailureInfo.print()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof"><code class="docutils literal notranslate"><span class="pre">APRProof</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.add_bounded"><code class="docutils literal notranslate"><span class="pre">APRProof.add_bounded()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.add_exec_time"><code class="docutils literal notranslate"><span class="pre">APRProof.add_exec_time()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.as_claim"><code class="docutils literal notranslate"><span class="pre">APRProof.as_claim()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.as_rule"><code class="docutils literal notranslate"><span class="pre">APRProof.as_rule()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.as_rules"><code class="docutils literal notranslate"><span class="pre">APRProof.as_rules()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.bmc_depth"><code class="docutils literal notranslate"><span class="pre">APRProof.bmc_depth</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.bounded"><code class="docutils literal notranslate"><span class="pre">APRProof.bounded</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.can_progress"><code class="docutils literal notranslate"><span class="pre">APRProof.can_progress</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.circularities_module_name"><code class="docutils literal notranslate"><span class="pre">APRProof.circularities_module_name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.circularity"><code class="docutils literal notranslate"><span class="pre">APRProof.circularity</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.commit"><code class="docutils literal notranslate"><span class="pre">APRProof.commit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.construct_node_refutation"><code class="docutils literal notranslate"><span class="pre">APRProof.construct_node_refutation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.dependencies_module_name"><code class="docutils literal notranslate"><span class="pre">APRProof.dependencies_module_name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.dict"><code class="docutils literal notranslate"><span class="pre">APRProof.dict</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.error_info"><code class="docutils literal notranslate"><span class="pre">APRProof.error_info</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.exec_time"><code class="docutils literal notranslate"><span class="pre">APRProof.exec_time</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.failing"><code class="docutils literal notranslate"><span class="pre">APRProof.failing</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.formatted_exec_time"><code class="docutils literal notranslate"><span class="pre">APRProof.formatted_exec_time()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.from_claim"><code class="docutils literal notranslate"><span class="pre">APRProof.from_claim()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.from_dict"><code class="docutils literal notranslate"><span class="pre">APRProof.from_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.from_spec_modules"><code class="docutils literal notranslate"><span class="pre">APRProof.from_spec_modules()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.get_refutation_id"><code class="docutils literal notranslate"><span class="pre">APRProof.get_refutation_id()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.get_steps"><code class="docutils literal notranslate"><span class="pre">APRProof.get_steps()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.init"><code class="docutils literal notranslate"><span class="pre">APRProof.init</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.is_bounded"><code class="docutils literal notranslate"><span class="pre">APRProof.is_bounded()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.is_failing"><code class="docutils literal notranslate"><span class="pre">APRProof.is_failing()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.is_init"><code class="docutils literal notranslate"><span class="pre">APRProof.is_init()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.is_pending"><code class="docutils literal notranslate"><span class="pre">APRProof.is_pending()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.is_refuted"><code class="docutils literal notranslate"><span class="pre">APRProof.is_refuted()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.is_target"><code class="docutils literal notranslate"><span class="pre">APRProof.is_target()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.logs"><code class="docutils literal notranslate"><span class="pre">APRProof.logs</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.module_name"><code class="docutils literal notranslate"><span class="pre">APRProof.module_name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.node_refutations"><code class="docutils literal notranslate"><span class="pre">APRProof.node_refutations</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.nonzero_depth"><code class="docutils literal notranslate"><span class="pre">APRProof.nonzero_depth()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.one_line_summary"><code class="docutils literal notranslate"><span class="pre">APRProof.one_line_summary</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.own_status"><code class="docutils literal notranslate"><span class="pre">APRProof.own_status</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.path_constraints"><code class="docutils literal notranslate"><span class="pre">APRProof.path_constraints()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.pending"><code class="docutils literal notranslate"><span class="pre">APRProof.pending</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.prior_loops_cache"><code class="docutils literal notranslate"><span class="pre">APRProof.prior_loops_cache</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.prune"><code class="docutils literal notranslate"><span class="pre">APRProof.prune()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.read_proof"><code class="docutils literal notranslate"><span class="pre">APRProof.read_proof()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.read_proof_data"><code class="docutils literal notranslate"><span class="pre">APRProof.read_proof_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.refute_node"><code class="docutils literal notranslate"><span class="pre">APRProof.refute_node()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.rule_id"><code class="docutils literal notranslate"><span class="pre">APRProof.rule_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.set_exec_time"><code class="docutils literal notranslate"><span class="pre">APRProof.set_exec_time()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.shortest_path_to"><code class="docutils literal notranslate"><span class="pre">APRProof.shortest_path_to()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.summary"><code class="docutils literal notranslate"><span class="pre">APRProof.summary</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.target"><code class="docutils literal notranslate"><span class="pre">APRProof.target</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.unrefute_node"><code class="docutils literal notranslate"><span class="pre">APRProof.unrefute_node()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProof.write_proof_data"><code class="docutils literal notranslate"><span class="pre">APRProof.write_proof_data()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProofBoundedResult"><code class="docutils literal notranslate"><span class="pre">APRProofBoundedResult</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProofExtendAndCacheResult"><code class="docutils literal notranslate"><span class="pre">APRProofExtendAndCacheResult</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProofExtendAndCacheResult.extension_to_cache"><code class="docutils literal notranslate"><span class="pre">APRProofExtendAndCacheResult.extension_to_cache</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProofExtendResult"><code class="docutils literal notranslate"><span class="pre">APRProofExtendResult</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProofExtendResult.extension_to_apply"><code class="docutils literal notranslate"><span class="pre">APRProofExtendResult.extension_to_apply</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProofResult"><code class="docutils literal notranslate"><span class="pre">APRProofResult</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProofResult.node_id"><code class="docutils literal notranslate"><span class="pre">APRProofResult.node_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProofResult.optimize_kcfg"><code class="docutils literal notranslate"><span class="pre">APRProofResult.optimize_kcfg</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProofResult.prior_loops_cache_update"><code class="docutils literal notranslate"><span class="pre">APRProofResult.prior_loops_cache_update</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProofStep"><code class="docutils literal notranslate"><span class="pre">APRProofStep</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProofStep.bmc_depth"><code class="docutils literal notranslate"><span class="pre">APRProofStep.bmc_depth</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProofStep.circularity"><code class="docutils literal notranslate"><span class="pre">APRProofStep.circularity</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProofStep.circularity_rule_id"><code class="docutils literal notranslate"><span class="pre">APRProofStep.circularity_rule_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProofStep.module_name"><code class="docutils literal notranslate"><span class="pre">APRProofStep.module_name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProofStep.node"><code class="docutils literal notranslate"><span class="pre">APRProofStep.node</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProofStep.nonzero_depth"><code class="docutils literal notranslate"><span class="pre">APRProofStep.nonzero_depth</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProofStep.prior_loops_cache"><code class="docutils literal notranslate"><span class="pre">APRProofStep.prior_loops_cache</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProofStep.proof_id"><code class="docutils literal notranslate"><span class="pre">APRProofStep.proof_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProofStep.shortest_path_to_node"><code class="docutils literal notranslate"><span class="pre">APRProofStep.shortest_path_to_node</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProofStep.target"><code class="docutils literal notranslate"><span class="pre">APRProofStep.target</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProofStep.use_cache"><code class="docutils literal notranslate"><span class="pre">APRProofStep.use_cache</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProofSubsumeResult"><code class="docutils literal notranslate"><span class="pre">APRProofSubsumeResult</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProofSubsumeResult.csubst"><code class="docutils literal notranslate"><span class="pre">APRProofSubsumeResult.csubst</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProofTerminalResult"><code class="docutils literal notranslate"><span class="pre">APRProofTerminalResult</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProofUseCacheResult"><code class="docutils literal notranslate"><span class="pre">APRProofUseCacheResult</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProofUseCacheResult.cached_node_id"><code class="docutils literal notranslate"><span class="pre">APRProofUseCacheResult.cached_node_id</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProver"><code class="docutils literal notranslate"><span class="pre">APRProver</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProver.assume_defined"><code class="docutils literal notranslate"><span class="pre">APRProver.assume_defined</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProver.close"><code class="docutils literal notranslate"><span class="pre">APRProver.close()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProver.counterexample_info"><code class="docutils literal notranslate"><span class="pre">APRProver.counterexample_info</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProver.cut_point_rules"><code class="docutils literal notranslate"><span class="pre">APRProver.cut_point_rules</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProver.direct_subproof_rules"><code class="docutils literal notranslate"><span class="pre">APRProver.direct_subproof_rules</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProver.execute_depth"><code class="docutils literal notranslate"><span class="pre">APRProver.execute_depth</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProver.extra_module"><code class="docutils literal notranslate"><span class="pre">APRProver.extra_module</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProver.failure_info"><code class="docutils literal notranslate"><span class="pre">APRProver.failure_info()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProver.fast_check_subsumption"><code class="docutils literal notranslate"><span class="pre">APRProver.fast_check_subsumption</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProver.init_proof"><code class="docutils literal notranslate"><span class="pre">APRProver.init_proof()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProver.kcfg_explore"><code class="docutils literal notranslate"><span class="pre">APRProver.kcfg_explore</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProver.main_module_name"><code class="docutils literal notranslate"><span class="pre">APRProver.main_module_name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProver.optimize_kcfg"><code class="docutils literal notranslate"><span class="pre">APRProver.optimize_kcfg</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProver.step_proof"><code class="docutils literal notranslate"><span class="pre">APRProver.step_proof()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRProver.terminal_rules"><code class="docutils literal notranslate"><span class="pre">APRProver.terminal_rules</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRSummary"><code class="docutils literal notranslate"><span class="pre">APRSummary</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRSummary.admitted"><code class="docutils literal notranslate"><span class="pre">APRSummary.admitted</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRSummary.bmc_depth"><code class="docutils literal notranslate"><span class="pre">APRSummary.bmc_depth</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRSummary.bounded"><code class="docutils literal notranslate"><span class="pre">APRSummary.bounded</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRSummary.failing"><code class="docutils literal notranslate"><span class="pre">APRSummary.failing</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRSummary.formatted_exec_time"><code class="docutils literal notranslate"><span class="pre">APRSummary.formatted_exec_time</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRSummary.id"><code class="docutils literal notranslate"><span class="pre">APRSummary.id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRSummary.lines"><code class="docutils literal notranslate"><span class="pre">APRSummary.lines</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRSummary.nodes"><code class="docutils literal notranslate"><span class="pre">APRSummary.nodes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRSummary.pending"><code class="docutils literal notranslate"><span class="pre">APRSummary.pending</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRSummary.refuted"><code class="docutils literal notranslate"><span class="pre">APRSummary.refuted</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRSummary.status"><code class="docutils literal notranslate"><span class="pre">APRSummary.status</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRSummary.stuck"><code class="docutils literal notranslate"><span class="pre">APRSummary.stuck</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRSummary.subproofs"><code class="docutils literal notranslate"><span class="pre">APRSummary.subproofs</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRSummary.terminal"><code class="docutils literal notranslate"><span class="pre">APRSummary.terminal</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.reachability.html#pyk.proof.reachability.APRSummary.vacuous"><code class="docutils literal notranslate"><span class="pre">APRSummary.vacuous</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pyk.proof.show.html">pyk.proof.show module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pyk.proof.show.html#pyk.proof.show.APRProofNodePrinter"><code class="docutils literal notranslate"><span class="pre">APRProofNodePrinter</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.show.html#pyk.proof.show.APRProofNodePrinter.node_attrs"><code class="docutils literal notranslate"><span class="pre">APRProofNodePrinter.node_attrs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.show.html#pyk.proof.show.APRProofNodePrinter.proof"><code class="docutils literal notranslate"><span class="pre">APRProofNodePrinter.proof</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.proof.show.html#pyk.proof.show.APRProofShow"><code class="docutils literal notranslate"><span class="pre">APRProofShow</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.show.html#pyk.proof.show.APRProofShow.dot"><code class="docutils literal notranslate"><span class="pre">APRProofShow.dot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.show.html#pyk.proof.show.APRProofShow.dump"><code class="docutils literal notranslate"><span class="pre">APRProofShow.dump()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.show.html#pyk.proof.show.APRProofShow.kcfg_show"><code class="docutils literal notranslate"><span class="pre">APRProofShow.kcfg_show</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.show.html#pyk.proof.show.APRProofShow.pretty"><code class="docutils literal notranslate"><span class="pre">APRProofShow.pretty()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.show.html#pyk.proof.show.APRProofShow.pretty_segments"><code class="docutils literal notranslate"><span class="pre">APRProofShow.pretty_segments()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.show.html#pyk.proof.show.APRProofShow.show"><code class="docutils literal notranslate"><span class="pre">APRProofShow.show()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pyk.proof.tui.html">pyk.proof.tui module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pyk.proof.tui.html#pyk.proof.tui.APRProofBehaviorView"><code class="docutils literal notranslate"><span class="pre">APRProofBehaviorView</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.tui.html#pyk.proof.tui.APRProofBehaviorView.can_focus"><code class="docutils literal notranslate"><span class="pre">APRProofBehaviorView.can_focus</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.tui.html#pyk.proof.tui.APRProofBehaviorView.can_focus_children"><code class="docutils literal notranslate"><span class="pre">APRProofBehaviorView.can_focus_children</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.tui.html#pyk.proof.tui.APRProofBehaviorView.compose"><code class="docutils literal notranslate"><span class="pre">APRProofBehaviorView.compose()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.proof.tui.html#pyk.proof.tui.APRProofViewer"><code class="docutils literal notranslate"><span class="pre">APRProofViewer</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.tui.html#pyk.proof.tui.APRProofViewer.compose"><code class="docutils literal notranslate"><span class="pre">APRProofViewer.compose()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.proof.tui.html#pyk.proof.tui.APRProofViewer.on_mount"><code class="docutils literal notranslate"><span class="pre">APRProofViewer.on_mount()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pyk.ktool.utils.html" class="btn btn-neutral float-left" title="pyk.ktool.utils module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pyk.proof.implies.html" class="btn btn-neutral float-right" title="pyk.proof.implies module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Runtime Verification, Inc.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

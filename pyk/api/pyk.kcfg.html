@@ -1,0 +1,585 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyk.kcfg package &mdash; pyk 7.1.313 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=9c1be6d9"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyk.kcfg.exploration module" href="pyk.kcfg.exploration.html" />
+    <link rel="prev" title="pyk.kbuild.utils module" href="pyk.kbuild.utils.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            pyk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">pyk</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pyk.html">pyk package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="pyk.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="pyk.cterm.html">pyk.cterm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kast.html">pyk.kast package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kbuild.html">pyk.kbuild package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">pyk.kcfg package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kdist.html">pyk.kdist package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.klean.html">pyk.klean package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kllvm.html">pyk.kllvm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.konvert.html">pyk.konvert package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kore.html">pyk.kore package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kore_exec_covr.html">pyk.kore_exec_covr package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.ktool.html">pyk.ktool package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.proof.html">pyk.proof package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.testing.html">pyk.testing package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">pyk</a></li>
+          <li class="breadcrumb-item"><a href="pyk.html">pyk package</a></li>
+      <li class="breadcrumb-item active">pyk.kcfg package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/pyk.kcfg.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pyk.kcfg">
+<span id="pyk-kcfg-package"></span><h1>pyk.kcfg package<a class="headerlink" href="#module-pyk.kcfg" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pyk.kcfg.exploration.html">pyk.kcfg.exploration module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pyk.kcfg.exploration.html#pyk.kcfg.exploration.KCFGExploration"><code class="docutils literal notranslate"><span class="pre">KCFGExploration</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.exploration.html#pyk.kcfg.exploration.KCFGExploration.add_terminal"><code class="docutils literal notranslate"><span class="pre">KCFGExploration.add_terminal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.exploration.html#pyk.kcfg.exploration.KCFGExploration.explorable"><code class="docutils literal notranslate"><span class="pre">KCFGExploration.explorable</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.exploration.html#pyk.kcfg.exploration.KCFGExploration.from_dict"><code class="docutils literal notranslate"><span class="pre">KCFGExploration.from_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.exploration.html#pyk.kcfg.exploration.KCFGExploration.is_explorable"><code class="docutils literal notranslate"><span class="pre">KCFGExploration.is_explorable()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.exploration.html#pyk.kcfg.exploration.KCFGExploration.is_terminal"><code class="docutils literal notranslate"><span class="pre">KCFGExploration.is_terminal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.exploration.html#pyk.kcfg.exploration.KCFGExploration.kcfg"><code class="docutils literal notranslate"><span class="pre">KCFGExploration.kcfg</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.exploration.html#pyk.kcfg.exploration.KCFGExploration.minimize_kcfg"><code class="docutils literal notranslate"><span class="pre">KCFGExploration.minimize_kcfg()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.exploration.html#pyk.kcfg.exploration.KCFGExploration.prune"><code class="docutils literal notranslate"><span class="pre">KCFGExploration.prune()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.exploration.html#pyk.kcfg.exploration.KCFGExploration.remove_node"><code class="docutils literal notranslate"><span class="pre">KCFGExploration.remove_node()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.exploration.html#pyk.kcfg.exploration.KCFGExploration.remove_terminal"><code class="docutils literal notranslate"><span class="pre">KCFGExploration.remove_terminal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.exploration.html#pyk.kcfg.exploration.KCFGExploration.terminal"><code class="docutils literal notranslate"><span class="pre">KCFGExploration.terminal</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.exploration.html#pyk.kcfg.exploration.KCFGExploration.terminal_ids"><code class="docutils literal notranslate"><span class="pre">KCFGExploration.terminal_ids</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.exploration.html#pyk.kcfg.exploration.KCFGExploration.to_dict"><code class="docutils literal notranslate"><span class="pre">KCFGExploration.to_dict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.kcfg.exploration.html#pyk.kcfg.exploration.KCFGExplorationNodeAttr"><code class="docutils literal notranslate"><span class="pre">KCFGExplorationNodeAttr</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.exploration.html#pyk.kcfg.exploration.KCFGExplorationNodeAttr.TERMINAL"><code class="docutils literal notranslate"><span class="pre">KCFGExplorationNodeAttr.TERMINAL</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pyk.kcfg.explore.html">pyk.kcfg.explore module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pyk.kcfg.explore.html#pyk.kcfg.explore.KCFGExplore"><code class="docutils literal notranslate"><span class="pre">KCFGExplore</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.explore.html#pyk.kcfg.explore.KCFGExplore.check_extendable"><code class="docutils literal notranslate"><span class="pre">KCFGExplore.check_extendable()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.explore.html#pyk.kcfg.explore.KCFGExplore.cterm_symbolic"><code class="docutils literal notranslate"><span class="pre">KCFGExplore.cterm_symbolic</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.explore.html#pyk.kcfg.explore.KCFGExplore.extend_cterm"><code class="docutils literal notranslate"><span class="pre">KCFGExplore.extend_cterm()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.explore.html#pyk.kcfg.explore.KCFGExplore.id"><code class="docutils literal notranslate"><span class="pre">KCFGExplore.id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.explore.html#pyk.kcfg.explore.KCFGExplore.implication_failure_reason"><code class="docutils literal notranslate"><span class="pre">KCFGExplore.implication_failure_reason()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.explore.html#pyk.kcfg.explore.KCFGExplore.kcfg_semantics"><code class="docutils literal notranslate"><span class="pre">KCFGExplore.kcfg_semantics</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.explore.html#pyk.kcfg.explore.KCFGExplore.pretty_print"><code class="docutils literal notranslate"><span class="pre">KCFGExplore.pretty_print()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.explore.html#pyk.kcfg.explore.KCFGExplore.section_edge"><code class="docutils literal notranslate"><span class="pre">KCFGExplore.section_edge()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.explore.html#pyk.kcfg.explore.KCFGExplore.simplify"><code class="docutils literal notranslate"><span class="pre">KCFGExplore.simplify()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.explore.html#pyk.kcfg.explore.KCFGExplore.step"><code class="docutils literal notranslate"><span class="pre">KCFGExplore.step()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pyk.kcfg.kcfg.html">pyk.kcfg.kcfg module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.Abstract"><code class="docutils literal notranslate"><span class="pre">Abstract</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.Abstract.cterm"><code class="docutils literal notranslate"><span class="pre">Abstract.cterm</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.Branch"><code class="docutils literal notranslate"><span class="pre">Branch</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.Branch.constraints"><code class="docutils literal notranslate"><span class="pre">Branch.constraints</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.Branch.heuristic"><code class="docutils literal notranslate"><span class="pre">Branch.heuristic</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.Branch.info"><code class="docutils literal notranslate"><span class="pre">Branch.info</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG"><code class="docutils literal notranslate"><span class="pre">KCFG</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Cover"><code class="docutils literal notranslate"><span class="pre">KCFG.Cover</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Cover.csubst"><code class="docutils literal notranslate"><span class="pre">KCFG.Cover.csubst</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Cover.from_dict"><code class="docutils literal notranslate"><span class="pre">KCFG.Cover.from_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Cover.replace_source"><code class="docutils literal notranslate"><span class="pre">KCFG.Cover.replace_source()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Cover.replace_target"><code class="docutils literal notranslate"><span class="pre">KCFG.Cover.replace_target()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Cover.source"><code class="docutils literal notranslate"><span class="pre">KCFG.Cover.source</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Cover.target"><code class="docutils literal notranslate"><span class="pre">KCFG.Cover.target</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Cover.to_dict"><code class="docutils literal notranslate"><span class="pre">KCFG.Cover.to_dict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Edge"><code class="docutils literal notranslate"><span class="pre">KCFG.Edge</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Edge.depth"><code class="docutils literal notranslate"><span class="pre">KCFG.Edge.depth</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Edge.from_dict"><code class="docutils literal notranslate"><span class="pre">KCFG.Edge.from_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Edge.replace_source"><code class="docutils literal notranslate"><span class="pre">KCFG.Edge.replace_source()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Edge.replace_target"><code class="docutils literal notranslate"><span class="pre">KCFG.Edge.replace_target()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Edge.rules"><code class="docutils literal notranslate"><span class="pre">KCFG.Edge.rules</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Edge.source"><code class="docutils literal notranslate"><span class="pre">KCFG.Edge.source</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Edge.target"><code class="docutils literal notranslate"><span class="pre">KCFG.Edge.target</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Edge.to_dict"><code class="docutils literal notranslate"><span class="pre">KCFG.Edge.to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Edge.to_rule"><code class="docutils literal notranslate"><span class="pre">KCFG.Edge.to_rule()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.EdgeLike"><code class="docutils literal notranslate"><span class="pre">KCFG.EdgeLike</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.EdgeLike.source"><code class="docutils literal notranslate"><span class="pre">KCFG.EdgeLike.source</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.EdgeLike.target"><code class="docutils literal notranslate"><span class="pre">KCFG.EdgeLike.target</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.EdgeLike.targets"><code class="docutils literal notranslate"><span class="pre">KCFG.EdgeLike.targets</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.MergedEdge"><code class="docutils literal notranslate"><span class="pre">KCFG.MergedEdge</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.MergedEdge.edges"><code class="docutils literal notranslate"><span class="pre">KCFG.MergedEdge.edges</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.MergedEdge.from_dict"><code class="docutils literal notranslate"><span class="pre">KCFG.MergedEdge.from_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.MergedEdge.replace_source"><code class="docutils literal notranslate"><span class="pre">KCFG.MergedEdge.replace_source()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.MergedEdge.replace_target"><code class="docutils literal notranslate"><span class="pre">KCFG.MergedEdge.replace_target()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.MergedEdge.source"><code class="docutils literal notranslate"><span class="pre">KCFG.MergedEdge.source</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.MergedEdge.target"><code class="docutils literal notranslate"><span class="pre">KCFG.MergedEdge.target</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.MergedEdge.to_dict"><code class="docutils literal notranslate"><span class="pre">KCFG.MergedEdge.to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.MergedEdge.to_rule"><code class="docutils literal notranslate"><span class="pre">KCFG.MergedEdge.to_rule()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.MultiEdge"><code class="docutils literal notranslate"><span class="pre">KCFG.MultiEdge</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.MultiEdge.source"><code class="docutils literal notranslate"><span class="pre">KCFG.MultiEdge.source</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.MultiEdge.with_single_target"><code class="docutils literal notranslate"><span class="pre">KCFG.MultiEdge.with_single_target()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.NDBranch"><code class="docutils literal notranslate"><span class="pre">KCFG.NDBranch</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.NDBranch.edges"><code class="docutils literal notranslate"><span class="pre">KCFG.NDBranch.edges</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.NDBranch.from_dict"><code class="docutils literal notranslate"><span class="pre">KCFG.NDBranch.from_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.NDBranch.replace_source"><code class="docutils literal notranslate"><span class="pre">KCFG.NDBranch.replace_source()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.NDBranch.replace_target"><code class="docutils literal notranslate"><span class="pre">KCFG.NDBranch.replace_target()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.NDBranch.rules"><code class="docutils literal notranslate"><span class="pre">KCFG.NDBranch.rules</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.NDBranch.source"><code class="docutils literal notranslate"><span class="pre">KCFG.NDBranch.source</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.NDBranch.targets"><code class="docutils literal notranslate"><span class="pre">KCFG.NDBranch.targets</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.NDBranch.to_dict"><code class="docutils literal notranslate"><span class="pre">KCFG.NDBranch.to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.NDBranch.with_single_target"><code class="docutils literal notranslate"><span class="pre">KCFG.NDBranch.with_single_target()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Node"><code class="docutils literal notranslate"><span class="pre">KCFG.Node</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Node.add_attr"><code class="docutils literal notranslate"><span class="pre">KCFG.Node.add_attr()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Node.attrs"><code class="docutils literal notranslate"><span class="pre">KCFG.Node.attrs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Node.cterm"><code class="docutils literal notranslate"><span class="pre">KCFG.Node.cterm</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Node.discard_attr"><code class="docutils literal notranslate"><span class="pre">KCFG.Node.discard_attr()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Node.free_vars"><code class="docutils literal notranslate"><span class="pre">KCFG.Node.free_vars</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Node.from_dict"><code class="docutils literal notranslate"><span class="pre">KCFG.Node.from_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Node.id"><code class="docutils literal notranslate"><span class="pre">KCFG.Node.id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Node.let"><code class="docutils literal notranslate"><span class="pre">KCFG.Node.let()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Node.remove_attr"><code class="docutils literal notranslate"><span class="pre">KCFG.Node.remove_attr()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Node.to_dict"><code class="docutils literal notranslate"><span class="pre">KCFG.Node.to_dict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Split"><code class="docutils literal notranslate"><span class="pre">KCFG.Split</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Split.covers"><code class="docutils literal notranslate"><span class="pre">KCFG.Split.covers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Split.from_dict"><code class="docutils literal notranslate"><span class="pre">KCFG.Split.from_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Split.replace_source"><code class="docutils literal notranslate"><span class="pre">KCFG.Split.replace_source()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Split.replace_target"><code class="docutils literal notranslate"><span class="pre">KCFG.Split.replace_target()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Split.source"><code class="docutils literal notranslate"><span class="pre">KCFG.Split.source</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Split.splits"><code class="docutils literal notranslate"><span class="pre">KCFG.Split.splits</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Split.targets"><code class="docutils literal notranslate"><span class="pre">KCFG.Split.targets</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Split.to_dict"><code class="docutils literal notranslate"><span class="pre">KCFG.Split.to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Split.with_single_target"><code class="docutils literal notranslate"><span class="pre">KCFG.Split.with_single_target()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Successor"><code class="docutils literal notranslate"><span class="pre">KCFG.Successor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Successor.from_dict"><code class="docutils literal notranslate"><span class="pre">KCFG.Successor.from_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Successor.replace_source"><code class="docutils literal notranslate"><span class="pre">KCFG.Successor.replace_source()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Successor.replace_target"><code class="docutils literal notranslate"><span class="pre">KCFG.Successor.replace_target()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Successor.source"><code class="docutils literal notranslate"><span class="pre">KCFG.Successor.source</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Successor.source_vars"><code class="docutils literal notranslate"><span class="pre">KCFG.Successor.source_vars</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Successor.target_ids"><code class="docutils literal notranslate"><span class="pre">KCFG.Successor.target_ids</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Successor.target_vars"><code class="docutils literal notranslate"><span class="pre">KCFG.Successor.target_vars</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Successor.targets"><code class="docutils literal notranslate"><span class="pre">KCFG.Successor.targets</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Successor.to_dict"><code class="docutils literal notranslate"><span class="pre">KCFG.Successor.to_dict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.add_alias"><code class="docutils literal notranslate"><span class="pre">KCFG.add_alias()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.add_attr"><code class="docutils literal notranslate"><span class="pre">KCFG.add_attr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.add_node"><code class="docutils literal notranslate"><span class="pre">KCFG.add_node()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.add_stuck"><code class="docutils literal notranslate"><span class="pre">KCFG.add_stuck()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.add_successor"><code class="docutils literal notranslate"><span class="pre">KCFG.add_successor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.add_vacuous"><code class="docutils literal notranslate"><span class="pre">KCFG.add_vacuous()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.aliases"><code class="docutils literal notranslate"><span class="pre">KCFG.aliases()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.contains_cover"><code class="docutils literal notranslate"><span class="pre">KCFG.contains_cover()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.contains_edge"><code class="docutils literal notranslate"><span class="pre">KCFG.contains_edge()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.contains_merged_edge"><code class="docutils literal notranslate"><span class="pre">KCFG.contains_merged_edge()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.contains_ndbranch"><code class="docutils literal notranslate"><span class="pre">KCFG.contains_ndbranch()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.contains_node"><code class="docutils literal notranslate"><span class="pre">KCFG.contains_node()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.contains_split"><code class="docutils literal notranslate"><span class="pre">KCFG.contains_split()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.cover"><code class="docutils literal notranslate"><span class="pre">KCFG.cover()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.covered"><code class="docutils literal notranslate"><span class="pre">KCFG.covered</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.covers"><code class="docutils literal notranslate"><span class="pre">KCFG.covers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.create_cover"><code class="docutils literal notranslate"><span class="pre">KCFG.create_cover()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.create_edge"><code class="docutils literal notranslate"><span class="pre">KCFG.create_edge()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.create_merged_edge"><code class="docutils literal notranslate"><span class="pre">KCFG.create_merged_edge()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.create_ndbranch"><code class="docutils literal notranslate"><span class="pre">KCFG.create_ndbranch()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.create_node"><code class="docutils literal notranslate"><span class="pre">KCFG.create_node()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.create_split"><code class="docutils literal notranslate"><span class="pre">KCFG.create_split()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.create_split_by_nodes"><code class="docutils literal notranslate"><span class="pre">KCFG.create_split_by_nodes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.discard_attr"><code class="docutils literal notranslate"><span class="pre">KCFG.discard_attr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.discard_stuck"><code class="docutils literal notranslate"><span class="pre">KCFG.discard_stuck()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.discard_vacuous"><code class="docutils literal notranslate"><span class="pre">KCFG.discard_vacuous()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.edge"><code class="docutils literal notranslate"><span class="pre">KCFG.edge()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.edge_likes"><code class="docutils literal notranslate"><span class="pre">KCFG.edge_likes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.edges"><code class="docutils literal notranslate"><span class="pre">KCFG.edges()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.extend"><code class="docutils literal notranslate"><span class="pre">KCFG.extend()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.from_claim"><code class="docutils literal notranslate"><span class="pre">KCFG.from_claim()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.from_dict"><code class="docutils literal notranslate"><span class="pre">KCFG.from_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.from_json"><code class="docutils literal notranslate"><span class="pre">KCFG.from_json()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.general_edges"><code class="docutils literal notranslate"><span class="pre">KCFG.general_edges()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.get_node"><code class="docutils literal notranslate"><span class="pre">KCFG.get_node()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.is_covered"><code class="docutils literal notranslate"><span class="pre">KCFG.is_covered()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.is_leaf"><code class="docutils literal notranslate"><span class="pre">KCFG.is_leaf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.is_ndbranch"><code class="docutils literal notranslate"><span class="pre">KCFG.is_ndbranch()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.is_root"><code class="docutils literal notranslate"><span class="pre">KCFG.is_root()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.is_split"><code class="docutils literal notranslate"><span class="pre">KCFG.is_split()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.is_stuck"><code class="docutils literal notranslate"><span class="pre">KCFG.is_stuck()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.is_vacuous"><code class="docutils literal notranslate"><span class="pre">KCFG.is_vacuous()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.leaves"><code class="docutils literal notranslate"><span class="pre">KCFG.leaves</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.let_node"><code class="docutils literal notranslate"><span class="pre">KCFG.let_node()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.merged_edge"><code class="docutils literal notranslate"><span class="pre">KCFG.merged_edge()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.merged_edges"><code class="docutils literal notranslate"><span class="pre">KCFG.merged_edges()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.ndbranches"><code class="docutils literal notranslate"><span class="pre">KCFG.ndbranches()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.node"><code class="docutils literal notranslate"><span class="pre">KCFG.node()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.nodes"><code class="docutils literal notranslate"><span class="pre">KCFG.nodes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.path_length"><code class="docutils literal notranslate"><span class="pre">KCFG.path_length()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.paths_between"><code class="docutils literal notranslate"><span class="pre">KCFG.paths_between()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.predecessors"><code class="docutils literal notranslate"><span class="pre">KCFG.predecessors()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.prune"><code class="docutils literal notranslate"><span class="pre">KCFG.prune()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.reachable_nodes"><code class="docutils literal notranslate"><span class="pre">KCFG.reachable_nodes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.read_cfg_data"><code class="docutils literal notranslate"><span class="pre">KCFG.read_cfg_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.read_node_data"><code class="docutils literal notranslate"><span class="pre">KCFG.read_node_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.remove_alias"><code class="docutils literal notranslate"><span class="pre">KCFG.remove_alias()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.remove_attr"><code class="docutils literal notranslate"><span class="pre">KCFG.remove_attr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.remove_cover"><code class="docutils literal notranslate"><span class="pre">KCFG.remove_cover()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.remove_edge"><code class="docutils literal notranslate"><span class="pre">KCFG.remove_edge()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.remove_edges_around"><code class="docutils literal notranslate"><span class="pre">KCFG.remove_edges_around()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.remove_merged_edge"><code class="docutils literal notranslate"><span class="pre">KCFG.remove_merged_edge()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.remove_node"><code class="docutils literal notranslate"><span class="pre">KCFG.remove_node()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.remove_stuck"><code class="docutils literal notranslate"><span class="pre">KCFG.remove_stuck()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.remove_vacuous"><code class="docutils literal notranslate"><span class="pre">KCFG.remove_vacuous()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.replace_node"><code class="docutils literal notranslate"><span class="pre">KCFG.replace_node()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.root"><code class="docutils literal notranslate"><span class="pre">KCFG.root</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.shortest_distance_between"><code class="docutils literal notranslate"><span class="pre">KCFG.shortest_distance_between()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.shortest_path_between"><code class="docutils literal notranslate"><span class="pre">KCFG.shortest_path_between()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.split_on_constraints"><code class="docutils literal notranslate"><span class="pre">KCFG.split_on_constraints()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.splits"><code class="docutils literal notranslate"><span class="pre">KCFG.splits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.stuck"><code class="docutils literal notranslate"><span class="pre">KCFG.stuck</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.successors"><code class="docutils literal notranslate"><span class="pre">KCFG.successors()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.to_dict"><code class="docutils literal notranslate"><span class="pre">KCFG.to_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.to_dict_no_nodes"><code class="docutils literal notranslate"><span class="pre">KCFG.to_dict_no_nodes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.to_json"><code class="docutils literal notranslate"><span class="pre">KCFG.to_json()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.to_module"><code class="docutils literal notranslate"><span class="pre">KCFG.to_module()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.to_rules"><code class="docutils literal notranslate"><span class="pre">KCFG.to_rules()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.uncovered"><code class="docutils literal notranslate"><span class="pre">KCFG.uncovered</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.vacuous"><code class="docutils literal notranslate"><span class="pre">KCFG.vacuous</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.write_cfg_data"><code class="docutils literal notranslate"><span class="pre">KCFG.write_cfg_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.zero_depth_between"><code class="docutils literal notranslate"><span class="pre">KCFG.zero_depth_between()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFGExtendResult"><code class="docutils literal notranslate"><span class="pre">KCFGExtendResult</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFGNodeAttr"><code class="docutils literal notranslate"><span class="pre">KCFGNodeAttr</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFGNodeAttr.STUCK"><code class="docutils literal notranslate"><span class="pre">KCFGNodeAttr.STUCK</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFGNodeAttr.VACUOUS"><code class="docutils literal notranslate"><span class="pre">KCFGNodeAttr.VACUOUS</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFGStore"><code class="docutils literal notranslate"><span class="pre">KCFGStore</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFGStore.kcfg_json_path"><code class="docutils literal notranslate"><span class="pre">KCFGStore.kcfg_json_path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFGStore.kcfg_node_dir"><code class="docutils literal notranslate"><span class="pre">KCFGStore.kcfg_node_dir</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFGStore.kcfg_node_path"><code class="docutils literal notranslate"><span class="pre">KCFGStore.kcfg_node_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFGStore.read_cfg_data"><code class="docutils literal notranslate"><span class="pre">KCFGStore.read_cfg_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFGStore.read_node_data"><code class="docutils literal notranslate"><span class="pre">KCFGStore.read_node_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFGStore.store_path"><code class="docutils literal notranslate"><span class="pre">KCFGStore.store_path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFGStore.write_cfg_data"><code class="docutils literal notranslate"><span class="pre">KCFGStore.write_cfg_data()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.NDBranch"><code class="docutils literal notranslate"><span class="pre">NDBranch</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.NDBranch.cterms"><code class="docutils literal notranslate"><span class="pre">NDBranch.cterms</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.NDBranch.logs"><code class="docutils literal notranslate"><span class="pre">NDBranch.logs</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.NDBranch.rule_labels"><code class="docutils literal notranslate"><span class="pre">NDBranch.rule_labels</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.NodeAttr"><code class="docutils literal notranslate"><span class="pre">NodeAttr</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.NodeAttr.value"><code class="docutils literal notranslate"><span class="pre">NodeAttr.value</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.Step"><code class="docutils literal notranslate"><span class="pre">Step</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.Step.cterm"><code class="docutils literal notranslate"><span class="pre">Step.cterm</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.Step.cut"><code class="docutils literal notranslate"><span class="pre">Step.cut</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.Step.depth"><code class="docutils literal notranslate"><span class="pre">Step.depth</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.Step.info"><code class="docutils literal notranslate"><span class="pre">Step.info</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.Step.logs"><code class="docutils literal notranslate"><span class="pre">Step.logs</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.Step.rule_labels"><code class="docutils literal notranslate"><span class="pre">Step.rule_labels</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.Stuck"><code class="docutils literal notranslate"><span class="pre">Stuck</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.Vacuous"><code class="docutils literal notranslate"><span class="pre">Vacuous</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pyk.kcfg.minimize.html">pyk.kcfg.minimize module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pyk.kcfg.minimize.html#pyk.kcfg.minimize.KCFGMinimizer"><code class="docutils literal notranslate"><span class="pre">KCFGMinimizer</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.minimize.html#pyk.kcfg.minimize.KCFGMinimizer.kcfg"><code class="docutils literal notranslate"><span class="pre">KCFGMinimizer.kcfg</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.minimize.html#pyk.kcfg.minimize.KCFGMinimizer.kdef"><code class="docutils literal notranslate"><span class="pre">KCFGMinimizer.kdef</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.minimize.html#pyk.kcfg.minimize.KCFGMinimizer.lift_edge"><code class="docutils literal notranslate"><span class="pre">KCFGMinimizer.lift_edge()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.minimize.html#pyk.kcfg.minimize.KCFGMinimizer.lift_edges"><code class="docutils literal notranslate"><span class="pre">KCFGMinimizer.lift_edges()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.minimize.html#pyk.kcfg.minimize.KCFGMinimizer.lift_split_edge"><code class="docutils literal notranslate"><span class="pre">KCFGMinimizer.lift_split_edge()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.minimize.html#pyk.kcfg.minimize.KCFGMinimizer.lift_split_split"><code class="docutils literal notranslate"><span class="pre">KCFGMinimizer.lift_split_split()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.minimize.html#pyk.kcfg.minimize.KCFGMinimizer.lift_splits"><code class="docutils literal notranslate"><span class="pre">KCFGMinimizer.lift_splits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.minimize.html#pyk.kcfg.minimize.KCFGMinimizer.merge_nodes"><code class="docutils literal notranslate"><span class="pre">KCFGMinimizer.merge_nodes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.minimize.html#pyk.kcfg.minimize.KCFGMinimizer.minimize"><code class="docutils literal notranslate"><span class="pre">KCFGMinimizer.minimize()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.minimize.html#pyk.kcfg.minimize.KCFGMinimizer.semantics"><code class="docutils literal notranslate"><span class="pre">KCFGMinimizer.semantics</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pyk.kcfg.semantics.html">pyk.kcfg.semantics module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pyk.kcfg.semantics.html#pyk.kcfg.semantics.DefaultSemantics"><code class="docutils literal notranslate"><span class="pre">DefaultSemantics</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.semantics.html#pyk.kcfg.semantics.DefaultSemantics.abstract_node"><code class="docutils literal notranslate"><span class="pre">DefaultSemantics.abstract_node()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.semantics.html#pyk.kcfg.semantics.DefaultSemantics.can_make_custom_step"><code class="docutils literal notranslate"><span class="pre">DefaultSemantics.can_make_custom_step()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.semantics.html#pyk.kcfg.semantics.DefaultSemantics.custom_step"><code class="docutils literal notranslate"><span class="pre">DefaultSemantics.custom_step()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.semantics.html#pyk.kcfg.semantics.DefaultSemantics.is_loop"><code class="docutils literal notranslate"><span class="pre">DefaultSemantics.is_loop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.semantics.html#pyk.kcfg.semantics.DefaultSemantics.is_mergeable"><code class="docutils literal notranslate"><span class="pre">DefaultSemantics.is_mergeable()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.semantics.html#pyk.kcfg.semantics.DefaultSemantics.is_terminal"><code class="docutils literal notranslate"><span class="pre">DefaultSemantics.is_terminal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.semantics.html#pyk.kcfg.semantics.DefaultSemantics.same_loop"><code class="docutils literal notranslate"><span class="pre">DefaultSemantics.same_loop()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.kcfg.semantics.html#pyk.kcfg.semantics.KCFGSemantics"><code class="docutils literal notranslate"><span class="pre">KCFGSemantics</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.semantics.html#pyk.kcfg.semantics.KCFGSemantics.abstract_node"><code class="docutils literal notranslate"><span class="pre">KCFGSemantics.abstract_node()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.semantics.html#pyk.kcfg.semantics.KCFGSemantics.can_make_custom_step"><code class="docutils literal notranslate"><span class="pre">KCFGSemantics.can_make_custom_step()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.semantics.html#pyk.kcfg.semantics.KCFGSemantics.custom_step"><code class="docutils literal notranslate"><span class="pre">KCFGSemantics.custom_step()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.semantics.html#pyk.kcfg.semantics.KCFGSemantics.is_loop"><code class="docutils literal notranslate"><span class="pre">KCFGSemantics.is_loop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.semantics.html#pyk.kcfg.semantics.KCFGSemantics.is_mergeable"><code class="docutils literal notranslate"><span class="pre">KCFGSemantics.is_mergeable()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.semantics.html#pyk.kcfg.semantics.KCFGSemantics.is_terminal"><code class="docutils literal notranslate"><span class="pre">KCFGSemantics.is_terminal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.semantics.html#pyk.kcfg.semantics.KCFGSemantics.same_loop"><code class="docutils literal notranslate"><span class="pre">KCFGSemantics.same_loop()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pyk.kcfg.show.html">pyk.kcfg.show module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pyk.kcfg.show.html#pyk.kcfg.show.KCFGShow"><code class="docutils literal notranslate"><span class="pre">KCFGShow</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.show.html#pyk.kcfg.show.KCFGShow.dot"><code class="docutils literal notranslate"><span class="pre">KCFGShow.dot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.show.html#pyk.kcfg.show.KCFGShow.dump"><code class="docutils literal notranslate"><span class="pre">KCFGShow.dump()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.show.html#pyk.kcfg.show.KCFGShow.hide_cells"><code class="docutils literal notranslate"><span class="pre">KCFGShow.hide_cells()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.show.html#pyk.kcfg.show.KCFGShow.make_unique_segments"><code class="docutils literal notranslate"><span class="pre">KCFGShow.make_unique_segments()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.show.html#pyk.kcfg.show.KCFGShow.node_printer"><code class="docutils literal notranslate"><span class="pre">KCFGShow.node_printer</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.show.html#pyk.kcfg.show.KCFGShow.node_short_info"><code class="docutils literal notranslate"><span class="pre">KCFGShow.node_short_info()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.show.html#pyk.kcfg.show.KCFGShow.pretty"><code class="docutils literal notranslate"><span class="pre">KCFGShow.pretty()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.show.html#pyk.kcfg.show.KCFGShow.pretty_printer"><code class="docutils literal notranslate"><span class="pre">KCFGShow.pretty_printer</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.show.html#pyk.kcfg.show.KCFGShow.pretty_segments"><code class="docutils literal notranslate"><span class="pre">KCFGShow.pretty_segments()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.show.html#pyk.kcfg.show.KCFGShow.show"><code class="docutils literal notranslate"><span class="pre">KCFGShow.show()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.show.html#pyk.kcfg.show.KCFGShow.simplify_config"><code class="docutils literal notranslate"><span class="pre">KCFGShow.simplify_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.show.html#pyk.kcfg.show.KCFGShow.to_module"><code class="docutils literal notranslate"><span class="pre">KCFGShow.to_module()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.kcfg.show.html#pyk.kcfg.show.NodePrinter"><code class="docutils literal notranslate"><span class="pre">NodePrinter</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.show.html#pyk.kcfg.show.NodePrinter.cterm_show"><code class="docutils literal notranslate"><span class="pre">NodePrinter.cterm_show</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.show.html#pyk.kcfg.show.NodePrinter.full_printer"><code class="docutils literal notranslate"><span class="pre">NodePrinter.full_printer</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.show.html#pyk.kcfg.show.NodePrinter.minimize"><code class="docutils literal notranslate"><span class="pre">NodePrinter.minimize</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.show.html#pyk.kcfg.show.NodePrinter.node_attrs"><code class="docutils literal notranslate"><span class="pre">NodePrinter.node_attrs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.show.html#pyk.kcfg.show.NodePrinter.print_node"><code class="docutils literal notranslate"><span class="pre">NodePrinter.print_node()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pyk.kcfg.store.html">pyk.kcfg.store module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pyk.kcfg.store.html#pyk.kcfg.store.OptimizedNodeStore"><code class="docutils literal notranslate"><span class="pre">OptimizedNodeStore</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pyk.kcfg.tui.html">pyk.kcfg.tui module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.BehaviorView"><code class="docutils literal notranslate"><span class="pre">BehaviorView</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.BehaviorView.Selected"><code class="docutils literal notranslate"><span class="pre">BehaviorView.Selected</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.BehaviorView.Selected.bubble"><code class="docutils literal notranslate"><span class="pre">BehaviorView.Selected.bubble</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.BehaviorView.Selected.handler_name"><code class="docutils literal notranslate"><span class="pre">BehaviorView.Selected.handler_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.BehaviorView.Selected.no_dispatch"><code class="docutils literal notranslate"><span class="pre">BehaviorView.Selected.no_dispatch</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.BehaviorView.Selected.time"><code class="docutils literal notranslate"><span class="pre">BehaviorView.Selected.time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.BehaviorView.Selected.verbose"><code class="docutils literal notranslate"><span class="pre">BehaviorView.Selected.verbose</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.BehaviorView.can_focus"><code class="docutils literal notranslate"><span class="pre">BehaviorView.can_focus</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.BehaviorView.can_focus_children"><code class="docutils literal notranslate"><span class="pre">BehaviorView.can_focus_children</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.BehaviorView.compose"><code class="docutils literal notranslate"><span class="pre">BehaviorView.compose()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.BehaviorView.on_click"><code class="docutils literal notranslate"><span class="pre">BehaviorView.on_click()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.Constraint"><code class="docutils literal notranslate"><span class="pre">Constraint</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.Constraint.can_focus"><code class="docutils literal notranslate"><span class="pre">Constraint.can_focus</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.Constraint.can_focus_children"><code class="docutils literal notranslate"><span class="pre">Constraint.can_focus_children</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.Constraint.on_click"><code class="docutils literal notranslate"><span class="pre">Constraint.on_click()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.Custom"><code class="docutils literal notranslate"><span class="pre">Custom</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.Custom.can_focus"><code class="docutils literal notranslate"><span class="pre">Custom.can_focus</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.Custom.can_focus_children"><code class="docutils literal notranslate"><span class="pre">Custom.can_focus_children</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.Custom.on_click"><code class="docutils literal notranslate"><span class="pre">Custom.on_click()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.GraphChunk"><code class="docutils literal notranslate"><span class="pre">GraphChunk</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.GraphChunk.Selected"><code class="docutils literal notranslate"><span class="pre">GraphChunk.Selected</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.GraphChunk.Selected.bubble"><code class="docutils literal notranslate"><span class="pre">GraphChunk.Selected.bubble</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.GraphChunk.Selected.chunk_id"><code class="docutils literal notranslate"><span class="pre">GraphChunk.Selected.chunk_id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.GraphChunk.Selected.handler_name"><code class="docutils literal notranslate"><span class="pre">GraphChunk.Selected.handler_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.GraphChunk.Selected.no_dispatch"><code class="docutils literal notranslate"><span class="pre">GraphChunk.Selected.no_dispatch</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.GraphChunk.Selected.time"><code class="docutils literal notranslate"><span class="pre">GraphChunk.Selected.time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.GraphChunk.Selected.verbose"><code class="docutils literal notranslate"><span class="pre">GraphChunk.Selected.verbose</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.GraphChunk.can_focus"><code class="docutils literal notranslate"><span class="pre">GraphChunk.can_focus</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.GraphChunk.can_focus_children"><code class="docutils literal notranslate"><span class="pre">GraphChunk.can_focus_children</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.GraphChunk.on_click"><code class="docutils literal notranslate"><span class="pre">GraphChunk.on_click()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.GraphChunk.on_enter"><code class="docutils literal notranslate"><span class="pre">GraphChunk.on_enter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.GraphChunk.on_leave"><code class="docutils literal notranslate"><span class="pre">GraphChunk.on_leave()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.Info"><code class="docutils literal notranslate"><span class="pre">Info</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.Info.can_focus"><code class="docutils literal notranslate"><span class="pre">Info.can_focus</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.Info.can_focus_children"><code class="docutils literal notranslate"><span class="pre">Info.can_focus_children</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.Info.compose"><code class="docutils literal notranslate"><span class="pre">Info.compose()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.Info.text"><code class="docutils literal notranslate"><span class="pre">Info.text</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.Info.update"><code class="docutils literal notranslate"><span class="pre">Info.update()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.Info.watch_text"><code class="docutils literal notranslate"><span class="pre">Info.watch_text()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.KCFGViewer"><code class="docutils literal notranslate"><span class="pre">KCFGViewer</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.KCFGViewer.BINDINGS"><code class="docutils literal notranslate"><span class="pre">KCFGViewer.BINDINGS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.KCFGViewer.CSS_PATH"><code class="docutils literal notranslate"><span class="pre">KCFGViewer.CSS_PATH</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.KCFGViewer.action_keystroke"><code class="docutils literal notranslate"><span class="pre">KCFGViewer.action_keystroke()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.KCFGViewer.compose"><code class="docutils literal notranslate"><span class="pre">KCFGViewer.compose()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.KCFGViewer.on_graph_chunk_selected"><code class="docutils literal notranslate"><span class="pre">KCFGViewer.on_graph_chunk_selected()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.NavWidget"><code class="docutils literal notranslate"><span class="pre">NavWidget</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.NavWidget.BINDINGS"><code class="docutils literal notranslate"><span class="pre">NavWidget.BINDINGS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.NavWidget.Selected"><code class="docutils literal notranslate"><span class="pre">NavWidget.Selected</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.NavWidget.Selected.bubble"><code class="docutils literal notranslate"><span class="pre">NavWidget.Selected.bubble</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.NavWidget.Selected.handler_name"><code class="docutils literal notranslate"><span class="pre">NavWidget.Selected.handler_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.NavWidget.Selected.no_dispatch"><code class="docutils literal notranslate"><span class="pre">NavWidget.Selected.no_dispatch</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.NavWidget.Selected.time"><code class="docutils literal notranslate"><span class="pre">NavWidget.Selected.time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.NavWidget.Selected.verbose"><code class="docutils literal notranslate"><span class="pre">NavWidget.Selected.verbose</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.NavWidget.can_focus"><code class="docutils literal notranslate"><span class="pre">NavWidget.can_focus</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.NavWidget.can_focus_children"><code class="docutils literal notranslate"><span class="pre">NavWidget.can_focus_children</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.NavWidget.compose"><code class="docutils literal notranslate"><span class="pre">NavWidget.compose()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.NavWidget.text"><code class="docutils literal notranslate"><span class="pre">NavWidget.text</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.NavWidget.update"><code class="docutils literal notranslate"><span class="pre">NavWidget.update()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.NavWidget.watch_text"><code class="docutils literal notranslate"><span class="pre">NavWidget.watch_text()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.NodeView"><code class="docutils literal notranslate"><span class="pre">NodeView</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.NodeView.can_focus"><code class="docutils literal notranslate"><span class="pre">NodeView.can_focus</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.NodeView.can_focus_children"><code class="docutils literal notranslate"><span class="pre">NodeView.can_focus_children</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.NodeView.compose"><code class="docutils literal notranslate"><span class="pre">NodeView.compose()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.NodeView.on_behavior_view_selected"><code class="docutils literal notranslate"><span class="pre">NodeView.on_behavior_view_selected()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.NodeView.on_constraint_selected"><code class="docutils literal notranslate"><span class="pre">NodeView.on_constraint_selected()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.NodeView.on_custom_selected"><code class="docutils literal notranslate"><span class="pre">NodeView.on_custom_selected()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.NodeView.on_mount"><code class="docutils literal notranslate"><span class="pre">NodeView.on_mount()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.NodeView.on_status_selected"><code class="docutils literal notranslate"><span class="pre">NodeView.on_status_selected()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.NodeView.on_term_selected"><code class="docutils literal notranslate"><span class="pre">NodeView.on_term_selected()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.NodeView.toggle_option"><code class="docutils literal notranslate"><span class="pre">NodeView.toggle_option()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.NodeView.toggle_view"><code class="docutils literal notranslate"><span class="pre">NodeView.toggle_view()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.NodeView.update"><code class="docutils literal notranslate"><span class="pre">NodeView.update()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.Status"><code class="docutils literal notranslate"><span class="pre">Status</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.Status.can_focus"><code class="docutils literal notranslate"><span class="pre">Status.can_focus</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.Status.can_focus_children"><code class="docutils literal notranslate"><span class="pre">Status.can_focus_children</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.Status.on_click"><code class="docutils literal notranslate"><span class="pre">Status.on_click()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.Term"><code class="docutils literal notranslate"><span class="pre">Term</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.Term.can_focus"><code class="docutils literal notranslate"><span class="pre">Term.can_focus</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.Term.can_focus_children"><code class="docutils literal notranslate"><span class="pre">Term.can_focus_children</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.kcfg.tui.html#pyk.kcfg.tui.Term.on_click"><code class="docutils literal notranslate"><span class="pre">Term.on_click()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pyk.kbuild.utils.html" class="btn btn-neutral float-left" title="pyk.kbuild.utils module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pyk.kcfg.exploration.html" class="btn btn-neutral float-right" title="pyk.kcfg.exploration module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Runtime Verification, Inc.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

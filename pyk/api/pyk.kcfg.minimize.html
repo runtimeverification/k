@@ -1,0 +1,277 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyk.kcfg.minimize module &mdash; pyk 7.1.313 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=9c1be6d9"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyk.kcfg.semantics module" href="pyk.kcfg.semantics.html" />
+    <link rel="prev" title="pyk.kcfg.kcfg module" href="pyk.kcfg.kcfg.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            pyk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">pyk</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pyk.html">pyk package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="pyk.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="pyk.cterm.html">pyk.cterm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kast.html">pyk.kast package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kbuild.html">pyk.kbuild package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="pyk.kcfg.html">pyk.kcfg package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kdist.html">pyk.kdist package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.klean.html">pyk.klean package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kllvm.html">pyk.kllvm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.konvert.html">pyk.konvert package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kore.html">pyk.kore package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kore_exec_covr.html">pyk.kore_exec_covr package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.ktool.html">pyk.ktool package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.proof.html">pyk.proof package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.testing.html">pyk.testing package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">pyk</a></li>
+          <li class="breadcrumb-item"><a href="pyk.html">pyk package</a></li>
+          <li class="breadcrumb-item"><a href="pyk.kcfg.html">pyk.kcfg package</a></li>
+      <li class="breadcrumb-item active">pyk.kcfg.minimize module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/pyk.kcfg.minimize.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pyk.kcfg.minimize">
+<span id="pyk-kcfg-minimize-module"></span><h1>pyk.kcfg.minimize module<a class="headerlink" href="#module-pyk.kcfg.minimize" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kcfg.minimize.KCFGMinimizer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">KCFGMinimizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kcfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG" title="pyk.kcfg.kcfg.KCFG"><span class="pre">KCFG</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">heuristics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kcfg.semantics.html#pyk.kcfg.semantics.KCFGSemantics" title="pyk.kcfg.semantics.KCFGSemantics"><span class="pre">KCFGSemantics</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kdef</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.outer.html#pyk.kast.outer.KDefinition" title="pyk.kast.outer.KDefinition"><span class="pre">KDefinition</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/kcfg/minimize.html#KCFGMinimizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.minimize.KCFGMinimizer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.minimize.KCFGMinimizer.kcfg">
+<span class="sig-name descname"><span class="pre">kcfg</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG" title="pyk.kcfg.kcfg.KCFG"><span class="pre">KCFG</span></a></em><a class="headerlink" href="#pyk.kcfg.minimize.KCFGMinimizer.kcfg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.minimize.KCFGMinimizer.kdef">
+<span class="sig-name descname"><span class="pre">kdef</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.outer.html#pyk.kast.outer.KDefinition" title="pyk.kast.outer.KDefinition"><span class="pre">KDefinition</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.kcfg.minimize.KCFGMinimizer.kdef" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.minimize.KCFGMinimizer.lift_edge">
+<span class="sig-name descname"><span class="pre">lift_edge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NodeIdLike</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/minimize.html#KCFGMinimizer.lift_edge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.minimize.KCFGMinimizer.lift_edge" title="Link to this definition"></a></dt>
+<dd><p>Lift an edge up another edge directly preceding it.</p>
+<p><cite>A –M steps–&gt; B –N steps–&gt; C</cite> becomes <cite>A –(M + N) steps–&gt; C</cite>. Node <cite>B</cite> is removed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>b_id</strong> – the identifier of the central node <cite>B</cite> of a sequence of edges <cite>A –&gt; B –&gt; C</cite>.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>AssertionError</strong> – If the edges in question are not in place.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.minimize.KCFGMinimizer.lift_edges">
+<span class="sig-name descname"><span class="pre">lift_edges</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/minimize.html#KCFGMinimizer.lift_edges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.minimize.KCFGMinimizer.lift_edges" title="Link to this definition"></a></dt>
+<dd><p>Perform all possible edge lifts across the KCFG.</p>
+<p>The KCFG is transformed to an equivalent in which no further edge lifts are possible.</p>
+<p>Given the KCFG design, it is not possible for one edge lift to either disallow another or
+allow another that was not previously possible. Therefore, this function is guaranteed to
+lift all possible edges without having to loop.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An indicator of whether or not at least one edge lift was performed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.minimize.KCFGMinimizer.lift_split_edge">
+<span class="sig-name descname"><span class="pre">lift_split_edge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NodeIdLike</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/minimize.html#KCFGMinimizer.lift_split_edge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.minimize.KCFGMinimizer.lift_split_edge" title="Link to this definition"></a></dt>
+<dd><p>Lift a split up an edge directly preceding it.</p>
+<p><cite>A –M steps–&gt; B –[cond_1, …, cond_N]–&gt; [C_1, …, C_N]</cite> becomes
+<cite>A –[cond_1, …, cond_N]–&gt; [A #And cond_1 –M steps–&gt; C_1, …, A #And cond_N –M steps–&gt; C_N]</cite>.
+Node <cite>B</cite> is removed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>b_id</strong> – The identifier of the central node <cite>B</cite> of the structure <cite>A –&gt; B –&gt; [C_1, …, C_N]</cite>.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>AssertionError</strong> – If the structure in question is not in place.</p></li>
+<li><p><strong>AssertionError</strong> – If any of the <cite>cond_i</cite> contain variables not present in <cite>A</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.minimize.KCFGMinimizer.lift_split_split">
+<span class="sig-name descname"><span class="pre">lift_split_split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NodeIdLike</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/minimize.html#KCFGMinimizer.lift_split_split"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.minimize.KCFGMinimizer.lift_split_split" title="Link to this definition"></a></dt>
+<dd><p>Lift a split up a split directly preceding it, joining them into a single split.</p>
+<p><cite>A –[…, cond_B, …]–&gt; […, B, …]</cite> with <cite>B –[cond_1, …, cond_N]–&gt; [C_1, …, C_N]</cite> becomes
+<cite>A –[…, cond_B #And cond_1, …, cond_B #And cond_N, …]–&gt; […, C_1, …, C_N, …]</cite>.
+Node <cite>B</cite> is removed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>b_id</strong> – the identifier of the node <cite>B</cite> of the structure
+<cite>A –[…, cond_B, …]–&gt; […, B, …]</cite> with <cite>B –[cond_1, …, cond_N]–&gt; [C_1, …, C_N]</cite>.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>AssertionError</strong> – If the structure in question is not in place.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.minimize.KCFGMinimizer.lift_splits">
+<span class="sig-name descname"><span class="pre">lift_splits</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/minimize.html#KCFGMinimizer.lift_splits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.minimize.KCFGMinimizer.lift_splits" title="Link to this definition"></a></dt>
+<dd><p>Perform all possible split liftings.</p>
+<p>The KCFG is transformed to an equivalent in which no further split lifts are possible.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An indicator of whether or not at least one split lift was performed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.minimize.KCFGMinimizer.merge_nodes">
+<span class="sig-name descname"><span class="pre">merge_nodes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/minimize.html#KCFGMinimizer.merge_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.minimize.KCFGMinimizer.merge_nodes" title="Link to this definition"></a></dt>
+<dd><p>Merge targets of Split for cutting down the number of branches, using heuristics KCFGSemantics.is_mergeable.</p>
+<dl class="simple">
+<dt>Side Effect: The KCFG is rewritten by the following rewrite pattern,</dt><dd><ul class="simple">
+<li><p>Match: A -<a href="#id1"><span class="problematic" id="id2">|Split|</span></a>-&gt; A_i -<a href="#id3"><span class="problematic" id="id4">|Edge|</span></a>-&gt; B_i</p></li>
+<li><dl class="simple">
+<dt>Rewrite:</dt><dd><ul>
+<li><p>if <cite>B_x, B_y, …, B_z are not mergeable</cite> then unchanged</p></li>
+<li><dl class="simple">
+<dt>if <cite>B_x, B_y, …, B_z are mergeable</cite>, then</dt><dd><ul>
+<li><p>A -<a href="#id5"><span class="problematic" id="id6">|Split|</span></a>-&gt; A_x or A_y or … or A_z</p></li>
+<li><p>A_x or A_y or … or A_z -<a href="#id7"><span class="problematic" id="id8">|Edge|</span></a>-&gt; B_x or B_y or … or B_z</p></li>
+<li><p>B_x or B_y or … or B_z -<a href="#id9"><span class="problematic" id="id10">|Split|</span></a>-&gt; B_x, B_y, …, B_z</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+<p>Specifically, when <cite>B_merge = B_x or B_y or … or B_z</cite>
+- <cite>or</cite>: fresh variables in places where the configurations differ
+- <cite>Edge</cite> in A_merged -<a href="#id11"><span class="problematic" id="id12">|Edge|</span></a>-&gt; B_merge: list of merged edges is from A_i -<a href="#id13"><span class="problematic" id="id14">|Edge|</span></a>-&gt; B_i
+- <cite>Split</cite> in B_merge -<a href="#id15"><span class="problematic" id="id16">|Split|</span></a>-&gt; B_x, B_y, …, B_z: subst for it is from A -<a href="#id17"><span class="problematic" id="id18">|Split|</span></a>-&gt; A_1, A_2, …, A_n
+:param semantics: provides the is_mergeable heuristic
+:return: whether any merge was performed</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.minimize.KCFGMinimizer.minimize">
+<span class="sig-name descname"><span class="pre">minimize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">merge</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/minimize.html#KCFGMinimizer.minimize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.minimize.KCFGMinimizer.minimize" title="Link to this definition"></a></dt>
+<dd><p>Minimize KCFG by repeatedly performing the lifting transformations.</p>
+<p>The KCFG is transformed to an equivalent in which no further lifting transformations are possible.
+The loop is designed so that each transformation is performed once in each iteration.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.minimize.KCFGMinimizer.semantics">
+<span class="sig-name descname"><span class="pre">semantics</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kcfg.semantics.html#pyk.kcfg.semantics.KCFGSemantics" title="pyk.kcfg.semantics.KCFGSemantics"><span class="pre">KCFGSemantics</span></a></em><a class="headerlink" href="#pyk.kcfg.minimize.KCFGMinimizer.semantics" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pyk.kcfg.kcfg.html" class="btn btn-neutral float-left" title="pyk.kcfg.kcfg module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pyk.kcfg.semantics.html" class="btn btn-neutral float-right" title="pyk.kcfg.semantics module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Runtime Verification, Inc.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

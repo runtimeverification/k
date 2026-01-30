@@ -1,0 +1,242 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyk.kast.prelude.ml &mdash; pyk 7.1.313 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=9c1be6d9"></script>
+      <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            pyk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/modules.html">pyk</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pyk.kast.prelude.ml</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyk.kast.prelude.ml</h1><div class="highlight"><pre>
+<span></span><span class="linenos">  1</span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<span class="linenos">  2</span>
+<span class="linenos">  3</span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="linenos">  4</span>
+<span class="linenos">  5</span><span class="kn">from</span><span class="w"> </span><span class="nn">...utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">single</span>
+<span class="linenos">  6</span><span class="kn">from</span><span class="w"> </span><span class="nn">..inner</span><span class="w"> </span><span class="kn">import</span> <span class="n">KApply</span><span class="p">,</span> <span class="n">KLabel</span><span class="p">,</span> <span class="n">build_assoc</span><span class="p">,</span> <span class="n">flatten_label</span>
+<span class="linenos">  7</span><span class="kn">from</span><span class="w"> </span><span class="nn">.k</span><span class="w"> </span><span class="kn">import</span> <span class="n">GENERATED_TOP_CELL</span><span class="p">,</span> <span class="n">K_ITEM</span><span class="p">,</span> <span class="n">K</span>
+<span class="linenos">  8</span><span class="kn">from</span><span class="w"> </span><span class="nn">.kbool</span><span class="w"> </span><span class="kn">import</span> <span class="n">BOOL</span><span class="p">,</span> <span class="n">FALSE</span><span class="p">,</span> <span class="n">TRUE</span>
+<span class="linenos">  9</span>
+<span class="linenos"> 10</span><span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+<span class="linenos"> 11</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterable</span>
+<span class="linenos"> 12</span>
+<span class="linenos"> 13</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">KInner</span>
+<span class="linenos"> 14</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">..inner</span><span class="w"> </span><span class="kn">import</span> <span class="n">KSort</span><span class="p">,</span> <span class="n">KVariable</span>
+<span class="linenos"> 15</span>
+<span class="linenos"> 16</span>
+<span class="linenos"> 17</span><span class="k">def</span><span class="w"> </span><span class="nf">_is_top</span><span class="p">(</span><span class="n">term</span><span class="p">:</span> <span class="n">KInner</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="linenos"> 18</span>    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="n">KApply</span><span class="p">)</span> <span class="ow">and</span> <span class="n">term</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;#Top&#39;</span>
+<span class="linenos"> 19</span>
+<span class="linenos"> 20</span>
+<div class="viewcode-block" id="is_top">
+<a class="viewcode-back" href="../../../../api/pyk.kast.prelude.ml.html#pyk.kast.prelude.ml.is_top">[docs]</a>
+<span class="linenos"> 21</span><span class="k">def</span><span class="w"> </span><span class="nf">is_top</span><span class="p">(</span><span class="n">term</span><span class="p">:</span> <span class="n">KInner</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">weak</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="linenos"> 22</span>    <span class="k">if</span> <span class="n">_is_top</span><span class="p">(</span><span class="n">term</span><span class="p">):</span>
+<span class="linenos"> 23</span>        <span class="k">return</span> <span class="kc">True</span>
+<span class="linenos"> 24</span>    <span class="k">if</span> <span class="ow">not</span> <span class="n">weak</span><span class="p">:</span>
+<span class="linenos"> 25</span>        <span class="k">return</span> <span class="kc">False</span>
+<span class="linenos"> 26</span>    <span class="n">flat</span> <span class="o">=</span> <span class="n">flatten_label</span><span class="p">(</span><span class="s1">&#39;#And&#39;</span><span class="p">,</span> <span class="n">term</span><span class="p">)</span>
+<span class="linenos"> 27</span>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">flat</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+<span class="linenos"> 28</span>        <span class="k">return</span> <span class="n">is_top</span><span class="p">(</span><span class="n">single</span><span class="p">(</span><span class="n">flat</span><span class="p">))</span>
+<span class="linenos"> 29</span>    <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">is_top</span><span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="n">weak</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">flat</span><span class="p">)</span></div>
+
+<span class="linenos"> 30</span>
+<span class="linenos"> 31</span>
+<span class="linenos"> 32</span><span class="k">def</span><span class="w"> </span><span class="nf">_is_bottom</span><span class="p">(</span><span class="n">term</span><span class="p">:</span> <span class="n">KInner</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="linenos"> 33</span>    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="n">KApply</span><span class="p">)</span> <span class="ow">and</span> <span class="n">term</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;#Bottom&#39;</span>
+<span class="linenos"> 34</span>
+<span class="linenos"> 35</span>
+<div class="viewcode-block" id="is_bottom">
+<a class="viewcode-back" href="../../../../api/pyk.kast.prelude.ml.html#pyk.kast.prelude.ml.is_bottom">[docs]</a>
+<span class="linenos"> 36</span><span class="k">def</span><span class="w"> </span><span class="nf">is_bottom</span><span class="p">(</span><span class="n">term</span><span class="p">:</span> <span class="n">KInner</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">weak</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="linenos"> 37</span>    <span class="k">if</span> <span class="n">_is_bottom</span><span class="p">(</span><span class="n">term</span><span class="p">):</span>
+<span class="linenos"> 38</span>        <span class="k">return</span> <span class="kc">True</span>
+<span class="linenos"> 39</span>    <span class="k">if</span> <span class="ow">not</span> <span class="n">weak</span><span class="p">:</span>
+<span class="linenos"> 40</span>        <span class="k">return</span> <span class="kc">False</span>
+<span class="linenos"> 41</span>    <span class="n">flat</span> <span class="o">=</span> <span class="n">flatten_label</span><span class="p">(</span><span class="s1">&#39;#And&#39;</span><span class="p">,</span> <span class="n">term</span><span class="p">)</span>
+<span class="linenos"> 42</span>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">flat</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+<span class="linenos"> 43</span>        <span class="k">return</span> <span class="n">is_bottom</span><span class="p">(</span><span class="n">single</span><span class="p">(</span><span class="n">flat</span><span class="p">))</span>
+<span class="linenos"> 44</span>    <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">is_bottom</span><span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="n">weak</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">flat</span><span class="p">)</span></div>
+
+<span class="linenos"> 45</span>
+<span class="linenos"> 46</span>
+<div class="viewcode-block" id="mlEquals">
+<a class="viewcode-back" href="../../../../api/pyk.kast.prelude.ml.html#pyk.kast.prelude.ml.mlEquals">[docs]</a>
+<span class="linenos"> 47</span><span class="k">def</span><span class="w"> </span><span class="nf">mlEquals</span><span class="p">(</span>  <span class="c1"># noqa: N802</span>
+<span class="linenos"> 48</span>    <span class="n">term1</span><span class="p">:</span> <span class="n">KInner</span><span class="p">,</span>
+<span class="linenos"> 49</span>    <span class="n">term2</span><span class="p">:</span> <span class="n">KInner</span><span class="p">,</span>
+<span class="linenos"> 50</span>    <span class="n">arg_sort</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">KSort</span> <span class="o">=</span> <span class="n">K</span><span class="p">,</span>
+<span class="linenos"> 51</span>    <span class="n">sort</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">KSort</span> <span class="o">=</span> <span class="n">GENERATED_TOP_CELL</span><span class="p">,</span>
+<span class="linenos"> 52</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KApply</span><span class="p">:</span>
+<span class="linenos"> 53</span>    <span class="k">return</span> <span class="n">KLabel</span><span class="p">(</span><span class="s1">&#39;#Equals&#39;</span><span class="p">,</span> <span class="n">arg_sort</span><span class="p">,</span> <span class="n">sort</span><span class="p">)(</span><span class="n">term1</span><span class="p">,</span> <span class="n">term2</span><span class="p">)</span></div>
+
+<span class="linenos"> 54</span>
+<span class="linenos"> 55</span>
+<div class="viewcode-block" id="mlEqualsTrue">
+<a class="viewcode-back" href="../../../../api/pyk.kast.prelude.ml.html#pyk.kast.prelude.ml.mlEqualsTrue">[docs]</a>
+<span class="linenos"> 56</span><span class="k">def</span><span class="w"> </span><span class="nf">mlEqualsTrue</span><span class="p">(</span><span class="n">term</span><span class="p">:</span> <span class="n">KInner</span><span class="p">,</span> <span class="n">sort</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">KSort</span> <span class="o">=</span> <span class="n">GENERATED_TOP_CELL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KApply</span><span class="p">:</span>  <span class="c1"># noqa: N802</span>
+<span class="linenos"> 57</span>    <span class="k">return</span> <span class="n">mlEquals</span><span class="p">(</span><span class="n">TRUE</span><span class="p">,</span> <span class="n">term</span><span class="p">,</span> <span class="n">arg_sort</span><span class="o">=</span><span class="n">BOOL</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">)</span></div>
+
+<span class="linenos"> 58</span>
+<span class="linenos"> 59</span>
+<div class="viewcode-block" id="mlEqualsFalse">
+<a class="viewcode-back" href="../../../../api/pyk.kast.prelude.ml.html#pyk.kast.prelude.ml.mlEqualsFalse">[docs]</a>
+<span class="linenos"> 60</span><span class="k">def</span><span class="w"> </span><span class="nf">mlEqualsFalse</span><span class="p">(</span><span class="n">term</span><span class="p">:</span> <span class="n">KInner</span><span class="p">,</span> <span class="n">sort</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">KSort</span> <span class="o">=</span> <span class="n">GENERATED_TOP_CELL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KApply</span><span class="p">:</span>  <span class="c1"># noqa: N802</span>
+<span class="linenos"> 61</span>    <span class="k">return</span> <span class="n">mlEquals</span><span class="p">(</span><span class="n">FALSE</span><span class="p">,</span> <span class="n">term</span><span class="p">,</span> <span class="n">arg_sort</span><span class="o">=</span><span class="n">BOOL</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">)</span></div>
+
+<span class="linenos"> 62</span>
+<span class="linenos"> 63</span>
+<div class="viewcode-block" id="mlTop">
+<a class="viewcode-back" href="../../../../api/pyk.kast.prelude.ml.html#pyk.kast.prelude.ml.mlTop">[docs]</a>
+<span class="linenos"> 64</span><span class="k">def</span><span class="w"> </span><span class="nf">mlTop</span><span class="p">(</span><span class="n">sort</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">KSort</span> <span class="o">=</span> <span class="n">GENERATED_TOP_CELL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KApply</span><span class="p">:</span>  <span class="c1"># noqa: N802</span>
+<span class="linenos"> 65</span>    <span class="k">return</span> <span class="n">KLabel</span><span class="p">(</span><span class="s1">&#39;#Top&#39;</span><span class="p">,</span> <span class="n">sort</span><span class="p">)()</span></div>
+
+<span class="linenos"> 66</span>
+<span class="linenos"> 67</span>
+<div class="viewcode-block" id="mlBottom">
+<a class="viewcode-back" href="../../../../api/pyk.kast.prelude.ml.html#pyk.kast.prelude.ml.mlBottom">[docs]</a>
+<span class="linenos"> 68</span><span class="k">def</span><span class="w"> </span><span class="nf">mlBottom</span><span class="p">(</span><span class="n">sort</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">KSort</span> <span class="o">=</span> <span class="n">GENERATED_TOP_CELL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KApply</span><span class="p">:</span>  <span class="c1"># noqa: N802</span>
+<span class="linenos"> 69</span>    <span class="k">return</span> <span class="n">KLabel</span><span class="p">(</span><span class="s1">&#39;#Bottom&#39;</span><span class="p">,</span> <span class="n">sort</span><span class="p">)()</span></div>
+
+<span class="linenos"> 70</span>
+<span class="linenos"> 71</span>
+<div class="viewcode-block" id="mlNot">
+<a class="viewcode-back" href="../../../../api/pyk.kast.prelude.ml.html#pyk.kast.prelude.ml.mlNot">[docs]</a>
+<span class="linenos"> 72</span><span class="k">def</span><span class="w"> </span><span class="nf">mlNot</span><span class="p">(</span><span class="n">term</span><span class="p">:</span> <span class="n">KInner</span><span class="p">,</span> <span class="n">sort</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">KSort</span> <span class="o">=</span> <span class="n">GENERATED_TOP_CELL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KApply</span><span class="p">:</span>  <span class="c1"># noqa: N802</span>
+<span class="linenos"> 73</span>    <span class="k">return</span> <span class="n">KLabel</span><span class="p">(</span><span class="s1">&#39;#Not&#39;</span><span class="p">,</span> <span class="n">sort</span><span class="p">)(</span><span class="n">term</span><span class="p">)</span></div>
+
+<span class="linenos"> 74</span>
+<span class="linenos"> 75</span>
+<div class="viewcode-block" id="mlAnd">
+<a class="viewcode-back" href="../../../../api/pyk.kast.prelude.ml.html#pyk.kast.prelude.ml.mlAnd">[docs]</a>
+<span class="linenos"> 76</span><span class="k">def</span><span class="w"> </span><span class="nf">mlAnd</span><span class="p">(</span><span class="n">conjuncts</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">KInner</span><span class="p">],</span> <span class="n">sort</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">KSort</span> <span class="o">=</span> <span class="n">GENERATED_TOP_CELL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KInner</span><span class="p">:</span>  <span class="c1"># noqa: N802</span>
+<span class="linenos"> 77</span>    <span class="k">return</span> <span class="n">build_assoc</span><span class="p">(</span><span class="n">mlTop</span><span class="p">(</span><span class="n">sort</span><span class="p">),</span> <span class="n">KLabel</span><span class="p">(</span><span class="s1">&#39;#And&#39;</span><span class="p">,</span> <span class="n">sort</span><span class="p">),</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="ow">not</span> <span class="n">is_top</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">conjuncts</span><span class="p">))</span></div>
+
+<span class="linenos"> 78</span>
+<span class="linenos"> 79</span>
+<div class="viewcode-block" id="mlOr">
+<a class="viewcode-back" href="../../../../api/pyk.kast.prelude.ml.html#pyk.kast.prelude.ml.mlOr">[docs]</a>
+<span class="linenos"> 80</span><span class="k">def</span><span class="w"> </span><span class="nf">mlOr</span><span class="p">(</span><span class="n">disjuncts</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">KInner</span><span class="p">],</span> <span class="n">sort</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">KSort</span> <span class="o">=</span> <span class="n">GENERATED_TOP_CELL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KInner</span><span class="p">:</span>  <span class="c1"># noqa: N802</span>
+<span class="linenos"> 81</span>    <span class="k">return</span> <span class="n">build_assoc</span><span class="p">(</span><span class="n">mlBottom</span><span class="p">(</span><span class="n">sort</span><span class="p">),</span> <span class="n">KLabel</span><span class="p">(</span><span class="s1">&#39;#Or&#39;</span><span class="p">,</span> <span class="n">sort</span><span class="p">),</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="ow">not</span> <span class="n">is_bottom</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">disjuncts</span><span class="p">))</span></div>
+
+<span class="linenos"> 82</span>
+<span class="linenos"> 83</span>
+<div class="viewcode-block" id="mlImplies">
+<a class="viewcode-back" href="../../../../api/pyk.kast.prelude.ml.html#pyk.kast.prelude.ml.mlImplies">[docs]</a>
+<span class="linenos"> 84</span><span class="k">def</span><span class="w"> </span><span class="nf">mlImplies</span><span class="p">(</span><span class="n">antecedent</span><span class="p">:</span> <span class="n">KInner</span><span class="p">,</span> <span class="n">consequent</span><span class="p">:</span> <span class="n">KInner</span><span class="p">,</span> <span class="n">sort</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">KSort</span> <span class="o">=</span> <span class="n">GENERATED_TOP_CELL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KApply</span><span class="p">:</span>  <span class="c1"># noqa: N802</span>
+<span class="linenos"> 85</span>    <span class="k">return</span> <span class="n">KLabel</span><span class="p">(</span><span class="s1">&#39;#Implies&#39;</span><span class="p">,</span> <span class="n">sort</span><span class="p">)(</span><span class="n">antecedent</span><span class="p">,</span> <span class="n">consequent</span><span class="p">)</span></div>
+
+<span class="linenos"> 86</span>
+<span class="linenos"> 87</span>
+<div class="viewcode-block" id="mlExists">
+<a class="viewcode-back" href="../../../../api/pyk.kast.prelude.ml.html#pyk.kast.prelude.ml.mlExists">[docs]</a>
+<span class="linenos"> 88</span><span class="k">def</span><span class="w"> </span><span class="nf">mlExists</span><span class="p">(</span>  <span class="c1"># noqa: N802</span>
+<span class="linenos"> 89</span>    <span class="n">var</span><span class="p">:</span> <span class="n">KVariable</span><span class="p">,</span>
+<span class="linenos"> 90</span>    <span class="n">body</span><span class="p">:</span> <span class="n">KInner</span><span class="p">,</span>
+<span class="linenos"> 91</span>    <span class="n">sort1</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">KSort</span> <span class="o">=</span> <span class="n">K_ITEM</span><span class="p">,</span>
+<span class="linenos"> 92</span>    <span class="n">sort2</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">KSort</span> <span class="o">=</span> <span class="n">GENERATED_TOP_CELL</span><span class="p">,</span>
+<span class="linenos"> 93</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KApply</span><span class="p">:</span>
+<span class="linenos"> 94</span>    <span class="k">return</span> <span class="n">KLabel</span><span class="p">(</span><span class="s1">&#39;#Exists&#39;</span><span class="p">,</span> <span class="n">sort1</span><span class="p">,</span> <span class="n">sort2</span><span class="p">)(</span><span class="n">var</span><span class="p">,</span> <span class="n">body</span><span class="p">)</span></div>
+
+<span class="linenos"> 95</span>
+<span class="linenos"> 96</span>
+<div class="viewcode-block" id="mlCeil">
+<a class="viewcode-back" href="../../../../api/pyk.kast.prelude.ml.html#pyk.kast.prelude.ml.mlCeil">[docs]</a>
+<span class="linenos"> 97</span><span class="k">def</span><span class="w"> </span><span class="nf">mlCeil</span><span class="p">(</span>  <span class="c1"># noqa: N802</span>
+<span class="linenos"> 98</span>    <span class="n">term</span><span class="p">:</span> <span class="n">KInner</span><span class="p">,</span>
+<span class="linenos"> 99</span>    <span class="n">arg_sort</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">KSort</span> <span class="o">=</span> <span class="n">GENERATED_TOP_CELL</span><span class="p">,</span>
+<span class="linenos">100</span>    <span class="n">sort</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">KSort</span> <span class="o">=</span> <span class="n">GENERATED_TOP_CELL</span><span class="p">,</span>
+<span class="linenos">101</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KApply</span><span class="p">:</span>
+<span class="linenos">102</span>    <span class="k">return</span> <span class="n">KLabel</span><span class="p">(</span><span class="s1">&#39;#Ceil&#39;</span><span class="p">,</span> <span class="n">arg_sort</span><span class="p">,</span> <span class="n">sort</span><span class="p">)(</span><span class="n">term</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Runtime Verification, Inc.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

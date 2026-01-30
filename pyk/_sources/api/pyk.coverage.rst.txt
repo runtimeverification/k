@@ -1,0 +1,7 @@
+pyk.coverage module
+===================
+
+.. automodule:: pyk.coverage
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,544 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyk.kast.pretty &mdash; pyk 7.1.313 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=9c1be6d9"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            pyk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">pyk</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pyk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pyk.kast.pretty</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyk.kast.pretty</h1><div class="highlight"><pre>
+<span></span><span class="linenos">  1</span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<span class="linenos">  2</span>
+<span class="linenos">  3</span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="linenos">  4</span><span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
+<span class="linenos">  5</span><span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">cached_property</span>
+<span class="linenos">  6</span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="linenos">  7</span>
+<span class="linenos">  8</span><span class="kn">from</span><span class="w"> </span><span class="nn">..kast.prelude.kbool</span><span class="w"> </span><span class="kn">import</span> <span class="n">TRUE</span>
+<span class="linenos">  9</span><span class="kn">from</span><span class="w"> </span><span class="nn">.att</span><span class="w"> </span><span class="kn">import</span> <span class="n">Atts</span><span class="p">,</span> <span class="n">KAtt</span>
+<span class="linenos"> 10</span><span class="kn">from</span><span class="w"> </span><span class="nn">.inner</span><span class="w"> </span><span class="kn">import</span> <span class="n">KApply</span><span class="p">,</span> <span class="n">KAs</span><span class="p">,</span> <span class="n">KInner</span><span class="p">,</span> <span class="n">KLabel</span><span class="p">,</span> <span class="n">KRewrite</span><span class="p">,</span> <span class="n">KSequence</span><span class="p">,</span> <span class="n">KSort</span><span class="p">,</span> <span class="n">KToken</span><span class="p">,</span> <span class="n">KVariable</span>
+<span class="linenos"> 11</span><span class="kn">from</span><span class="w"> </span><span class="nn">.manip</span><span class="w"> </span><span class="kn">import</span> <span class="n">flatten_label</span><span class="p">,</span> <span class="n">sort_ac_collections</span><span class="p">,</span> <span class="n">undo_aliases</span>
+<span class="linenos"> 12</span><span class="kn">from</span><span class="w"> </span><span class="nn">.outer</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+<span class="linenos"> 13</span>    <span class="n">KBubble</span><span class="p">,</span>
+<span class="linenos"> 14</span>    <span class="n">KClaim</span><span class="p">,</span>
+<span class="linenos"> 15</span>    <span class="n">KContext</span><span class="p">,</span>
+<span class="linenos"> 16</span>    <span class="n">KDefinition</span><span class="p">,</span>
+<span class="linenos"> 17</span>    <span class="n">KFlatModule</span><span class="p">,</span>
+<span class="linenos"> 18</span>    <span class="n">KImport</span><span class="p">,</span>
+<span class="linenos"> 19</span>    <span class="n">KNonTerminal</span><span class="p">,</span>
+<span class="linenos"> 20</span>    <span class="n">KOuter</span><span class="p">,</span>
+<span class="linenos"> 21</span>    <span class="n">KProduction</span><span class="p">,</span>
+<span class="linenos"> 22</span>    <span class="n">KRegexTerminal</span><span class="p">,</span>
+<span class="linenos"> 23</span>    <span class="n">KRequire</span><span class="p">,</span>
+<span class="linenos"> 24</span>    <span class="n">KRule</span><span class="p">,</span>
+<span class="linenos"> 25</span>    <span class="n">KRuleLike</span><span class="p">,</span>
+<span class="linenos"> 26</span>    <span class="n">KSortSynonym</span><span class="p">,</span>
+<span class="linenos"> 27</span>    <span class="n">KSyntaxAssociativity</span><span class="p">,</span>
+<span class="linenos"> 28</span>    <span class="n">KSyntaxLexical</span><span class="p">,</span>
+<span class="linenos"> 29</span>    <span class="n">KSyntaxPriority</span><span class="p">,</span>
+<span class="linenos"> 30</span>    <span class="n">KSyntaxSort</span><span class="p">,</span>
+<span class="linenos"> 31</span>    <span class="n">KTerminal</span><span class="p">,</span>
+<span class="linenos"> 32</span><span class="p">)</span>
+<span class="linenos"> 33</span>
+<span class="linenos"> 34</span><span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+<span class="linenos"> 35</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterable</span>
+<span class="linenos"> 36</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Final</span><span class="p">,</span> <span class="n">TypeVar</span>
+<span class="linenos"> 37</span>
+<span class="linenos"> 38</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">.kast</span><span class="w"> </span><span class="kn">import</span> <span class="n">KAst</span>
+<span class="linenos"> 39</span>
+<span class="linenos"> 40</span>    <span class="n">RL</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;RL&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;KRuleLike&#39;</span><span class="p">)</span>
+<span class="linenos"> 41</span>
+<span class="linenos"> 42</span><span class="n">_LOGGER</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="linenos"> 43</span>
+<span class="linenos"> 44</span><span class="n">SymbolTable</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span>
+<span class="linenos"> 45</span>
+<span class="linenos"> 46</span>
+<div class="viewcode-block" id="PrettyPrinter">
+<a class="viewcode-back" href="../../../api/pyk.kast.pretty.html#pyk.kast.pretty.PrettyPrinter">[docs]</a>
+<span class="linenos"> 47</span><span class="k">class</span><span class="w"> </span><span class="nc">PrettyPrinter</span><span class="p">:</span>
+<span class="linenos"> 48</span>    <span class="n">definition</span><span class="p">:</span> <span class="n">KDefinition</span>
+<span class="linenos"> 49</span>    <span class="n">_extra_unparsing_modules</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">KFlatModule</span><span class="p">]</span>
+<span class="linenos"> 50</span>    <span class="n">_patch_symbol_table</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">SymbolTable</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span>
+<span class="linenos"> 51</span>    <span class="n">_unalias</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="linenos"> 52</span>    <span class="n">_sort_collections</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="linenos"> 53</span>
+<span class="linenos"> 54</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="linenos"> 55</span>        <span class="bp">self</span><span class="p">,</span>
+<span class="linenos"> 56</span>        <span class="n">definition</span><span class="p">:</span> <span class="n">KDefinition</span><span class="p">,</span>
+<span class="linenos"> 57</span>        <span class="n">extra_unparsing_modules</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">KFlatModule</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
+<span class="linenos"> 58</span>        <span class="n">patch_symbol_table</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">SymbolTable</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="linenos"> 59</span>        <span class="n">unalias</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="linenos"> 60</span>        <span class="n">sort_collections</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="linenos"> 61</span>    <span class="p">):</span>
+<span class="linenos"> 62</span>        <span class="bp">self</span><span class="o">.</span><span class="n">definition</span> <span class="o">=</span> <span class="n">definition</span>
+<span class="linenos"> 63</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_extra_unparsing_modules</span> <span class="o">=</span> <span class="n">extra_unparsing_modules</span>
+<span class="linenos"> 64</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_patch_symbol_table</span> <span class="o">=</span> <span class="n">patch_symbol_table</span>
+<span class="linenos"> 65</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_unalias</span> <span class="o">=</span> <span class="n">unalias</span>
+<span class="linenos"> 66</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_sort_collections</span> <span class="o">=</span> <span class="n">sort_collections</span>
+<span class="linenos"> 67</span>
+<span class="linenos"> 68</span>    <span class="nd">@cached_property</span>
+<span class="linenos"> 69</span>    <span class="k">def</span><span class="w"> </span><span class="nf">symbol_table</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
+<span class="linenos"> 70</span>        <span class="n">symb_table</span> <span class="o">=</span> <span class="n">build_symbol_table</span><span class="p">(</span>
+<span class="linenos"> 71</span>            <span class="bp">self</span><span class="o">.</span><span class="n">definition</span><span class="p">,</span>
+<span class="linenos"> 72</span>            <span class="n">extra_modules</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_extra_unparsing_modules</span><span class="p">,</span>
+<span class="linenos"> 73</span>            <span class="n">opinionated</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="linenos"> 74</span>        <span class="p">)</span>
+<span class="linenos"> 75</span>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_patch_symbol_table</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos"> 76</span>            <span class="bp">self</span><span class="o">.</span><span class="n">_patch_symbol_table</span><span class="p">(</span><span class="n">symb_table</span><span class="p">)</span>
+<span class="linenos"> 77</span>        <span class="k">return</span> <span class="n">symb_table</span>
+<span class="linenos"> 78</span>
+<div class="viewcode-block" id="PrettyPrinter.print">
+<a class="viewcode-back" href="../../../api/pyk.kast.pretty.html#pyk.kast.pretty.PrettyPrinter.print">[docs]</a>
+<span class="linenos"> 79</span>    <span class="k">def</span><span class="w"> </span><span class="nf">print</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kast</span><span class="p">:</span> <span class="n">KAst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos"> 80</span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Print out KAST terms/outer syntax.</span>
+<span class="linenos"> 81</span>
+<span class="linenos"> 82</span><span class="sd">        Args:</span>
+<span class="linenos"> 83</span><span class="sd">            kast: KAST term to print.</span>
+<span class="linenos"> 84</span>
+<span class="linenos"> 85</span><span class="sd">        Returns:</span>
+<span class="linenos"> 86</span><span class="sd">            Best-effort string representation of KAST term.</span>
+<span class="linenos"> 87</span><span class="sd">        &quot;&quot;&quot;</span>
+<span class="linenos"> 88</span>        <span class="n">_LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unparsing: </span><span class="si">{</span><span class="n">kast</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos"> 89</span>        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span> <span class="ow">is</span> <span class="n">KAtt</span><span class="p">:</span>
+<span class="linenos"> 90</span>            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_katt</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span>
+<span class="linenos"> 91</span>        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span> <span class="ow">is</span> <span class="n">KSort</span><span class="p">:</span>
+<span class="linenos"> 92</span>            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_ksort</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span>
+<span class="linenos"> 93</span>        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span> <span class="ow">is</span> <span class="n">KLabel</span><span class="p">:</span>
+<span class="linenos"> 94</span>            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_klabel</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span>
+<span class="linenos"> 95</span>        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">kast</span><span class="p">,</span> <span class="n">KOuter</span><span class="p">):</span>
+<span class="linenos"> 96</span>            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_kouter</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span>
+<span class="linenos"> 97</span>        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">kast</span><span class="p">,</span> <span class="n">KInner</span><span class="p">):</span>
+<span class="linenos"> 98</span>            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unalias</span><span class="p">:</span>
+<span class="linenos"> 99</span>                <span class="n">kast</span> <span class="o">=</span> <span class="n">undo_aliases</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">definition</span><span class="p">,</span> <span class="n">kast</span><span class="p">)</span>
+<span class="linenos">100</span>            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sort_collections</span><span class="p">:</span>
+<span class="linenos">101</span>                <span class="n">kast</span> <span class="o">=</span> <span class="n">sort_ac_collections</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span>
+<span class="linenos">102</span>            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_kinner</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span>
+<span class="linenos">103</span>        <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Error unparsing: </span><span class="si">{</span><span class="n">kast</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+<span class="linenos">104</span>
+<span class="linenos">105</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_print_kouter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kast</span><span class="p">:</span> <span class="n">KOuter</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">106</span>        <span class="k">match</span> <span class="n">kast</span><span class="p">:</span>
+<span class="linenos">107</span>            <span class="k">case</span> <span class="n">KTerminal</span><span class="p">():</span>
+<span class="linenos">108</span>                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_kterminal</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span>
+<span class="linenos">109</span>            <span class="k">case</span> <span class="n">KRegexTerminal</span><span class="p">():</span>
+<span class="linenos">110</span>                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_kregexterminal</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span>
+<span class="linenos">111</span>            <span class="k">case</span> <span class="n">KNonTerminal</span><span class="p">():</span>
+<span class="linenos">112</span>                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_knonterminal</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span>
+<span class="linenos">113</span>            <span class="k">case</span> <span class="n">KProduction</span><span class="p">():</span>
+<span class="linenos">114</span>                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_kproduction</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span>
+<span class="linenos">115</span>            <span class="k">case</span> <span class="n">KSyntaxSort</span><span class="p">():</span>
+<span class="linenos">116</span>                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_ksyntaxsort</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span>
+<span class="linenos">117</span>            <span class="k">case</span> <span class="n">KSortSynonym</span><span class="p">():</span>
+<span class="linenos">118</span>                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_ksortsynonym</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span>
+<span class="linenos">119</span>            <span class="k">case</span> <span class="n">KSyntaxLexical</span><span class="p">():</span>
+<span class="linenos">120</span>                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_ksyntaxlexical</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span>
+<span class="linenos">121</span>            <span class="k">case</span> <span class="n">KSyntaxAssociativity</span><span class="p">():</span>
+<span class="linenos">122</span>                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_ksyntaxassociativity</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span>
+<span class="linenos">123</span>            <span class="k">case</span> <span class="n">KSyntaxPriority</span><span class="p">():</span>
+<span class="linenos">124</span>                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_ksyntaxpriority</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span>
+<span class="linenos">125</span>            <span class="k">case</span> <span class="n">KBubble</span><span class="p">():</span>
+<span class="linenos">126</span>                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_kbubble</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span>
+<span class="linenos">127</span>            <span class="k">case</span> <span class="n">KRule</span><span class="p">():</span>
+<span class="linenos">128</span>                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_krule</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span>
+<span class="linenos">129</span>            <span class="k">case</span> <span class="n">KClaim</span><span class="p">():</span>
+<span class="linenos">130</span>                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_kclaim</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span>
+<span class="linenos">131</span>            <span class="k">case</span> <span class="n">KContext</span><span class="p">():</span>
+<span class="linenos">132</span>                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_kcontext</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span>
+<span class="linenos">133</span>            <span class="k">case</span> <span class="n">KImport</span><span class="p">():</span>
+<span class="linenos">134</span>                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_kimport</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span>
+<span class="linenos">135</span>            <span class="k">case</span> <span class="n">KFlatModule</span><span class="p">():</span>
+<span class="linenos">136</span>                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_kflatmodule</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span>
+<span class="linenos">137</span>            <span class="k">case</span> <span class="n">KRequire</span><span class="p">():</span>
+<span class="linenos">138</span>                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_krequire</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span>
+<span class="linenos">139</span>            <span class="k">case</span> <span class="n">KDefinition</span><span class="p">():</span>
+<span class="linenos">140</span>                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_kdefinition</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span>
+<span class="linenos">141</span>            <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+<span class="linenos">142</span>                <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Error unparsing: </span><span class="si">{</span><span class="n">kast</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos">143</span>
+<span class="linenos">144</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_print_kinner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kast</span><span class="p">:</span> <span class="n">KInner</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">145</span>        <span class="k">match</span> <span class="n">kast</span><span class="p">:</span>
+<span class="linenos">146</span>            <span class="k">case</span> <span class="n">KVariable</span><span class="p">():</span>
+<span class="linenos">147</span>                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_kvariable</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span>
+<span class="linenos">148</span>            <span class="k">case</span> <span class="n">KToken</span><span class="p">():</span>
+<span class="linenos">149</span>                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_ktoken</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span>
+<span class="linenos">150</span>            <span class="k">case</span> <span class="n">KApply</span><span class="p">():</span>
+<span class="linenos">151</span>                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_kapply</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span>
+<span class="linenos">152</span>            <span class="k">case</span> <span class="n">KAs</span><span class="p">():</span>
+<span class="linenos">153</span>                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_kas</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span>
+<span class="linenos">154</span>            <span class="k">case</span> <span class="n">KRewrite</span><span class="p">():</span>
+<span class="linenos">155</span>                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_krewrite</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span>
+<span class="linenos">156</span>            <span class="k">case</span> <span class="n">KSequence</span><span class="p">():</span>
+<span class="linenos">157</span>                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_ksequence</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span>
+<span class="linenos">158</span>            <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+<span class="linenos">159</span>                <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Error unparsing: </span><span class="si">{</span><span class="n">kast</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos">160</span>
+<span class="linenos">161</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_print_ksort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ksort</span><span class="p">:</span> <span class="n">KSort</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">162</span>        <span class="k">return</span> <span class="n">ksort</span><span class="o">.</span><span class="n">name</span>
+<span class="linenos">163</span>
+<span class="linenos">164</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_print_klabel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">klabel</span><span class="p">:</span> <span class="n">KLabel</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">165</span>        <span class="k">return</span> <span class="n">klabel</span><span class="o">.</span><span class="n">name</span>
+<span class="linenos">166</span>
+<span class="linenos">167</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_print_kvariable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kvariable</span><span class="p">:</span> <span class="n">KVariable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">168</span>        <span class="n">sort</span> <span class="o">=</span> <span class="n">kvariable</span><span class="o">.</span><span class="n">sort</span>
+<span class="linenos">169</span>        <span class="k">if</span> <span class="ow">not</span> <span class="n">sort</span><span class="p">:</span>
+<span class="linenos">170</span>            <span class="k">return</span> <span class="n">kvariable</span><span class="o">.</span><span class="n">name</span>
+<span class="linenos">171</span>        <span class="k">return</span> <span class="n">kvariable</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span> <span class="n">sort</span><span class="o">.</span><span class="n">name</span>
+<span class="linenos">172</span>
+<span class="linenos">173</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_print_ktoken</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ktoken</span><span class="p">:</span> <span class="n">KToken</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">174</span>        <span class="k">return</span> <span class="n">ktoken</span><span class="o">.</span><span class="n">token</span>
+<span class="linenos">175</span>
+<span class="linenos">176</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_print_kapply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kapply</span><span class="p">:</span> <span class="n">KApply</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">177</span>        <span class="n">label</span> <span class="o">=</span> <span class="n">kapply</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">name</span>
+<span class="linenos">178</span>        <span class="n">args</span> <span class="o">=</span> <span class="n">kapply</span><span class="o">.</span><span class="n">args</span>
+<span class="linenos">179</span>        <span class="n">unparsed_args</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_print_kinner</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">]</span>
+<span class="linenos">180</span>        <span class="k">if</span> <span class="n">kapply</span><span class="o">.</span><span class="n">is_cell</span><span class="p">:</span>
+<span class="linenos">181</span>            <span class="n">cell_contents</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">unparsed_args</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+<span class="linenos">182</span>            <span class="n">cell_str</span> <span class="o">=</span> <span class="n">label</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">indent</span><span class="p">(</span><span class="n">cell_contents</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&lt;/&#39;</span> <span class="o">+</span> <span class="n">label</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+<span class="linenos">183</span>            <span class="k">return</span> <span class="n">cell_str</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+<span class="linenos">184</span>        <span class="n">unparser</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_applied_label_str</span><span class="p">(</span><span class="n">label</span><span class="p">)</span> <span class="k">if</span> <span class="n">label</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbol_table</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbol_table</span><span class="p">[</span><span class="n">label</span><span class="p">]</span>
+<span class="linenos">185</span>        <span class="k">return</span> <span class="n">unparser</span><span class="p">(</span><span class="o">*</span><span class="n">unparsed_args</span><span class="p">)</span>
+<span class="linenos">186</span>
+<span class="linenos">187</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_print_kas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kas</span><span class="p">:</span> <span class="n">KAs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">188</span>        <span class="n">pattern_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_kinner</span><span class="p">(</span><span class="n">kas</span><span class="o">.</span><span class="n">pattern</span><span class="p">)</span>
+<span class="linenos">189</span>        <span class="n">alias_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_kinner</span><span class="p">(</span><span class="n">kas</span><span class="o">.</span><span class="n">alias</span><span class="p">)</span>
+<span class="linenos">190</span>        <span class="k">return</span> <span class="n">pattern_str</span> <span class="o">+</span> <span class="s1">&#39; #as &#39;</span> <span class="o">+</span> <span class="n">alias_str</span>
+<span class="linenos">191</span>
+<span class="linenos">192</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_print_krewrite</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">krewrite</span><span class="p">:</span> <span class="n">KRewrite</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">193</span>        <span class="n">lhs_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_kinner</span><span class="p">(</span><span class="n">krewrite</span><span class="o">.</span><span class="n">lhs</span><span class="p">)</span>
+<span class="linenos">194</span>        <span class="n">rhs_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_kinner</span><span class="p">(</span><span class="n">krewrite</span><span class="o">.</span><span class="n">rhs</span><span class="p">)</span>
+<span class="linenos">195</span>        <span class="k">return</span> <span class="s1">&#39;( &#39;</span> <span class="o">+</span> <span class="n">lhs_str</span> <span class="o">+</span> <span class="s1">&#39; =&gt; &#39;</span> <span class="o">+</span> <span class="n">rhs_str</span> <span class="o">+</span> <span class="s1">&#39; )&#39;</span>
+<span class="linenos">196</span>
+<span class="linenos">197</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_print_ksequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ksequence</span><span class="p">:</span> <span class="n">KSequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">198</span>        <span class="k">if</span> <span class="n">ksequence</span><span class="o">.</span><span class="n">arity</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+<span class="linenos">199</span>            <span class="c1"># TODO: Would be nice to say `return self._print_kinner(EMPTY_K)`</span>
+<span class="linenos">200</span>            <span class="k">return</span> <span class="s1">&#39;.K&#39;</span>
+<span class="linenos">201</span>        <span class="k">if</span> <span class="n">ksequence</span><span class="o">.</span><span class="n">arity</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+<span class="linenos">202</span>            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_kinner</span><span class="p">(</span><span class="n">ksequence</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; ~&gt; .K&#39;</span>
+<span class="linenos">203</span>        <span class="n">unparsed_k_seq</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">~&gt; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_print_kinner</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">ksequence</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+<span class="linenos">204</span>        <span class="k">if</span> <span class="n">ksequence</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">KToken</span><span class="p">(</span><span class="s1">&#39;...&#39;</span><span class="p">,</span> <span class="n">KSort</span><span class="p">(</span><span class="s1">&#39;K&#39;</span><span class="p">)):</span>
+<span class="linenos">205</span>            <span class="n">unparsed_k_seq</span> <span class="o">=</span> <span class="n">unparsed_k_seq</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_kinner</span><span class="p">(</span><span class="n">KToken</span><span class="p">(</span><span class="s1">&#39;...&#39;</span><span class="p">,</span> <span class="n">KSort</span><span class="p">(</span><span class="s1">&#39;K&#39;</span><span class="p">)))</span>
+<span class="linenos">206</span>        <span class="k">else</span><span class="p">:</span>
+<span class="linenos">207</span>            <span class="n">unparsed_k_seq</span> <span class="o">=</span> <span class="n">unparsed_k_seq</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">~&gt; &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_kinner</span><span class="p">(</span><span class="n">ksequence</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="linenos">208</span>        <span class="k">return</span> <span class="n">unparsed_k_seq</span>
+<span class="linenos">209</span>
+<span class="linenos">210</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_print_kterminal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kterminal</span><span class="p">:</span> <span class="n">KTerminal</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">211</span>        <span class="k">return</span> <span class="s1">&#39;&quot;&#39;</span> <span class="o">+</span> <span class="n">kterminal</span><span class="o">.</span><span class="n">value</span> <span class="o">+</span> <span class="s1">&#39;&quot;&#39;</span>
+<span class="linenos">212</span>
+<span class="linenos">213</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_print_kregexterminal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kregexterminal</span><span class="p">:</span> <span class="n">KRegexTerminal</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">214</span>        <span class="k">return</span> <span class="s1">&#39;r&quot;&#39;</span> <span class="o">+</span> <span class="n">kregexterminal</span><span class="o">.</span><span class="n">regex</span> <span class="o">+</span> <span class="s1">&#39;&quot;&#39;</span>
+<span class="linenos">215</span>
+<span class="linenos">216</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_print_knonterminal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">knonterminal</span><span class="p">:</span> <span class="n">KNonTerminal</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">217</span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">knonterminal</span><span class="o">.</span><span class="n">sort</span><span class="p">)</span>
+<span class="linenos">218</span>
+<span class="linenos">219</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_print_kproduction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kproduction</span><span class="p">:</span> <span class="n">KProduction</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">220</span>        <span class="n">syntax_str</span> <span class="o">=</span> <span class="s1">&#39;syntax &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">kproduction</span><span class="o">.</span><span class="n">sort</span><span class="p">)</span>
+<span class="linenos">221</span>        <span class="k">if</span> <span class="n">kproduction</span><span class="o">.</span><span class="n">items</span><span class="p">:</span>
+<span class="linenos">222</span>            <span class="n">syntax_str</span> <span class="o">+=</span> <span class="s1">&#39; ::= &#39;</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_print_kouter</span><span class="p">(</span><span class="n">pi</span><span class="p">)</span> <span class="k">for</span> <span class="n">pi</span> <span class="ow">in</span> <span class="n">kproduction</span><span class="o">.</span><span class="n">items</span><span class="p">])</span>
+<span class="linenos">223</span>        <span class="n">att_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">kproduction</span><span class="o">.</span><span class="n">att</span><span class="p">)</span>
+<span class="linenos">224</span>        <span class="k">if</span> <span class="n">att_str</span><span class="p">:</span>
+<span class="linenos">225</span>            <span class="n">syntax_str</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">att_str</span>
+<span class="linenos">226</span>        <span class="k">return</span> <span class="n">syntax_str</span>
+<span class="linenos">227</span>
+<span class="linenos">228</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_print_ksyntaxsort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ksyntaxsort</span><span class="p">:</span> <span class="n">KSyntaxSort</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">229</span>        <span class="n">sort_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">ksyntaxsort</span><span class="o">.</span><span class="n">sort</span><span class="p">)</span>
+<span class="linenos">230</span>        <span class="n">att_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">ksyntaxsort</span><span class="o">.</span><span class="n">att</span><span class="p">)</span>
+<span class="linenos">231</span>        <span class="k">return</span> <span class="s1">&#39;syntax &#39;</span> <span class="o">+</span> <span class="n">sort_str</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">att_str</span>
+<span class="linenos">232</span>
+<span class="linenos">233</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_print_ksortsynonym</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ksortsynonym</span><span class="p">:</span> <span class="n">KSortSynonym</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">234</span>        <span class="n">new_sort_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">ksortsynonym</span><span class="o">.</span><span class="n">new_sort</span><span class="p">)</span>
+<span class="linenos">235</span>        <span class="n">old_sort_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">ksortsynonym</span><span class="o">.</span><span class="n">old_sort</span><span class="p">)</span>
+<span class="linenos">236</span>        <span class="n">att_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">ksortsynonym</span><span class="o">.</span><span class="n">att</span><span class="p">)</span>
+<span class="linenos">237</span>        <span class="k">return</span> <span class="s1">&#39;syntax &#39;</span> <span class="o">+</span> <span class="n">new_sort_str</span> <span class="o">+</span> <span class="s1">&#39; = &#39;</span> <span class="o">+</span> <span class="n">old_sort_str</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">att_str</span>
+<span class="linenos">238</span>
+<span class="linenos">239</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_print_ksyntaxlexical</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ksyntaxlexical</span><span class="p">:</span> <span class="n">KSyntaxLexical</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">240</span>        <span class="n">name_str</span> <span class="o">=</span> <span class="n">ksyntaxlexical</span><span class="o">.</span><span class="n">name</span>
+<span class="linenos">241</span>        <span class="n">regex_str</span> <span class="o">=</span> <span class="n">ksyntaxlexical</span><span class="o">.</span><span class="n">regex</span>
+<span class="linenos">242</span>        <span class="n">att_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">ksyntaxlexical</span><span class="o">.</span><span class="n">att</span><span class="p">)</span>
+<span class="linenos">243</span>        <span class="c1"># todo: proper escaping</span>
+<span class="linenos">244</span>        <span class="k">return</span> <span class="s1">&#39;syntax lexical &#39;</span> <span class="o">+</span> <span class="n">name_str</span> <span class="o">+</span> <span class="s1">&#39; = r&quot;&#39;</span> <span class="o">+</span> <span class="n">regex_str</span> <span class="o">+</span> <span class="s1">&#39;&quot; &#39;</span> <span class="o">+</span> <span class="n">att_str</span>
+<span class="linenos">245</span>
+<span class="linenos">246</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_print_ksyntaxassociativity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ksyntaxassociativity</span><span class="p">:</span> <span class="n">KSyntaxAssociativity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">247</span>        <span class="n">assoc_str</span> <span class="o">=</span> <span class="n">ksyntaxassociativity</span><span class="o">.</span><span class="n">assoc</span><span class="o">.</span><span class="n">value</span>
+<span class="linenos">248</span>        <span class="n">tags_str</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ksyntaxassociativity</span><span class="o">.</span><span class="n">tags</span><span class="p">)</span>
+<span class="linenos">249</span>        <span class="n">att_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">ksyntaxassociativity</span><span class="o">.</span><span class="n">att</span><span class="p">)</span>
+<span class="linenos">250</span>        <span class="k">return</span> <span class="s1">&#39;syntax associativity &#39;</span> <span class="o">+</span> <span class="n">assoc_str</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">tags_str</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">att_str</span>
+<span class="linenos">251</span>
+<span class="linenos">252</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_print_ksyntaxpriority</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ksyntaxpriority</span><span class="p">:</span> <span class="n">KSyntaxPriority</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">253</span>        <span class="n">priorities_str</span> <span class="o">=</span> <span class="s1">&#39; &gt; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">group</span><span class="p">)</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">ksyntaxpriority</span><span class="o">.</span><span class="n">priorities</span><span class="p">])</span>
+<span class="linenos">254</span>        <span class="n">att_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">ksyntaxpriority</span><span class="o">.</span><span class="n">att</span><span class="p">)</span>
+<span class="linenos">255</span>        <span class="k">return</span> <span class="s1">&#39;syntax priority &#39;</span> <span class="o">+</span> <span class="n">priorities_str</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">att_str</span>
+<span class="linenos">256</span>
+<span class="linenos">257</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_print_kbubble</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kbubble</span><span class="p">:</span> <span class="n">KBubble</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">258</span>        <span class="n">body</span> <span class="o">=</span> <span class="s1">&#39;// KBubble(&#39;</span> <span class="o">+</span> <span class="n">kbubble</span><span class="o">.</span><span class="n">sentence_type</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span> <span class="o">+</span> <span class="n">kbubble</span><span class="o">.</span><span class="n">contents</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span>
+<span class="linenos">259</span>        <span class="n">att_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">kbubble</span><span class="o">.</span><span class="n">att</span><span class="p">)</span>
+<span class="linenos">260</span>        <span class="k">return</span> <span class="n">body</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">att_str</span>
+<span class="linenos">261</span>
+<span class="linenos">262</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_print_krule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kterm</span><span class="p">:</span> <span class="n">KRule</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">263</span>        <span class="n">body</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">     &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">kterm</span><span class="o">.</span><span class="n">body</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">))</span>
+<span class="linenos">264</span>        <span class="n">rule_str</span> <span class="o">=</span> <span class="s1">&#39;rule &#39;</span>
+<span class="linenos">265</span>        <span class="k">if</span> <span class="n">Atts</span><span class="o">.</span><span class="n">LABEL</span> <span class="ow">in</span> <span class="n">kterm</span><span class="o">.</span><span class="n">att</span><span class="p">:</span>
+<span class="linenos">266</span>            <span class="n">rule_str</span> <span class="o">=</span> <span class="n">rule_str</span> <span class="o">+</span> <span class="s1">&#39;[&#39;</span> <span class="o">+</span> <span class="n">kterm</span><span class="o">.</span><span class="n">att</span><span class="p">[</span><span class="n">Atts</span><span class="o">.</span><span class="n">LABEL</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;]:&#39;</span>
+<span class="linenos">267</span>        <span class="n">rule_str</span> <span class="o">=</span> <span class="n">rule_str</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">body</span>
+<span class="linenos">268</span>        <span class="n">atts_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">kterm</span><span class="o">.</span><span class="n">att</span><span class="p">)</span>
+<span class="linenos">269</span>        <span class="k">if</span> <span class="n">kterm</span><span class="o">.</span><span class="n">requires</span> <span class="o">!=</span> <span class="n">TRUE</span><span class="p">:</span>
+<span class="linenos">270</span>            <span class="n">requires_str</span> <span class="o">=</span> <span class="s1">&#39;requires &#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">  &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_print_kast_bool</span><span class="p">(</span><span class="n">kterm</span><span class="o">.</span><span class="n">requires</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">))</span>
+<span class="linenos">271</span>            <span class="n">rule_str</span> <span class="o">=</span> <span class="n">rule_str</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">  &#39;</span> <span class="o">+</span> <span class="n">requires_str</span>
+<span class="linenos">272</span>        <span class="k">if</span> <span class="n">kterm</span><span class="o">.</span><span class="n">ensures</span> <span class="o">!=</span> <span class="n">TRUE</span><span class="p">:</span>
+<span class="linenos">273</span>            <span class="n">ensures_str</span> <span class="o">=</span> <span class="s1">&#39;ensures &#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">  &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_print_kast_bool</span><span class="p">(</span><span class="n">kterm</span><span class="o">.</span><span class="n">ensures</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">))</span>
+<span class="linenos">274</span>            <span class="n">rule_str</span> <span class="o">=</span> <span class="n">rule_str</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">   &#39;</span> <span class="o">+</span> <span class="n">ensures_str</span>
+<span class="linenos">275</span>        <span class="k">return</span> <span class="n">rule_str</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">  &#39;</span> <span class="o">+</span> <span class="n">atts_str</span>
+<span class="linenos">276</span>
+<span class="linenos">277</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_print_kclaim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kterm</span><span class="p">:</span> <span class="n">KClaim</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">278</span>        <span class="n">body</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">     &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">kterm</span><span class="o">.</span><span class="n">body</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">))</span>
+<span class="linenos">279</span>        <span class="n">rule_str</span> <span class="o">=</span> <span class="s1">&#39;claim &#39;</span>
+<span class="linenos">280</span>        <span class="k">if</span> <span class="n">Atts</span><span class="o">.</span><span class="n">LABEL</span> <span class="ow">in</span> <span class="n">kterm</span><span class="o">.</span><span class="n">att</span><span class="p">:</span>
+<span class="linenos">281</span>            <span class="n">rule_str</span> <span class="o">=</span> <span class="n">rule_str</span> <span class="o">+</span> <span class="s1">&#39;[&#39;</span> <span class="o">+</span> <span class="n">kterm</span><span class="o">.</span><span class="n">att</span><span class="p">[</span><span class="n">Atts</span><span class="o">.</span><span class="n">LABEL</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;]:&#39;</span>
+<span class="linenos">282</span>        <span class="n">rule_str</span> <span class="o">=</span> <span class="n">rule_str</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">body</span>
+<span class="linenos">283</span>        <span class="n">atts_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">kterm</span><span class="o">.</span><span class="n">att</span><span class="p">)</span>
+<span class="linenos">284</span>        <span class="k">if</span> <span class="n">kterm</span><span class="o">.</span><span class="n">requires</span> <span class="o">!=</span> <span class="n">TRUE</span><span class="p">:</span>
+<span class="linenos">285</span>            <span class="n">requires_str</span> <span class="o">=</span> <span class="s1">&#39;requires &#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">  &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_print_kast_bool</span><span class="p">(</span><span class="n">kterm</span><span class="o">.</span><span class="n">requires</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">))</span>
+<span class="linenos">286</span>            <span class="n">rule_str</span> <span class="o">=</span> <span class="n">rule_str</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">  &#39;</span> <span class="o">+</span> <span class="n">requires_str</span>
+<span class="linenos">287</span>        <span class="k">if</span> <span class="n">kterm</span><span class="o">.</span><span class="n">ensures</span> <span class="o">!=</span> <span class="n">TRUE</span><span class="p">:</span>
+<span class="linenos">288</span>            <span class="n">ensures_str</span> <span class="o">=</span> <span class="s1">&#39;ensures &#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">  &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_print_kast_bool</span><span class="p">(</span><span class="n">kterm</span><span class="o">.</span><span class="n">ensures</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">))</span>
+<span class="linenos">289</span>            <span class="n">rule_str</span> <span class="o">=</span> <span class="n">rule_str</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">   &#39;</span> <span class="o">+</span> <span class="n">ensures_str</span>
+<span class="linenos">290</span>        <span class="k">return</span> <span class="n">rule_str</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">  &#39;</span> <span class="o">+</span> <span class="n">atts_str</span>
+<span class="linenos">291</span>
+<span class="linenos">292</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_print_kcontext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcontext</span><span class="p">:</span> <span class="n">KContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">293</span>        <span class="n">body</span> <span class="o">=</span> <span class="n">indent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">kcontext</span><span class="o">.</span><span class="n">body</span><span class="p">))</span>
+<span class="linenos">294</span>        <span class="n">context_str</span> <span class="o">=</span> <span class="s1">&#39;context alias &#39;</span> <span class="o">+</span> <span class="n">body</span>
+<span class="linenos">295</span>        <span class="n">requires_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<span class="linenos">296</span>        <span class="n">atts_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">kcontext</span><span class="o">.</span><span class="n">att</span><span class="p">)</span>
+<span class="linenos">297</span>        <span class="k">if</span> <span class="n">kcontext</span><span class="o">.</span><span class="n">requires</span> <span class="o">!=</span> <span class="n">TRUE</span><span class="p">:</span>
+<span class="linenos">298</span>            <span class="n">requires_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">kcontext</span><span class="o">.</span><span class="n">requires</span><span class="p">)</span>
+<span class="linenos">299</span>            <span class="n">requires_str</span> <span class="o">=</span> <span class="s1">&#39;requires &#39;</span> <span class="o">+</span> <span class="n">indent</span><span class="p">(</span><span class="n">requires_str</span><span class="p">)</span>
+<span class="linenos">300</span>        <span class="k">return</span> <span class="n">context_str</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">  &#39;</span> <span class="o">+</span> <span class="n">requires_str</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">  &#39;</span> <span class="o">+</span> <span class="n">atts_str</span>
+<span class="linenos">301</span>
+<span class="linenos">302</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_print_katt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">katt</span><span class="p">:</span> <span class="n">KAtt</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">303</span>        <span class="k">return</span> <span class="n">katt</span><span class="o">.</span><span class="n">pretty</span>
+<span class="linenos">304</span>
+<span class="linenos">305</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_print_kimport</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kimport</span><span class="p">:</span> <span class="n">KImport</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">306</span>        <span class="k">return</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;imports&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;public&#39;</span> <span class="k">if</span> <span class="n">kimport</span><span class="o">.</span><span class="n">public</span> <span class="k">else</span> <span class="s1">&#39;private&#39;</span><span class="p">),</span> <span class="n">kimport</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+<span class="linenos">307</span>
+<span class="linenos">308</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_print_kflatmodule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kflatmodule</span><span class="p">:</span> <span class="n">KFlatModule</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">309</span>        <span class="n">name</span> <span class="o">=</span> <span class="n">kflatmodule</span><span class="o">.</span><span class="n">name</span>
+<span class="linenos">310</span>        <span class="n">imports</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_print_kouter</span><span class="p">(</span><span class="n">kimport</span><span class="p">)</span> <span class="k">for</span> <span class="n">kimport</span> <span class="ow">in</span> <span class="n">kflatmodule</span><span class="o">.</span><span class="n">imports</span><span class="p">])</span>
+<span class="linenos">311</span>        <span class="n">sentences</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_print_kouter</span><span class="p">(</span><span class="n">sentence</span><span class="p">)</span> <span class="k">for</span> <span class="n">sentence</span> <span class="ow">in</span> <span class="n">kflatmodule</span><span class="o">.</span><span class="n">sentences</span><span class="p">])</span>
+<span class="linenos">312</span>        <span class="n">contents</span> <span class="o">=</span> <span class="n">imports</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">sentences</span>
+<span class="linenos">313</span>        <span class="k">return</span> <span class="s1">&#39;module &#39;</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">    &#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">    &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">contents</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">endmodule&#39;</span>
+<span class="linenos">314</span>
+<span class="linenos">315</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_print_krequire</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">krequire</span><span class="p">:</span> <span class="n">KRequire</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">316</span>        <span class="k">return</span> <span class="s1">&#39;requires &quot;&#39;</span> <span class="o">+</span> <span class="n">krequire</span><span class="o">.</span><span class="n">require</span> <span class="o">+</span> <span class="s1">&#39;&quot;&#39;</span>
+<span class="linenos">317</span>
+<span class="linenos">318</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_print_kdefinition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kdefinition</span><span class="p">:</span> <span class="n">KDefinition</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">319</span>        <span class="n">requires</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_print_kouter</span><span class="p">(</span><span class="n">require</span><span class="p">)</span> <span class="k">for</span> <span class="n">require</span> <span class="ow">in</span> <span class="n">kdefinition</span><span class="o">.</span><span class="n">requires</span><span class="p">])</span>
+<span class="linenos">320</span>        <span class="n">modules</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_print_kouter</span><span class="p">(</span><span class="n">module</span><span class="p">)</span> <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="n">kdefinition</span><span class="o">.</span><span class="n">all_modules</span><span class="p">])</span>
+<span class="linenos">321</span>        <span class="k">return</span> <span class="n">requires</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">modules</span>
+<span class="linenos">322</span>
+<span class="linenos">323</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_print_kast_bool</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kast</span><span class="p">:</span> <span class="n">KAst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">324</span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Print out KAST requires/ensures clause.</span>
+<span class="linenos">325</span>
+<span class="linenos">326</span><span class="sd">        Args:</span>
+<span class="linenos">327</span><span class="sd">            kast: KAST Bool for requires/ensures clause.</span>
+<span class="linenos">328</span>
+<span class="linenos">329</span><span class="sd">        Returns:</span>
+<span class="linenos">330</span><span class="sd">            Best-effort string representation of KAST term.</span>
+<span class="linenos">331</span><span class="sd">        &quot;&quot;&quot;</span>
+<span class="linenos">332</span>        <span class="n">_LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;_print_kast_bool: </span><span class="si">{</span><span class="n">kast</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos">333</span>        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span> <span class="ow">is</span> <span class="n">KApply</span> <span class="ow">and</span> <span class="n">kast</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;_andBool_&#39;</span><span class="p">,</span> <span class="s1">&#39;_orBool_&#39;</span><span class="p">]:</span>
+<span class="linenos">334</span>            <span class="n">clauses</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_print_kast_bool</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">flatten_label</span><span class="p">(</span><span class="n">kast</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">kast</span><span class="p">)]</span>
+<span class="linenos">335</span>            <span class="n">head</span> <span class="o">=</span> <span class="n">kast</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
+<span class="linenos">336</span>            <span class="k">if</span> <span class="n">head</span> <span class="o">==</span> <span class="s1">&#39; orBool &#39;</span><span class="p">:</span>
+<span class="linenos">337</span>                <span class="n">head</span> <span class="o">=</span> <span class="s1">&#39;  orBool &#39;</span>
+<span class="linenos">338</span>            <span class="n">separator</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">head</span><span class="p">)</span> <span class="o">-</span> <span class="mi">7</span><span class="p">)</span>
+<span class="linenos">339</span>            <span class="n">spacer</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">head</span><span class="p">)</span>
+<span class="linenos">340</span>
+<span class="linenos">341</span>            <span class="k">def</span><span class="w"> </span><span class="nf">join_sep</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">342</span>                <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">separator</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">))</span>
+<span class="linenos">343</span>
+<span class="linenos">344</span>            <span class="n">clauses</span> <span class="o">=</span> <span class="p">(</span>
+<span class="linenos">345</span>                <span class="p">[</span><span class="s1">&#39;( &#39;</span> <span class="o">+</span> <span class="n">join_sep</span><span class="p">(</span><span class="n">clauses</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+<span class="linenos">346</span>                <span class="o">+</span> <span class="p">[</span><span class="n">head</span> <span class="o">+</span> <span class="s1">&#39;( &#39;</span> <span class="o">+</span> <span class="n">join_sep</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">clauses</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
+<span class="linenos">347</span>                <span class="o">+</span> <span class="p">[</span><span class="n">spacer</span> <span class="o">+</span> <span class="p">(</span><span class="s1">&#39;)&#39;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">clauses</span><span class="p">))]</span>
+<span class="linenos">348</span>            <span class="p">)</span>
+<span class="linenos">349</span>            <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">clauses</span><span class="p">)</span>
+<span class="linenos">350</span>        <span class="k">else</span><span class="p">:</span>
+<span class="linenos">351</span>            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">kast</span><span class="p">)</span>
+<span class="linenos">352</span>
+<span class="linenos">353</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_applied_label_str</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="linenos">354</span>        <span class="k">return</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">symbol</span> <span class="o">+</span> <span class="s1">&#39; ( &#39;</span> <span class="o">+</span> <span class="s1">&#39; , &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; )&#39;</span></div>
+
+<span class="linenos">355</span>
+<span class="linenos">356</span>
+<div class="viewcode-block" id="build_symbol_table">
+<a class="viewcode-back" href="../../../api/pyk.kast.pretty.html#pyk.kast.pretty.build_symbol_table">[docs]</a>
+<span class="linenos">357</span><span class="k">def</span><span class="w"> </span><span class="nf">build_symbol_table</span><span class="p">(</span>
+<span class="linenos">358</span>    <span class="n">definition</span><span class="p">:</span> <span class="n">KDefinition</span><span class="p">,</span>
+<span class="linenos">359</span>    <span class="n">extra_modules</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">KFlatModule</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
+<span class="linenos">360</span>    <span class="n">opinionated</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="linenos">361</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
+<span class="linenos">362</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Build the unparsing symbol table given a JSON encoded definition.</span>
+<span class="linenos">363</span>
+<span class="linenos">364</span><span class="sd">    Args:</span>
+<span class="linenos">365</span><span class="sd">        definition: JSON encoded K definition.</span>
+<span class="linenos">366</span>
+<span class="linenos">367</span><span class="sd">    Returns:</span>
+<span class="linenos">368</span><span class="sd">        Python dictionary mapping klabels to automatically generated unparsers.</span>
+<span class="linenos">369</span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos">370</span>    <span class="n">symbol_table</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="linenos">371</span>    <span class="n">all_modules</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">definition</span><span class="o">.</span><span class="n">all_modules</span><span class="p">)</span> <span class="o">+</span> <span class="p">([]</span> <span class="k">if</span> <span class="n">extra_modules</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">list</span><span class="p">(</span><span class="n">extra_modules</span><span class="p">))</span>
+<span class="linenos">372</span>    <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="n">all_modules</span><span class="p">:</span>
+<span class="linenos">373</span>        <span class="k">for</span> <span class="n">prod</span> <span class="ow">in</span> <span class="n">module</span><span class="o">.</span><span class="n">syntax_productions</span><span class="p">:</span>
+<span class="linenos">374</span>            <span class="k">assert</span> <span class="n">prod</span><span class="o">.</span><span class="n">klabel</span>
+<span class="linenos">375</span>            <span class="n">label</span> <span class="o">=</span> <span class="n">prod</span><span class="o">.</span><span class="n">klabel</span><span class="o">.</span><span class="n">name</span>
+<span class="linenos">376</span>            <span class="n">unparser</span> <span class="o">=</span> <span class="n">unparser_for_production</span><span class="p">(</span><span class="n">prod</span><span class="p">)</span>
+<span class="linenos">377</span>
+<span class="linenos">378</span>            <span class="n">symbol_table</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">unparser</span>
+<span class="linenos">379</span>            <span class="k">if</span> <span class="n">Atts</span><span class="o">.</span><span class="n">SYMBOL</span> <span class="ow">in</span> <span class="n">prod</span><span class="o">.</span><span class="n">att</span><span class="p">:</span>
+<span class="linenos">380</span>                <span class="n">symbol_table</span><span class="p">[</span><span class="n">prod</span><span class="o">.</span><span class="n">att</span><span class="p">[</span><span class="n">Atts</span><span class="o">.</span><span class="n">SYMBOL</span><span class="p">]]</span> <span class="o">=</span> <span class="n">unparser</span>
+<span class="linenos">381</span>
+<span class="linenos">382</span>    <span class="k">if</span> <span class="n">opinionated</span><span class="p">:</span>
+<span class="linenos">383</span>        <span class="n">symbol_table</span><span class="p">[</span><span class="s1">&#39;#And&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">:</span> <span class="n">c1</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">#And &#39;</span> <span class="o">+</span> <span class="n">c2</span>
+<span class="linenos">384</span>        <span class="n">symbol_table</span><span class="p">[</span><span class="s1">&#39;#Or&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">:</span> <span class="n">c1</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">#Or</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">indent</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="linenos">385</span>
+<span class="linenos">386</span>    <span class="k">return</span> <span class="n">symbol_table</span></div>
+
+<span class="linenos">387</span>
+<span class="linenos">388</span>
+<div class="viewcode-block" id="unparser_for_production">
+<a class="viewcode-back" href="../../../api/pyk.kast.pretty.html#pyk.kast.pretty.unparser_for_production">[docs]</a>
+<span class="linenos">389</span><span class="k">def</span><span class="w"> </span><span class="nf">unparser_for_production</span><span class="p">(</span><span class="n">prod</span><span class="p">:</span> <span class="n">KProduction</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="linenos">390</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_unparser</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">391</span>        <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="linenos">392</span>        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">393</span>        <span class="n">num_nonterm</span> <span class="o">=</span> <span class="nb">len</span><span class="p">([</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">prod</span><span class="o">.</span><span class="n">items</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="ow">is</span> <span class="n">KNonTerminal</span><span class="p">])</span>
+<span class="linenos">394</span>        <span class="n">num_named_nonterm</span> <span class="o">=</span> <span class="nb">len</span><span class="p">([</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">prod</span><span class="o">.</span><span class="n">items</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="ow">is</span> <span class="n">KNonTerminal</span> <span class="ow">and</span> <span class="n">item</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">])</span>
+<span class="linenos">395</span>        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">prod</span><span class="o">.</span><span class="n">items</span><span class="p">:</span>
+<span class="linenos">396</span>            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="ow">is</span> <span class="n">KTerminal</span><span class="p">:</span>
+<span class="linenos">397</span>                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+<span class="linenos">398</span>            <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="ow">is</span> <span class="n">KNonTerminal</span> <span class="ow">and</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+<span class="linenos">399</span>                <span class="k">if</span> <span class="n">num_nonterm</span> <span class="o">==</span> <span class="n">num_named_nonterm</span><span class="p">:</span>
+<span class="linenos">400</span>                    <span class="k">if</span> <span class="n">index</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+<span class="linenos">401</span>                        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;...&#39;</span><span class="p">)</span>
+<span class="linenos">402</span>                    <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">:&#39;</span><span class="p">)</span>
+<span class="linenos">403</span>                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+<span class="linenos">404</span>                <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="linenos">405</span>        <span class="k">return</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="linenos">406</span>
+<span class="linenos">407</span>    <span class="k">return</span> <span class="n">_unparser</span></div>
+
+<span class="linenos">408</span>
+<span class="linenos">409</span>
+<div class="viewcode-block" id="indent">
+<a class="viewcode-back" href="../../../api/pyk.kast.pretty.html#pyk.kast.pretty.indent">[docs]</a>
+<span class="linenos">410</span><span class="k">def</span><span class="w"> </span><span class="nf">indent</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">411</span>    <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([(</span><span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="n">size</span><span class="p">)</span> <span class="o">+</span> <span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)])</span></div>
+
+<span class="linenos">412</span>
+<span class="linenos">413</span>
+<div class="viewcode-block" id="paren">
+<a class="viewcode-back" href="../../../api/pyk.kast.pretty.html#pyk.kast.pretty.paren">[docs]</a>
+<span class="linenos">414</span><span class="k">def</span><span class="w"> </span><span class="nf">paren</span><span class="p">(</span><span class="n">printer</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="linenos">415</span>    <span class="k">return</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;( &#39;</span> <span class="o">+</span> <span class="n">printer</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; )&#39;</span></div>
+
+<span class="linenos">416</span>
+<span class="linenos">417</span>
+<div class="viewcode-block" id="assoc_with_unit">
+<a class="viewcode-back" href="../../../api/pyk.kast.pretty.html#pyk.kast.pretty.assoc_with_unit">[docs]</a>
+<span class="linenos">418</span><span class="k">def</span><span class="w"> </span><span class="nf">assoc_with_unit</span><span class="p">(</span><span class="n">assoc_join</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="linenos">419</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_assoc_with_unit</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">420</span>        <span class="k">return</span> <span class="n">assoc_join</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">arg</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span> <span class="k">if</span> <span class="n">arg</span> <span class="o">!=</span> <span class="n">unit</span><span class="p">)</span>
+<span class="linenos">421</span>
+<span class="linenos">422</span>    <span class="k">return</span> <span class="n">_assoc_with_unit</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Runtime Verification, Inc.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

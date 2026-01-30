@@ -1,0 +1,375 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyk.kore.parser module &mdash; pyk 7.1.313 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=9c1be6d9"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyk.kore.pool module" href="pyk.kore.pool.html" />
+    <link rel="prev" title="pyk.kore.match module" href="pyk.kore.match.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            pyk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">pyk</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pyk.html">pyk package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="pyk.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="pyk.cterm.html">pyk.cterm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kast.html">pyk.kast package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kbuild.html">pyk.kbuild package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.html">pyk.kcfg package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kdist.html">pyk.kdist package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.klean.html">pyk.klean package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kllvm.html">pyk.kllvm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.konvert.html">pyk.konvert package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="pyk.kore.html">pyk.kore package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kore_exec_covr.html">pyk.kore_exec_covr package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.ktool.html">pyk.ktool package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.proof.html">pyk.proof package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.testing.html">pyk.testing package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">pyk</a></li>
+          <li class="breadcrumb-item"><a href="pyk.html">pyk package</a></li>
+          <li class="breadcrumb-item"><a href="pyk.kore.html">pyk.kore package</a></li>
+      <li class="breadcrumb-item active">pyk.kore.parser module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/pyk.kore.parser.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pyk.kore.parser">
+<span id="pyk-kore-parser-module"></span><h1>pyk.kore.parser module<a class="headerlink" href="#module-pyk.kore.parser" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">KoreParser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.alias_decl">
+<span class="sig-name descname"><span class="pre">alias_decl</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.AliasDecl" title="pyk.kore.syntax.AliasDecl"><span class="pre">AliasDecl</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.alias_decl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.alias_decl" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.andd">
+<span class="sig-name descname"><span class="pre">andd</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.And" title="pyk.kore.syntax.And"><span class="pre">And</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.andd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.andd" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.app">
+<span class="sig-name descname"><span class="pre">app</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.App" title="pyk.kore.syntax.App"><span class="pre">App</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.app"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.app" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.axiom">
+<span class="sig-name descname"><span class="pre">axiom</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Axiom" title="pyk.kore.syntax.Axiom"><span class="pre">Axiom</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.axiom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.axiom" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.bottom">
+<span class="sig-name descname"><span class="pre">bottom</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Bottom" title="pyk.kore.syntax.Bottom"><span class="pre">Bottom</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.bottom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.bottom" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.ceil">
+<span class="sig-name descname"><span class="pre">ceil</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Ceil" title="pyk.kore.syntax.Ceil"><span class="pre">Ceil</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.ceil"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.ceil" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.claim">
+<span class="sig-name descname"><span class="pre">claim</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Claim" title="pyk.kore.syntax.Claim"><span class="pre">Claim</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.claim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.claim" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.definition">
+<span class="sig-name descname"><span class="pre">definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Definition" title="pyk.kore.syntax.Definition"><span class="pre">Definition</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.definition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.definition" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.dv">
+<span class="sig-name descname"><span class="pre">dv</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.DV" title="pyk.kore.syntax.DV"><span class="pre">DV</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.dv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.dv" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.elem_var">
+<span class="sig-name descname"><span class="pre">elem_var</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.EVar" title="pyk.kore.syntax.EVar"><span class="pre">EVar</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.elem_var"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.elem_var" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.eof">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">eof</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyk.kore.parser.KoreParser.eof" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.equals">
+<span class="sig-name descname"><span class="pre">equals</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Equals" title="pyk.kore.syntax.Equals"><span class="pre">Equals</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.equals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.equals" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.exists">
+<span class="sig-name descname"><span class="pre">exists</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Exists" title="pyk.kore.syntax.Exists"><span class="pre">Exists</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.exists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.exists" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.floor">
+<span class="sig-name descname"><span class="pre">floor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Floor" title="pyk.kore.syntax.Floor"><span class="pre">Floor</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.floor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.floor" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.forall">
+<span class="sig-name descname"><span class="pre">forall</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Forall" title="pyk.kore.syntax.Forall"><span class="pre">Forall</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.forall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.forall" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.hooked_sort_decl">
+<span class="sig-name descname"><span class="pre">hooked_sort_decl</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.SortDecl" title="pyk.kore.syntax.SortDecl"><span class="pre">SortDecl</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.hooked_sort_decl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.hooked_sort_decl" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.hooked_symbol_decl">
+<span class="sig-name descname"><span class="pre">hooked_symbol_decl</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.SymbolDecl" title="pyk.kore.syntax.SymbolDecl"><span class="pre">SymbolDecl</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.hooked_symbol_decl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.hooked_symbol_decl" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.id">
+<span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.iff">
+<span class="sig-name descname"><span class="pre">iff</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Iff" title="pyk.kore.syntax.Iff"><span class="pre">Iff</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.iff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.iff" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.implies">
+<span class="sig-name descname"><span class="pre">implies</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Implies" title="pyk.kore.syntax.Implies"><span class="pre">Implies</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.implies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.implies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.importt">
+<span class="sig-name descname"><span class="pre">importt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Import" title="pyk.kore.syntax.Import"><span class="pre">Import</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.importt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.importt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.inn">
+<span class="sig-name descname"><span class="pre">inn</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.In" title="pyk.kore.syntax.In"><span class="pre">In</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.inn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.inn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.left_assoc">
+<span class="sig-name descname"><span class="pre">left_assoc</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.LeftAssoc" title="pyk.kore.syntax.LeftAssoc"><span class="pre">LeftAssoc</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.left_assoc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.left_assoc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.ml_pattern">
+<span class="sig-name descname"><span class="pre">ml_pattern</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.MLPattern" title="pyk.kore.syntax.MLPattern"><span class="pre">MLPattern</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.ml_pattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.ml_pattern" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.module">
+<span class="sig-name descname"><span class="pre">module</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Module" title="pyk.kore.syntax.Module"><span class="pre">Module</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.module"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.module" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.mu">
+<span class="sig-name descname"><span class="pre">mu</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Mu" title="pyk.kore.syntax.Mu"><span class="pre">Mu</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.mu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.mu" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.multi_or">
+<span class="sig-name descname"><span class="pre">multi_or</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.multi_or"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.multi_or" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.next">
+<span class="sig-name descname"><span class="pre">next</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Next" title="pyk.kore.syntax.Next"><span class="pre">Next</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.next"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.next" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.nott">
+<span class="sig-name descname"><span class="pre">nott</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Not" title="pyk.kore.syntax.Not"><span class="pre">Not</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.nott"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.nott" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.nu">
+<span class="sig-name descname"><span class="pre">nu</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Nu" title="pyk.kore.syntax.Nu"><span class="pre">Nu</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.nu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.nu" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.orr">
+<span class="sig-name descname"><span class="pre">orr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Or" title="pyk.kore.syntax.Or"><span class="pre">Or</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.orr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.orr" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.pattern">
+<span class="sig-name descname"><span class="pre">pattern</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.pattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.pattern" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.rewrites">
+<span class="sig-name descname"><span class="pre">rewrites</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Rewrites" title="pyk.kore.syntax.Rewrites"><span class="pre">Rewrites</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.rewrites"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.rewrites" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.right_assoc">
+<span class="sig-name descname"><span class="pre">right_assoc</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.RightAssoc" title="pyk.kore.syntax.RightAssoc"><span class="pre">RightAssoc</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.right_assoc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.right_assoc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.sentence">
+<span class="sig-name descname"><span class="pre">sentence</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.outer_syntax.html#pyk.kast.outer_syntax.Sentence" title="pyk.kast.outer_syntax.Sentence"><span class="pre">Sentence</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.sentence"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.sentence" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.set_var">
+<span class="sig-name descname"><span class="pre">set_var</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.SVar" title="pyk.kore.syntax.SVar"><span class="pre">SVar</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.set_var"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.set_var" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.set_var_id">
+<span class="sig-name descname"><span class="pre">set_var_id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.set_var_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.set_var_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.sort">
+<span class="sig-name descname"><span class="pre">sort</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.outer_syntax.html#pyk.kast.outer_syntax.Sort" title="pyk.kast.outer_syntax.Sort"><span class="pre">Sort</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.sort"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.sort" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.sort_app">
+<span class="sig-name descname"><span class="pre">sort_app</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.SortApp" title="pyk.kore.syntax.SortApp"><span class="pre">SortApp</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.sort_app"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.sort_app" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.sort_decl">
+<span class="sig-name descname"><span class="pre">sort_decl</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.SortDecl" title="pyk.kore.syntax.SortDecl"><span class="pre">SortDecl</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.sort_decl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.sort_decl" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.sort_var">
+<span class="sig-name descname"><span class="pre">sort_var</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.SortVar" title="pyk.kore.syntax.SortVar"><span class="pre">SortVar</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.sort_var"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.sort_var" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.string">
+<span class="sig-name descname"><span class="pre">string</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.String" title="pyk.kore.syntax.String"><span class="pre">String</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.string" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.symbol">
+<span class="sig-name descname"><span class="pre">symbol</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Symbol" title="pyk.kore.syntax.Symbol"><span class="pre">Symbol</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.symbol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.symbol" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.symbol_decl">
+<span class="sig-name descname"><span class="pre">symbol_decl</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.SymbolDecl" title="pyk.kore.syntax.SymbolDecl"><span class="pre">SymbolDecl</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.symbol_decl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.symbol_decl" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.symbol_id">
+<span class="sig-name descname"><span class="pre">symbol_id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.symbol_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.symbol_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.top">
+<span class="sig-name descname"><span class="pre">top</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Top" title="pyk.kore.syntax.Top"><span class="pre">Top</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.top"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.top" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.parser.KoreParser.var_pattern">
+<span class="sig-name descname"><span class="pre">var_pattern</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.VarPattern" title="pyk.kore.syntax.VarPattern"><span class="pre">VarPattern</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/parser.html#KoreParser.var_pattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.parser.KoreParser.var_pattern" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pyk.kore.match.html" class="btn btn-neutral float-left" title="pyk.kore.match module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pyk.kore.pool.html" class="btn btn-neutral float-right" title="pyk.kore.pool module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Runtime Verification, Inc.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

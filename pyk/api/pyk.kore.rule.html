@@ -1,0 +1,501 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyk.kore.rule module &mdash; pyk 7.1.313 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=9c1be6d9"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyk.kore.syntax module" href="pyk.kore.syntax.html" />
+    <link rel="prev" title="pyk.kore.rpc module" href="pyk.kore.rpc.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            pyk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">pyk</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pyk.html">pyk package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="pyk.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="pyk.cterm.html">pyk.cterm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kast.html">pyk.kast package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kbuild.html">pyk.kbuild package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.html">pyk.kcfg package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kdist.html">pyk.kdist package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.klean.html">pyk.klean package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kllvm.html">pyk.kllvm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.konvert.html">pyk.konvert package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="pyk.kore.html">pyk.kore package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kore_exec_covr.html">pyk.kore_exec_covr package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.ktool.html">pyk.ktool package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.proof.html">pyk.proof package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.testing.html">pyk.testing package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">pyk</a></li>
+          <li class="breadcrumb-item"><a href="pyk.html">pyk package</a></li>
+          <li class="breadcrumb-item"><a href="pyk.kore.html">pyk.kore package</a></li>
+      <li class="breadcrumb-item active">pyk.kore.rule module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/pyk.kore.rule.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pyk.kore.rule">
+<span id="pyk-kore-rule-module"></span><h1>pyk.kore.rule module<a class="headerlink" href="#module-pyk.kore.rule" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kore.rule.AppRule">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AppRule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lhs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'App'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rhs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Pattern'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">req</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Pattern</span> <span class="pre">|</span> <span class="pre">None'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ens</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Pattern</span> <span class="pre">|</span> <span class="pre">None'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Sort'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'int'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str</span> <span class="pre">|</span> <span class="pre">None'</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/kore/rule.html#AppRule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.rule.AppRule" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.kore.rule.SimpliRule" title="pyk.kore.rule.SimpliRule"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimpliRule</span></code></a>[<a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.App" title="pyk.kore.syntax.App"><code class="xref py py-class docutils literal notranslate"><span class="pre">App</span></code></a>]</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.AppRule.ens">
+<span class="sig-name descname"><span class="pre">ens</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.kore.rule.AppRule.ens" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.rule.AppRule.from_axiom">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_axiom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axiom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Axiom" title="pyk.kore.syntax.Axiom"><span class="pre">Axiom</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.kore.rule.AppRule" title="pyk.kore.rule.AppRule"><span class="pre">AppRule</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/rule.html#AppRule.from_axiom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.rule.AppRule.from_axiom" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.AppRule.label">
+<span class="sig-name descname"><span class="pre">label</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.kore.rule.AppRule.label" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.AppRule.lhs">
+<span class="sig-name descname"><span class="pre">lhs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.App" title="pyk.kore.syntax.App"><span class="pre">App</span></a></em><a class="headerlink" href="#pyk.kore.rule.AppRule.lhs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.AppRule.priority">
+<span class="sig-name descname"><span class="pre">priority</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pyk.kore.rule.AppRule.priority" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.AppRule.req">
+<span class="sig-name descname"><span class="pre">req</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.kore.rule.AppRule.req" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.AppRule.rhs">
+<span class="sig-name descname"><span class="pre">rhs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></em><a class="headerlink" href="#pyk.kore.rule.AppRule.rhs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.AppRule.sort">
+<span class="sig-name descname"><span class="pre">sort</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.outer_syntax.html#pyk.kast.outer_syntax.Sort" title="pyk.kast.outer_syntax.Sort"><span class="pre">Sort</span></a></em><a class="headerlink" href="#pyk.kore.rule.AppRule.sort" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.AppRule.uid">
+<span class="sig-name descname"><span class="pre">uid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.kore.rule.AppRule.uid" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kore.rule.CeilRule">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CeilRule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lhs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Ceil'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rhs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Pattern'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">req</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Pattern</span> <span class="pre">|</span> <span class="pre">None'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ens</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Pattern</span> <span class="pre">|</span> <span class="pre">None'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Sort'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'int'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str</span> <span class="pre">|</span> <span class="pre">None'</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/kore/rule.html#CeilRule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.rule.CeilRule" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.kore.rule.SimpliRule" title="pyk.kore.rule.SimpliRule"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimpliRule</span></code></a>[<a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Ceil" title="pyk.kore.syntax.Ceil"><code class="xref py py-class docutils literal notranslate"><span class="pre">Ceil</span></code></a>]</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.CeilRule.ens">
+<span class="sig-name descname"><span class="pre">ens</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.kore.rule.CeilRule.ens" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.rule.CeilRule.from_axiom">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_axiom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axiom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Axiom" title="pyk.kore.syntax.Axiom"><span class="pre">Axiom</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.kore.rule.CeilRule" title="pyk.kore.rule.CeilRule"><span class="pre">CeilRule</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/rule.html#CeilRule.from_axiom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.rule.CeilRule.from_axiom" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.CeilRule.label">
+<span class="sig-name descname"><span class="pre">label</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.kore.rule.CeilRule.label" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.CeilRule.lhs">
+<span class="sig-name descname"><span class="pre">lhs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Ceil" title="pyk.kore.syntax.Ceil"><span class="pre">Ceil</span></a></em><a class="headerlink" href="#pyk.kore.rule.CeilRule.lhs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.CeilRule.priority">
+<span class="sig-name descname"><span class="pre">priority</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pyk.kore.rule.CeilRule.priority" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.CeilRule.req">
+<span class="sig-name descname"><span class="pre">req</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.kore.rule.CeilRule.req" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.CeilRule.rhs">
+<span class="sig-name descname"><span class="pre">rhs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></em><a class="headerlink" href="#pyk.kore.rule.CeilRule.rhs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.CeilRule.sort">
+<span class="sig-name descname"><span class="pre">sort</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.outer_syntax.html#pyk.kast.outer_syntax.Sort" title="pyk.kast.outer_syntax.Sort"><span class="pre">Sort</span></a></em><a class="headerlink" href="#pyk.kore.rule.CeilRule.sort" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.CeilRule.uid">
+<span class="sig-name descname"><span class="pre">uid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.kore.rule.CeilRule.uid" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kore.rule.EqualsRule">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EqualsRule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lhs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Equals'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rhs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Pattern'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">req</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Pattern</span> <span class="pre">|</span> <span class="pre">None'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ens</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Pattern</span> <span class="pre">|</span> <span class="pre">None'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Sort'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'int'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str</span> <span class="pre">|</span> <span class="pre">None'</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/kore/rule.html#EqualsRule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.rule.EqualsRule" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.kore.rule.SimpliRule" title="pyk.kore.rule.SimpliRule"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimpliRule</span></code></a>[<a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Equals" title="pyk.kore.syntax.Equals"><code class="xref py py-class docutils literal notranslate"><span class="pre">Equals</span></code></a>]</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.EqualsRule.ens">
+<span class="sig-name descname"><span class="pre">ens</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.kore.rule.EqualsRule.ens" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.rule.EqualsRule.from_axiom">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_axiom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axiom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Axiom" title="pyk.kore.syntax.Axiom"><span class="pre">Axiom</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.kore.rule.EqualsRule" title="pyk.kore.rule.EqualsRule"><span class="pre">EqualsRule</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/rule.html#EqualsRule.from_axiom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.rule.EqualsRule.from_axiom" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.EqualsRule.label">
+<span class="sig-name descname"><span class="pre">label</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.kore.rule.EqualsRule.label" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.EqualsRule.lhs">
+<span class="sig-name descname"><span class="pre">lhs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Equals" title="pyk.kore.syntax.Equals"><span class="pre">Equals</span></a></em><a class="headerlink" href="#pyk.kore.rule.EqualsRule.lhs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.EqualsRule.priority">
+<span class="sig-name descname"><span class="pre">priority</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pyk.kore.rule.EqualsRule.priority" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.EqualsRule.req">
+<span class="sig-name descname"><span class="pre">req</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.kore.rule.EqualsRule.req" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.EqualsRule.rhs">
+<span class="sig-name descname"><span class="pre">rhs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></em><a class="headerlink" href="#pyk.kore.rule.EqualsRule.rhs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.EqualsRule.sort">
+<span class="sig-name descname"><span class="pre">sort</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.outer_syntax.html#pyk.kast.outer_syntax.Sort" title="pyk.kast.outer_syntax.Sort"><span class="pre">Sort</span></a></em><a class="headerlink" href="#pyk.kore.rule.EqualsRule.sort" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.EqualsRule.uid">
+<span class="sig-name descname"><span class="pre">uid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.kore.rule.EqualsRule.uid" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kore.rule.FunctionRule">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FunctionRule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lhs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'App'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rhs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Pattern'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">req</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Pattern</span> <span class="pre">|</span> <span class="pre">None'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ens</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Pattern</span> <span class="pre">|</span> <span class="pre">None'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Sort'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg_sorts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'tuple[Sort,</span> <span class="pre">...]'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anti_left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Pattern</span> <span class="pre">|</span> <span class="pre">None'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'int'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str</span> <span class="pre">|</span> <span class="pre">None'</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/kore/rule.html#FunctionRule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.rule.FunctionRule" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.kore.rule.Rule" title="pyk.kore.rule.Rule"><code class="xref py py-class docutils literal notranslate"><span class="pre">Rule</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.FunctionRule.anti_left">
+<span class="sig-name descname"><span class="pre">anti_left</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.kore.rule.FunctionRule.anti_left" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.FunctionRule.arg_sorts">
+<span class="sig-name descname"><span class="pre">arg_sorts</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.outer_syntax.html#pyk.kast.outer_syntax.Sort" title="pyk.kast.outer_syntax.Sort"><span class="pre">Sort</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.kore.rule.FunctionRule.arg_sorts" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.FunctionRule.ens">
+<span class="sig-name descname"><span class="pre">ens</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.kore.rule.FunctionRule.ens" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.rule.FunctionRule.from_axiom">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_axiom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axiom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Axiom" title="pyk.kore.syntax.Axiom"><span class="pre">Axiom</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.kore.rule.FunctionRule" title="pyk.kore.rule.FunctionRule"><span class="pre">FunctionRule</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/rule.html#FunctionRule.from_axiom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.rule.FunctionRule.from_axiom" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.FunctionRule.label">
+<span class="sig-name descname"><span class="pre">label</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.kore.rule.FunctionRule.label" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.FunctionRule.lhs">
+<span class="sig-name descname"><span class="pre">lhs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.App" title="pyk.kore.syntax.App"><span class="pre">App</span></a></em><a class="headerlink" href="#pyk.kore.rule.FunctionRule.lhs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.FunctionRule.priority">
+<span class="sig-name descname"><span class="pre">priority</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pyk.kore.rule.FunctionRule.priority" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.FunctionRule.req">
+<span class="sig-name descname"><span class="pre">req</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.kore.rule.FunctionRule.req" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.FunctionRule.rhs">
+<span class="sig-name descname"><span class="pre">rhs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></em><a class="headerlink" href="#pyk.kore.rule.FunctionRule.rhs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.FunctionRule.sort">
+<span class="sig-name descname"><span class="pre">sort</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.outer_syntax.html#pyk.kast.outer_syntax.Sort" title="pyk.kast.outer_syntax.Sort"><span class="pre">Sort</span></a></em><a class="headerlink" href="#pyk.kore.rule.FunctionRule.sort" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.rule.FunctionRule.to_axiom">
+<span class="sig-name descname"><span class="pre">to_axiom</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Axiom" title="pyk.kore.syntax.Axiom"><span class="pre">Axiom</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/rule.html#FunctionRule.to_axiom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.rule.FunctionRule.to_axiom" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.FunctionRule.uid">
+<span class="sig-name descname"><span class="pre">uid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.kore.rule.FunctionRule.uid" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kore.rule.RewriteRule">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RewriteRule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lhs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'App'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rhs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'App'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">req</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Pattern</span> <span class="pre">|</span> <span class="pre">None'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ens</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Pattern</span> <span class="pre">|</span> <span class="pre">None'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'EVar</span> <span class="pre">|</span> <span class="pre">None'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'int'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str</span> <span class="pre">|</span> <span class="pre">None'</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/kore/rule.html#RewriteRule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.rule.RewriteRule" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.kore.rule.Rule" title="pyk.kore.rule.Rule"><code class="xref py py-class docutils literal notranslate"><span class="pre">Rule</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.RewriteRule.ctx">
+<span class="sig-name descname"><span class="pre">ctx</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.EVar" title="pyk.kore.syntax.EVar"><span class="pre">EVar</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.kore.rule.RewriteRule.ctx" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.RewriteRule.ens">
+<span class="sig-name descname"><span class="pre">ens</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.kore.rule.RewriteRule.ens" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.rule.RewriteRule.from_axiom">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_axiom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axiom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Axiom" title="pyk.kore.syntax.Axiom"><span class="pre">Axiom</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.kore.rule.RewriteRule" title="pyk.kore.rule.RewriteRule"><span class="pre">RewriteRule</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/rule.html#RewriteRule.from_axiom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.rule.RewriteRule.from_axiom" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.RewriteRule.label">
+<span class="sig-name descname"><span class="pre">label</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.kore.rule.RewriteRule.label" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.RewriteRule.lhs">
+<span class="sig-name descname"><span class="pre">lhs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.App" title="pyk.kore.syntax.App"><span class="pre">App</span></a></em><a class="headerlink" href="#pyk.kore.rule.RewriteRule.lhs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.RewriteRule.priority">
+<span class="sig-name descname"><span class="pre">priority</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pyk.kore.rule.RewriteRule.priority" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.RewriteRule.req">
+<span class="sig-name descname"><span class="pre">req</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.kore.rule.RewriteRule.req" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.RewriteRule.rhs">
+<span class="sig-name descname"><span class="pre">rhs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.App" title="pyk.kore.syntax.App"><span class="pre">App</span></a></em><a class="headerlink" href="#pyk.kore.rule.RewriteRule.rhs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.RewriteRule.sort">
+<span class="sig-name descname"><span class="pre">sort</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.outer_syntax.html#pyk.kast.outer_syntax.Sort" title="pyk.kast.outer_syntax.Sort"><span class="pre">Sort</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">SortApp(name='SortGeneratedTopCell',</span> <span class="pre">sorts=())</span></em><a class="headerlink" href="#pyk.kore.rule.RewriteRule.sort" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.rule.RewriteRule.to_axiom">
+<span class="sig-name descname"><span class="pre">to_axiom</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Axiom" title="pyk.kore.syntax.Axiom"><span class="pre">Axiom</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/rule.html#RewriteRule.to_axiom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.rule.RewriteRule.to_axiom" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.RewriteRule.uid">
+<span class="sig-name descname"><span class="pre">uid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.kore.rule.RewriteRule.uid" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kore.rule.Rule">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Rule</span></span><a class="reference internal" href="../_modules/pyk/kore/rule.html#Rule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.rule.Rule" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.Rule.ens">
+<span class="sig-name descname"><span class="pre">ens</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.kore.rule.Rule.ens" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.rule.Rule.extract_all">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extract_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">defn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.outer_syntax.html#pyk.kast.outer_syntax.Definition" title="pyk.kast.outer_syntax.Definition"><span class="pre">Definition</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pyk.kore.rule.Rule" title="pyk.kore.rule.Rule"><span class="pre">Rule</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/kore/rule.html#Rule.extract_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.rule.Rule.extract_all" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.rule.Rule.from_axiom">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_axiom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axiom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Axiom" title="pyk.kore.syntax.Axiom"><span class="pre">Axiom</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.kore.rule.Rule" title="pyk.kore.rule.Rule"><span class="pre">Rule</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/rule.html#Rule.from_axiom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.rule.Rule.from_axiom" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.rule.Rule.is_rule">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_rule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axiom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Axiom" title="pyk.kore.syntax.Axiom"><span class="pre">Axiom</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/pyk/kore/rule.html#Rule.is_rule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.rule.Rule.is_rule" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.Rule.label">
+<span class="sig-name descname"><span class="pre">label</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.kore.rule.Rule.label" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.Rule.lhs">
+<span class="sig-name descname"><span class="pre">lhs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></em><a class="headerlink" href="#pyk.kore.rule.Rule.lhs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.Rule.priority">
+<span class="sig-name descname"><span class="pre">priority</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pyk.kore.rule.Rule.priority" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.Rule.req">
+<span class="sig-name descname"><span class="pre">req</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.kore.rule.Rule.req" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.Rule.rhs">
+<span class="sig-name descname"><span class="pre">rhs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></em><a class="headerlink" href="#pyk.kore.rule.Rule.rhs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.Rule.sort">
+<span class="sig-name descname"><span class="pre">sort</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.outer_syntax.html#pyk.kast.outer_syntax.Sort" title="pyk.kast.outer_syntax.Sort"><span class="pre">Sort</span></a></em><a class="headerlink" href="#pyk.kore.rule.Rule.sort" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.rule.Rule.to_axiom">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">to_axiom</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Axiom" title="pyk.kore.syntax.Axiom"><span class="pre">Axiom</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/rule.html#Rule.to_axiom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.rule.Rule.to_axiom" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.Rule.uid">
+<span class="sig-name descname"><span class="pre">uid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.kore.rule.Rule.uid" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kore.rule.SimpliRule">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SimpliRule</span></span><a class="reference internal" href="../_modules/pyk/kore/rule.html#SimpliRule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.rule.SimpliRule" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.kore.rule.Rule" title="pyk.kore.rule.Rule"><code class="xref py py-class docutils literal notranslate"><span class="pre">Rule</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">P</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.SimpliRule.lhs">
+<span class="sig-name descname"><span class="pre">lhs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">P</span></em><a class="headerlink" href="#pyk.kore.rule.SimpliRule.lhs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kore.rule.SimpliRule.sort">
+<span class="sig-name descname"><span class="pre">sort</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.outer_syntax.html#pyk.kast.outer_syntax.Sort" title="pyk.kast.outer_syntax.Sort"><span class="pre">Sort</span></a></em><a class="headerlink" href="#pyk.kore.rule.SimpliRule.sort" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kore.rule.SimpliRule.to_axiom">
+<span class="sig-name descname"><span class="pre">to_axiom</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Axiom" title="pyk.kore.syntax.Axiom"><span class="pre">Axiom</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/rule.html#SimpliRule.to_axiom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.rule.SimpliRule.to_axiom" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pyk.kore.rpc.html" class="btn btn-neutral float-left" title="pyk.kore.rpc module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pyk.kore.syntax.html" class="btn btn-neutral float-right" title="pyk.kore.syntax module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Runtime Verification, Inc.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

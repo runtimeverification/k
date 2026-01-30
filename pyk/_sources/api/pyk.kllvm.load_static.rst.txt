@@ -1,0 +1,7 @@
+pyk.kllvm.load\_static module
+=============================
+
+.. automodule:: pyk.kllvm.load_static
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,480 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyk.proof.proof module &mdash; pyk 7.1.313 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=9c1be6d9"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyk.proof.prove_rpc module" href="pyk.proof.prove_rpc.html" />
+    <link rel="prev" title="pyk.proof.implies module" href="pyk.proof.implies.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            pyk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">pyk</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pyk.html">pyk package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="pyk.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="pyk.cterm.html">pyk.cterm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kast.html">pyk.kast package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kbuild.html">pyk.kbuild package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.html">pyk.kcfg package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kdist.html">pyk.kdist package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.klean.html">pyk.klean package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kllvm.html">pyk.kllvm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.konvert.html">pyk.konvert package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kore.html">pyk.kore package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kore_exec_covr.html">pyk.kore_exec_covr package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.ktool.html">pyk.ktool package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="pyk.proof.html">pyk.proof package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.testing.html">pyk.testing package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">pyk</a></li>
+          <li class="breadcrumb-item"><a href="pyk.html">pyk package</a></li>
+          <li class="breadcrumb-item"><a href="pyk.proof.html">pyk.proof package</a></li>
+      <li class="breadcrumb-item active">pyk.proof.proof module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/pyk.proof.proof.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pyk.proof.proof">
+<span id="pyk-proof-proof-module"></span><h1>pyk.proof.proof module<a class="headerlink" href="#module-pyk.proof.proof" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.proof.proof.CompositeSummary">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CompositeSummary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_summaries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Iterable[ProofSummary]'</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/proof/proof.html#CompositeSummary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.proof.CompositeSummary" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.proof.proof.ProofSummary" title="pyk.proof.proof.ProofSummary"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProofSummary</span></code></a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.proof.CompositeSummary.lines">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">lines</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.proof.proof.CompositeSummary.lines" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.proof.CompositeSummary.summaries">
+<span class="sig-name descname"><span class="pre">summaries</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pyk.proof.proof.ProofSummary" title="pyk.proof.proof.ProofSummary"><span class="pre">ProofSummary</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.proof.proof.CompositeSummary.summaries" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.proof.proof.FailureInfo">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FailureInfo</span></span><a class="reference internal" href="../_modules/pyk/proof/proof.html#FailureInfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.proof.FailureInfo" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Proof</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proof_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subproof_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">admitted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/proof/proof.html#Proof"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.proof.Proof" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">PS</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">SR</span></code>]</p>
+<p>Abstract representation of a proof that can be executed in one or more discrete steps.</p>
+<p>Generic type variables:</p>
+<ul class="simple">
+<li><p>PS: Proof step: data required to perform a step of the proof.</p></li>
+<li><p>SR: Step result: data produced by executing a PS with <code class="docutils literal notranslate"><span class="pre">Prover.step_proof</span></code> used to update the <cite>Proof</cite>.</p></li>
+</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.add_subproof">
+<span class="sig-name descname"><span class="pre">add_subproof</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proof</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pyk.proof.proof.Proof" title="pyk.proof.proof.Proof"><span class="pre">Proof</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/proof/proof.html#Proof.add_subproof"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.proof.Proof.add_subproof" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.admit">
+<span class="sig-name descname"><span class="pre">admit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/proof/proof.html#Proof.admit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.proof.Proof.admit" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.admitted">
+<span class="sig-name descname"><span class="pre">admitted</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyk.proof.proof.Proof.admitted" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.can_progress">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">can_progress</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyk.proof.proof.Proof.can_progress" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.commit">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">commit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">SR</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/proof/proof.html#Proof.commit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.proof.Proof.commit" title="Link to this definition"></a></dt>
+<dd><p>Apply the step result of type <cite>SR</cite> to <cite>self</cite>, modifying <cite>self</cite>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.dict">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dict</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.proof.proof.Proof.dict" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.digest">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.proof.proof.Proof.digest" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.failed">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">failed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyk.proof.proof.Proof.failed" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.failure_info">
+<span class="sig-name descname"><span class="pre">failure_info</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.proof.proof.FailureInfo" title="pyk.proof.proof.FailureInfo"><span class="pre">FailureInfo</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.proof.proof.Proof.failure_info" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.fetch_subproof">
+<span class="sig-name descname"><span class="pre">fetch_subproof</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proof_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_reread</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uptodate_check_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'timestamp'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.proof.proof.Proof" title="pyk.proof.proof.Proof"><span class="pre">Proof</span></a></span></span><a class="reference internal" href="../_modules/pyk/proof/proof.html#Proof.fetch_subproof"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.proof.Proof.fetch_subproof" title="Link to this definition"></a></dt>
+<dd><p>Get a subproof, re-reading from disk if it’s not up-to-date.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.fetch_subproof_data">
+<span class="sig-name descname"><span class="pre">fetch_subproof_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proof_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_reread</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uptodate_check_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'timestamp'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.proof.proof.Proof" title="pyk.proof.proof.Proof"><span class="pre">Proof</span></a></span></span><a class="reference internal" href="../_modules/pyk/proof/proof.html#Proof.fetch_subproof_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.proof.Proof.fetch_subproof_data" title="Link to this definition"></a></dt>
+<dd><p>Get a subproof, re-reading from disk if it’s not up-to-date.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.from_dict">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dct</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proof_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.proof.proof.Proof" title="pyk.proof.proof.Proof"><span class="pre">Proof</span></a></span></span><a class="reference internal" href="../_modules/pyk/proof/proof.html#Proof.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.proof.Proof.from_dict" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.get_steps">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_steps</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">PS</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/proof/proof.html#Proof.get_steps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.proof.Proof.get_steps" title="Link to this definition"></a></dt>
+<dd><p>Return all currently available steps associated with this Proof. Should not modify <cite>self</cite>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.id">
+<span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.proof.proof.Proof.id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.json">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">json</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.proof.proof.Proof.json" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.one_line_summary">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">one_line_summary</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.proof.proof.Proof.one_line_summary" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.own_status">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">own_status</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.proof.proof.ProofStatus" title="pyk.proof.proof.ProofStatus"><span class="pre">ProofStatus</span></a></em><a class="headerlink" href="#pyk.proof.proof.Proof.own_status" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.passed">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">passed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyk.proof.proof.Proof.passed" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.proof_data_exists">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">proof_data_exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proof_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/pyk/proof/proof.html#Proof.proof_data_exists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.proof.Proof.proof_data_exists" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.proof_dir">
+<span class="sig-name descname"><span class="pre">proof_dir</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.proof.proof.Proof.proof_dir" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.proof_exists">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">proof_exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proof_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/pyk/proof/proof.html#Proof.proof_exists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.proof.Proof.proof_exists" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.proof_subdir">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">proof_subdir</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.proof.proof.Proof.proof_subdir" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.read_proof">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_proof</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proof_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.proof.proof.Proof" title="pyk.proof.proof.Proof"><span class="pre">Proof</span></a></span></span><a class="reference internal" href="../_modules/pyk/proof/proof.html#Proof.read_proof"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.proof.Proof.read_proof" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.read_proof_data">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_proof_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proof_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.proof.proof.Proof" title="pyk.proof.proof.Proof"><span class="pre">Proof</span></a></span></span><a class="reference internal" href="../_modules/pyk/proof/proof.html#Proof.read_proof_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.proof.Proof.read_proof_data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.read_subproof">
+<span class="sig-name descname"><span class="pre">read_subproof</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proof_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/proof/proof.html#Proof.read_subproof"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.proof.Proof.read_subproof" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.read_subproof_data">
+<span class="sig-name descname"><span class="pre">read_subproof_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proof_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/proof/proof.html#Proof.read_subproof_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.proof.Proof.read_subproof_data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.remove_subproof">
+<span class="sig-name descname"><span class="pre">remove_subproof</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proof_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/proof/proof.html#Proof.remove_subproof"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.proof.Proof.remove_subproof" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.status">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">status</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.proof.proof.ProofStatus" title="pyk.proof.proof.ProofStatus"><span class="pre">ProofStatus</span></a></em><a class="headerlink" href="#pyk.proof.proof.Proof.status" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.subproof_ids">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">subproof_ids</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.proof.proof.Proof.subproof_ids" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.subproofs">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">subproofs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pyk.proof.proof.Proof" title="pyk.proof.proof.Proof"><span class="pre">Proof</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.proof.proof.Proof.subproofs" title="Link to this definition"></a></dt>
+<dd><p>Return the subproofs, re-reading from disk the ones that changed.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.subproofs_status">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">subproofs_status</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.proof.proof.ProofStatus" title="pyk.proof.proof.ProofStatus"><span class="pre">ProofStatus</span></a></em><a class="headerlink" href="#pyk.proof.proof.Proof.subproofs_status" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.summary">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">summary</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.proof.proof.ProofSummary" title="pyk.proof.proof.ProofSummary"><span class="pre">ProofSummary</span></a></em><a class="headerlink" href="#pyk.proof.proof.Proof.summary" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.up_to_date">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">up_to_date</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyk.proof.proof.Proof.up_to_date" title="Link to this definition"></a></dt>
+<dd><p>Check that the proof’s representation on disk is up-to-date.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.write_proof">
+<span class="sig-name descname"><span class="pre">write_proof</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subproofs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/proof/proof.html#Proof.write_proof"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.proof.Proof.write_proof" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.proof.Proof.write_proof_data">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">write_proof_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/proof/proof.html#Proof.write_proof_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.proof.Proof.write_proof_data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.proof.proof.ProofStatus">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ProofStatus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/proof/proof.html#ProofStatus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.proof.ProofStatus" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.proof.ProofStatus.FAILED">
+<span class="sig-name descname"><span class="pre">FAILED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'failed'</span></em><a class="headerlink" href="#pyk.proof.proof.ProofStatus.FAILED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.proof.ProofStatus.PASSED">
+<span class="sig-name descname"><span class="pre">PASSED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'passed'</span></em><a class="headerlink" href="#pyk.proof.proof.ProofStatus.PASSED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.proof.ProofStatus.PENDING">
+<span class="sig-name descname"><span class="pre">PENDING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pending'</span></em><a class="headerlink" href="#pyk.proof.proof.ProofStatus.PENDING" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.proof.proof.ProofSummary">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ProofSummary</span></span><a class="reference internal" href="../_modules/pyk/proof/proof.html#ProofSummary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.proof.ProofSummary" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.proof.ProofSummary.id">
+<span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.proof.proof.ProofSummary.id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.proof.ProofSummary.lines">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">lines</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.proof.proof.ProofSummary.lines" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.proof.ProofSummary.status">
+<span class="sig-name descname"><span class="pre">status</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.proof.proof.ProofStatus" title="pyk.proof.proof.ProofStatus"><span class="pre">ProofStatus</span></a></em><a class="headerlink" href="#pyk.proof.proof.ProofSummary.status" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.proof.proof.Prover">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Prover</span></span><a class="reference internal" href="../_modules/pyk/proof/proof.html#Prover"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.proof.Prover" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ContextManager</span></code>[<a class="reference internal" href="#pyk.proof.proof.Prover" title="pyk.proof.proof.Prover"><code class="xref py py-class docutils literal notranslate"><span class="pre">Prover</span></code></a>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">P</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">PS</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">SR</span></code>]</p>
+<p>Abstract class which advances <cite>Proof`s with `init_proof()</cite> and <cite>step_proof()</cite>.</p>
+<p>Generic type variables:</p>
+<ul class="simple">
+<li><p>P: Type of proof this <cite>Prover</cite> operates on.</p></li>
+<li><p>PS: Proof step: data required to perform a step of the proof.</p></li>
+<li><p>SR: Step result: data produced by executing a PS with <cite>Prover.step_proof</cite> used to update the <cite>Proof</cite>.</p></li>
+</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.proof.Prover.advance_proof">
+<span class="sig-name descname"><span class="pre">advance_proof</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">proof:</span> <span class="pre">P,</span> <span class="pre">max_iterations:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">fail_fast:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False,</span> <span class="pre">callback:</span> <span class="pre">Callable[[P],</span> <span class="pre">None]</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">Prover.&lt;lambda&gt;&gt;,</span> <span class="pre">maintenance_rate:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">1</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/proof/proof.html#Prover.advance_proof"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.proof.Prover.advance_proof" title="Link to this definition"></a></dt>
+<dd><p>Advance a proof.</p>
+<p>Performs loop <cite>Proof.get_steps()</cite> -&gt; <cite>Prover.step_proof()</cite> -&gt; <cite>Proof.commit()</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>proof</strong> – proof to advance.</p></li>
+<li><p><strong>max_iterations</strong> (<em>optional</em>) – Maximum number of steps to take.</p></li>
+<li><p><strong>fail_fast</strong> – If the proof is failing after finishing a step,
+halt execution even if there are still available steps.</p></li>
+<li><p><strong>callback</strong> – Callable to run in between each completed step, useful for getting real-time information about the proof.</p></li>
+<li><p><strong>maintenance_rate</strong> – Number of iterations between proof maintenance (writing to disk and executing callback).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.proof.Prover.close">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/proof/proof.html#Prover.close"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.proof.Prover.close" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.proof.Prover.failure_info">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">failure_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proof</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">P</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.proof.proof.FailureInfo" title="pyk.proof.proof.FailureInfo"><span class="pre">FailureInfo</span></a></span></span><a class="reference internal" href="../_modules/pyk/proof/proof.html#Prover.failure_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.proof.Prover.failure_info" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.proof.Prover.init_proof">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">init_proof</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proof</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">P</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/proof/proof.html#Prover.init_proof"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.proof.Prover.init_proof" title="Link to this definition"></a></dt>
+<dd><p>Perform any initialization steps needed at the beginning of proof execution.</p>
+<p>For example, for <cite>APRProver</cite>, upload circularity and depends module of the proof
+to the <cite>KoreServer</cite> via <cite>add_module</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.proof.Prover.step_proof">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">step_proof</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">PS</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">SR</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/proof/proof.html#Prover.step_proof"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.proof.Prover.step_proof" title="Link to this definition"></a></dt>
+<dd><p>Do the work associated with a <cite>PS</cite>, a proof step.</p>
+<p>Should not modify a <cite>Proof</cite> or <cite>self</cite>, but may read from <cite>self</cite> as long as
+those fields are not being modified during <cite>step_proof()</cite>, <cite>get_steps()</cite>, and <cite>commit()</cite>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.proof.proof.parallel_advance_proof">
+<span class="sig-name descname"><span class="pre">parallel_advance_proof</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">proof:</span> <span class="pre">P,</span> <span class="pre">create_prover:</span> <span class="pre">Callable[[],</span> <span class="pre">Prover[P,</span> <span class="pre">PS,</span> <span class="pre">SR]],</span> <span class="pre">max_iterations:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">fail_fast:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False,</span> <span class="pre">max_workers:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">1,</span> <span class="pre">callback:</span> <span class="pre">Callable[[P],</span> <span class="pre">None]</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">&lt;lambda&gt;&gt;,</span> <span class="pre">maintenance_rate:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">1</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/proof/proof.html#parallel_advance_proof"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.proof.parallel_advance_proof" title="Link to this definition"></a></dt>
+<dd><p>Advance proof with multithreaded strategy.</p>
+<p><cite>Prover.step_proof()</cite> to a worker thread pool for each step as available,
+and <cite>Proof.commit()</cite> results as they become available,
+and get new steps with <cite>Proof.get_steps()</cite> and submit to thread pool.</p>
+<p>Generic type variables:</p>
+<ul class="simple">
+<li><p>P: Type of proof to be advanced in parallel.</p></li>
+<li><p>PS: Proof step: data required to perform a step of the proof.</p></li>
+<li><p>SR: Step result: data produced by executing a PS with <cite>Prover.step_proof</cite> used to update the <cite>Proof</cite>.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>proof</strong> – The proof to advance.</p></li>
+<li><p><strong>create_prover</strong> – Function which creates a new <cite>Prover</cite>. These provers must not reference any shared
+data to be written during <cite>parallel_advance_proof</cite>, to avoid race conditions.</p></li>
+<li><p><strong>max_iterations</strong> – Maximum number of steps to take.</p></li>
+<li><p><strong>fail_fast</strong> – If the proof is failing after finishing a step,
+halt execution even if there are still available steps.</p></li>
+<li><p><strong>max_workers</strong> – Maximum number of worker threads the pool can spawn.</p></li>
+<li><p><strong>callback</strong> – Callable to run during proof maintenance, useful for getting real-time information about the proof.</p></li>
+<li><p><strong>maintenance_rate</strong> – Number of iterations between proof maintenance (writing to disk and executing callback).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pyk.proof.implies.html" class="btn btn-neutral float-left" title="pyk.proof.implies module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pyk.proof.prove_rpc.html" class="btn btn-neutral float-right" title="pyk.proof.prove_rpc module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Runtime Verification, Inc.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

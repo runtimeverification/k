@@ -1,0 +1,606 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyk.kore.prelude &mdash; pyk 7.1.313 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=9c1be6d9"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            pyk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">pyk</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pyk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pyk.kore.prelude</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyk.kore.prelude</h1><div class="highlight"><pre>
+<span></span><span class="linenos">  1</span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<span class="linenos">  2</span>
+<span class="linenos">  3</span><span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">chain</span>
+<span class="linenos">  4</span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="linenos">  5</span>
+<span class="linenos">  6</span><span class="kn">from</span><span class="w"> </span><span class="nn">..dequote</span><span class="w"> </span><span class="kn">import</span> <span class="n">bytes_decode</span>
+<span class="linenos">  7</span><span class="kn">from</span><span class="w"> </span><span class="nn">..utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_type</span>
+<span class="linenos">  8</span><span class="kn">from</span><span class="w"> </span><span class="nn">.syntax</span><span class="w"> </span><span class="kn">import</span> <span class="n">DV</span><span class="p">,</span> <span class="n">App</span><span class="p">,</span> <span class="n">LeftAssoc</span><span class="p">,</span> <span class="n">RightAssoc</span><span class="p">,</span> <span class="n">SortApp</span><span class="p">,</span> <span class="n">String</span><span class="p">,</span> <span class="n">SymbolId</span>
+<span class="linenos">  9</span>
+<span class="linenos"> 10</span><span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+<span class="linenos"> 11</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Mapping</span>
+<span class="linenos"> 12</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Final</span>
+<span class="linenos"> 13</span>
+<span class="linenos"> 14</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">.syntax</span><span class="w"> </span><span class="kn">import</span> <span class="n">EVar</span><span class="p">,</span> <span class="n">Pattern</span><span class="p">,</span> <span class="n">Sort</span>
+<span class="linenos"> 15</span>
+<span class="linenos"> 16</span>
+<span class="linenos"> 17</span><span class="c1"># ----------</span>
+<span class="linenos"> 18</span><span class="c1"># Base types</span>
+<span class="linenos"> 19</span><span class="c1"># ----------</span>
+<span class="linenos"> 20</span>
+<span class="linenos"> 21</span><span class="n">BOOL</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SortApp</span><span class="p">(</span><span class="s1">&#39;SortBool&#39;</span><span class="p">)</span>
+<span class="linenos"> 22</span><span class="n">INT</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SortApp</span><span class="p">(</span><span class="s1">&#39;SortInt&#39;</span><span class="p">)</span>
+<span class="linenos"> 23</span><span class="n">BYTES</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SortApp</span><span class="p">(</span><span class="s1">&#39;SortBytes&#39;</span><span class="p">)</span>
+<span class="linenos"> 24</span><span class="n">STRING</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SortApp</span><span class="p">(</span><span class="s1">&#39;SortString&#39;</span><span class="p">)</span>
+<span class="linenos"> 25</span><span class="n">ID</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SortApp</span><span class="p">(</span><span class="s1">&#39;SortId&#39;</span><span class="p">)</span>
+<span class="linenos"> 26</span>
+<span class="linenos"> 27</span><span class="n">TRUE</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">DV</span><span class="p">(</span><span class="n">BOOL</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="s1">&#39;true&#39;</span><span class="p">))</span>
+<span class="linenos"> 28</span><span class="n">FALSE</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">DV</span><span class="p">(</span><span class="n">BOOL</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="s1">&#39;false&#39;</span><span class="p">))</span>
+<span class="linenos"> 29</span>
+<span class="linenos"> 30</span>
+<div class="viewcode-block" id="dv">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.dv">[docs]</a>
+<span class="linenos"> 31</span><span class="k">def</span><span class="w"> </span><span class="nf">dv</span><span class="p">(</span><span class="n">val</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DV</span><span class="p">:</span>
+<span class="linenos"> 32</span>    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="linenos"> 33</span>        <span class="k">return</span> <span class="n">bool_dv</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+<span class="linenos"> 34</span>    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span><span class="p">:</span>
+<span class="linenos"> 35</span>        <span class="k">return</span> <span class="n">int_dv</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+<span class="linenos"> 36</span>    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">bytes</span><span class="p">:</span>
+<span class="linenos"> 37</span>        <span class="k">return</span> <span class="n">bytes_dv</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+<span class="linenos"> 38</span>    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos"> 39</span>        <span class="k">return</span> <span class="n">str_dv</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+<span class="linenos"> 40</span>    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Illegal type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+<span class="linenos"> 41</span>
+<span class="linenos"> 42</span>
+<div class="viewcode-block" id="bool_dv">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.bool_dv">[docs]</a>
+<span class="linenos"> 43</span><span class="k">def</span><span class="w"> </span><span class="nf">bool_dv</span><span class="p">(</span><span class="n">val</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DV</span><span class="p">:</span>
+<span class="linenos"> 44</span>    <span class="k">return</span> <span class="n">TRUE</span> <span class="k">if</span> <span class="n">val</span> <span class="k">else</span> <span class="n">FALSE</span></div>
+
+<span class="linenos"> 45</span>
+<span class="linenos"> 46</span>
+<div class="viewcode-block" id="int_dv">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.int_dv">[docs]</a>
+<span class="linenos"> 47</span><span class="k">def</span><span class="w"> </span><span class="nf">int_dv</span><span class="p">(</span><span class="n">val</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DV</span><span class="p">:</span>
+<span class="linenos"> 48</span>    <span class="k">return</span> <span class="n">DV</span><span class="p">(</span><span class="n">INT</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)))</span></div>
+
+<span class="linenos"> 49</span>
+<span class="linenos"> 50</span>
+<div class="viewcode-block" id="bytes_dv">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.bytes_dv">[docs]</a>
+<span class="linenos"> 51</span><span class="k">def</span><span class="w"> </span><span class="nf">bytes_dv</span><span class="p">(</span><span class="n">val</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DV</span><span class="p">:</span>
+<span class="linenos"> 52</span>    <span class="k">return</span> <span class="n">DV</span><span class="p">(</span><span class="n">BYTES</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="n">bytes_decode</span><span class="p">(</span><span class="n">val</span><span class="p">)))</span></div>
+
+<span class="linenos"> 53</span>
+<span class="linenos"> 54</span>
+<div class="viewcode-block" id="str_dv">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.str_dv">[docs]</a>
+<span class="linenos"> 55</span><span class="k">def</span><span class="w"> </span><span class="nf">str_dv</span><span class="p">(</span><span class="n">val</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DV</span><span class="p">:</span>
+<span class="linenos"> 56</span>    <span class="k">return</span> <span class="n">DV</span><span class="p">(</span><span class="n">STRING</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="n">val</span><span class="p">))</span></div>
+
+<span class="linenos"> 57</span>
+<span class="linenos"> 58</span>
+<span class="linenos"> 59</span><span class="c1"># ------------</span>
+<span class="linenos"> 60</span><span class="c1"># Bool</span>
+<span class="linenos"> 61</span><span class="c1"># ------------</span>
+<span class="linenos"> 62</span>
+<span class="linenos"> 63</span><span class="n">LBL_NOT_BOOL</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s2">&quot;LblnotBool&#39;Unds&#39;&quot;</span><span class="p">)</span>
+<span class="linenos"> 64</span><span class="n">LBL_AND_BOOL</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s2">&quot;Lbl&#39;Unds&#39;andBool&#39;Unds&#39;&quot;</span><span class="p">)</span>
+<span class="linenos"> 65</span><span class="n">LBL_OR_BOOL</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s2">&quot;Lbl&#39;Unds&#39;orBool&#39;Unds&#39;&quot;</span><span class="p">)</span>
+<span class="linenos"> 66</span><span class="n">LBL_IMPLIES_BOOL</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s2">&quot;Lbl&#39;Unds&#39;impliesBool&#39;Unds&#39;&quot;</span><span class="p">)</span>
+<span class="linenos"> 67</span><span class="n">LBL_XOR_BOOL</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s2">&quot;Lbl&#39;Unds&#39;xorBool&#39;Unds&#39;&quot;</span><span class="p">)</span>
+<span class="linenos"> 68</span><span class="n">LBL_EQ_BOOL</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s2">&quot;Lbl&#39;UndsEqlsEqls&#39;Bool&#39;Unds&#39;&quot;</span><span class="p">)</span>
+<span class="linenos"> 69</span><span class="n">LBL_NE_BOOL</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s2">&quot;Lbl&#39;UndsEqlsSlshEqls&#39;Bool&#39;Unds&#39;&quot;</span><span class="p">)</span>
+<span class="linenos"> 70</span>
+<span class="linenos"> 71</span>
+<div class="viewcode-block" id="not_bool">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.not_bool">[docs]</a>
+<span class="linenos"> 72</span><span class="k">def</span><span class="w"> </span><span class="nf">not_bool</span><span class="p">(</span><span class="n">pattern</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pattern</span><span class="p">:</span>
+<span class="linenos"> 73</span>    <span class="k">return</span> <span class="n">App</span><span class="p">(</span><span class="n">LBL_NOT_BOOL</span><span class="p">,</span> <span class="p">(),</span> <span class="p">(</span><span class="n">pattern</span><span class="p">,))</span></div>
+
+<span class="linenos"> 74</span>
+<span class="linenos"> 75</span>
+<div class="viewcode-block" id="and_bool">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.and_bool">[docs]</a>
+<span class="linenos"> 76</span><span class="k">def</span><span class="w"> </span><span class="nf">and_bool</span><span class="p">(</span><span class="n">left</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pattern</span><span class="p">:</span>
+<span class="linenos"> 77</span>    <span class="k">return</span> <span class="n">App</span><span class="p">(</span><span class="n">LBL_AND_BOOL</span><span class="p">,</span> <span class="p">(),</span> <span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">))</span></div>
+
+<span class="linenos"> 78</span>
+<span class="linenos"> 79</span>
+<div class="viewcode-block" id="or_bool">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.or_bool">[docs]</a>
+<span class="linenos"> 80</span><span class="k">def</span><span class="w"> </span><span class="nf">or_bool</span><span class="p">(</span><span class="n">left</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pattern</span><span class="p">:</span>
+<span class="linenos"> 81</span>    <span class="k">return</span> <span class="n">App</span><span class="p">(</span><span class="n">LBL_OR_BOOL</span><span class="p">,</span> <span class="p">(),</span> <span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">))</span></div>
+
+<span class="linenos"> 82</span>
+<span class="linenos"> 83</span>
+<div class="viewcode-block" id="implies_bool">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.implies_bool">[docs]</a>
+<span class="linenos"> 84</span><span class="k">def</span><span class="w"> </span><span class="nf">implies_bool</span><span class="p">(</span><span class="n">left</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pattern</span><span class="p">:</span>
+<span class="linenos"> 85</span>    <span class="k">return</span> <span class="n">App</span><span class="p">(</span><span class="n">LBL_IMPLIES_BOOL</span><span class="p">,</span> <span class="p">(),</span> <span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">))</span></div>
+
+<span class="linenos"> 86</span>
+<span class="linenos"> 87</span>
+<div class="viewcode-block" id="xor_bool">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.xor_bool">[docs]</a>
+<span class="linenos"> 88</span><span class="k">def</span><span class="w"> </span><span class="nf">xor_bool</span><span class="p">(</span><span class="n">left</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pattern</span><span class="p">:</span>
+<span class="linenos"> 89</span>    <span class="k">return</span> <span class="n">App</span><span class="p">(</span><span class="n">LBL_XOR_BOOL</span><span class="p">,</span> <span class="p">(),</span> <span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">))</span></div>
+
+<span class="linenos"> 90</span>
+<span class="linenos"> 91</span>
+<div class="viewcode-block" id="eq_bool">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.eq_bool">[docs]</a>
+<span class="linenos"> 92</span><span class="k">def</span><span class="w"> </span><span class="nf">eq_bool</span><span class="p">(</span><span class="n">left</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pattern</span><span class="p">:</span>
+<span class="linenos"> 93</span>    <span class="k">return</span> <span class="n">App</span><span class="p">(</span><span class="n">LBL_EQ_BOOL</span><span class="p">,</span> <span class="p">(),</span> <span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">))</span></div>
+
+<span class="linenos"> 94</span>
+<span class="linenos"> 95</span>
+<div class="viewcode-block" id="ne_bool">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.ne_bool">[docs]</a>
+<span class="linenos"> 96</span><span class="k">def</span><span class="w"> </span><span class="nf">ne_bool</span><span class="p">(</span><span class="n">left</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pattern</span><span class="p">:</span>
+<span class="linenos"> 97</span>    <span class="k">return</span> <span class="n">App</span><span class="p">(</span><span class="n">LBL_NE_BOOL</span><span class="p">,</span> <span class="p">(),</span> <span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">))</span></div>
+
+<span class="linenos"> 98</span>
+<span class="linenos"> 99</span>
+<span class="linenos">100</span><span class="c1"># ------------</span>
+<span class="linenos">101</span><span class="c1"># Int</span>
+<span class="linenos">102</span><span class="c1"># ------------</span>
+<span class="linenos">103</span>
+<span class="linenos">104</span><span class="n">LBL_EQ_INT</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s2">&quot;Lbl&#39;UndsEqlsEqls&#39;Int&#39;Unds&#39;&quot;</span><span class="p">)</span>
+<span class="linenos">105</span><span class="n">LBL_NE_INT</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s2">&quot;Lbl&#39;UndsEqlsSlshEqls&#39;Int&#39;Unds&#39;&quot;</span><span class="p">)</span>
+<span class="linenos">106</span><span class="n">LBL_GT_INT</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s2">&quot;Lbl&#39;Unds-GT-&#39;Int&#39;Unds&#39;&quot;</span><span class="p">)</span>
+<span class="linenos">107</span><span class="n">LBL_GE_INT</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s2">&quot;Lbl&#39;Unds-GT-Eqls&#39;Int&#39;Unds&#39;&quot;</span><span class="p">)</span>
+<span class="linenos">108</span><span class="n">LBL_LT_INT</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s2">&quot;Lbl&#39;Unds-LT-&#39;Int&#39;Unds&#39;&quot;</span><span class="p">)</span>
+<span class="linenos">109</span><span class="n">LBL_LE_INT</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s2">&quot;Lbl&#39;Unds-LT-Eqls&#39;Int&#39;Unds&#39;&quot;</span><span class="p">)</span>
+<span class="linenos">110</span>
+<span class="linenos">111</span>
+<div class="viewcode-block" id="eq_int">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.eq_int">[docs]</a>
+<span class="linenos">112</span><span class="k">def</span><span class="w"> </span><span class="nf">eq_int</span><span class="p">(</span><span class="n">left</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pattern</span><span class="p">:</span>
+<span class="linenos">113</span>    <span class="k">return</span> <span class="n">App</span><span class="p">(</span><span class="n">LBL_EQ_INT</span><span class="p">,</span> <span class="p">(),</span> <span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">))</span></div>
+
+<span class="linenos">114</span>
+<span class="linenos">115</span>
+<div class="viewcode-block" id="ne_int">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.ne_int">[docs]</a>
+<span class="linenos">116</span><span class="k">def</span><span class="w"> </span><span class="nf">ne_int</span><span class="p">(</span><span class="n">left</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pattern</span><span class="p">:</span>
+<span class="linenos">117</span>    <span class="k">return</span> <span class="n">App</span><span class="p">(</span><span class="n">LBL_NE_INT</span><span class="p">,</span> <span class="p">(),</span> <span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">))</span></div>
+
+<span class="linenos">118</span>
+<span class="linenos">119</span>
+<div class="viewcode-block" id="gt_int">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.gt_int">[docs]</a>
+<span class="linenos">120</span><span class="k">def</span><span class="w"> </span><span class="nf">gt_int</span><span class="p">(</span><span class="n">left</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pattern</span><span class="p">:</span>
+<span class="linenos">121</span>    <span class="k">return</span> <span class="n">App</span><span class="p">(</span><span class="n">LBL_GT_INT</span><span class="p">,</span> <span class="p">(),</span> <span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">))</span></div>
+
+<span class="linenos">122</span>
+<span class="linenos">123</span>
+<div class="viewcode-block" id="ge_int">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.ge_int">[docs]</a>
+<span class="linenos">124</span><span class="k">def</span><span class="w"> </span><span class="nf">ge_int</span><span class="p">(</span><span class="n">left</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pattern</span><span class="p">:</span>
+<span class="linenos">125</span>    <span class="k">return</span> <span class="n">App</span><span class="p">(</span><span class="n">LBL_GE_INT</span><span class="p">,</span> <span class="p">(),</span> <span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">))</span></div>
+
+<span class="linenos">126</span>
+<span class="linenos">127</span>
+<div class="viewcode-block" id="lt_int">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.lt_int">[docs]</a>
+<span class="linenos">128</span><span class="k">def</span><span class="w"> </span><span class="nf">lt_int</span><span class="p">(</span><span class="n">left</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pattern</span><span class="p">:</span>
+<span class="linenos">129</span>    <span class="k">return</span> <span class="n">App</span><span class="p">(</span><span class="n">LBL_LT_INT</span><span class="p">,</span> <span class="p">(),</span> <span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">))</span></div>
+
+<span class="linenos">130</span>
+<span class="linenos">131</span>
+<div class="viewcode-block" id="le_int">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.le_int">[docs]</a>
+<span class="linenos">132</span><span class="k">def</span><span class="w"> </span><span class="nf">le_int</span><span class="p">(</span><span class="n">left</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pattern</span><span class="p">:</span>
+<span class="linenos">133</span>    <span class="k">return</span> <span class="n">App</span><span class="p">(</span><span class="n">LBL_LE_INT</span><span class="p">,</span> <span class="p">(),</span> <span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">))</span></div>
+
+<span class="linenos">134</span>
+<span class="linenos">135</span>
+<span class="linenos">136</span><span class="c1"># ------------</span>
+<span class="linenos">137</span><span class="c1"># K constructs</span>
+<span class="linenos">138</span><span class="c1"># ------------</span>
+<span class="linenos">139</span>
+<span class="linenos">140</span><span class="c1"># TODO auto injections</span>
+<span class="linenos">141</span>
+<span class="linenos">142</span><span class="n">SORT_K</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SortApp</span><span class="p">(</span><span class="s1">&#39;SortK&#39;</span><span class="p">)</span>
+<span class="linenos">143</span><span class="n">SORT_K_ITEM</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SortApp</span><span class="p">(</span><span class="s1">&#39;SortKItem&#39;</span><span class="p">)</span>
+<span class="linenos">144</span><span class="n">SORT_K_CONFIG_VAR</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SortApp</span><span class="p">(</span><span class="s1">&#39;SortKConfigVar&#39;</span><span class="p">)</span>
+<span class="linenos">145</span><span class="n">SORT_GENERATED_TOP_CELL</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SortApp</span><span class="p">(</span><span class="s1">&#39;SortGeneratedTopCell&#39;</span><span class="p">)</span>
+<span class="linenos">146</span><span class="n">SORT_GENERATED_COUNTER_CELL</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SortApp</span><span class="p">(</span><span class="s1">&#39;SortGeneratedCounterCell&#39;</span><span class="p">)</span>
+<span class="linenos">147</span>
+<span class="linenos">148</span><span class="n">LBL_INIT_GENERATED_TOP_CELL</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s1">&#39;LblinitGeneratedTopCell&#39;</span><span class="p">)</span>
+<span class="linenos">149</span><span class="n">LBL_GENERATED_TOP</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s2">&quot;Lbl&#39;-LT-&#39;generatedTop&#39;-GT-&#39;&quot;</span><span class="p">)</span>
+<span class="linenos">150</span><span class="n">LBL_GENERATED_COUNTER</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s2">&quot;Lbl&#39;-LT-&#39;generatedCounter&#39;-GT-&#39;&quot;</span><span class="p">)</span>
+<span class="linenos">151</span><span class="n">LBL_K</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s2">&quot;Lbl&#39;-LT-&#39;k&#39;-GT-&#39;&quot;</span><span class="p">)</span>
+<span class="linenos">152</span><span class="n">LBL_ITE</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s1">&#39;Lblite&#39;</span><span class="p">)</span>
+<span class="linenos">153</span><span class="n">INJ</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s1">&#39;inj&#39;</span><span class="p">)</span>
+<span class="linenos">154</span><span class="n">KSEQ</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s1">&#39;kseq&#39;</span><span class="p">)</span>
+<span class="linenos">155</span>
+<span class="linenos">156</span><span class="n">DOTK</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="s1">&#39;dotk&#39;</span><span class="p">,</span> <span class="p">(),</span> <span class="p">())</span>
+<span class="linenos">157</span>
+<span class="linenos">158</span>
+<div class="viewcode-block" id="init_generated_top_cell">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.init_generated_top_cell">[docs]</a>
+<span class="linenos">159</span><span class="k">def</span><span class="w"> </span><span class="nf">init_generated_top_cell</span><span class="p">(</span><span class="n">pattern</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">App</span><span class="p">:</span>
+<span class="linenos">160</span>    <span class="k">return</span> <span class="n">App</span><span class="p">(</span><span class="n">LBL_INIT_GENERATED_TOP_CELL</span><span class="p">,</span> <span class="p">(),</span> <span class="p">(</span><span class="n">pattern</span><span class="p">,))</span></div>
+
+<span class="linenos">161</span>
+<span class="linenos">162</span>
+<div class="viewcode-block" id="generated_top">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.generated_top">[docs]</a>
+<span class="linenos">163</span><span class="k">def</span><span class="w"> </span><span class="nf">generated_top</span><span class="p">(</span><span class="n">patterns</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Pattern</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">App</span><span class="p">:</span>
+<span class="linenos">164</span>    <span class="k">return</span> <span class="n">App</span><span class="p">(</span><span class="n">LBL_GENERATED_TOP</span><span class="p">,</span> <span class="p">(),</span> <span class="n">patterns</span><span class="p">)</span></div>
+
+<span class="linenos">165</span>
+<span class="linenos">166</span>
+<div class="viewcode-block" id="generated_counter">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.generated_counter">[docs]</a>
+<span class="linenos">167</span><span class="k">def</span><span class="w"> </span><span class="nf">generated_counter</span><span class="p">(</span><span class="n">pattern</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">App</span><span class="p">:</span>
+<span class="linenos">168</span>    <span class="k">return</span> <span class="n">App</span><span class="p">(</span><span class="n">LBL_GENERATED_COUNTER</span><span class="p">,</span> <span class="p">(),</span> <span class="p">(</span><span class="n">pattern</span><span class="p">,))</span></div>
+
+<span class="linenos">169</span>
+<span class="linenos">170</span>
+<div class="viewcode-block" id="k">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.k">[docs]</a>
+<span class="linenos">171</span><span class="k">def</span><span class="w"> </span><span class="nf">k</span><span class="p">(</span><span class="n">pattern</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">App</span><span class="p">:</span>
+<span class="linenos">172</span>    <span class="k">return</span> <span class="n">App</span><span class="p">(</span><span class="n">LBL_K</span><span class="p">,</span> <span class="p">(),</span> <span class="p">(</span><span class="n">pattern</span><span class="p">,))</span></div>
+
+<span class="linenos">173</span>
+<span class="linenos">174</span>
+<div class="viewcode-block" id="inj">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.inj">[docs]</a>
+<span class="linenos">175</span><span class="k">def</span><span class="w"> </span><span class="nf">inj</span><span class="p">(</span><span class="n">sort1</span><span class="p">:</span> <span class="n">Sort</span><span class="p">,</span> <span class="n">sort2</span><span class="p">:</span> <span class="n">Sort</span><span class="p">,</span> <span class="n">pattern</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">App</span><span class="p">:</span>
+<span class="linenos">176</span>    <span class="k">return</span> <span class="n">App</span><span class="p">(</span><span class="n">INJ</span><span class="p">,</span> <span class="p">(</span><span class="n">sort1</span><span class="p">,</span> <span class="n">sort2</span><span class="p">),</span> <span class="p">(</span><span class="n">pattern</span><span class="p">,))</span></div>
+
+<span class="linenos">177</span>
+<span class="linenos">178</span>
+<div class="viewcode-block" id="kseq">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.kseq">[docs]</a>
+<span class="linenos">179</span><span class="k">def</span><span class="w"> </span><span class="nf">kseq</span><span class="p">(</span><span class="n">kitems</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Pattern</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">dotvar</span><span class="p">:</span> <span class="n">EVar</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pattern</span><span class="p">:</span>
+<span class="linenos">180</span>    <span class="k">if</span> <span class="n">dotvar</span> <span class="ow">and</span> <span class="n">dotvar</span><span class="o">.</span><span class="n">sort</span> <span class="o">!=</span> <span class="n">SORT_K</span><span class="p">:</span>
+<span class="linenos">181</span>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Expected </span><span class="si">{</span><span class="n">SORT_K</span><span class="o">.</span><span class="n">text</span><span class="si">}</span><span class="s1"> as dotvar sort, got: </span><span class="si">{</span><span class="n">dotvar</span><span class="o">.</span><span class="n">sort</span><span class="o">.</span><span class="n">text</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos">182</span>
+<span class="linenos">183</span>    <span class="n">tail</span> <span class="o">=</span> <span class="n">dotvar</span> <span class="ow">or</span> <span class="n">DOTK</span>
+<span class="linenos">184</span>    <span class="n">args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">chain</span><span class="p">(</span><span class="n">kitems</span><span class="p">,</span> <span class="p">(</span><span class="n">tail</span><span class="p">,)))</span>
+<span class="linenos">185</span>
+<span class="linenos">186</span>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+<span class="linenos">187</span>        <span class="k">return</span> <span class="n">tail</span>
+<span class="linenos">188</span>
+<span class="linenos">189</span>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+<span class="linenos">190</span>        <span class="k">return</span> <span class="n">App</span><span class="p">(</span><span class="n">KSEQ</span><span class="p">,</span> <span class="p">(),</span> <span class="n">args</span><span class="p">)</span>
+<span class="linenos">191</span>
+<span class="linenos">192</span>    <span class="k">return</span> <span class="n">RightAssoc</span><span class="p">(</span><span class="n">KSEQ</span><span class="p">,</span> <span class="p">(),</span> <span class="n">args</span><span class="p">)</span></div>
+
+<span class="linenos">193</span>
+<span class="linenos">194</span>
+<div class="viewcode-block" id="k_config_var">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.k_config_var">[docs]</a>
+<span class="linenos">195</span><span class="k">def</span><span class="w"> </span><span class="nf">k_config_var</span><span class="p">(</span><span class="n">var</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DV</span><span class="p">:</span>
+<span class="linenos">196</span>    <span class="k">return</span> <span class="n">DV</span><span class="p">(</span><span class="n">SORT_K_CONFIG_VAR</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="n">var</span><span class="p">))</span></div>
+
+<span class="linenos">197</span>
+<span class="linenos">198</span>
+<div class="viewcode-block" id="top_cell_initializer">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.top_cell_initializer">[docs]</a>
+<span class="linenos">199</span><span class="k">def</span><span class="w"> </span><span class="nf">top_cell_initializer</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Pattern</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">App</span><span class="p">:</span>
+<span class="linenos">200</span>    <span class="k">return</span> <span class="n">init_generated_top_cell</span><span class="p">(</span>
+<span class="linenos">201</span>        <span class="n">map_pattern</span><span class="p">(</span>
+<span class="linenos">202</span>            <span class="o">*</span><span class="p">(</span>
+<span class="linenos">203</span>                <span class="p">(</span>
+<span class="linenos">204</span>                    <span class="n">inj</span><span class="p">(</span><span class="n">SORT_K_CONFIG_VAR</span><span class="p">,</span> <span class="n">SORT_K_ITEM</span><span class="p">,</span> <span class="n">k_config_var</span><span class="p">(</span><span class="n">key</span><span class="p">)),</span>
+<span class="linenos">205</span>                    <span class="n">value</span><span class="p">,</span>
+<span class="linenos">206</span>                <span class="p">)</span>
+<span class="linenos">207</span>                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+<span class="linenos">208</span>            <span class="p">)</span>
+<span class="linenos">209</span>        <span class="p">)</span>
+<span class="linenos">210</span>    <span class="p">)</span></div>
+
+<span class="linenos">211</span>
+<span class="linenos">212</span>
+<span class="linenos">213</span><span class="c1"># -----------</span>
+<span class="linenos">214</span><span class="c1"># Collections</span>
+<span class="linenos">215</span><span class="c1"># -----------</span>
+<span class="linenos">216</span>
+<span class="linenos">217</span><span class="n">STOP_LIST</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="s2">&quot;Lbl&#39;Stop&#39;List&quot;</span><span class="p">)</span>
+<span class="linenos">218</span><span class="n">LBL_LIST</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s2">&quot;Lbl&#39;Unds&#39;List&#39;Unds&#39;&quot;</span><span class="p">)</span>
+<span class="linenos">219</span><span class="n">LBL_LIST_ITEM</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s1">&#39;LblListItem&#39;</span><span class="p">)</span>
+<span class="linenos">220</span>
+<span class="linenos">221</span>
+<div class="viewcode-block" id="list_pattern">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.list_pattern">[docs]</a>
+<span class="linenos">222</span><span class="k">def</span><span class="w"> </span><span class="nf">list_pattern</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pattern</span><span class="p">:</span>
+<span class="linenos">223</span>    <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="p">:</span>
+<span class="linenos">224</span>        <span class="k">return</span> <span class="n">STOP_LIST</span>
+<span class="linenos">225</span>    <span class="k">return</span> <span class="n">LeftAssoc</span><span class="p">(</span><span class="n">LBL_LIST</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">App</span><span class="p">(</span><span class="n">LBL_LIST_ITEM</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">arg</span><span class="p">,))</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">))</span></div>
+
+<span class="linenos">226</span>
+<span class="linenos">227</span>
+<span class="linenos">228</span><span class="n">STOP_SET</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="s2">&quot;Lbl&#39;Stop&#39;Set&quot;</span><span class="p">)</span>
+<span class="linenos">229</span><span class="n">LBL_SET</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s2">&quot;Lbl&#39;Unds&#39;Set&#39;Unds&#39;&quot;</span><span class="p">)</span>
+<span class="linenos">230</span><span class="n">LBL_SET_ITEM</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s1">&#39;LblSetItem&#39;</span><span class="p">)</span>
+<span class="linenos">231</span>
+<span class="linenos">232</span>
+<div class="viewcode-block" id="set_pattern">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.set_pattern">[docs]</a>
+<span class="linenos">233</span><span class="k">def</span><span class="w"> </span><span class="nf">set_pattern</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pattern</span><span class="p">:</span>
+<span class="linenos">234</span>    <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="p">:</span>
+<span class="linenos">235</span>        <span class="k">return</span> <span class="n">STOP_SET</span>
+<span class="linenos">236</span>    <span class="k">return</span> <span class="n">LeftAssoc</span><span class="p">(</span><span class="n">LBL_SET</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">App</span><span class="p">(</span><span class="n">LBL_SET_ITEM</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">arg</span><span class="p">,))</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">))</span></div>
+
+<span class="linenos">237</span>
+<span class="linenos">238</span>
+<span class="linenos">239</span><span class="n">STOP_MAP</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="s2">&quot;Lbl&#39;Stop&#39;Map&quot;</span><span class="p">)</span>
+<span class="linenos">240</span><span class="n">LBL_MAP</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s2">&quot;Lbl&#39;Unds&#39;Map&#39;Unds&#39;&quot;</span><span class="p">)</span>
+<span class="linenos">241</span><span class="n">LBL_MAP_ITEM</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s2">&quot;Lbl&#39;UndsPipe&#39;-&#39;-GT-Unds&#39;&quot;</span><span class="p">)</span>
+<span class="linenos">242</span>
+<span class="linenos">243</span>
+<div class="viewcode-block" id="map_pattern">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.map_pattern">[docs]</a>
+<span class="linenos">244</span><span class="k">def</span><span class="w"> </span><span class="nf">map_pattern</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Pattern</span><span class="p">,</span> <span class="n">Pattern</span><span class="p">],</span> <span class="n">cell</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pattern</span><span class="p">:</span>
+<span class="linenos">245</span>    <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="p">:</span>
+<span class="linenos">246</span>        <span class="k">return</span> <span class="n">App</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Lbl&#39;Stop&#39;</span><span class="si">{</span><span class="n">cell</span><span class="si">}</span><span class="s2">Map&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">cell</span> <span class="k">else</span> <span class="n">STOP_MAP</span>
+<span class="linenos">247</span>
+<span class="linenos">248</span>    <span class="n">cons_symbol</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Lbl&#39;Unds&#39;</span><span class="si">{</span><span class="n">cell</span><span class="si">}</span><span class="s2">Map&#39;Unds&#39;&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">cell</span> <span class="k">else</span> <span class="n">LBL_MAP</span>
+<span class="linenos">249</span>    <span class="n">item_symbol</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Lbl</span><span class="si">{</span><span class="n">cell</span><span class="si">}</span><span class="s1">MapItem&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">cell</span> <span class="k">else</span> <span class="n">LBL_MAP_ITEM</span>
+<span class="linenos">250</span>    <span class="k">return</span> <span class="n">LeftAssoc</span><span class="p">(</span><span class="n">cons_symbol</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">App</span><span class="p">(</span><span class="n">item_symbol</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">))</span></div>
+
+<span class="linenos">251</span>
+<span class="linenos">252</span>
+<span class="linenos">253</span><span class="n">STOP_RANGEMAP</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="s2">&quot;Lbl&#39;Stop&#39;RangeMap&quot;</span><span class="p">)</span>
+<span class="linenos">254</span><span class="n">LBL_RANGEMAP</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s2">&quot;Lbl&#39;Unds&#39;RangeMap&#39;Unds&#39;&quot;</span><span class="p">)</span>
+<span class="linenos">255</span><span class="n">LBL_RANGEMAP_ITEM</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s2">&quot;Lbl&#39;Unds&#39;r&#39;Pipe&#39;-&#39;-GT-Unds&#39;&quot;</span><span class="p">)</span>
+<span class="linenos">256</span><span class="n">LBL_RANGEMAP_RANGE</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s2">&quot;LblRangeMap&#39;Coln&#39;Range&quot;</span><span class="p">)</span>
+<span class="linenos">257</span>
+<span class="linenos">258</span>
+<div class="viewcode-block" id="rangemap_pattern">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.rangemap_pattern">[docs]</a>
+<span class="linenos">259</span><span class="k">def</span><span class="w"> </span><span class="nf">rangemap_pattern</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">Pattern</span><span class="p">,</span> <span class="n">Pattern</span><span class="p">],</span> <span class="n">Pattern</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Pattern</span><span class="p">:</span>
+<span class="linenos">260</span>    <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="p">:</span>
+<span class="linenos">261</span>        <span class="k">return</span> <span class="n">STOP_RANGEMAP</span>
+<span class="linenos">262</span>
+<span class="linenos">263</span>    <span class="k">return</span> <span class="n">LeftAssoc</span><span class="p">(</span>
+<span class="linenos">264</span>        <span class="n">LBL_RANGEMAP</span><span class="p">,</span>
+<span class="linenos">265</span>        <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">App</span><span class="p">(</span><span class="n">LBL_RANGEMAP_ITEM</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">App</span><span class="p">(</span><span class="n">LBL_RANGEMAP_RANGE</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">arg</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">arg</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">),</span>
+<span class="linenos">266</span>    <span class="p">)</span></div>
+
+<span class="linenos">267</span>
+<span class="linenos">268</span>
+<span class="linenos">269</span><span class="c1"># ----</span>
+<span class="linenos">270</span><span class="c1"># JSON</span>
+<span class="linenos">271</span><span class="c1"># ----</span>
+<span class="linenos">272</span>
+<span class="linenos">273</span><span class="n">SORT_JSON</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SortApp</span><span class="p">(</span><span class="s1">&#39;SortJSON&#39;</span><span class="p">)</span>
+<span class="linenos">274</span><span class="n">SORT_JSON_KEY</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SortApp</span><span class="p">(</span><span class="s1">&#39;SortJSONKey&#39;</span><span class="p">)</span>
+<span class="linenos">275</span>
+<span class="linenos">276</span><span class="n">LBL_JSONS</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s1">&#39;LblJSONs&#39;</span><span class="p">)</span>
+<span class="linenos">277</span><span class="n">LBL_JSON_LIST</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s1">&#39;LblJSONList&#39;</span><span class="p">)</span>
+<span class="linenos">278</span><span class="n">LBL_JSON_OBJECT</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s1">&#39;LblJSONObject&#39;</span><span class="p">)</span>
+<span class="linenos">279</span><span class="n">LBL_JSON_ENTRY</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s1">&#39;LblJSONEntry&#39;</span><span class="p">)</span>
+<span class="linenos">280</span>
+<span class="linenos">281</span><span class="n">JSON_NULL</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="s1">&#39;LblJSONnull&#39;</span><span class="p">)</span>
+<span class="linenos">282</span><span class="n">STOP_JSONS</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="s2">&quot;Lbl&#39;Stop&#39;List&#39;LBraQuot&#39;JSONs&#39;QuotRBra&#39;&quot;</span><span class="p">)</span>
+<span class="linenos">283</span>
+<span class="linenos">284</span><span class="n">LBL_STRING2JSON</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s1">&#39;LblString2JSON&#39;</span><span class="p">)</span>
+<span class="linenos">285</span><span class="n">LBL_JSON2STRING</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">SymbolId</span><span class="p">(</span><span class="s1">&#39;LblJSON2String&#39;</span><span class="p">)</span>
+<span class="linenos">286</span>
+<span class="linenos">287</span>
+<div class="viewcode-block" id="string2json">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.string2json">[docs]</a>
+<span class="linenos">288</span><span class="k">def</span><span class="w"> </span><span class="nf">string2json</span><span class="p">(</span><span class="n">pattern</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">App</span><span class="p">:</span>
+<span class="linenos">289</span>    <span class="k">return</span> <span class="n">App</span><span class="p">(</span><span class="n">LBL_STRING2JSON</span><span class="p">,</span> <span class="p">(),</span> <span class="p">(</span><span class="n">pattern</span><span class="p">,))</span></div>
+
+<span class="linenos">290</span>
+<span class="linenos">291</span>
+<div class="viewcode-block" id="json2string">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.json2string">[docs]</a>
+<span class="linenos">292</span><span class="k">def</span><span class="w"> </span><span class="nf">json2string</span><span class="p">(</span><span class="n">pattern</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">App</span><span class="p">:</span>
+<span class="linenos">293</span>    <span class="k">return</span> <span class="n">App</span><span class="p">(</span><span class="n">LBL_JSON2STRING</span><span class="p">,</span> <span class="p">(),</span> <span class="p">(</span><span class="n">pattern</span><span class="p">,))</span></div>
+
+<span class="linenos">294</span>
+<span class="linenos">295</span>
+<div class="viewcode-block" id="json_list">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.json_list">[docs]</a>
+<span class="linenos">296</span><span class="k">def</span><span class="w"> </span><span class="nf">json_list</span><span class="p">(</span><span class="n">pattern</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">App</span><span class="p">:</span>
+<span class="linenos">297</span>    <span class="k">return</span> <span class="n">App</span><span class="p">(</span><span class="n">LBL_JSON_LIST</span><span class="p">,</span> <span class="p">(),</span> <span class="p">(</span><span class="n">pattern</span><span class="p">,))</span></div>
+
+<span class="linenos">298</span>
+<span class="linenos">299</span>
+<div class="viewcode-block" id="json_object">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.json_object">[docs]</a>
+<span class="linenos">300</span><span class="k">def</span><span class="w"> </span><span class="nf">json_object</span><span class="p">(</span><span class="n">pattern</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">App</span><span class="p">:</span>
+<span class="linenos">301</span>    <span class="k">return</span> <span class="n">App</span><span class="p">(</span><span class="n">LBL_JSON_OBJECT</span><span class="p">,</span> <span class="p">(),</span> <span class="p">(</span><span class="n">pattern</span><span class="p">,))</span></div>
+
+<span class="linenos">302</span>
+<span class="linenos">303</span>
+<div class="viewcode-block" id="jsons">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.jsons">[docs]</a>
+<span class="linenos">304</span><span class="k">def</span><span class="w"> </span><span class="nf">jsons</span><span class="p">(</span><span class="n">patterns</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Pattern</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">RightAssoc</span><span class="p">:</span>
+<span class="linenos">305</span>    <span class="k">return</span> <span class="n">RightAssoc</span><span class="p">(</span><span class="n">LBL_JSONS</span><span class="p">,</span> <span class="p">(),</span> <span class="n">chain</span><span class="p">(</span><span class="n">patterns</span><span class="p">,</span> <span class="p">(</span><span class="n">STOP_JSONS</span><span class="p">,)))</span></div>
+
+<span class="linenos">306</span>
+<span class="linenos">307</span>
+<div class="viewcode-block" id="json_key">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.json_key">[docs]</a>
+<span class="linenos">308</span><span class="k">def</span><span class="w"> </span><span class="nf">json_key</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">App</span><span class="p">:</span>
+<span class="linenos">309</span>    <span class="k">return</span> <span class="n">inj</span><span class="p">(</span><span class="n">STRING</span><span class="p">,</span> <span class="n">SORT_JSON_KEY</span><span class="p">,</span> <span class="n">str_dv</span><span class="p">(</span><span class="n">key</span><span class="p">))</span></div>
+
+<span class="linenos">310</span>
+<span class="linenos">311</span>
+<div class="viewcode-block" id="json_entry">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.json_entry">[docs]</a>
+<span class="linenos">312</span><span class="k">def</span><span class="w"> </span><span class="nf">json_entry</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">App</span><span class="p">:</span>
+<span class="linenos">313</span>    <span class="k">return</span> <span class="n">App</span><span class="p">(</span><span class="n">LBL_JSON_ENTRY</span><span class="p">,</span> <span class="p">(),</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span></div>
+
+<span class="linenos">314</span>
+<span class="linenos">315</span>
+<div class="viewcode-block" id="json_to_kore">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.json_to_kore">[docs]</a>
+<span class="linenos">316</span><span class="k">def</span><span class="w"> </span><span class="nf">json_to_kore</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pattern</span><span class="p">:</span>
+<span class="linenos">317</span>    <span class="k">match</span> <span class="n">data</span><span class="p">:</span>
+<span class="linenos">318</span>        <span class="k">case</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">319</span>            <span class="k">return</span> <span class="n">JSON_NULL</span>
+<span class="linenos">320</span>        <span class="k">case</span> <span class="nb">bool</span><span class="p">():</span>
+<span class="linenos">321</span>            <span class="k">return</span> <span class="n">inj</span><span class="p">(</span><span class="n">BOOL</span><span class="p">,</span> <span class="n">SORT_JSON</span><span class="p">,</span> <span class="n">bool_dv</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+<span class="linenos">322</span>        <span class="k">case</span> <span class="nb">int</span><span class="p">():</span>
+<span class="linenos">323</span>            <span class="k">return</span> <span class="n">inj</span><span class="p">(</span><span class="n">INT</span><span class="p">,</span> <span class="n">SORT_JSON</span><span class="p">,</span> <span class="n">int_dv</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+<span class="linenos">324</span>        <span class="k">case</span> <span class="nb">str</span><span class="p">():</span>
+<span class="linenos">325</span>            <span class="k">return</span> <span class="n">inj</span><span class="p">(</span><span class="n">STRING</span><span class="p">,</span> <span class="n">SORT_JSON</span><span class="p">,</span> <span class="n">str_dv</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+<span class="linenos">326</span>        <span class="k">case</span> <span class="nb">list</span><span class="p">():</span>
+<span class="linenos">327</span>            <span class="k">return</span> <span class="n">json_list</span><span class="p">(</span><span class="n">jsons</span><span class="p">(</span><span class="n">json_to_kore</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">data</span><span class="p">))</span>
+<span class="linenos">328</span>        <span class="k">case</span> <span class="nb">dict</span><span class="p">():</span>
+<span class="linenos">329</span>            <span class="k">return</span> <span class="n">json_object</span><span class="p">(</span>
+<span class="linenos">330</span>                <span class="n">jsons</span><span class="p">(</span><span class="n">json_entry</span><span class="p">(</span><span class="n">json_key</span><span class="p">(</span><span class="n">check_type</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">)),</span> <span class="n">json_to_kore</span><span class="p">(</span><span class="n">value</span><span class="p">))</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+<span class="linenos">331</span>            <span class="p">)</span>
+<span class="linenos">332</span>        <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+<span class="linenos">333</span>            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unsupported object of type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">data</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+<span class="linenos">334</span>
+<span class="linenos">335</span>
+<span class="linenos">336</span><span class="c1"># TODO Eliminate circularity with kore.match</span>
+<div class="viewcode-block" id="kore_to_json">
+<a class="viewcode-back" href="../../../api/pyk.kore.prelude.html#pyk.kore.prelude.kore_to_json">[docs]</a>
+<span class="linenos">337</span><span class="k">def</span><span class="w"> </span><span class="nf">kore_to_json</span><span class="p">(</span><span class="n">pattern</span><span class="p">:</span> <span class="n">Pattern</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="linenos">338</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">match</span> <span class="k">as</span> <span class="n">km</span>
+<span class="linenos">339</span>
+<span class="linenos">340</span>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">DV</span><span class="p">):</span>
+<span class="linenos">341</span>        <span class="k">if</span> <span class="n">pattern</span><span class="o">.</span><span class="n">sort</span> <span class="o">==</span> <span class="n">BOOL</span><span class="p">:</span>
+<span class="linenos">342</span>            <span class="k">return</span> <span class="n">km</span><span class="o">.</span><span class="n">kore_bool</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
+<span class="linenos">343</span>
+<span class="linenos">344</span>        <span class="k">if</span> <span class="n">pattern</span><span class="o">.</span><span class="n">sort</span> <span class="o">==</span> <span class="n">INT</span><span class="p">:</span>
+<span class="linenos">345</span>            <span class="k">return</span> <span class="n">km</span><span class="o">.</span><span class="n">kore_int</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
+<span class="linenos">346</span>
+<span class="linenos">347</span>        <span class="k">if</span> <span class="n">pattern</span><span class="o">.</span><span class="n">sort</span> <span class="o">==</span> <span class="n">STRING</span><span class="p">:</span>
+<span class="linenos">348</span>            <span class="k">return</span> <span class="n">km</span><span class="o">.</span><span class="n">kore_str</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
+<span class="linenos">349</span>
+<span class="linenos">350</span>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">App</span><span class="p">):</span>
+<span class="linenos">351</span>        <span class="k">if</span> <span class="n">pattern</span><span class="o">.</span><span class="n">symbol</span> <span class="o">==</span> <span class="n">JSON_NULL</span><span class="o">.</span><span class="n">symbol</span><span class="p">:</span>
+<span class="linenos">352</span>            <span class="k">return</span> <span class="kc">None</span>
+<span class="linenos">353</span>
+<span class="linenos">354</span>        <span class="k">if</span> <span class="n">pattern</span><span class="o">.</span><span class="n">symbol</span> <span class="o">==</span> <span class="n">INJ</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>  <span class="c1"># can be further refined: arg is DV, ...</span>
+<span class="linenos">355</span>            <span class="k">return</span> <span class="n">kore_to_json</span><span class="p">(</span><span class="n">km</span><span class="o">.</span><span class="n">inj</span><span class="p">(</span><span class="n">pattern</span><span class="p">))</span>
+<span class="linenos">356</span>
+<span class="linenos">357</span>        <span class="k">if</span> <span class="n">pattern</span><span class="o">.</span><span class="n">symbol</span> <span class="o">==</span> <span class="n">LBL_JSON_LIST</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+<span class="linenos">358</span>            <span class="k">return</span> <span class="p">[</span><span class="n">kore_to_json</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">_iter_json_list</span><span class="p">(</span><span class="n">pattern</span><span class="p">)]</span>
+<span class="linenos">359</span>
+<span class="linenos">360</span>        <span class="k">if</span> <span class="n">pattern</span><span class="o">.</span><span class="n">symbol</span> <span class="o">==</span> <span class="n">LBL_JSON_OBJECT</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+<span class="linenos">361</span>            <span class="k">return</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">kore_to_json</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">_iter_json_object</span><span class="p">(</span><span class="n">pattern</span><span class="p">)}</span>
+<span class="linenos">362</span>
+<span class="linenos">363</span>    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Not a JSON pattern: </span><span class="si">{</span><span class="n">pattern</span><span class="o">.</span><span class="n">text</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+<span class="linenos">364</span>
+<span class="linenos">365</span>
+<span class="linenos">366</span><span class="k">def</span><span class="w"> </span><span class="nf">_iter_json_list</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">App</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Pattern</span><span class="p">]:</span>
+<span class="linenos">367</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">match</span> <span class="k">as</span> <span class="n">km</span>
+<span class="linenos">368</span>
+<span class="linenos">369</span>    <span class="n">km</span><span class="o">.</span><span class="n">match_app</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">LBL_JSON_LIST</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+<span class="linenos">370</span>    <span class="n">curr</span> <span class="o">=</span> <span class="n">km</span><span class="o">.</span><span class="n">match_app</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="linenos">371</span>    <span class="k">while</span> <span class="n">curr</span><span class="o">.</span><span class="n">symbol</span> <span class="o">!=</span> <span class="n">STOP_JSONS</span><span class="o">.</span><span class="n">symbol</span><span class="p">:</span>
+<span class="linenos">372</span>        <span class="n">km</span><span class="o">.</span><span class="n">match_app</span><span class="p">(</span><span class="n">curr</span><span class="p">,</span> <span class="n">LBL_JSONS</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+<span class="linenos">373</span>        <span class="k">yield</span> <span class="n">curr</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="linenos">374</span>        <span class="n">curr</span> <span class="o">=</span> <span class="n">km</span><span class="o">.</span><span class="n">match_app</span><span class="p">(</span><span class="n">curr</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="linenos">375</span>
+<span class="linenos">376</span>
+<span class="linenos">377</span><span class="k">def</span><span class="w"> </span><span class="nf">_iter_json_object</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">App</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Pattern</span><span class="p">]]:</span>
+<span class="linenos">378</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">match</span> <span class="k">as</span> <span class="n">km</span>
+<span class="linenos">379</span>
+<span class="linenos">380</span>    <span class="n">km</span><span class="o">.</span><span class="n">match_app</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">LBL_JSON_OBJECT</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+<span class="linenos">381</span>    <span class="n">curr</span> <span class="o">=</span> <span class="n">km</span><span class="o">.</span><span class="n">match_app</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="linenos">382</span>    <span class="k">while</span> <span class="n">curr</span><span class="o">.</span><span class="n">symbol</span> <span class="o">!=</span> <span class="n">STOP_JSONS</span><span class="o">.</span><span class="n">symbol</span><span class="p">:</span>
+<span class="linenos">383</span>        <span class="n">km</span><span class="o">.</span><span class="n">match_app</span><span class="p">(</span><span class="n">curr</span><span class="p">,</span> <span class="n">LBL_JSONS</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+<span class="linenos">384</span>        <span class="n">entry</span> <span class="o">=</span> <span class="n">km</span><span class="o">.</span><span class="n">match_app</span><span class="p">(</span><span class="n">curr</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">LBL_JSON_ENTRY</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+<span class="linenos">385</span>        <span class="n">key</span> <span class="o">=</span> <span class="n">km</span><span class="o">.</span><span class="n">kore_str</span><span class="p">(</span><span class="n">km</span><span class="o">.</span><span class="n">inj</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+<span class="linenos">386</span>        <span class="n">value</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="linenos">387</span>        <span class="k">yield</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span>
+<span class="linenos">388</span>        <span class="n">curr</span> <span class="o">=</span> <span class="n">km</span><span class="o">.</span><span class="n">match_app</span><span class="p">(</span><span class="n">curr</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Runtime Verification, Inc.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

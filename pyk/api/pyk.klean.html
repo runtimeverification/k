@@ -1,0 +1,407 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyk.klean package &mdash; pyk 7.1.313 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=9c1be6d9"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyk.klean.generate module" href="pyk.klean.generate.html" />
+    <link rel="prev" title="pyk.kdist.utils module" href="pyk.kdist.utils.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            pyk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">pyk</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pyk.html">pyk package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="pyk.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="pyk.cterm.html">pyk.cterm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kast.html">pyk.kast package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kbuild.html">pyk.kbuild package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.html">pyk.kcfg package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kdist.html">pyk.kdist package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">pyk.klean package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kllvm.html">pyk.kllvm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.konvert.html">pyk.konvert package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kore.html">pyk.kore package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kore_exec_covr.html">pyk.kore_exec_covr package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.ktool.html">pyk.ktool package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.proof.html">pyk.proof package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.testing.html">pyk.testing package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">pyk</a></li>
+          <li class="breadcrumb-item"><a href="pyk.html">pyk package</a></li>
+      <li class="breadcrumb-item active">pyk.klean package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/pyk.klean.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pyk.klean">
+<span id="pyk-klean-package"></span><h1>pyk.klean package<a class="headerlink" href="#module-pyk.klean" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pyk.klean.generate.html">pyk.klean.generate module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.generate.html#pyk.klean.generate.GenContext"><code class="docutils literal notranslate"><span class="pre">GenContext</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.generate.html#pyk.klean.generate.GenContext.library_name"><code class="docutils literal notranslate"><span class="pre">GenContext.library_name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.generate.html#pyk.klean.generate.GenContext.package_name"><code class="docutils literal notranslate"><span class="pre">GenContext.package_name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.generate.html#pyk.klean.generate.generate"><code class="docutils literal notranslate"><span class="pre">generate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pyk.klean.k2lean4.html">pyk.klean.k2lean4 module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.BaseMatcher"><code class="docutils literal notranslate"><span class="pre">BaseMatcher</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.BaseMatcher.var"><code class="docutils literal notranslate"><span class="pre">BaseMatcher.var</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.Config"><code class="docutils literal notranslate"><span class="pre">Config</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.Config.derive_beq"><code class="docutils literal notranslate"><span class="pre">Config.derive_beq</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.Config.derive_decidableeq"><code class="docutils literal notranslate"><span class="pre">Config.derive_decidableeq</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.EmptyListMatcher"><code class="docutils literal notranslate"><span class="pre">EmptyListMatcher</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.EmptyListMatcher.var"><code class="docutils literal notranslate"><span class="pre">EmptyListMatcher.var</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.EmptyMapMatcher"><code class="docutils literal notranslate"><span class="pre">EmptyMapMatcher</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.EmptyMapMatcher.key_sort"><code class="docutils literal notranslate"><span class="pre">EmptyMapMatcher.key_sort</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.EmptyMapMatcher.value_sort"><code class="docutils literal notranslate"><span class="pre">EmptyMapMatcher.value_sort</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.EmptyMapMatcher.var"><code class="docutils literal notranslate"><span class="pre">EmptyMapMatcher.var</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.EmptySetMatcher"><code class="docutils literal notranslate"><span class="pre">EmptySetMatcher</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.EmptySetMatcher.var"><code class="docutils literal notranslate"><span class="pre">EmptySetMatcher.var</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.EqMatcher"><code class="docutils literal notranslate"><span class="pre">EqMatcher</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.EqMatcher.var1"><code class="docutils literal notranslate"><span class="pre">EqMatcher.var1</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.EqMatcher.var2"><code class="docutils literal notranslate"><span class="pre">EqMatcher.var2</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.Field"><code class="docutils literal notranslate"><span class="pre">Field</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.Field.name"><code class="docutils literal notranslate"><span class="pre">Field.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.Field.ty"><code class="docutils literal notranslate"><span class="pre">Field.ty</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.K2Lean4"><code class="docutils literal notranslate"><span class="pre">K2Lean4</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.K2Lean4.defn"><code class="docutils literal notranslate"><span class="pre">K2Lean4.defn</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.K2Lean4.derive_beq"><code class="docutils literal notranslate"><span class="pre">K2Lean4.derive_beq</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.K2Lean4.derive_decidableeq"><code class="docutils literal notranslate"><span class="pre">K2Lean4.derive_decidableeq</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.K2Lean4.func_module"><code class="docutils literal notranslate"><span class="pre">K2Lean4.func_module()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.K2Lean4.inj_module"><code class="docutils literal notranslate"><span class="pre">K2Lean4.inj_module()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.K2Lean4.noncomputable"><code class="docutils literal notranslate"><span class="pre">K2Lean4.noncomputable</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.K2Lean4.rewrite_module"><code class="docutils literal notranslate"><span class="pre">K2Lean4.rewrite_module()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.K2Lean4.sort_module"><code class="docutils literal notranslate"><span class="pre">K2Lean4.sort_module()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.K2Lean4.structure_symbols"><code class="docutils literal notranslate"><span class="pre">K2Lean4.structure_symbols</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.K2Lean4.structures"><code class="docutils literal notranslate"><span class="pre">K2Lean4.structures</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.K2Lean4.symbol_table"><code class="docutils literal notranslate"><span class="pre">K2Lean4.symbol_table</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.ListMatcher"><code class="docutils literal notranslate"><span class="pre">ListMatcher</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.ListMatcher.middle"><code class="docutils literal notranslate"><span class="pre">ListMatcher.middle</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.ListMatcher.prefix"><code class="docutils literal notranslate"><span class="pre">ListMatcher.prefix</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.ListMatcher.suffix"><code class="docutils literal notranslate"><span class="pre">ListMatcher.suffix</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.ListMatcher.var"><code class="docutils literal notranslate"><span class="pre">ListMatcher.var</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.MapMatcher"><code class="docutils literal notranslate"><span class="pre">MapMatcher</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.MapMatcher.key_sort"><code class="docutils literal notranslate"><span class="pre">MapMatcher.key_sort</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.MapMatcher.keys"><code class="docutils literal notranslate"><span class="pre">MapMatcher.keys</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.MapMatcher.rest"><code class="docutils literal notranslate"><span class="pre">MapMatcher.rest</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.MapMatcher.value_sort"><code class="docutils literal notranslate"><span class="pre">MapMatcher.value_sort</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.MapMatcher.values"><code class="docutils literal notranslate"><span class="pre">MapMatcher.values</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.MapMatcher.var"><code class="docutils literal notranslate"><span class="pre">MapMatcher.var</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.Matcher"><code class="docutils literal notranslate"><span class="pre">Matcher</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.Matcher.inputs"><code class="docutils literal notranslate"><span class="pre">Matcher.inputs</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.Matcher.outputs"><code class="docutils literal notranslate"><span class="pre">Matcher.outputs</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.SetMatcher"><code class="docutils literal notranslate"><span class="pre">SetMatcher</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.SetMatcher.elems"><code class="docutils literal notranslate"><span class="pre">SetMatcher.elems</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.SetMatcher.rest"><code class="docutils literal notranslate"><span class="pre">SetMatcher.rest</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.SetMatcher.var"><code class="docutils literal notranslate"><span class="pre">SetMatcher.var</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.SubsortMatcher"><code class="docutils literal notranslate"><span class="pre">SubsortMatcher</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.SubsortMatcher.pattern"><code class="docutils literal notranslate"><span class="pre">SubsortMatcher.pattern</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.SubsortMatcher.subsort"><code class="docutils literal notranslate"><span class="pre">SubsortMatcher.subsort</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.SubsortMatcher.supersort"><code class="docutils literal notranslate"><span class="pre">SubsortMatcher.supersort</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.k2lean4.html#pyk.klean.k2lean4.SubsortMatcher.var"><code class="docutils literal notranslate"><span class="pre">SubsortMatcher.var</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pyk.klean.model.html">pyk.klean.model module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Abbrev"><code class="docutils literal notranslate"><span class="pre">Abbrev</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Abbrev.ident"><code class="docutils literal notranslate"><span class="pre">Abbrev.ident</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Abbrev.modifiers"><code class="docutils literal notranslate"><span class="pre">Abbrev.modifiers</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Abbrev.signature"><code class="docutils literal notranslate"><span class="pre">Abbrev.signature</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Abbrev.val"><code class="docutils literal notranslate"><span class="pre">Abbrev.val</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Alt"><code class="docutils literal notranslate"><span class="pre">Alt</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Alt.patterns"><code class="docutils literal notranslate"><span class="pre">Alt.patterns</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Alt.rhs"><code class="docutils literal notranslate"><span class="pre">Alt.rhs</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.AltsFieldVal"><code class="docutils literal notranslate"><span class="pre">AltsFieldVal</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.AltsFieldVal.alts"><code class="docutils literal notranslate"><span class="pre">AltsFieldVal.alts</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.AltsVal"><code class="docutils literal notranslate"><span class="pre">AltsVal</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.AltsVal.alts"><code class="docutils literal notranslate"><span class="pre">AltsVal.alts</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Attr"><code class="docutils literal notranslate"><span class="pre">Attr</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Attr.attr"><code class="docutils literal notranslate"><span class="pre">Attr.attr</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Attr.kind"><code class="docutils literal notranslate"><span class="pre">Attr.kind</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.AttrKind"><code class="docutils literal notranslate"><span class="pre">AttrKind</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.AttrKind.LOCAL"><code class="docutils literal notranslate"><span class="pre">AttrKind.LOCAL</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.AttrKind.SCOPED"><code class="docutils literal notranslate"><span class="pre">AttrKind.SCOPED</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Axiom"><code class="docutils literal notranslate"><span class="pre">Axiom</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Axiom.ident"><code class="docutils literal notranslate"><span class="pre">Axiom.ident</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Axiom.modifiers"><code class="docutils literal notranslate"><span class="pre">Axiom.modifiers</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Axiom.signature"><code class="docutils literal notranslate"><span class="pre">Axiom.signature</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Binder"><code class="docutils literal notranslate"><span class="pre">Binder</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.BracketBinder"><code class="docutils literal notranslate"><span class="pre">BracketBinder</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Command"><code class="docutils literal notranslate"><span class="pre">Command</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Ctor"><code class="docutils literal notranslate"><span class="pre">Ctor</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Ctor.ident"><code class="docutils literal notranslate"><span class="pre">Ctor.ident</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Ctor.modifiers"><code class="docutils literal notranslate"><span class="pre">Ctor.modifiers</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Ctor.signature"><code class="docutils literal notranslate"><span class="pre">Ctor.signature</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.DeclId"><code class="docutils literal notranslate"><span class="pre">DeclId</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.DeclId.uvars"><code class="docutils literal notranslate"><span class="pre">DeclId.uvars</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.DeclId.val"><code class="docutils literal notranslate"><span class="pre">DeclId.val</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.DeclVal"><code class="docutils literal notranslate"><span class="pre">DeclVal</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Declaration"><code class="docutils literal notranslate"><span class="pre">Declaration</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Declaration.modifiers"><code class="docutils literal notranslate"><span class="pre">Declaration.modifiers</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Definition"><code class="docutils literal notranslate"><span class="pre">Definition</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Definition.deriving"><code class="docutils literal notranslate"><span class="pre">Definition.deriving</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Definition.ident"><code class="docutils literal notranslate"><span class="pre">Definition.ident</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Definition.modifiers"><code class="docutils literal notranslate"><span class="pre">Definition.modifiers</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Definition.signature"><code class="docutils literal notranslate"><span class="pre">Definition.signature</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Definition.val"><code class="docutils literal notranslate"><span class="pre">Definition.val</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.ExplBinder"><code class="docutils literal notranslate"><span class="pre">ExplBinder</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.ExplBinder.idents"><code class="docutils literal notranslate"><span class="pre">ExplBinder.idents</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.ExplBinder.ty"><code class="docutils literal notranslate"><span class="pre">ExplBinder.ty</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.FieldVal"><code class="docutils literal notranslate"><span class="pre">FieldVal</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.ImplBinder"><code class="docutils literal notranslate"><span class="pre">ImplBinder</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.ImplBinder.idents"><code class="docutils literal notranslate"><span class="pre">ImplBinder.idents</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.ImplBinder.strict"><code class="docutils literal notranslate"><span class="pre">ImplBinder.strict</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.ImplBinder.ty"><code class="docutils literal notranslate"><span class="pre">ImplBinder.ty</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Inductive"><code class="docutils literal notranslate"><span class="pre">Inductive</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Inductive.ctors"><code class="docutils literal notranslate"><span class="pre">Inductive.ctors</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Inductive.deriving"><code class="docutils literal notranslate"><span class="pre">Inductive.deriving</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Inductive.ident"><code class="docutils literal notranslate"><span class="pre">Inductive.ident</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Inductive.modifiers"><code class="docutils literal notranslate"><span class="pre">Inductive.modifiers</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Inductive.signature"><code class="docutils literal notranslate"><span class="pre">Inductive.signature</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.InstBinder"><code class="docutils literal notranslate"><span class="pre">InstBinder</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.InstBinder.ident"><code class="docutils literal notranslate"><span class="pre">InstBinder.ident</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.InstBinder.ty"><code class="docutils literal notranslate"><span class="pre">InstBinder.ty</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.InstField"><code class="docutils literal notranslate"><span class="pre">InstField</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.InstField.lval"><code class="docutils literal notranslate"><span class="pre">InstField.lval</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.InstField.signature"><code class="docutils literal notranslate"><span class="pre">InstField.signature</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.InstField.val"><code class="docutils literal notranslate"><span class="pre">InstField.val</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Instance"><code class="docutils literal notranslate"><span class="pre">Instance</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Instance.attr_kind"><code class="docutils literal notranslate"><span class="pre">Instance.attr_kind</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Instance.ident"><code class="docutils literal notranslate"><span class="pre">Instance.ident</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Instance.modifiers"><code class="docutils literal notranslate"><span class="pre">Instance.modifiers</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Instance.priority"><code class="docutils literal notranslate"><span class="pre">Instance.priority</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Instance.signature"><code class="docutils literal notranslate"><span class="pre">Instance.signature</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Instance.val"><code class="docutils literal notranslate"><span class="pre">Instance.val</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Modifiers"><code class="docutils literal notranslate"><span class="pre">Modifiers</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Modifiers.attrs"><code class="docutils literal notranslate"><span class="pre">Modifiers.attrs</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Modifiers.noncomputable"><code class="docutils literal notranslate"><span class="pre">Modifiers.noncomputable</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Modifiers.totality"><code class="docutils literal notranslate"><span class="pre">Modifiers.totality</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Modifiers.unsafe"><code class="docutils literal notranslate"><span class="pre">Modifiers.unsafe</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Modifiers.visibility"><code class="docutils literal notranslate"><span class="pre">Modifiers.visibility</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Module"><code class="docutils literal notranslate"><span class="pre">Module</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Module.commands"><code class="docutils literal notranslate"><span class="pre">Module.commands</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Module.imports"><code class="docutils literal notranslate"><span class="pre">Module.imports</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Mutual"><code class="docutils literal notranslate"><span class="pre">Mutual</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Mutual.commands"><code class="docutils literal notranslate"><span class="pre">Mutual.commands</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Signature"><code class="docutils literal notranslate"><span class="pre">Signature</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Signature.binders"><code class="docutils literal notranslate"><span class="pre">Signature.binders</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Signature.ty"><code class="docutils literal notranslate"><span class="pre">Signature.ty</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.SimpleFieldVal"><code class="docutils literal notranslate"><span class="pre">SimpleFieldVal</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.SimpleFieldVal.term"><code class="docutils literal notranslate"><span class="pre">SimpleFieldVal.term</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.SimpleVal"><code class="docutils literal notranslate"><span class="pre">SimpleVal</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.SimpleVal.term"><code class="docutils literal notranslate"><span class="pre">SimpleVal.term</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.StructCtor"><code class="docutils literal notranslate"><span class="pre">StructCtor</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.StructCtor.fields"><code class="docutils literal notranslate"><span class="pre">StructCtor.fields</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.StructCtor.ident"><code class="docutils literal notranslate"><span class="pre">StructCtor.ident</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.StructIdent"><code class="docutils literal notranslate"><span class="pre">StructIdent</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.StructIdent.ident"><code class="docutils literal notranslate"><span class="pre">StructIdent.ident</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.StructIdent.modifiers"><code class="docutils literal notranslate"><span class="pre">StructIdent.modifiers</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.StructVal"><code class="docutils literal notranslate"><span class="pre">StructVal</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.StructVal.fields"><code class="docutils literal notranslate"><span class="pre">StructVal.fields</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Structure"><code class="docutils literal notranslate"><span class="pre">Structure</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Structure.ctor"><code class="docutils literal notranslate"><span class="pre">Structure.ctor</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Structure.deriving"><code class="docutils literal notranslate"><span class="pre">Structure.deriving</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Structure.extends"><code class="docutils literal notranslate"><span class="pre">Structure.extends</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Structure.ident"><code class="docutils literal notranslate"><span class="pre">Structure.ident</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Structure.modifiers"><code class="docutils literal notranslate"><span class="pre">Structure.modifiers</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Structure.signature"><code class="docutils literal notranslate"><span class="pre">Structure.signature</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Term"><code class="docutils literal notranslate"><span class="pre">Term</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Term.term"><code class="docutils literal notranslate"><span class="pre">Term.term</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Totality"><code class="docutils literal notranslate"><span class="pre">Totality</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Totality.NONREC"><code class="docutils literal notranslate"><span class="pre">Totality.NONREC</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Totality.PARTIAL"><code class="docutils literal notranslate"><span class="pre">Totality.PARTIAL</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Visibility"><code class="docutils literal notranslate"><span class="pre">Visibility</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Visibility.PRIVATE"><code class="docutils literal notranslate"><span class="pre">Visibility.PRIVATE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.Visibility.PROTECTED"><code class="docutils literal notranslate"><span class="pre">Visibility.PROTECTED</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyk.klean.model.html#pyk.klean.model.indent"><code class="docutils literal notranslate"><span class="pre">indent()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pyk.kdist.utils.html" class="btn btn-neutral float-left" title="pyk.kdist.utils module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pyk.klean.generate.html" class="btn btn-neutral float-right" title="pyk.klean.generate module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Runtime Verification, Inc.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

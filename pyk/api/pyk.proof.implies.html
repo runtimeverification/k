@@ -1,0 +1,452 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyk.proof.implies module &mdash; pyk 7.1.313 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=9c1be6d9"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyk.proof.proof module" href="pyk.proof.proof.html" />
+    <link rel="prev" title="pyk.proof package" href="pyk.proof.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            pyk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">pyk</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pyk.html">pyk package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="pyk.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="pyk.cterm.html">pyk.cterm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kast.html">pyk.kast package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kbuild.html">pyk.kbuild package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.html">pyk.kcfg package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kdist.html">pyk.kdist package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.klean.html">pyk.klean package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kllvm.html">pyk.kllvm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.konvert.html">pyk.konvert package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kore.html">pyk.kore package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kore_exec_covr.html">pyk.kore_exec_covr package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.ktool.html">pyk.ktool package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="pyk.proof.html">pyk.proof package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.testing.html">pyk.testing package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">pyk</a></li>
+          <li class="breadcrumb-item"><a href="pyk.html">pyk package</a></li>
+          <li class="breadcrumb-item"><a href="pyk.proof.html">pyk.proof package</a></li>
+      <li class="breadcrumb-item active">pyk.proof.implies module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/pyk.proof.implies.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pyk.proof.implies">
+<span id="pyk-proof-implies-module"></span><h1>pyk.proof.implies module<a class="headerlink" href="#module-pyk.proof.implies" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.proof.implies.EqualityProof">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EqualityProof</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lhs_body</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">rhs_body</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KSort" title="pyk.kast.inner.KSort"><span class="pre">KSort</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simplified_constraints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simplified_equality</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csubst</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.cterm.cterm.html#pyk.cterm.cterm.CSubst" title="pyk.cterm.cterm.CSubst"><span class="pre">CSubst</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proof_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subproof_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">admitted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/proof/implies.html#EqualityProof"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.implies.EqualityProof" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.proof.implies.ImpliesProof" title="pyk.proof.implies.ImpliesProof"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImpliesProof</span></code></a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.implies.EqualityProof.constraint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">constraint</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></em><a class="headerlink" href="#pyk.proof.implies.EqualityProof.constraint" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.implies.EqualityProof.constraints">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">constraints</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.proof.implies.EqualityProof.constraints" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.implies.EqualityProof.dict">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dict</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.proof.implies.EqualityProof.dict" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.implies.EqualityProof.equality">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">equality</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KApply" title="pyk.kast.inner.KApply"><span class="pre">KApply</span></a></em><a class="headerlink" href="#pyk.proof.implies.EqualityProof.equality" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.implies.EqualityProof.from_claim">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_claim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">claim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.outer.html#pyk.kast.outer.KClaim" title="pyk.kast.outer.KClaim"><span class="pre">KClaim</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">defn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.outer.html#pyk.kast.outer.KDefinition" title="pyk.kast.outer.KDefinition"><span class="pre">KDefinition</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">proof_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.proof.implies.EqualityProof" title="pyk.proof.implies.EqualityProof"><span class="pre">EqualityProof</span></a></span></span><a class="reference internal" href="../_modules/pyk/proof/implies.html#EqualityProof.from_claim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.implies.EqualityProof.from_claim" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.implies.EqualityProof.from_dict">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dct</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proof_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.proof.implies.EqualityProof" title="pyk.proof.implies.EqualityProof"><span class="pre">EqualityProof</span></a></span></span><a class="reference internal" href="../_modules/pyk/proof/implies.html#EqualityProof.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.implies.EqualityProof.from_dict" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.implies.EqualityProof.lhs_body">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">lhs_body</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></em><a class="headerlink" href="#pyk.proof.implies.EqualityProof.lhs_body" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.implies.EqualityProof.pretty">
+<span class="sig-name descname"><span class="pre">pretty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kprint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.ktool.kprint.html#pyk.ktool.kprint.KPrint" title="pyk.ktool.kprint.KPrint"><span class="pre">KPrint</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/proof/implies.html#EqualityProof.pretty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.implies.EqualityProof.pretty" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.implies.EqualityProof.read_proof_data">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_proof_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proof_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.proof.implies.EqualityProof" title="pyk.proof.implies.EqualityProof"><span class="pre">EqualityProof</span></a></span></span><a class="reference internal" href="../_modules/pyk/proof/implies.html#EqualityProof.read_proof_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.implies.EqualityProof.read_proof_data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.implies.EqualityProof.rhs_body">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rhs_body</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></em><a class="headerlink" href="#pyk.proof.implies.EqualityProof.rhs_body" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.implies.EqualityProof.simplified_constraints">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">simplified_constraints</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.proof.implies.EqualityProof.simplified_constraints" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.implies.EqualityProof.simplified_equality">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">simplified_equality</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.proof.implies.EqualityProof.simplified_equality" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.implies.EqualityProof.sort">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sort</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KSort" title="pyk.kast.inner.KSort"><span class="pre">KSort</span></a></em><a class="headerlink" href="#pyk.proof.implies.EqualityProof.sort" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.implies.EqualityProof.summary">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">summary</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.proof.implies.EqualitySummary" title="pyk.proof.implies.EqualitySummary"><span class="pre">EqualitySummary</span></a></em><a class="headerlink" href="#pyk.proof.implies.EqualityProof.summary" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.proof.implies.EqualitySummary">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EqualitySummary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'ProofStatus'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">admitted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'bool'</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/proof/implies.html#EqualitySummary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.implies.EqualitySummary" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.ProofSummary" title="pyk.proof.proof.ProofSummary"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProofSummary</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.implies.EqualitySummary.admitted">
+<span class="sig-name descname"><span class="pre">admitted</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyk.proof.implies.EqualitySummary.admitted" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.implies.EqualitySummary.id">
+<span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.proof.implies.EqualitySummary.id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.implies.EqualitySummary.lines">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">lines</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.proof.implies.EqualitySummary.lines" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.implies.EqualitySummary.status">
+<span class="sig-name descname"><span class="pre">status</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.ProofStatus" title="pyk.proof.proof.ProofStatus"><span class="pre">ProofStatus</span></a></em><a class="headerlink" href="#pyk.proof.implies.EqualitySummary.status" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.proof.implies.ImpliesProof">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ImpliesProof</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">antecedent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">consequent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">bind_universally</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simplified_antecedent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simplified_consequent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csubst</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.cterm.cterm.html#pyk.cterm.cterm.CSubst" title="pyk.cterm.cterm.CSubst"><span class="pre">CSubst</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proof_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subproof_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">admitted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/proof/implies.html#ImpliesProof"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.implies.ImpliesProof" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Proof" title="pyk.proof.proof.Proof"><code class="xref py py-class docutils literal notranslate"><span class="pre">Proof</span></code></a>[<a class="reference internal" href="#pyk.proof.implies.ImpliesProofStep" title="pyk.proof.implies.ImpliesProofStep"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImpliesProofStep</span></code></a>, <a class="reference internal" href="#pyk.proof.implies.ImpliesProofResult" title="pyk.proof.implies.ImpliesProofResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImpliesProofResult</span></code></a>]</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.implies.ImpliesProof.antecedent">
+<span class="sig-name descname"><span class="pre">antecedent</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></em><a class="headerlink" href="#pyk.proof.implies.ImpliesProof.antecedent" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.implies.ImpliesProof.bind_universally">
+<span class="sig-name descname"><span class="pre">bind_universally</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyk.proof.implies.ImpliesProof.bind_universally" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.implies.ImpliesProof.can_progress">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">can_progress</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyk.proof.implies.ImpliesProof.can_progress" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.implies.ImpliesProof.commit">
+<span class="sig-name descname"><span class="pre">commit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pyk.proof.implies.ImpliesProofResult" title="pyk.proof.implies.ImpliesProofResult"><span class="pre">ImpliesProofResult</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/proof/implies.html#ImpliesProof.commit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.implies.ImpliesProof.commit" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.implies.ImpliesProof.consequent">
+<span class="sig-name descname"><span class="pre">consequent</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></em><a class="headerlink" href="#pyk.proof.implies.ImpliesProof.consequent" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.implies.ImpliesProof.csubst">
+<span class="sig-name descname"><span class="pre">csubst</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.cterm.cterm.html#pyk.cterm.cterm.CSubst" title="pyk.cterm.cterm.CSubst"><span class="pre">CSubst</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.proof.implies.ImpliesProof.csubst" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.implies.ImpliesProof.dict">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dict</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.proof.implies.ImpliesProof.dict" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.implies.ImpliesProof.from_dict">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dct</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proof_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.proof.implies.ImpliesProof" title="pyk.proof.implies.ImpliesProof"><span class="pre">ImpliesProof</span></a></span></span><a class="reference internal" href="../_modules/pyk/proof/implies.html#ImpliesProof.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.implies.ImpliesProof.from_dict" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.implies.ImpliesProof.get_steps">
+<span class="sig-name descname"><span class="pre">get_steps</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pyk.proof.implies.ImpliesProofStep" title="pyk.proof.implies.ImpliesProofStep"><span class="pre">ImpliesProofStep</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/proof/implies.html#ImpliesProof.get_steps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.implies.ImpliesProof.get_steps" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.implies.ImpliesProof.own_status">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">own_status</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.ProofStatus" title="pyk.proof.proof.ProofStatus"><span class="pre">ProofStatus</span></a></em><a class="headerlink" href="#pyk.proof.implies.ImpliesProof.own_status" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.implies.ImpliesProof.simplified_antecedent">
+<span class="sig-name descname"><span class="pre">simplified_antecedent</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.proof.implies.ImpliesProof.simplified_antecedent" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.implies.ImpliesProof.simplified_consequent">
+<span class="sig-name descname"><span class="pre">simplified_consequent</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.proof.implies.ImpliesProof.simplified_consequent" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.implies.ImpliesProof.write_proof_data">
+<span class="sig-name descname"><span class="pre">write_proof_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subproofs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/proof/implies.html#ImpliesProof.write_proof_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.implies.ImpliesProof.write_proof_data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.proof.implies.ImpliesProofResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ImpliesProofResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">csubst</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'CSubst</span> <span class="pre">|</span> <span class="pre">None'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simplified_antecedent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'KInner</span> <span class="pre">|</span> <span class="pre">None'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simplified_consequent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'KInner</span> <span class="pre">|</span> <span class="pre">None'</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/proof/implies.html#ImpliesProofResult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.implies.ImpliesProofResult" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.implies.ImpliesProofResult.csubst">
+<span class="sig-name descname"><span class="pre">csubst</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.cterm.cterm.html#pyk.cterm.cterm.CSubst" title="pyk.cterm.cterm.CSubst"><span class="pre">CSubst</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.proof.implies.ImpliesProofResult.csubst" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.implies.ImpliesProofResult.simplified_antecedent">
+<span class="sig-name descname"><span class="pre">simplified_antecedent</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.proof.implies.ImpliesProofResult.simplified_antecedent" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.implies.ImpliesProofResult.simplified_consequent">
+<span class="sig-name descname"><span class="pre">simplified_consequent</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.proof.implies.ImpliesProofResult.simplified_consequent" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.proof.implies.ImpliesProofStep">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ImpliesProofStep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proof</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'ImpliesProof'</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/proof/implies.html#ImpliesProofStep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.implies.ImpliesProofStep" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.implies.ImpliesProofStep.proof">
+<span class="sig-name descname"><span class="pre">proof</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.proof.implies.ImpliesProof" title="pyk.proof.implies.ImpliesProof"><span class="pre">ImpliesProof</span></a></em><a class="headerlink" href="#pyk.proof.implies.ImpliesProofStep.proof" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.proof.implies.ImpliesProver">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ImpliesProver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proof</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pyk.proof.implies.ImpliesProof" title="pyk.proof.implies.ImpliesProof"><span class="pre">ImpliesProof</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">kcfg_explore</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kcfg.explore.html#pyk.kcfg.explore.KCFGExplore" title="pyk.kcfg.explore.KCFGExplore"><span class="pre">KCFGExplore</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">assume_defined</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/proof/implies.html#ImpliesProver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.implies.ImpliesProver" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.Prover" title="pyk.proof.proof.Prover"><code class="xref py py-class docutils literal notranslate"><span class="pre">Prover</span></code></a>[<a class="reference internal" href="#pyk.proof.implies.ImpliesProof" title="pyk.proof.implies.ImpliesProof"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImpliesProof</span></code></a>, <a class="reference internal" href="#pyk.proof.implies.ImpliesProofStep" title="pyk.proof.implies.ImpliesProofStep"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImpliesProofStep</span></code></a>, <a class="reference internal" href="#pyk.proof.implies.ImpliesProofResult" title="pyk.proof.implies.ImpliesProofResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImpliesProofResult</span></code></a>]</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.implies.ImpliesProver.assume_defined">
+<span class="sig-name descname"><span class="pre">assume_defined</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyk.proof.implies.ImpliesProver.assume_defined" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.implies.ImpliesProver.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/proof/implies.html#ImpliesProver.close"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.implies.ImpliesProver.close" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.implies.ImpliesProver.failure_info">
+<span class="sig-name descname"><span class="pre">failure_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proof</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pyk.proof.implies.ImpliesProof" title="pyk.proof.implies.ImpliesProof"><span class="pre">ImpliesProof</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.FailureInfo" title="pyk.proof.proof.FailureInfo"><span class="pre">FailureInfo</span></a></span></span><a class="reference internal" href="../_modules/pyk/proof/implies.html#ImpliesProver.failure_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.implies.ImpliesProver.failure_info" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.implies.ImpliesProver.init_proof">
+<span class="sig-name descname"><span class="pre">init_proof</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proof</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pyk.proof.implies.ImpliesProof" title="pyk.proof.implies.ImpliesProof"><span class="pre">ImpliesProof</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/proof/implies.html#ImpliesProver.init_proof"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.implies.ImpliesProver.init_proof" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.implies.ImpliesProver.kcfg_explore">
+<span class="sig-name descname"><span class="pre">kcfg_explore</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kcfg.explore.html#pyk.kcfg.explore.KCFGExplore" title="pyk.kcfg.explore.KCFGExplore"><span class="pre">KCFGExplore</span></a></em><a class="headerlink" href="#pyk.proof.implies.ImpliesProver.kcfg_explore" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.implies.ImpliesProver.proof">
+<span class="sig-name descname"><span class="pre">proof</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.proof.implies.ImpliesProof" title="pyk.proof.implies.ImpliesProof"><span class="pre">ImpliesProof</span></a></em><a class="headerlink" href="#pyk.proof.implies.ImpliesProver.proof" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.implies.ImpliesProver.step_proof">
+<span class="sig-name descname"><span class="pre">step_proof</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pyk.proof.implies.ImpliesProofStep" title="pyk.proof.implies.ImpliesProofStep"><span class="pre">ImpliesProofStep</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pyk.proof.implies.ImpliesProofResult" title="pyk.proof.implies.ImpliesProofResult"><span class="pre">ImpliesProofResult</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/proof/implies.html#ImpliesProver.step_proof"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.implies.ImpliesProver.step_proof" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.proof.implies.RefutationProof">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RefutationProof</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_constraints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_constraint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">simplified_antecedent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simplified_consequent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csubst</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.cterm.cterm.html#pyk.cterm.cterm.CSubst" title="pyk.cterm.cterm.CSubst"><span class="pre">CSubst</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proof_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subproof_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">admitted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/proof/implies.html#RefutationProof"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.implies.RefutationProof" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.proof.implies.ImpliesProof" title="pyk.proof.implies.ImpliesProof"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImpliesProof</span></code></a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.implies.RefutationProof.dict">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dict</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.proof.implies.RefutationProof.dict" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.implies.RefutationProof.from_dict">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dct</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proof_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.proof.implies.RefutationProof" title="pyk.proof.implies.RefutationProof"><span class="pre">RefutationProof</span></a></span></span><a class="reference internal" href="../_modules/pyk/proof/implies.html#RefutationProof.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.implies.RefutationProof.from_dict" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.implies.RefutationProof.last_constraint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">last_constraint</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></em><a class="headerlink" href="#pyk.proof.implies.RefutationProof.last_constraint" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.implies.RefutationProof.pre_constraints">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pre_constraints</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.proof.implies.RefutationProof.pre_constraints" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.implies.RefutationProof.pretty">
+<span class="sig-name descname"><span class="pre">pretty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kprint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.ktool.kprint.html#pyk.ktool.kprint.KPrint" title="pyk.ktool.kprint.KPrint"><span class="pre">KPrint</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/proof/implies.html#RefutationProof.pretty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.implies.RefutationProof.pretty" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.implies.RefutationProof.read_proof_data">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_proof_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proof_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.proof.implies.RefutationProof" title="pyk.proof.implies.RefutationProof"><span class="pre">RefutationProof</span></a></span></span><a class="reference internal" href="../_modules/pyk/proof/implies.html#RefutationProof.read_proof_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.implies.RefutationProof.read_proof_data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.implies.RefutationProof.simplified_constraints">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">simplified_constraints</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyk.proof.implies.RefutationProof.simplified_constraints" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.implies.RefutationProof.summary">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">summary</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyk.proof.implies.RefutationSummary" title="pyk.proof.implies.RefutationSummary"><span class="pre">RefutationSummary</span></a></em><a class="headerlink" href="#pyk.proof.implies.RefutationProof.summary" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.proof.implies.RefutationProof.to_claim">
+<span class="sig-name descname"><span class="pre">to_claim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">claim_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.outer.html#pyk.kast.outer.KClaim" title="pyk.kast.outer.KClaim"><span class="pre">KClaim</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.Subst" title="pyk.kast.inner.Subst"><span class="pre">Subst</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/proof/implies.html#RefutationProof.to_claim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.implies.RefutationProof.to_claim" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.proof.implies.RefutationSummary">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RefutationSummary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'ProofStatus'</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/proof/implies.html#RefutationSummary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.proof.implies.RefutationSummary" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.ProofSummary" title="pyk.proof.proof.ProofSummary"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProofSummary</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.implies.RefutationSummary.id">
+<span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.proof.implies.RefutationSummary.id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.proof.implies.RefutationSummary.lines">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">lines</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.proof.implies.RefutationSummary.lines" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.proof.implies.RefutationSummary.status">
+<span class="sig-name descname"><span class="pre">status</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.proof.proof.html#pyk.proof.proof.ProofStatus" title="pyk.proof.proof.ProofStatus"><span class="pre">ProofStatus</span></a></em><a class="headerlink" href="#pyk.proof.implies.RefutationSummary.status" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pyk.proof.html" class="btn btn-neutral float-left" title="pyk.proof package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pyk.proof.proof.html" class="btn btn-neutral float-right" title="pyk.proof.proof module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Runtime Verification, Inc.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

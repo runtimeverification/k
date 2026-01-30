@@ -1,0 +1,487 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyk.cterm.cterm module &mdash; pyk 7.1.313 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=9c1be6d9"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyk.cterm.show module" href="pyk.cterm.show.html" />
+    <link rel="prev" title="pyk.cterm package" href="pyk.cterm.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            pyk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">pyk</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pyk.html">pyk package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="pyk.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="pyk.cterm.html">pyk.cterm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kast.html">pyk.kast package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kbuild.html">pyk.kbuild package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.html">pyk.kcfg package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kdist.html">pyk.kdist package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.klean.html">pyk.klean package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kllvm.html">pyk.kllvm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.konvert.html">pyk.konvert package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kore.html">pyk.kore package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kore_exec_covr.html">pyk.kore_exec_covr package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.ktool.html">pyk.ktool package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.proof.html">pyk.proof package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.testing.html">pyk.testing package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">pyk</a></li>
+          <li class="breadcrumb-item"><a href="pyk.html">pyk package</a></li>
+          <li class="breadcrumb-item"><a href="pyk.cterm.html">pyk.cterm package</a></li>
+      <li class="breadcrumb-item active">pyk.cterm.cterm module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/pyk.cterm.cterm.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pyk.cterm.cterm">
+<span id="pyk-cterm-cterm-module"></span><h1>pyk.cterm.cterm module<a class="headerlink" href="#module-pyk.cterm.cterm" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CSubst">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CSubst</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subst</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.Subst" title="pyk.kast.inner.Subst"><span class="pre">Subst</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/cterm/cterm.html#CSubst"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.cterm.cterm.CSubst" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Store information about instantiation of a symbolic state (<cite>CTerm</cite>) to a more specific one.</p>
+<p>Contains the data:
+- <cite>subst</cite>: assignment to apply to free variables in the state to achieve more specific one
+- <cite>constraints</cite>: additional constraints over the free variables of the original state and the <cite>subst</cite> to add to the new state</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CSubst.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cterm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pyk.cterm.cterm.CTerm" title="pyk.cterm.cterm.CTerm"><span class="pre">CTerm</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.cterm.cterm.CTerm" title="pyk.cterm.cterm.CTerm"><span class="pre">CTerm</span></a></span></span><a class="reference internal" href="../_modules/pyk/cterm/cterm.html#CSubst.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.cterm.cterm.CSubst.__call__" title="Link to this definition"></a></dt>
+<dd><p>Overload for <cite>CSubst.apply</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CSubst.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subst</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.Subst" title="pyk.kast.inner.Subst"><span class="pre">Subst</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/cterm/cterm.html#CSubst.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.cterm.cterm.CSubst.__init__" title="Link to this definition"></a></dt>
+<dd><p>Construct a new <cite>CSubst</cite> given a <cite>Subst</cite> and set of constraints as <cite>KInner</cite>, performing basic sanity checks.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CSubst.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.Subst" title="pyk.kast.inner.Subst"><span class="pre">Subst</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/cterm/cterm.html#CSubst.__iter__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.cterm.cterm.CSubst.__iter__" title="Link to this definition"></a></dt>
+<dd><p>Return an iterator with the head being the <cite>subst</cite> and the tail being the <cite>constraints</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CSubst.add_constraint">
+<span class="sig-name descname"><span class="pre">add_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">constraint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.cterm.cterm.CSubst" title="pyk.cterm.cterm.CSubst"><span class="pre">CSubst</span></a></span></span><a class="reference internal" href="../_modules/pyk/cterm/cterm.html#CSubst.add_constraint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.cterm.cterm.CSubst.add_constraint" title="Link to this definition"></a></dt>
+<dd><p>Return this <cite>CSubst</cite> with an additional constraint added.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CSubst.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cterm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pyk.cterm.cterm.CTerm" title="pyk.cterm.cterm.CTerm"><span class="pre">CTerm</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.cterm.cterm.CTerm" title="pyk.cterm.cterm.CTerm"><span class="pre">CTerm</span></a></span></span><a class="reference internal" href="../_modules/pyk/cterm/cterm.html#CSubst.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.cterm.cterm.CSubst.apply" title="Link to this definition"></a></dt>
+<dd><p>Apply this <cite>CSubst</cite> to the given <cite>CTerm</cite> (instantiating the free variables, and adding the constraints).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CSubst.constraint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">constraint</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></em><a class="headerlink" href="#pyk.cterm.cterm.CSubst.constraint" title="Link to this definition"></a></dt>
+<dd><p>Return the set of constraints as a single flattened constraint using <cite>mlAnd</cite>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CSubst.constraints">
+<span class="sig-name descname"><span class="pre">constraints</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.cterm.cterm.CSubst.constraints" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CSubst.from_dict">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dct</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.cterm.cterm.CSubst" title="pyk.cterm.cterm.CSubst"><span class="pre">CSubst</span></a></span></span><a class="reference internal" href="../_modules/pyk/cterm/cterm.html#CSubst.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.cterm.cterm.CSubst.from_dict" title="Link to this definition"></a></dt>
+<dd><p>Deserialize <cite>CSubst</cite> from a dictionary representation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CSubst.from_pred">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_pred</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pred</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.cterm.cterm.CSubst" title="pyk.cterm.cterm.CSubst"><span class="pre">CSubst</span></a></span></span><a class="reference internal" href="../_modules/pyk/cterm/cterm.html#CSubst.from_pred"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.cterm.cterm.CSubst.from_pred" title="Link to this definition"></a></dt>
+<dd><p>Extract from a boolean predicate a CSubst.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CSubst.pred">
+<span class="sig-name descname"><span class="pre">pred</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sort_with</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.outer.html#pyk.kast.outer.KDefinition" title="pyk.kast.outer.KDefinition"><span class="pre">KDefinition</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subst</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></span><a class="reference internal" href="../_modules/pyk/cterm/cterm.html#CSubst.pred"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.cterm.cterm.CSubst.pred" title="Link to this definition"></a></dt>
+<dd><p>Return an ML predicate representing this substitution.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CSubst.subst">
+<span class="sig-name descname"><span class="pre">subst</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.Subst" title="pyk.kast.inner.Subst"><span class="pre">Subst</span></a></em><a class="headerlink" href="#pyk.cterm.cterm.CSubst.subst" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CSubst.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/cterm/cterm.html#CSubst.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.cterm.cterm.CSubst.to_dict" title="Link to this definition"></a></dt>
+<dd><p>Serialize <cite>CSubst</cite> to dictionary representation.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CTerm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CTerm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/cterm/cterm.html#CTerm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.cterm.cterm.CTerm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Represent a symbolic program state, obtained and manipulated using symbolic execution.</p>
+<p>Contains the data:
+- <cite>config</cite>: the _configuration_ (structural component of the state, potentially containing free variabls)
+- <cite>constraints</cite>: conditions which limit/constraint the free variables from the <cite>config</cite></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CTerm.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/cterm/cterm.html#CTerm.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.cterm.cterm.CTerm.__init__" title="Link to this definition"></a></dt>
+<dd><p>Instantiate a given <cite>CTerm</cite>, performing basic sanity checks on the <cite>config</cite> and <cite>constraints</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CTerm.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/cterm/cterm.html#CTerm.__iter__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.cterm.cterm.CTerm.__iter__" title="Link to this definition"></a></dt>
+<dd><p>Return an iterator with the head being the <cite>config</cite> and the tail being the <cite>constraints</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CTerm.add_constraint">
+<span class="sig-name descname"><span class="pre">add_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_constraint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.cterm.cterm.CTerm" title="pyk.cterm.cterm.CTerm"><span class="pre">CTerm</span></a></span></span><a class="reference internal" href="../_modules/pyk/cterm/cterm.html#CTerm.add_constraint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.cterm.cterm.CTerm.add_constraint" title="Link to this definition"></a></dt>
+<dd><p>Return a new <cite>CTerm</cite> with the additional constraints.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CTerm.anti_unify">
+<span class="sig-name descname"><span class="pre">anti_unify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pyk.cterm.cterm.CTerm" title="pyk.cterm.cterm.CTerm"><span class="pre">CTerm</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kdef</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.outer.html#pyk.kast.outer.KDefinition" title="pyk.kast.outer.KDefinition"><span class="pre">KDefinition</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pyk.cterm.cterm.CTerm" title="pyk.cterm.cterm.CTerm"><span class="pre">CTerm</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pyk.cterm.cterm.CSubst" title="pyk.cterm.cterm.CSubst"><span class="pre">CSubst</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pyk.cterm.cterm.CSubst" title="pyk.cterm.cterm.CSubst"><span class="pre">CSubst</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/cterm/cterm.html#CTerm.anti_unify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.cterm.cterm.CTerm.anti_unify" title="Link to this definition"></a></dt>
+<dd><p>Given two <cite>CTerm</cite> instances, find a more general <cite>CTerm</cite> which can instantiate to both.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> – other <cite>CTerm</cite> to consider for finding a more general <cite>CTerm</cite> with this one.</p></li>
+<li><p><strong>keep_values</strong> – do not discard information about abstracted variables in returned result.</p></li>
+<li><p><strong>kdef</strong> (<em>optional</em>) – <cite>KDefinition</cite> to make analysis more precise.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>A tuple <code class="docutils literal notranslate"><span class="pre">(cterm,</span> <span class="pre">csubst1,</span> <span class="pre">csubst2)</span></code> where</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">cterm</span></code>: More general <cite>CTerm</cite> than either <cite>self</cite> or <cite>other</cite>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">csubst1</span></code>: Constrained substitution to apply to <cite>cterm</cite> to obtain <cite>self</cite>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">csubst2</span></code>: Constrained substitution to apply to <cite>cterm</cite> to obtain <cite>other</cite>.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CTerm.bottom">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bottom</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.cterm.cterm.CTerm" title="pyk.cterm.cterm.CTerm"><span class="pre">CTerm</span></a></span></span><a class="reference internal" href="../_modules/pyk/cterm/cterm.html#CTerm.bottom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.cterm.cterm.CTerm.bottom" title="Link to this definition"></a></dt>
+<dd><p>Construct a <cite>CTerm</cite> representing no possible states.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CTerm.cell">
+<span class="sig-name descname"><span class="pre">cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></span><a class="reference internal" href="../_modules/pyk/cterm/cterm.html#CTerm.cell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.cterm.cterm.CTerm.cell" title="Link to this definition"></a></dt>
+<dd><p>Access the contents of a named cell in the <cite>config</cite>, die on failure.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CTerm.cells">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cells</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.Subst" title="pyk.kast.inner.Subst"><span class="pre">Subst</span></a></em><a class="headerlink" href="#pyk.cterm.cterm.CTerm.cells" title="Link to this definition"></a></dt>
+<dd><p>Return key-value store of the contents of each cell in the <cite>config</cite>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CTerm.config">
+<span class="sig-name descname"><span class="pre">config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></em><a class="headerlink" href="#pyk.cterm.cterm.CTerm.config" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CTerm.constraint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">constraint</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></em><a class="headerlink" href="#pyk.cterm.cterm.CTerm.constraint" title="Link to this definition"></a></dt>
+<dd><p>Return the unstructured bare <cite>KInner</cite> representation of the constraints.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CTerm.constraints">
+<span class="sig-name descname"><span class="pre">constraints</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.cterm.cterm.CTerm.constraints" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CTerm.free_vars">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">free_vars</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">frozenset</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.cterm.cterm.CTerm.free_vars" title="Link to this definition"></a></dt>
+<dd><p>Return the set of free variable names contained in this <cite>CTerm</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CTerm.from_dict">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dct</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.cterm.cterm.CTerm" title="pyk.cterm.cterm.CTerm"><span class="pre">CTerm</span></a></span></span><a class="reference internal" href="../_modules/pyk/cterm/cterm.html#CTerm.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.cterm.cterm.CTerm.from_dict" title="Link to this definition"></a></dt>
+<dd><p>Deserialize a <cite>CTerm</cite> from its dictionary representation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CTerm.from_kast">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_kast</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kast</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.cterm.cterm.CTerm" title="pyk.cterm.cterm.CTerm"><span class="pre">CTerm</span></a></span></span><a class="reference internal" href="../_modules/pyk/cterm/cterm.html#CTerm.from_kast"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.cterm.cterm.CTerm.from_kast" title="Link to this definition"></a></dt>
+<dd><p>Interpret a given <cite>KInner</cite> as a <cite>CTerm</cite> by splitting the <cite>config</cite> and <cite>constraints</cite> (see <cite>CTerm.kast</cite>).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CTerm.hash">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hash</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.cterm.cterm.CTerm.hash" title="Link to this definition"></a></dt>
+<dd><p>Unique hash representing the contents of this <cite>CTerm</cite>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CTerm.is_bottom">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_bottom</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyk.cterm.cterm.CTerm.is_bottom" title="Link to this definition"></a></dt>
+<dd><p>Check if a given <cite>CTerm</cite> is trivially empty.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CTerm.kast">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kast</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></em><a class="headerlink" href="#pyk.cterm.cterm.CTerm.kast" title="Link to this definition"></a></dt>
+<dd><p>Return the unstructured bare <cite>KInner</cite> representation of a <cite>CTerm</cite> (see <cite>CTerm.from_kast</cite>).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CTerm.match">
+<span class="sig-name descname"><span class="pre">match</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cterm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pyk.cterm.cterm.CTerm" title="pyk.cterm.cterm.CTerm"><span class="pre">CTerm</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.Subst" title="pyk.kast.inner.Subst"><span class="pre">Subst</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/cterm/cterm.html#CTerm.match"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.cterm.cterm.CTerm.match" title="Link to this definition"></a></dt>
+<dd><p>Find <cite>Subst</cite> instantiating this <cite>CTerm</cite> to the other, return <cite>None</cite> if no such <cite>Subst</cite> exists.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CTerm.match_with_constraint">
+<span class="sig-name descname"><span class="pre">match_with_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cterm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pyk.cterm.cterm.CTerm" title="pyk.cterm.cterm.CTerm"><span class="pre">CTerm</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.cterm.cterm.CSubst" title="pyk.cterm.cterm.CSubst"><span class="pre">CSubst</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/cterm/cterm.html#CTerm.match_with_constraint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.cterm.cterm.CTerm.match_with_constraint" title="Link to this definition"></a></dt>
+<dd><p>Find <cite>CSubst</cite> instantiating this <cite>CTerm</cite> to the other, return <cite>None</cite> if no such <cite>CSubst</cite> exists.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CTerm.remove_useless_constraints">
+<span class="sig-name descname"><span class="pre">remove_useless_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keep_vars</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.cterm.cterm.CTerm" title="pyk.cterm.cterm.CTerm"><span class="pre">CTerm</span></a></span></span><a class="reference internal" href="../_modules/pyk/cterm/cterm.html#CTerm.remove_useless_constraints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.cterm.cterm.CTerm.remove_useless_constraints" title="Link to this definition"></a></dt>
+<dd><p>Return a new <cite>CTerm</cite> with constraints over unbound variables removed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>keep_vars</strong> – List of variables to keep constraints for even if unbound in the <cite>CTerm</cite>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A <cite>CTerm</cite> with the constraints over unbound variables removed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CTerm.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/cterm/cterm.html#CTerm.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.cterm.cterm.CTerm.to_dict" title="Link to this definition"></a></dt>
+<dd><p>Serialize a <cite>CTerm</cite> to dictionary representation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CTerm.top">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">top</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyk.cterm.cterm.CTerm" title="pyk.cterm.cterm.CTerm"><span class="pre">CTerm</span></a></span></span><a class="reference internal" href="../_modules/pyk/cterm/cterm.html#CTerm.top"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.cterm.cterm.CTerm.top" title="Link to this definition"></a></dt>
+<dd><p>Construct a <cite>CTerm</cite> representing all possible states.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.CTerm.try_cell">
+<span class="sig-name descname"><span class="pre">try_cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/cterm/cterm.html#CTerm.try_cell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.cterm.cterm.CTerm.try_cell" title="Link to this definition"></a></dt>
+<dd><p>Access the contents of a named cell in the <cite>config</cite>, return <cite>None</cite> on failure.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.anti_unify">
+<span class="sig-name descname"><span class="pre">anti_unify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">state2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">kdef</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.outer.html#pyk.kast.outer.KDefinition" title="pyk.kast.outer.KDefinition"><span class="pre">KDefinition</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.Subst" title="pyk.kast.inner.Subst"><span class="pre">Subst</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.Subst" title="pyk.kast.inner.Subst"><span class="pre">Subst</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/cterm/cterm.html#anti_unify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.cterm.cterm.anti_unify" title="Link to this definition"></a></dt>
+<dd><p>Return a generalized state over the two input states.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state1</strong> – State to generalize over, represented as bare <cite>KInner</cite>.</p></li>
+<li><p><strong>state2</strong> – State to generalize over, represented as bare <cite>KInner</cite>.</p></li>
+<li><p><strong>kdef</strong> (<em>optional</em>) – <cite>KDefinition</cite> to make the analysis more precise.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Both <cite>state1</cite> and <cite>state2</cite> are expected to be bare configurations with no constraints attached.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><p>A tuple <code class="docutils literal notranslate"><span class="pre">(state,</span> <span class="pre">subst1,</span> <span class="pre">subst2)</span></code> such that</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state</span></code>: A symbolic state represented as <cite>KInner</cite> which is more general than <cite>state1</cite> or <cite>state2</cite>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">subst1</span></code>: A <cite>Subst</cite> which, when applied to <cite>state</cite>, recovers <cite>state1</cite>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">subst2</span></code>: A <cite>Subst</cite> which, when applied to <cite>state</cite>, recovers <cite>state2</cite>.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.cterm_build_claim">
+<span class="sig-name descname"><span class="pre">cterm_build_claim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">claim_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_cterm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pyk.cterm.cterm.CTerm" title="pyk.cterm.cterm.CTerm"><span class="pre">CTerm</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">final_cterm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pyk.cterm.cterm.CTerm" title="pyk.cterm.cterm.CTerm"><span class="pre">CTerm</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_vars</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.outer.html#pyk.kast.outer.KClaim" title="pyk.kast.outer.KClaim"><span class="pre">KClaim</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.Subst" title="pyk.kast.inner.Subst"><span class="pre">Subst</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/cterm/cterm.html#cterm_build_claim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.cterm.cterm.cterm_build_claim" title="Link to this definition"></a></dt>
+<dd><p>Return a <cite>KClaim</cite> between the supplied initial and final states.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>claim_id</strong> – Label to give the claim.</p></li>
+<li><p><strong>init_cterm</strong> – State to put on LHS of the rule (constraints interpreted as <cite>requires</cite> clause).</p></li>
+<li><p><strong>final_cterm</strong> – State to put on RHS of the rule (constraints interpreted as <cite>ensures</cite> clause).</p></li>
+<li><p><strong>keep_vars</strong> – Variables to leave in the side-conditions even if not bound in the configuration.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>A tuple <code class="docutils literal notranslate"><span class="pre">(claim,</span> <span class="pre">var_map)</span></code> where</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">claim</span></code>: A <cite>KClaim</cite> with variable naming conventions applied
+so that it should be parseable by the K Frontend.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">var_map</span></code>: The variable renamings applied to make the claim parseable by the K Frontend
+(which can be undone to recover original variables).</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.cterm_build_rule">
+<span class="sig-name descname"><span class="pre">cterm_build_rule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_cterm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pyk.cterm.cterm.CTerm" title="pyk.cterm.cterm.CTerm"><span class="pre">CTerm</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">final_cterm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pyk.cterm.cterm.CTerm" title="pyk.cterm.cterm.CTerm"><span class="pre">CTerm</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_vars</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defunc_with</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.outer.html#pyk.kast.outer.KDefinition" title="pyk.kast.outer.KDefinition"><span class="pre">KDefinition</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.outer.html#pyk.kast.outer.KRule" title="pyk.kast.outer.KRule"><span class="pre">KRule</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.Subst" title="pyk.kast.inner.Subst"><span class="pre">Subst</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/cterm/cterm.html#cterm_build_rule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.cterm.cterm.cterm_build_rule" title="Link to this definition"></a></dt>
+<dd><p>Return a <cite>KRule</cite> between the supplied initial and final states.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rule_id</strong> – Label to give the rule.</p></li>
+<li><p><strong>init_cterm</strong> – State to put on LHS of the rule (constraints interpreted as <cite>requires</cite> clause).</p></li>
+<li><p><strong>final_cterm</strong> – State to put on RHS of the rule (constraints interpreted as <cite>ensures</cite> clause).</p></li>
+<li><p><strong>keep_vars</strong> – Variables to leave in the side-conditions even if not bound in the configuration.</p></li>
+<li><p><strong>priority</strong> – Priority index to use for generated rules.</p></li>
+<li><p><strong>defunc_with</strong> (<em>optional</em>) – KDefinition to be able to defunctionalize LHS appropriately.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>A tuple <code class="docutils literal notranslate"><span class="pre">(rule,</span> <span class="pre">var_map)</span></code> where</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">rule</span></code>: A <cite>KRule</cite> with variable naming conventions applied
+so that it should be parseable by the K Frontend.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">var_map</span></code>: The variable renamings applied to make the rule parseable by the K Frontend
+(which can be undone to recover original variables).</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.cterm.cterm.cterms_anti_unify">
+<span class="sig-name descname"><span class="pre">cterms_anti_unify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cterms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pyk.cterm.cterm.CTerm" title="pyk.cterm.cterm.CTerm"><span class="pre">CTerm</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kdef</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.outer.html#pyk.kast.outer.KDefinition" title="pyk.kast.outer.KDefinition"><span class="pre">KDefinition</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pyk.cterm.cterm.CTerm" title="pyk.cterm.cterm.CTerm"><span class="pre">CTerm</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pyk.cterm.cterm.CSubst" title="pyk.cterm.cterm.CSubst"><span class="pre">CSubst</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/cterm/cterm.html#cterms_anti_unify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.cterm.cterm.cterms_anti_unify" title="Link to this definition"></a></dt>
+<dd><p>Given many <cite>CTerm</cite> instances, find a more general <cite>CTerm</cite> which can instantiate to all.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cterms</strong> – <cite>CTerm`s to consider for finding a more general `CTerm</cite> with this one.</p></li>
+<li><p><strong>keep_values</strong> – do not discard information about abstracted variables in returned result.</p></li>
+<li><p><strong>kdef</strong> (<em>optional</em>) – <cite>KDefinition</cite> to make analysis more precise.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>A tuple <code class="docutils literal notranslate"><span class="pre">(cterm,</span> <span class="pre">csubsts)</span></code> where</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">cterm</span></code>: More general <cite>CTerm</cite> than any of the input <a href="#id1"><span class="problematic" id="id2">`</span></a>CTerm`s.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">csubsts</span></code>: List of <cite>CSubst</cite> which, when applied to <cite>cterm</cite>, yield the input <a href="#id3"><span class="problematic" id="id4">`</span></a>CTerm`s.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pyk.cterm.html" class="btn btn-neutral float-left" title="pyk.cterm package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pyk.cterm.show.html" class="btn btn-neutral float-right" title="pyk.cterm.show module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Runtime Verification, Inc.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

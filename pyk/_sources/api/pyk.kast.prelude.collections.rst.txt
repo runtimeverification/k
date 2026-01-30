@@ -1,0 +1,7 @@
+pyk.kast.prelude.collections module
+===================================
+
+.. automodule:: pyk.kast.prelude.collections
+   :members:
+   :undoc-members:
+   :show-inheritance:

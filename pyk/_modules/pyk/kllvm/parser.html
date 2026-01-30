@@ -1,0 +1,160 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyk.kllvm.parser &mdash; pyk 7.1.313 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=9c1be6d9"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            pyk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">pyk</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pyk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pyk.kllvm.parser</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyk.kllvm.parser</h1><div class="highlight"><pre>
+<span></span><span class="linenos"> 1</span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="linenos"> 4</span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="kn">from</span><span class="w"> </span><span class="nn">_kllvm.parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parser</span>  <span class="c1"># type: ignore</span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span><span class="kn">from</span><span class="w"> </span><span class="nn">..cli.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_file_path</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+<span class="linenos">11</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">.ast</span><span class="w"> </span><span class="kn">import</span> <span class="n">Definition</span><span class="p">,</span> <span class="n">Pattern</span><span class="p">,</span> <span class="n">Sort</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span>
+<div class="viewcode-block" id="parse_pattern">
+<a class="viewcode-back" href="../../../api/pyk.kllvm.parser.html#pyk.kllvm.parser.parse_pattern">[docs]</a>
+<span class="linenos">14</span><span class="k">def</span><span class="w"> </span><span class="nf">parse_pattern</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pattern</span><span class="p">:</span>
+<span class="linenos">15</span>    <span class="k">return</span> <span class="n">Parser</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">text</span><span class="p">)</span><span class="o">.</span><span class="n">pattern</span><span class="p">()</span></div>
+
+<span class="linenos">16</span>
+<span class="linenos">17</span>
+<div class="viewcode-block" id="parse_sort">
+<a class="viewcode-back" href="../../../api/pyk.kllvm.parser.html#pyk.kllvm.parser.parse_sort">[docs]</a>
+<span class="linenos">18</span><span class="k">def</span><span class="w"> </span><span class="nf">parse_sort</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sort</span><span class="p">:</span>
+<span class="linenos">19</span>    <span class="k">return</span> <span class="n">Parser</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">text</span><span class="p">)</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span></div>
+
+<span class="linenos">20</span>
+<span class="linenos">21</span>
+<div class="viewcode-block" id="parse_definition">
+<a class="viewcode-back" href="../../../api/pyk.kllvm.parser.html#pyk.kllvm.parser.parse_definition">[docs]</a>
+<span class="linenos">22</span><span class="k">def</span><span class="w"> </span><span class="nf">parse_definition</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Definition</span><span class="p">:</span>
+<span class="linenos">23</span>    <span class="k">return</span> <span class="n">Parser</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">text</span><span class="p">)</span><span class="o">.</span><span class="n">definition</span><span class="p">()</span></div>
+
+<span class="linenos">24</span>
+<span class="linenos">25</span>
+<div class="viewcode-block" id="parse_pattern_file">
+<a class="viewcode-back" href="../../../api/pyk.kllvm.parser.html#pyk.kllvm.parser.parse_pattern_file">[docs]</a>
+<span class="linenos">26</span><span class="k">def</span><span class="w"> </span><span class="nf">parse_pattern_file</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pattern</span><span class="p">:</span>
+<span class="linenos">27</span>    <span class="k">return</span> <span class="n">_parser_from_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">pattern</span><span class="p">()</span></div>
+
+<span class="linenos">28</span>
+<span class="linenos">29</span>
+<div class="viewcode-block" id="parse_sort_file">
+<a class="viewcode-back" href="../../../api/pyk.kllvm.parser.html#pyk.kllvm.parser.parse_sort_file">[docs]</a>
+<span class="linenos">30</span><span class="k">def</span><span class="w"> </span><span class="nf">parse_sort_file</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pattern</span><span class="p">:</span>
+<span class="linenos">31</span>    <span class="k">return</span> <span class="n">_parser_from_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span></div>
+
+<span class="linenos">32</span>
+<span class="linenos">33</span>
+<div class="viewcode-block" id="parse_definition_file">
+<a class="viewcode-back" href="../../../api/pyk.kllvm.parser.html#pyk.kllvm.parser.parse_definition_file">[docs]</a>
+<span class="linenos">34</span><span class="k">def</span><span class="w"> </span><span class="nf">parse_definition_file</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Definition</span><span class="p">:</span>
+<span class="linenos">35</span>    <span class="k">return</span> <span class="n">_parser_from_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">definition</span><span class="p">()</span></div>
+
+<span class="linenos">36</span>
+<span class="linenos">37</span>
+<span class="linenos">38</span><span class="k">def</span><span class="w"> </span><span class="nf">_parser_from_path</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Parser</span><span class="p">:</span>
+<span class="linenos">39</span>    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="linenos">40</span>    <span class="n">check_file_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="linenos">41</span>    <span class="k">return</span> <span class="n">Parser</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Runtime Verification, Inc.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

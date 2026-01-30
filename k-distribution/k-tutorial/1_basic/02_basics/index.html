@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+<meta charset="utf-8" />
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+/>
+<meta
+  name="description"
+  content="Design and implement your programming language and software analysis tools with mathematical rigor."
+/>
+<meta name="keywords" content="runtime, verification, rv, k" />
+<meta name="author" content="K | Runtime Verification Inc" />
+<meta name="robots" content="index, follow" />
+<link rel="canonical" href="https://kframework.org/k-distribution/k-tutorial/1_basic/02_basics/" />
+
+<!--favicon icon-->
+<link rel="icon" type="image/png" href="../../../../assets/img/favicon.ico" />
+
+<title>Lesson 1.2: Basics of Functional K | Runtime Verification Inc</title>
+
+<!-- <base href="/k/" /> -->
+
+<!--web fonts-->
+<link
+  href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800"
+  rel="stylesheet"
+/>
+<link
+  href="https://fonts.googleapis.com/css?family=Lora:400i"
+  rel="stylesheet"
+/>
+
+<link
+  href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css"
+  rel="stylesheet"
+/>
+
+<link href="../../../../assets/css/index.css" rel="stylesheet" />
+
+<!--[if (gt IE 9) |!(IE)]><!-->
+<!--<link rel="stylesheet" href="/assets/vendor/custom-nav/css/effects/fade-menu.css"/>-->
+<!-- <link rel="stylesheet" href="../../../../assets/k/vl-nav/css/effects/slide-menu.css" /> -->
+<!--<![endif]-->
+
+  </head>
+
+  <body>
+<header
+  class="navbar navbar-expand navbar-dark flex-column flex-md-row bd-navbar"
+>
+  <a class="logo-link" href="../../../../index.html">
+    <picture>
+      <source
+        srcset="../../../../assets/img/k-logo-dark.png"
+        media="(prefers-color-scheme: dark)"
+      />
+      <img src="../../../../assets/img/k-logo.png" alt="K" style="height: 48px" />
+    </picture>
+    Semantic Framework
+  </a>
+  <ul class="navbar-nav ml-md-auto">
+    <li class="nav-item dropdown">
+      <a
+        class="nav-link dropdown-toggle"
+        href="#"
+        id="navbarDropdown"
+        role="button"
+        data-toggle="dropdown"
+        aria-haspopup="true"
+        aria-expanded="false"
+      >
+        <i class="fas fa-book"></i>
+      </a>
+      <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+        <a class="dropdown-item" href="../../../../exports/K.pdf">pdf</a>
+        <a class="dropdown-item" href="../../../../exports/K.epub">epub</a>
+        <a class="dropdown-item" href="../../../../exports/K.mobi">mobi</a>
+        <a class="dropdown-item" href="../../../../exports/K.html">html</a>
+      </div>
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link pl-2 pr-1 mx-1 py-3 my-n2"
+        href="https://github.com/runtimeverification/k"
+        target="_blank"
+        rel="noopener"
+        aria-label="GitHub"
+      >
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  </ul>
+  <a
+    class="btn btn-rv-blue d-none d-lg-inline-block mb-3 mb-md-0 ml-md-3"
+    href="https://github.com/runtimeverification/k/releases/latest"
+    >Download</a
+  >
+</header>
+<style>
+  .dropdown:hover .dropdown-menu {
+    display: block;
+    margin-top: 0; /* remove the gap so it doesn't close */
+  }
+</style>
+
+
+    <div class="container-fluid">
+      <div class="row flex-xl-nowrap">
+<div class="col-12 col-md-3 col-xl-2 bd-sidebar mb-3">
+  <form
+    role="search"
+    class="bd-search d-flex align-items-center justify-content-between"
+  >
+    <input
+      type="search"
+      class="form-control"
+      placeholder="Search..."
+      aria-label="Search for..."
+      autocomplete="false"
+      id="search-box"
+    />
+    <button
+      class="btn bd-search-docs-toggle d-md-none p-0 ml-3 collapsed"
+      type="button"
+      aria-label="Toggle docs navigation"
+      style="font-size: 1.4rem"
+    >
+      <i class="fas fa-bars"></i>
+    </button>
+  </form>
+  <nav class="collapse bd-links" aria-label="Main navigation">
+    <div class="sidebar-toc pl-2"><div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../">Homepage</a></div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="https://github.com/runtimeverification/k/releases/latest">Install K</a></div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="https://kframework.org/pyk">Pyk Documentation</a></div>
+<details style="padding:0.25rem 0;;padding-left: 8px;"><summary><a href="../../../../k-distribution/k-tutorial/">K Tutorial</a></summary><div>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../k-distribution/k-tutorial/1_basic/">Section 1: Basic K Concepts</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/01_installing/">Lesson 1.1: Setting up a K Environment</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/02_basics/">Lesson 1.2: Basics of Functional K</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/03_parsing/">Lesson 1.3: BNF Syntax and Parser Generation</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/04_disambiguation/">Lesson 1.4: Disambiguating Parses</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/05_modules/">Lesson 1.5: Modules, Imports, and Requires</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/06_ints_and_bools/">Lesson 1.6: Integers and Booleans</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/07_side_conditions/">Lesson 1.7: Side Conditions and Rule Priority</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/08_literate_programming/">Lesson 1.8: Literate Programming with Markdown</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/09_unparsing/">Lesson 1.9: Unparsing and the format and color attributes</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/10_strings/">Lesson 1.10: Strings</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/11_casts/">Lesson 1.11: Casting Terms</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/12_syntactic_lists/">Lesson 1.12: Syntactic Lists</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/13_rewrite_rules/">Lesson 1.13: Basics of K Rewriting</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/14_evaluation_order/">Lesson 1.14: Defining Evaluation Order</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/15_configurations/">Lesson 1.15: Configuration Declarations and Cell Nesting</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/16_collections/">Lesson 1.16: Maps, Semantic Lists, and Sets</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/17_cell_multiplicity/">Lesson 1.17: Cell Multiplicity and Cell Collections</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/18_equality_and_conditionals/">Lesson 1.18: Term Equality and the Ternary Operator</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/19_debugging/">Lesson 1.19: Debugging with GDB or LLDB</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/20_backends/">Lesson 1.20: K Backends and the Haskell Backend</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/21_symbolic_execution/">Lesson 1.21: Unification and Symbolic Execution</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/22_proofs/">Lesson 1.22: K Deductive Verification</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../k-distribution/k-tutorial/2_intermediate/">Section 2: Intermediate K Concepts</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/01_macros/">Lesson 2.1: Macros, Aliases, and Anywhere Rules</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/02_fresh_constants/">Lesson 2.2: Fresh Constants</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/03_klabels/">Lesson 2.3: KLabels and Abstract Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/04_overloading/">Lesson 2.4: Overloaded Symbols</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/05_matching_logic/">Lesson 2.5: Matching Logic Connectives and #Or Patterns</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/06_function_context/">Lesson 2.6: Function Context</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/07_record_productions/">Lesson 2.7: Record Productions and Named Nonterminals</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/08_fun_and_let/">Lesson 2.8: #fun and #let</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/09_as/">Lesson 2.9: #as Patterns</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/10_matching_operator/">Lesson 2.10: The Matching Operators, :=K and :/=K</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/11_evaluation_order/">Lesson 2.11: Uncommon Evaluation Order Concepts</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/12_floats_and_machine_ints/">Lesson 2.12: IEEE 754 Floating Point and Fixed Width Integers</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/13_substitution/">Lesson 2.13: Alpha-renaming-aware Substitution</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/14_io/">Lesson 2.14: File I/O</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/15_string_buffers_and_bytes/">Lesson 2.15: String Buffers and Byte Sequences</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/16_kore/">Lesson 2.16: The Intermediate Language of K, KORE</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/17_debugging_proofs/">Lesson 2.17: Debugging Proofs using the Haskell Backend REPL</a></div>
+</div></details>
+</div></details>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../docs/user_manual/">K User Manual</a></div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../docs/cheat_sheet/">K Cheat Sheet</a></div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../docs/ktools/">K Tool Reference</a></div>
+<details style="padding:0.25rem 0;;padding-left: 8px;"><summary><a href="../../../../k-distribution/include/kframework/">K Builtins</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/domains/">domains</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/kast/">kast</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/prelude/">prelude</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/ffi/">ffi</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/json/">json</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/rat/">rat</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/substitution/">substitution</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="https://github.com/runtimeverification/k/blob/master/k-distribution/include/kframework/builtin/unification.k">unification</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 8px;"><summary><a href="../../../../k-distribution/pl-tutorial/">K PL Tutorial</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../overview/">K Overview</a></div>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../k-distribution/pl-tutorial/1_k/">Learning K</a></summary><div>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/">Part 1: Defining LAMBDA</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_1/">Lesson 1, LAMBDA: Syntax Modules and Basic K Commands</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_2/">Lesson 2, LAMBDA: Module Importing, Rules, Variables</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_3/">Lesson 3, LAMBDA: Evaluation Strategies using Strictness</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_4/">Lesson 4, LAMBDA: Generating Documentation; Latex Attributes</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_5/">Lesson 5, LAMBDA: Adding Builtins; Side Conditions</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_6/">Lesson 6, LAMBDA: Selective Strictness; Anonymous Variables</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_7/">Lesson 7, LAMBDA: Derived Constructs; Extending Predefined Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_8/">Lesson 8, LAMBDA: Multiple Binding Constructs</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_9/">Lesson 9, LAMBDA: A Complete and Commented Definition</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/1_k/2_imp/">Part 2: Defining IMP</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_1/">Lesson 1, IMP: Defining a More Complex Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_2/">Lesson 2, IMP: Defining a Configuration</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_3/">Lesson 3, IMP: Computations, Results, Strictness; Rules Involving Cells</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_4/">Lesson 4, IMP: Configuration Abstraction, Part 1; Types of Rules</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_5/">Lesson 5, IMP: Completing and Documenting IMP</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/">Part 3: Defining LAMBDA++</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_1/">Lesson 1, LAMBDA++: Abrupt Changes of Control</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_2/">Lesson 2, LAMBDA++: Semantic (Non-Syntactic) Computation Items</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_3/">Lesson 3, LAMBDA++: Reusing Existing Semantics</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_4/">Lesson 4, LAMBDA++: Do Not Reuse Blindly!</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_5/">Lesson 5, LAMBDA++: More Semantic Computation Items</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_6/">Lesson 6, LAMBDA++: Wrapping Up and Documenting LAMBDA++ (environment-based)</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/">Part 4: Defining IMP++</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_1/">Lesson 1, IMP++: Extending/Changing an Existing Language Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_2/">Lesson 2, IMP++: Configuration Refinement; Freshness</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_3/">Lesson 3, IMP++: Tagging; Superheat/Supercool Kompilation Options</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_4/">Lesson 4, IMP++: Semantic Lists; Input/Output Streaming</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_5/">Lesson 5, IMP++: Deleting, Saving and Restoring Cell Contents</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_6/">Lesson 6, IMP++: Adding/Deleting Cells Dynamically; Configuration Abstraction, Part 2</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_7/">Lesson 7, IMP++: Everything Changes: Syntax, Configuration, Semantics</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_8/">Lesson 8, IMP++: Wrapping up Larger Languages</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/">Part 5: Defining Type Systems</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_1/">Lesson 1, Type Systems: Imperative, Environment-Based Type Systems</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_2/">Lesson 2, Type Systems: Substitution-Based Higher-Order Type Systems</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_3/">Lesson 3, Type Systems: Environment-Based Higher-Order Type Systems</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_4/">Lesson 4, Type Systems: A Naive Substitution-Based Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_5/">Lesson 5, Type Systems: A Naive Environment-Based Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_6/">Lesson 6, Type Systems: Parallel Type Checkers/Inferencers</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_7/">Lesson 7, Type Systems: A Naive Substitution-based Polymorphic Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_8/">Lesson 8, Type Systems: A Naive Environment-based Polymorphic Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_9/">Lesson 9, Type Systems: Let-Polymorphic Type Inferencer (Damas-Hindley-Milner)</a></div>
+</div></details>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../k-distribution/pl-tutorial/2_languages/">Learning Language Design and Semantics using K</a></summary><div>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/2_languages/1_simple/1_untyped/simple-untyped/">Part 7: SIMPLE: Designing Imperative Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/1_simple/1_untyped/simple-untyped/">Lesson 1, SIMPLE untyped</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/1_simple/2_typed/1_static/simple-typed-static/">Lesson 2, SIMPLE typed static</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/1_simple/2_typed/2_dynamic/simple-typed-dynamic/">Lesson 3, SIMPLE typed dynamic</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/2_languages/2_kool/1_untyped/kool-untyped/">Part 8: KOOL: Designing Object-Oriented Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/2_kool/1_untyped/kool-untyped/">Lesson 1, KOOL untyped</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/2_kool/2_typed/1_dynamic/kool-typed-dynamic/">Lesson 2, KOOL typed dynamic</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/2_kool/2_typed/2_static/kool-typed-static/">Lesson 3, KOOL typed static</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/2_languages/3_fun/1_untyped/1_environment/fun-untyped/">Part 9: FUN: Designing Functional Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/3_fun/1_untyped/1_environment/fun-untyped/">Lesson 1, FUN untyped, Environment-Based</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/3_fun/1_untyped/2_substitution/fun-untyped/">Lesson 2, FUN untyped, Substitution-Based</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;">Lesson 3, FUN polymorphic type inferencer</div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/2_languages/4_logik/basic/logik/">Part 10: LOGIK: Designing Logic Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/4_logik/basic/logik/">Lesson 1, LOGIK</a></div>
+</div></details>
+</div></details>
+</div></details>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../projects/">Projects using K</a></div>
+</div></div>
+  </nav>
+</div>
+
+        <main
+          class="col-12 col-md-6 col-xl-8 py-md-3 pl-md-5 bd-content"
+          role="main"
+        >
+          <div class="introduction markdown-preview"><html><head></head><body><h1 id="lesson-1.2%3A-basics-of-functional-k">Lesson 1.2: Basics of Functional K</h1>
+<p>In this lesson you will learn about basic K syntactic constructs, how
+to write simple K definitions, and how to compile and run them.</p>
+<h2 id="your-first-k-program">Your first K program</h2>
+<p>Now that you've installed K on your system, you're ready for your first
+program in K.</p>
+<p>Copy the code below into your editor and save it as <code>lesson-02-a.k</code>.
+K files end with the <code>.k</code> extension.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k"><span class="token keyword">module</span> LESSON<span class="token operator">-</span><span class="token number">02</span><span class="token operator">-</span>A
+
+  <span class="token keyword">syntax</span> Color <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> Yellow<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">|</span> Blue<span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">syntax</span> Fruit <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> Banana<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">|</span> Blueberry<span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">syntax</span> Color <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> colorOf<span class="token punctuation">(</span>Fruit<span class="token punctuation">)</span> <span class="token punctuation">[</span>function<span class="token punctuation">]</span>
+
+  <span class="token keyword">rule</span> colorOf<span class="token punctuation">(</span>Banana<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> Yellow<span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">rule</span> colorOf<span class="token punctuation">(</span>Blueberry<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> Blue<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">endmodule</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Note that the name of the module and name of the file match. While the name of
+the module has to be written in capitals, the file name can have any
+capitalization. It is not a requirement that the file carries the module
+name, but merely a convention. If you choose to name your file differenly, you will
+need to compile it with attribute <code>--main-module</code> followed by the name of
+the module, to point the compiler to the <em>main</em> module of the definition. More
+about naming conventions and main modules will follow in
+<a href="../05_modules/">Lesson 1.5</a>.</p>
+<p>Now, save the file and, from within the directory where you saved it, run:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>kompile lesson-02-a.k
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><code>kompile</code> is K's compiler. It takes a <strong>K definition</strong> and compiles it into an
+interpreter. Right now, you are compiling a single-file K definition, but
+we'll cover multiple-file K definitions later on.</p>
+<p>You should get the following output:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>[Warning] Compiler: Could not find main syntax module with name
+LESSON-02-A-SYNTAX in definition.  Use --syntax-module to specify one. Using
+LESSON-02-A as default.
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p>It's a warning highlighting a K convention of splitting the syntactic
+definitions from the actual implementation into different modules. In
+<a href="../05_modules/">Lesson 1.5</a> you will learn how to do it the proper
+way, as the examples will get bigger. For the smaller examples we work on
+now, we can just ignore it.</p>
+<p><code>kompile</code> will also output a directory containing everything needed to execute
+programs and perform proofs using the K definition given as input.
+Check your working directory and you'll see directory <code>lesson-02-a-kompiled</code>
+has beed created inside. If you're curious, have a look at its contents and
+inspect the generated documentation.</p>
+<p>This directory not only contains all the basic tools produced by a K
+definition, e.g., parser, interpreter, or verifier, but also all sorts of
+files that can be used as input to execute these tools. More about K's parser
+will come in the next lesson, more on the other tools in due time.</p>
+<p>Now, save the program below in the file <code>banana.color</code> in the same directory as
+<code>lesson-02-a.k</code>:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>colorOf(Banana())
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>Note that we use <code>color</code> as file extension, but merely because this is the
+sort returned by function <code>colorOf</code>. The file name gives us a better
+understanding of what the file contains.</p>
+<p>We can now evaluate this K term by running (from the same directory):</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>krun banana.color
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><code>krun</code> is a tool which uses the interpreter generated by <code>kompile</code> to execute
+this program.</p>
+<p>You should get the following output:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>&lt;k&gt;
+  Yellow ( ) ~&gt; .K
+&lt;/k&gt;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p>For now, don't worry about the <code>&lt;k&gt;</code>, <code>&lt;/k&gt;</code>, or <code> ~&gt; .K</code> portions of this
+output file. We'll come back to them later.</p>
+<p>You can also execute small programs directly on the command line instead of
+putting them in a file. For example, the same program above
+could have been executed by running the following command:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>krun -cPGM='colorOf(Banana())'
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>Or by running the command below:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>krun -cPGM='colorOf(Banana())' --definition 'lesson-02-a-kompiled'
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><code>-cPGM='colorOf(Banana())'</code> simply sets variable <code>PGM</code> responsible for holding
+the program to execute to value <code>colorOf(Banana())</code>.
+Attribute <code>--definition</code> points to the <em>directory</em> containing the compiled version
+of <code>LESSON-02-A</code>.</p>
+<h3 id="exercise">Exercise</h3>
+<p>Use <code>krun</code> to compute the return value of the <code>colorOf</code> function on a
+<code>Blueberry()</code>.</p>
+<h2 id="structure-of-a-k-file">Structure of a K file</h2>
+<p>A K file consists of one or more <strong>modules</strong>, of which only one is the
+<em>main</em> one, in the sense that no other module defined in that file <strong>imports</strong>
+it. The name of this <em>main</em> module will also be the one given as argument to
+attribute <code>main-module</code> at compile time.
+Modules residing in other K files are imported instead through <strong>requires</strong>
+statements (similar to <code>include</code> in C/C++). You'll learn more about <strong>imports</strong> and
+<strong>requires</strong> in <a href="../05_modules/">Lesson 1.5</a>.
+In this lesson we continue with a closer look to a K module structure.</p>
+<p>A K module is formed of sentences (and <strong>imports</strong>), and sentences
+come in different forms. For example, <strong>productions</strong> and <strong>rules</strong> are two
+types of sentences you have seen already in example <code>lesson-02-a.k</code>.
+We'll discuss each separately.</p>
+<h3 id="productions%2C-constructors%2C-and-functions">Productions, constructors, and functions</h3>
+<p>Productions are introduced with the <strong>syntax</strong> keyword and our first K module
+<code>LESSON-02-A</code> contains 5 productions defining <strong>sorts</strong> <code>Color</code> and <code>Fruit</code>.
+You can think of them as <code>enums</code> in C or <code>data</code> constructs in Haskell, although
+you'll find that they encompass other behaviors too.</p>
+<p>Most of productions above are <strong>constructor</strong> productions (e.g., <code>Yellow()</code>,
+<code>Blue()</code>, or <code>Blueberry()</code>), while the last one is a <strong>function</strong> production
+(<code>colorOf(Fruit) [function]</code>). It's easy to distinguish the two as the latter
+production has additional attribute <code>function</code>.
+There are other types of productions—tokens, brackets, lists, macros,
+or aliases—but you'll learn about them in due time.
+There are other types of attributes too, and a sentence can carry several,
+in which case they will be separated by comma between square brackets.
+We will discuss them throughout the tutorial.</p>
+<p>Constructors can have arguments, but these ones do not. We will cover the
+syntax of productions in detail in the next lesson, but for now, you can write
+a production with no arguments as an uppercase or lowercase identifier followed
+by the <code>()</code> operator. Sorts must always start with uppercase letter.</p>
+<p>Returning to the syntax of a K module instead, note that individual productions
+of the same sort are separated by pipe operator <code>|</code>.
+For example, we can write an equivalent K definition of <code>lesson-02-a.k</code>
+as definition <code>lesson-02-b.k</code> as follows:</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k"><span class="token keyword">module</span> LESSON<span class="token operator">-</span><span class="token number">02</span><span class="token operator">-</span>B
+
+  <span class="token keyword">syntax</span> Color <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> Yellow<span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">syntax</span> Color <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> Blue<span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">syntax</span> Fruit <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> Banana<span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">syntax</span> Fruit <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> Blueberry<span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">syntax</span> Color <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> colorOf<span class="token punctuation">(</span>Fruit<span class="token punctuation">)</span> <span class="token punctuation">[</span>function<span class="token punctuation">]</span>
+
+  <span class="token keyword">rule</span> colorOf<span class="token punctuation">(</span>Banana<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> Yellow<span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">rule</span> colorOf<span class="token punctuation">(</span>Blueberry<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> Blue<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">endmodule</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>We can be even more compact, as in definition <code>lesson-02-c.k</code>:</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k"><span class="token keyword">module</span> LESSON<span class="token operator">-</span><span class="token number">02</span><span class="token operator">-</span>C
+
+  <span class="token keyword">syntax</span> Color <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> Yellow<span class="token punctuation">(</span><span class="token punctuation">)</span>
+                 <span class="token operator">|</span> Blue<span class="token punctuation">(</span><span class="token punctuation">)</span>
+                 <span class="token operator">|</span> colorOf<span class="token punctuation">(</span>Fruit<span class="token punctuation">)</span> <span class="token punctuation">[</span>function<span class="token punctuation">]</span>
+  <span class="token keyword">syntax</span> Fruit <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> Banana<span class="token punctuation">(</span><span class="token punctuation">)</span>
+                 <span class="token operator">|</span> Blueberry<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+  <span class="token keyword">rule</span> colorOf<span class="token punctuation">(</span>Banana<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> Yellow<span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">rule</span> colorOf<span class="token punctuation">(</span>Blueberry<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> Blue<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">endmodule</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>You can try compiling and running both <code>lesson-02-b.k</code> and <code>lesson-02-c.k</code> to
+see that they produce the same output as <code>lesson-02-a.k</code>.
+If you run them from the same directory, remember to run with argument
+<code>--definition</code> to specify where the compiled version of the specific K
+definition is:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>kompile lesson-02-b.k
+krun -cPGM='colorOf(Banana())' --definition 'lesson-02-b-kompiled'
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>and</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>kompile lesson-02-c.k
+krun -cPGM='colorOf(Banana())' --definition 'lesson-02-c-kompiled'
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<h3 id="rules%2C-matching%2C-and-variables">Rules, matching, and variables</h3>
+<p>We learned that <strong>functions</strong> are a type of productions carrying attribute
+<code>function</code>. However, the function production only introduces a specific
+function, it does not define it. For defining the behavior of a function in K,
+we use rules.</p>
+<p>A rule begins with the <code>rule</code> keyword, which is followed by a <strong>left-hand side</strong>,
+<strong>rewrite operator</strong> <code>=&gt;</code>, and a <strong>right-hand side</strong>. The left-hand side
+contains the name of the function and zero or more <strong>patterns</strong> corresponding
+to the parameters of the function. The right-hand side is another pattern.
+It specifies the function behavior for those parameters. Then, we can read the
+rule as follows: if the function is called with arguments that <strong>match</strong> the
+patterns on the left-hand side, then the function will return the value of the
+rewritten pattern on the right-hand side.</p>
+<p>For example, in the above example, if the argument of the <code>colorOf</code> function
+is <code>Banana()</code>, then the return value of the function is <code>Yellow()</code>.</p>
+<p>Note that a function's definition can be expressed through several rules and that
+functions in K can be partial.</p>
+<p>Let's add a new fruit constructor <code>Kiwi()</code> in <code>lesson-02-d.k</code></p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k"><span class="token keyword">module</span> LESSON<span class="token operator">-</span><span class="token number">02</span><span class="token operator">-</span>D
+
+  <span class="token keyword">syntax</span> Color <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> Yellow<span class="token punctuation">(</span><span class="token punctuation">)</span>
+                 <span class="token operator">|</span> Blue<span class="token punctuation">(</span><span class="token punctuation">)</span>
+                 <span class="token operator">|</span> Kiwi<span class="token punctuation">(</span><span class="token punctuation">)</span>
+                 <span class="token operator">|</span> colorOf<span class="token punctuation">(</span>Fruit<span class="token punctuation">)</span> <span class="token punctuation">[</span>function<span class="token punctuation">]</span>
+  <span class="token keyword">syntax</span> Fruit <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> Banana<span class="token punctuation">(</span><span class="token punctuation">)</span>
+                 <span class="token operator">|</span> Blueberry<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+  <span class="token keyword">rule</span> colorOf<span class="token punctuation">(</span>Banana<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> Yellow<span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">rule</span> colorOf<span class="token punctuation">(</span>Blueberry<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> Blue<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">endmodule</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>and compile:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>kompile lesson-02-d.k
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>You will notice that the new K definition compiled just fine.
+Now, execute the following:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>krun -cPGM='colorOf(Kiwi())' --definition 'lesson-02-d-kompiled'
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>and observe the error:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>[Error] krun: lesson-02-d-kompiled/interpreter 
+/tmp/.krun-2025-04-14-20-41-45-bxhfwDNT0t/tmp.in.LwwPb4Jo9W -1 
+/tmp/.krun-2025-04-14-20-41-45-bxhfwDNT0t/result.kore
+colorOf ( Kiwi ( ) )
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>The function is undefined for this value, i.e., there is no rule for function
+<code>colorOf</code> whose left-hand side can be pattern-matched to <code>Kiwi()</code>, thus no
+right-hand side pattern either, and no output value.</p>
+<p>We said that the left- and right-hand sides of a <code>rule</code> are <strong>patterns</strong>.
+Thus, constructors are a type of pattern. We will introduce more complex patterns
+later, but before we proceed to the next lesson, let us briefly
+discuss one more type of pattern—<strong>variables</strong>.</p>
+<p>A variable, syntactically, consists of an uppercase identifier. It differs from
+a constructor in that it matches <strong>any</strong> pattern with one exception: two
+variables with the same name must match the same pattern.</p>
+<p>Take the more complex example below (<code>lesson-02-e.k</code>):</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k"><span class="token keyword">module</span> LESSON<span class="token operator">-</span><span class="token number">02</span><span class="token operator">-</span>E
+
+  <span class="token keyword">syntax</span> Container <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> Jar<span class="token punctuation">(</span>Fruit<span class="token punctuation">)</span>
+  <span class="token keyword">syntax</span> Fruit <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> Apple<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">|</span> Pear<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+  <span class="token keyword">syntax</span> Fruit <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> contentsOfJar<span class="token punctuation">(</span>Container<span class="token punctuation">)</span> <span class="token punctuation">[</span>function<span class="token punctuation">]</span>
+
+  <span class="token keyword">rule</span> contentsOfJar<span class="token punctuation">(</span>Jar<span class="token punctuation">(</span>F<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> F
+
+<span class="token keyword">endmodule</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Note that <code>Jar</code> is a constructor with a single argument. Multiple arguments
+are separated by comma.</p>
+<p>In this example, <code>F</code> is a variable. It will match either <code>Apple()</code> or <code>Pear()</code>.
+The return value of the function is created by <strong>substituting</strong> the matched
+values of all of the variables into the variables on the right-hand side of
+the rule.</p>
+<p>To demonstrate, compile this definition and execute the following program with
+krun:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>kompile lesson-02-e.k 
+krun -cPGM='contentsOfJar(Jar(Apple()))' --definition 'lesson-02-e-kompiled'
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>The program returns <code>Apple()</code>, because that is the pattern that was matched by
+<code>F</code>.</p>
+<h3 id="exercise-1">Exercise</h3>
+<p>Extend the definition of function <code>colorOf</code> in <code>lesson-02-d.k</code> to return a
+pattern for <code>Kiwi()</code>.</p>
+<h2 id="exercises">Exercises</h2>
+<ol>
+<li>Extend the definition in <code>lesson-02-d.k</code> with the addition of blackberries.
+For simplicity, consider blackberries to be black and kiwis to be green. Then
+compile your definition and test that your additional fruits are correctly
+handled by the <code>colorOf</code> function.</li>
+<li>Create a new definition which defines an outfit as a multi-argument constructor
+consisting of a hat, shirt, pants, and shoes. Define a new sort
+<code>Boolean</code> with two constructors, true and false. Productions for hat, shirt, pants,
+and shoes will have a single argument each—a color, either black or
+white. Then define an <code>outfitMatching</code> function that will return true if all
+the pieces of the outfit are the same color. You do not need to define the
+case that returns false. Execute your program on different values to see that
+your function behaves the way you expect.</li>
+</ol>
+<h2 id="next-lesson">Next lesson</h2>
+<p>Once you have completed the above exercises, you can continue to
+<a href="../03_parsing/">Lesson 1.3: BNF Syntax and Parser Generation</a>.</p>
+</body></html></div>
+        </main>
+
+        <!-- Page ToC -->
+        <div class="col-12 col-md-3 col-xl-2 py-md-3 bd-sidebar page-toc mb-3">
+          
+<div>
+<details style="padding:0.25rem 0;;padding-left: 0px;">
+            <summary class="bd-toc-link-wrapper">
+              <a href="#lesson-1.2%3A-basics-of-functional-k" class="bd-toc-link">Lesson 1.2: Basics of Functional K</a>
+              </summary>
+            <div>
+              <details style="padding:0.25rem 0;;padding-left: 8px;">
+            <summary class="bd-toc-link-wrapper">
+              <a href="#your-first-k-program" class="bd-toc-link">Your first K program</a>
+              </summary>
+            <div>
+              <div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#exercise"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                Exercise
+              </a></div>
+            </div>
+          </details>
+        <details style="padding:0.25rem 0;;padding-left: 8px;">
+            <summary class="bd-toc-link-wrapper">
+              <a href="#structure-of-a-k-file" class="bd-toc-link">Structure of a K file</a>
+              </summary>
+            <div>
+              <div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#productions%2C-constructors%2C-and-functions"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                Productions, constructors, and functions
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#rules%2C-matching%2C-and-variables"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                Rules, matching, and variables
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#exercise-1"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                Exercise
+              </a></div>
+            </div>
+          </details>
+        <div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#exercises"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Exercises
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#next-lesson"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Next lesson
+              </a></div>
+            </div>
+          </details>
+        
+</div>
+
+        </div>
+        <div class="btn btn-rv-blue page-toc-toggle-btn"></div>
+        <!-- End Page ToC -->
+      </div>
+    </div>
+<!-- The footer is now controlled by the k-web-theme git submodule -->
+<footer id="rvsite-footer" class="app-footer text-md-left text-center">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-md-4 mb-md-0 mb-4">
+        <a href="https://runtimeverification.com/" target="_blank">
+          <picture>
+            <source
+              srcset="
+                https://runtimeverification.com/assets/img/rv-logo-dark.png
+              "
+              media="(prefers-color-scheme: dark)"
+            />
+            <img
+              class="logo-dark"
+              src="https://runtimeverification.com/assets/img/rv-logo.png"
+              alt="Runtime Verification logo"
+              style="height: 32px"
+            /> </picture
+        ></a>
+        <p class="mt-2 text-md-left copyright">
+          <a href="https://maps.app.goo.gl/8YhKozfmZtgzQBsH7" target="_blank"
+            >202 S Broadway Ave #31, Urbana, IL</a
+          >
+        </p>
+      </div>
+      <div class="col-md-4 text-md-center mb-md-0 mb-4"></div>
+      <div class="col-md-4 mb-md-0 mb-4 pl-0 text-md-right">
+        <p class="copyright">2026 © all rights reserved</p>
+        <span class="copyright"
+          ><a href="https://runtimeverification.com/privacy-policy"
+            >privacy policy</a
+          >
+          |
+          <a href="https://runtimeverification.com/terms-of-use"
+            >terms of use</a
+          ></span
+        >
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Typist/1.2/typist.min.js"></script>
+    <script src="../../../../assets/js/index.js"></script>
+    <script>
+      $(function () {
+        // Render youtube video
+        const anchorElements = document.querySelectorAll(".markdown-preview a");
+        for (let i = anchorElements.length - 1; i >= 0; i--) {
+          if (anchorElements.length - 1 - i > 3) {
+            break;
+          }
+          const anchorElement = anchorElements[i];
+          const href = anchorElement.getAttribute("href");
+          if (href.match(/^https?:\/\/youtu.be\//)) {
+            const match = href.match(/^https?:\/\/youtu.be\/(.+?)$/);
+            if (match && match[1]) {
+              const youtubeId = match[1];
+              const $iframe = $(`
+<div style="text-align:center;">
+  <iframe
+    width="560"
+    height="315"
+    src="https://www.youtube.com/embed/${youtubeId}"
+    frameborder="0"
+    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen
+    style="max-width: 100%;"
+  ></iframe>
+  <p>The video is out of date</p>
+</div>
+`);
+              $(anchorElement).replaceWith($iframe[0]);
+            }
+          }
+        }
+      });
+    </script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-9LBGDMRG32"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-9LBGDMRG32");
+    </script>
+  </body>
+</html>

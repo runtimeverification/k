@@ -1,0 +1,1066 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyk.kast.color module &mdash; pyk 7.1.313 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=9c1be6d9"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyk.kast.formatter module" href="pyk.kast.formatter.html" />
+    <link rel="prev" title="pyk.kast.att module" href="pyk.kast.att.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            pyk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">pyk</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pyk.html">pyk package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="pyk.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="pyk.cterm.html">pyk.cterm package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="pyk.kast.html">pyk.kast package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kbuild.html">pyk.kbuild package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.html">pyk.kcfg package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kdist.html">pyk.kdist package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.klean.html">pyk.klean package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kllvm.html">pyk.kllvm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.konvert.html">pyk.konvert package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kore.html">pyk.kore package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kore_exec_covr.html">pyk.kore_exec_covr package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.ktool.html">pyk.ktool package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.proof.html">pyk.proof package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.testing.html">pyk.testing package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">pyk</a></li>
+          <li class="breadcrumb-item"><a href="pyk.html">pyk package</a></li>
+          <li class="breadcrumb-item"><a href="pyk.kast.html">pyk.kast package</a></li>
+      <li class="breadcrumb-item active">pyk.kast.color module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/pyk.kast.color.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pyk.kast.color">
+<span id="pyk-kast-color-module"></span><h1>pyk.kast.color module<a class="headerlink" href="#module-pyk.kast.color" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kast.color.Color">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Color</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/kast/color.html#Color"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.color.Color" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.ALICE_BLUE">
+<span class="sig-name descname"><span class="pre">ALICE_BLUE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'AliceBlue'</span></em><a class="headerlink" href="#pyk.kast.color.Color.ALICE_BLUE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.ANTIQUE_WHITE">
+<span class="sig-name descname"><span class="pre">ANTIQUE_WHITE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'AntiqueWhite'</span></em><a class="headerlink" href="#pyk.kast.color.Color.ANTIQUE_WHITE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.APRICOT">
+<span class="sig-name descname"><span class="pre">APRICOT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Apricot'</span></em><a class="headerlink" href="#pyk.kast.color.Color.APRICOT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.AQUA">
+<span class="sig-name descname"><span class="pre">AQUA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Aqua'</span></em><a class="headerlink" href="#pyk.kast.color.Color.AQUA" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.AQUAMARINE">
+<span class="sig-name descname"><span class="pre">AQUAMARINE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Aquamarine'</span></em><a class="headerlink" href="#pyk.kast.color.Color.AQUAMARINE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.AZURE">
+<span class="sig-name descname"><span class="pre">AZURE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Azure'</span></em><a class="headerlink" href="#pyk.kast.color.Color.AZURE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.BEIGE">
+<span class="sig-name descname"><span class="pre">BEIGE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Beige'</span></em><a class="headerlink" href="#pyk.kast.color.Color.BEIGE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.BISQUE">
+<span class="sig-name descname"><span class="pre">BISQUE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Bisque'</span></em><a class="headerlink" href="#pyk.kast.color.Color.BISQUE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.BITTERSWEET">
+<span class="sig-name descname"><span class="pre">BITTERSWEET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Bittersweet'</span></em><a class="headerlink" href="#pyk.kast.color.Color.BITTERSWEET" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.BLACK">
+<span class="sig-name descname"><span class="pre">BLACK</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'black'</span></em><a class="headerlink" href="#pyk.kast.color.Color.BLACK" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.BLANCHED_ALMOND">
+<span class="sig-name descname"><span class="pre">BLANCHED_ALMOND</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'BlanchedAlmond'</span></em><a class="headerlink" href="#pyk.kast.color.Color.BLANCHED_ALMOND" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.BLUE">
+<span class="sig-name descname"><span class="pre">BLUE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'blue'</span></em><a class="headerlink" href="#pyk.kast.color.Color.BLUE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.BLUE_GREEN">
+<span class="sig-name descname"><span class="pre">BLUE_GREEN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'BlueGreen'</span></em><a class="headerlink" href="#pyk.kast.color.Color.BLUE_GREEN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.BLUE_VIOLET">
+<span class="sig-name descname"><span class="pre">BLUE_VIOLET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'BlueViolet'</span></em><a class="headerlink" href="#pyk.kast.color.Color.BLUE_VIOLET" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.BRICK_RED">
+<span class="sig-name descname"><span class="pre">BRICK_RED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'BrickRed'</span></em><a class="headerlink" href="#pyk.kast.color.Color.BRICK_RED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.BROWN">
+<span class="sig-name descname"><span class="pre">BROWN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'brown'</span></em><a class="headerlink" href="#pyk.kast.color.Color.BROWN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.BURLY_WOOD">
+<span class="sig-name descname"><span class="pre">BURLY_WOOD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'BurlyWood'</span></em><a class="headerlink" href="#pyk.kast.color.Color.BURLY_WOOD" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.BURNT_ORANGE">
+<span class="sig-name descname"><span class="pre">BURNT_ORANGE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'BurntOrange'</span></em><a class="headerlink" href="#pyk.kast.color.Color.BURNT_ORANGE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.CADET_BLUE">
+<span class="sig-name descname"><span class="pre">CADET_BLUE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'CadetBlue'</span></em><a class="headerlink" href="#pyk.kast.color.Color.CADET_BLUE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.CARNATION_PINK">
+<span class="sig-name descname"><span class="pre">CARNATION_PINK</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'CarnationPink'</span></em><a class="headerlink" href="#pyk.kast.color.Color.CARNATION_PINK" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.CERULEAN">
+<span class="sig-name descname"><span class="pre">CERULEAN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Cerulean'</span></em><a class="headerlink" href="#pyk.kast.color.Color.CERULEAN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.CHARTREUSE">
+<span class="sig-name descname"><span class="pre">CHARTREUSE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Chartreuse'</span></em><a class="headerlink" href="#pyk.kast.color.Color.CHARTREUSE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.CHOCOLATE">
+<span class="sig-name descname"><span class="pre">CHOCOLATE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Chocolate'</span></em><a class="headerlink" href="#pyk.kast.color.Color.CHOCOLATE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.CORAL">
+<span class="sig-name descname"><span class="pre">CORAL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Coral'</span></em><a class="headerlink" href="#pyk.kast.color.Color.CORAL" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.CORNFLOWER_BLUE">
+<span class="sig-name descname"><span class="pre">CORNFLOWER_BLUE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'CornflowerBlue'</span></em><a class="headerlink" href="#pyk.kast.color.Color.CORNFLOWER_BLUE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.CORNSILK">
+<span class="sig-name descname"><span class="pre">CORNSILK</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Cornsilk'</span></em><a class="headerlink" href="#pyk.kast.color.Color.CORNSILK" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.CRIMSON">
+<span class="sig-name descname"><span class="pre">CRIMSON</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Crimson'</span></em><a class="headerlink" href="#pyk.kast.color.Color.CRIMSON" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.CYAN">
+<span class="sig-name descname"><span class="pre">CYAN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'cyan'</span></em><a class="headerlink" href="#pyk.kast.color.Color.CYAN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.DANDELION">
+<span class="sig-name descname"><span class="pre">DANDELION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Dandelion'</span></em><a class="headerlink" href="#pyk.kast.color.Color.DANDELION" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.DARKGRAY">
+<span class="sig-name descname"><span class="pre">DARKGRAY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'darkgray'</span></em><a class="headerlink" href="#pyk.kast.color.Color.DARKGRAY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.DARK_BLUE">
+<span class="sig-name descname"><span class="pre">DARK_BLUE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'DarkBlue'</span></em><a class="headerlink" href="#pyk.kast.color.Color.DARK_BLUE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.DARK_CYAN">
+<span class="sig-name descname"><span class="pre">DARK_CYAN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'DarkCyan'</span></em><a class="headerlink" href="#pyk.kast.color.Color.DARK_CYAN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.DARK_GOLDENROD">
+<span class="sig-name descname"><span class="pre">DARK_GOLDENROD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'DarkGoldenrod'</span></em><a class="headerlink" href="#pyk.kast.color.Color.DARK_GOLDENROD" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.DARK_GRAY">
+<span class="sig-name descname"><span class="pre">DARK_GRAY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'DarkGray'</span></em><a class="headerlink" href="#pyk.kast.color.Color.DARK_GRAY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.DARK_GREEN">
+<span class="sig-name descname"><span class="pre">DARK_GREEN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'DarkGreen'</span></em><a class="headerlink" href="#pyk.kast.color.Color.DARK_GREEN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.DARK_GREY">
+<span class="sig-name descname"><span class="pre">DARK_GREY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'DarkGrey'</span></em><a class="headerlink" href="#pyk.kast.color.Color.DARK_GREY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.DARK_KHAKI">
+<span class="sig-name descname"><span class="pre">DARK_KHAKI</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'DarkKhaki'</span></em><a class="headerlink" href="#pyk.kast.color.Color.DARK_KHAKI" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.DARK_MAGENTA">
+<span class="sig-name descname"><span class="pre">DARK_MAGENTA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'DarkMagenta'</span></em><a class="headerlink" href="#pyk.kast.color.Color.DARK_MAGENTA" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.DARK_OLIVE_GREEN">
+<span class="sig-name descname"><span class="pre">DARK_OLIVE_GREEN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'DarkOliveGreen'</span></em><a class="headerlink" href="#pyk.kast.color.Color.DARK_OLIVE_GREEN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.DARK_ORANGE">
+<span class="sig-name descname"><span class="pre">DARK_ORANGE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'DarkOrange'</span></em><a class="headerlink" href="#pyk.kast.color.Color.DARK_ORANGE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.DARK_ORCHID">
+<span class="sig-name descname"><span class="pre">DARK_ORCHID</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'DarkOrchid'</span></em><a class="headerlink" href="#pyk.kast.color.Color.DARK_ORCHID" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.DARK_RED">
+<span class="sig-name descname"><span class="pre">DARK_RED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'DarkRed'</span></em><a class="headerlink" href="#pyk.kast.color.Color.DARK_RED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.DARK_SALMON">
+<span class="sig-name descname"><span class="pre">DARK_SALMON</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'DarkSalmon'</span></em><a class="headerlink" href="#pyk.kast.color.Color.DARK_SALMON" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.DARK_SEA_GREEN">
+<span class="sig-name descname"><span class="pre">DARK_SEA_GREEN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'DarkSeaGreen'</span></em><a class="headerlink" href="#pyk.kast.color.Color.DARK_SEA_GREEN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.DARK_SLATE_BLUE">
+<span class="sig-name descname"><span class="pre">DARK_SLATE_BLUE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'DarkSlateBlue'</span></em><a class="headerlink" href="#pyk.kast.color.Color.DARK_SLATE_BLUE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.DARK_SLATE_GRAY">
+<span class="sig-name descname"><span class="pre">DARK_SLATE_GRAY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'DarkSlateGray'</span></em><a class="headerlink" href="#pyk.kast.color.Color.DARK_SLATE_GRAY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.DARK_SLATE_GREY">
+<span class="sig-name descname"><span class="pre">DARK_SLATE_GREY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'DarkSlateGrey'</span></em><a class="headerlink" href="#pyk.kast.color.Color.DARK_SLATE_GREY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.DARK_TURQUOISE">
+<span class="sig-name descname"><span class="pre">DARK_TURQUOISE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'DarkTurquoise'</span></em><a class="headerlink" href="#pyk.kast.color.Color.DARK_TURQUOISE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.DARK_VIOLET">
+<span class="sig-name descname"><span class="pre">DARK_VIOLET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'DarkViolet'</span></em><a class="headerlink" href="#pyk.kast.color.Color.DARK_VIOLET" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.DEEP_PINK">
+<span class="sig-name descname"><span class="pre">DEEP_PINK</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'DeepPink'</span></em><a class="headerlink" href="#pyk.kast.color.Color.DEEP_PINK" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.DEEP_SKY_BLUE">
+<span class="sig-name descname"><span class="pre">DEEP_SKY_BLUE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'DeepSkyBlue'</span></em><a class="headerlink" href="#pyk.kast.color.Color.DEEP_SKY_BLUE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.DIM_GRAY">
+<span class="sig-name descname"><span class="pre">DIM_GRAY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'DimGray'</span></em><a class="headerlink" href="#pyk.kast.color.Color.DIM_GRAY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.DIM_GREY">
+<span class="sig-name descname"><span class="pre">DIM_GREY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'DimGrey'</span></em><a class="headerlink" href="#pyk.kast.color.Color.DIM_GREY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.DODGER_BLUE">
+<span class="sig-name descname"><span class="pre">DODGER_BLUE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'DodgerBlue'</span></em><a class="headerlink" href="#pyk.kast.color.Color.DODGER_BLUE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.EMERALD">
+<span class="sig-name descname"><span class="pre">EMERALD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Emerald'</span></em><a class="headerlink" href="#pyk.kast.color.Color.EMERALD" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.FIRE_BRICK">
+<span class="sig-name descname"><span class="pre">FIRE_BRICK</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'FireBrick'</span></em><a class="headerlink" href="#pyk.kast.color.Color.FIRE_BRICK" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.FLORAL_WHITE">
+<span class="sig-name descname"><span class="pre">FLORAL_WHITE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'FloralWhite'</span></em><a class="headerlink" href="#pyk.kast.color.Color.FLORAL_WHITE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.FOREST_GREEN">
+<span class="sig-name descname"><span class="pre">FOREST_GREEN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ForestGreen'</span></em><a class="headerlink" href="#pyk.kast.color.Color.FOREST_GREEN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.FUCHSIA">
+<span class="sig-name descname"><span class="pre">FUCHSIA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Fuchsia'</span></em><a class="headerlink" href="#pyk.kast.color.Color.FUCHSIA" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.GAINSBORO">
+<span class="sig-name descname"><span class="pre">GAINSBORO</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Gainsboro'</span></em><a class="headerlink" href="#pyk.kast.color.Color.GAINSBORO" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.GHOST_WHITE">
+<span class="sig-name descname"><span class="pre">GHOST_WHITE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'GhostWhite'</span></em><a class="headerlink" href="#pyk.kast.color.Color.GHOST_WHITE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.GOLD">
+<span class="sig-name descname"><span class="pre">GOLD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Gold'</span></em><a class="headerlink" href="#pyk.kast.color.Color.GOLD" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.GOLDENROD">
+<span class="sig-name descname"><span class="pre">GOLDENROD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Goldenrod'</span></em><a class="headerlink" href="#pyk.kast.color.Color.GOLDENROD" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.GRAY">
+<span class="sig-name descname"><span class="pre">GRAY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'gray'</span></em><a class="headerlink" href="#pyk.kast.color.Color.GRAY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.GREEN">
+<span class="sig-name descname"><span class="pre">GREEN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'green'</span></em><a class="headerlink" href="#pyk.kast.color.Color.GREEN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.GREEN_YELLOW">
+<span class="sig-name descname"><span class="pre">GREEN_YELLOW</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'GreenYellow'</span></em><a class="headerlink" href="#pyk.kast.color.Color.GREEN_YELLOW" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.GREY">
+<span class="sig-name descname"><span class="pre">GREY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Grey'</span></em><a class="headerlink" href="#pyk.kast.color.Color.GREY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.HONEYDEW">
+<span class="sig-name descname"><span class="pre">HONEYDEW</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Honeydew'</span></em><a class="headerlink" href="#pyk.kast.color.Color.HONEYDEW" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.HOT_PINK">
+<span class="sig-name descname"><span class="pre">HOT_PINK</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'HotPink'</span></em><a class="headerlink" href="#pyk.kast.color.Color.HOT_PINK" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.INDIAN_RED">
+<span class="sig-name descname"><span class="pre">INDIAN_RED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'IndianRed'</span></em><a class="headerlink" href="#pyk.kast.color.Color.INDIAN_RED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.INDIGO">
+<span class="sig-name descname"><span class="pre">INDIGO</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Indigo'</span></em><a class="headerlink" href="#pyk.kast.color.Color.INDIGO" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.IVORY">
+<span class="sig-name descname"><span class="pre">IVORY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Ivory'</span></em><a class="headerlink" href="#pyk.kast.color.Color.IVORY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.JUNGLE_GREEN">
+<span class="sig-name descname"><span class="pre">JUNGLE_GREEN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'JungleGreen'</span></em><a class="headerlink" href="#pyk.kast.color.Color.JUNGLE_GREEN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.KHAKI">
+<span class="sig-name descname"><span class="pre">KHAKI</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Khaki'</span></em><a class="headerlink" href="#pyk.kast.color.Color.KHAKI" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.LAVENDER">
+<span class="sig-name descname"><span class="pre">LAVENDER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Lavender'</span></em><a class="headerlink" href="#pyk.kast.color.Color.LAVENDER" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.LAVENDER_BLUSH">
+<span class="sig-name descname"><span class="pre">LAVENDER_BLUSH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LavenderBlush'</span></em><a class="headerlink" href="#pyk.kast.color.Color.LAVENDER_BLUSH" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.LAWN_GREEN">
+<span class="sig-name descname"><span class="pre">LAWN_GREEN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LawnGreen'</span></em><a class="headerlink" href="#pyk.kast.color.Color.LAWN_GREEN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.LEMON_CHIFFON">
+<span class="sig-name descname"><span class="pre">LEMON_CHIFFON</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LemonChiffon'</span></em><a class="headerlink" href="#pyk.kast.color.Color.LEMON_CHIFFON" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.LIGHTGRAY">
+<span class="sig-name descname"><span class="pre">LIGHTGRAY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'lightgray'</span></em><a class="headerlink" href="#pyk.kast.color.Color.LIGHTGRAY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.LIGHT_BLUE">
+<span class="sig-name descname"><span class="pre">LIGHT_BLUE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LightBlue'</span></em><a class="headerlink" href="#pyk.kast.color.Color.LIGHT_BLUE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.LIGHT_CORAL">
+<span class="sig-name descname"><span class="pre">LIGHT_CORAL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LightCoral'</span></em><a class="headerlink" href="#pyk.kast.color.Color.LIGHT_CORAL" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.LIGHT_CYAN">
+<span class="sig-name descname"><span class="pre">LIGHT_CYAN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LightCyan'</span></em><a class="headerlink" href="#pyk.kast.color.Color.LIGHT_CYAN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.LIGHT_GOLDENROD">
+<span class="sig-name descname"><span class="pre">LIGHT_GOLDENROD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LightGoldenrod'</span></em><a class="headerlink" href="#pyk.kast.color.Color.LIGHT_GOLDENROD" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.LIGHT_GOLDENROD_YELLOW">
+<span class="sig-name descname"><span class="pre">LIGHT_GOLDENROD_YELLOW</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LightGoldenrodYellow'</span></em><a class="headerlink" href="#pyk.kast.color.Color.LIGHT_GOLDENROD_YELLOW" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.LIGHT_GRAY">
+<span class="sig-name descname"><span class="pre">LIGHT_GRAY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LightGray'</span></em><a class="headerlink" href="#pyk.kast.color.Color.LIGHT_GRAY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.LIGHT_GREEN">
+<span class="sig-name descname"><span class="pre">LIGHT_GREEN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LightGreen'</span></em><a class="headerlink" href="#pyk.kast.color.Color.LIGHT_GREEN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.LIGHT_GREY">
+<span class="sig-name descname"><span class="pre">LIGHT_GREY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LightGrey'</span></em><a class="headerlink" href="#pyk.kast.color.Color.LIGHT_GREY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.LIGHT_PINK">
+<span class="sig-name descname"><span class="pre">LIGHT_PINK</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LightPink'</span></em><a class="headerlink" href="#pyk.kast.color.Color.LIGHT_PINK" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.LIGHT_SALMON">
+<span class="sig-name descname"><span class="pre">LIGHT_SALMON</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LightSalmon'</span></em><a class="headerlink" href="#pyk.kast.color.Color.LIGHT_SALMON" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.LIGHT_SEA_GREEN">
+<span class="sig-name descname"><span class="pre">LIGHT_SEA_GREEN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LightSeaGreen'</span></em><a class="headerlink" href="#pyk.kast.color.Color.LIGHT_SEA_GREEN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.LIGHT_SKY_BLUE">
+<span class="sig-name descname"><span class="pre">LIGHT_SKY_BLUE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LightSkyBlue'</span></em><a class="headerlink" href="#pyk.kast.color.Color.LIGHT_SKY_BLUE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.LIGHT_SLATE_BLUE">
+<span class="sig-name descname"><span class="pre">LIGHT_SLATE_BLUE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LightSlateBlue'</span></em><a class="headerlink" href="#pyk.kast.color.Color.LIGHT_SLATE_BLUE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.LIGHT_SLATE_GRAY">
+<span class="sig-name descname"><span class="pre">LIGHT_SLATE_GRAY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LightSlateGray'</span></em><a class="headerlink" href="#pyk.kast.color.Color.LIGHT_SLATE_GRAY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.LIGHT_SLATE_GREY">
+<span class="sig-name descname"><span class="pre">LIGHT_SLATE_GREY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LightSlateGrey'</span></em><a class="headerlink" href="#pyk.kast.color.Color.LIGHT_SLATE_GREY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.LIGHT_STEEL_BLUE">
+<span class="sig-name descname"><span class="pre">LIGHT_STEEL_BLUE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LightSteelBlue'</span></em><a class="headerlink" href="#pyk.kast.color.Color.LIGHT_STEEL_BLUE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.LIGHT_YELLOW">
+<span class="sig-name descname"><span class="pre">LIGHT_YELLOW</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LightYellow'</span></em><a class="headerlink" href="#pyk.kast.color.Color.LIGHT_YELLOW" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.LIME">
+<span class="sig-name descname"><span class="pre">LIME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'lime'</span></em><a class="headerlink" href="#pyk.kast.color.Color.LIME" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.LIME_GREEN">
+<span class="sig-name descname"><span class="pre">LIME_GREEN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LimeGreen'</span></em><a class="headerlink" href="#pyk.kast.color.Color.LIME_GREEN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.LINEN">
+<span class="sig-name descname"><span class="pre">LINEN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Linen'</span></em><a class="headerlink" href="#pyk.kast.color.Color.LINEN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.MAGENTA">
+<span class="sig-name descname"><span class="pre">MAGENTA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'magenta'</span></em><a class="headerlink" href="#pyk.kast.color.Color.MAGENTA" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.MAHOGANY">
+<span class="sig-name descname"><span class="pre">MAHOGANY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Mahogany'</span></em><a class="headerlink" href="#pyk.kast.color.Color.MAHOGANY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.MAROON">
+<span class="sig-name descname"><span class="pre">MAROON</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Maroon'</span></em><a class="headerlink" href="#pyk.kast.color.Color.MAROON" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.MEDIUM_AQUAMARINE">
+<span class="sig-name descname"><span class="pre">MEDIUM_AQUAMARINE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'MediumAquamarine'</span></em><a class="headerlink" href="#pyk.kast.color.Color.MEDIUM_AQUAMARINE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.MEDIUM_BLUE">
+<span class="sig-name descname"><span class="pre">MEDIUM_BLUE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'MediumBlue'</span></em><a class="headerlink" href="#pyk.kast.color.Color.MEDIUM_BLUE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.MEDIUM_ORCHID">
+<span class="sig-name descname"><span class="pre">MEDIUM_ORCHID</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'MediumOrchid'</span></em><a class="headerlink" href="#pyk.kast.color.Color.MEDIUM_ORCHID" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.MEDIUM_PURPLE">
+<span class="sig-name descname"><span class="pre">MEDIUM_PURPLE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'MediumPurple'</span></em><a class="headerlink" href="#pyk.kast.color.Color.MEDIUM_PURPLE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.MEDIUM_SEA_GREEN">
+<span class="sig-name descname"><span class="pre">MEDIUM_SEA_GREEN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'MediumSeaGreen'</span></em><a class="headerlink" href="#pyk.kast.color.Color.MEDIUM_SEA_GREEN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.MEDIUM_SLATE_BLUE">
+<span class="sig-name descname"><span class="pre">MEDIUM_SLATE_BLUE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'MediumSlateBlue'</span></em><a class="headerlink" href="#pyk.kast.color.Color.MEDIUM_SLATE_BLUE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.MEDIUM_SPRING_GREEN">
+<span class="sig-name descname"><span class="pre">MEDIUM_SPRING_GREEN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'MediumSpringGreen'</span></em><a class="headerlink" href="#pyk.kast.color.Color.MEDIUM_SPRING_GREEN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.MEDIUM_TURQUOISE">
+<span class="sig-name descname"><span class="pre">MEDIUM_TURQUOISE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'MediumTurquoise'</span></em><a class="headerlink" href="#pyk.kast.color.Color.MEDIUM_TURQUOISE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.MEDIUM_VIOLET_RED">
+<span class="sig-name descname"><span class="pre">MEDIUM_VIOLET_RED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'MediumVioletRed'</span></em><a class="headerlink" href="#pyk.kast.color.Color.MEDIUM_VIOLET_RED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.MELON">
+<span class="sig-name descname"><span class="pre">MELON</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Melon'</span></em><a class="headerlink" href="#pyk.kast.color.Color.MELON" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.MIDNIGHT_BLUE">
+<span class="sig-name descname"><span class="pre">MIDNIGHT_BLUE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'MidnightBlue'</span></em><a class="headerlink" href="#pyk.kast.color.Color.MIDNIGHT_BLUE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.MINT_CREAM">
+<span class="sig-name descname"><span class="pre">MINT_CREAM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'MintCream'</span></em><a class="headerlink" href="#pyk.kast.color.Color.MINT_CREAM" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.MISTY_ROSE">
+<span class="sig-name descname"><span class="pre">MISTY_ROSE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'MistyRose'</span></em><a class="headerlink" href="#pyk.kast.color.Color.MISTY_ROSE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.MOCCASIN">
+<span class="sig-name descname"><span class="pre">MOCCASIN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Moccasin'</span></em><a class="headerlink" href="#pyk.kast.color.Color.MOCCASIN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.MULBERRY">
+<span class="sig-name descname"><span class="pre">MULBERRY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Mulberry'</span></em><a class="headerlink" href="#pyk.kast.color.Color.MULBERRY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.NAVAJO_WHITE">
+<span class="sig-name descname"><span class="pre">NAVAJO_WHITE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'NavajoWhite'</span></em><a class="headerlink" href="#pyk.kast.color.Color.NAVAJO_WHITE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.NAVY">
+<span class="sig-name descname"><span class="pre">NAVY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Navy'</span></em><a class="headerlink" href="#pyk.kast.color.Color.NAVY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.NAVY_BLUE">
+<span class="sig-name descname"><span class="pre">NAVY_BLUE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'NavyBlue'</span></em><a class="headerlink" href="#pyk.kast.color.Color.NAVY_BLUE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.OLD_LACE">
+<span class="sig-name descname"><span class="pre">OLD_LACE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'OldLace'</span></em><a class="headerlink" href="#pyk.kast.color.Color.OLD_LACE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.OLIVE">
+<span class="sig-name descname"><span class="pre">OLIVE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'olive'</span></em><a class="headerlink" href="#pyk.kast.color.Color.OLIVE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.OLIVE_DRAB">
+<span class="sig-name descname"><span class="pre">OLIVE_DRAB</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'OliveDrab'</span></em><a class="headerlink" href="#pyk.kast.color.Color.OLIVE_DRAB" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.OLIVE_GREEN">
+<span class="sig-name descname"><span class="pre">OLIVE_GREEN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'OliveGreen'</span></em><a class="headerlink" href="#pyk.kast.color.Color.OLIVE_GREEN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.ORANGE">
+<span class="sig-name descname"><span class="pre">ORANGE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'orange'</span></em><a class="headerlink" href="#pyk.kast.color.Color.ORANGE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.ORANGE_RED">
+<span class="sig-name descname"><span class="pre">ORANGE_RED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'OrangeRed'</span></em><a class="headerlink" href="#pyk.kast.color.Color.ORANGE_RED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.ORCHID">
+<span class="sig-name descname"><span class="pre">ORCHID</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Orchid'</span></em><a class="headerlink" href="#pyk.kast.color.Color.ORCHID" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.PALE_GOLDENROD">
+<span class="sig-name descname"><span class="pre">PALE_GOLDENROD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'PaleGoldenrod'</span></em><a class="headerlink" href="#pyk.kast.color.Color.PALE_GOLDENROD" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.PALE_GREEN">
+<span class="sig-name descname"><span class="pre">PALE_GREEN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'PaleGreen'</span></em><a class="headerlink" href="#pyk.kast.color.Color.PALE_GREEN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.PALE_TURQUOISE">
+<span class="sig-name descname"><span class="pre">PALE_TURQUOISE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'PaleTurquoise'</span></em><a class="headerlink" href="#pyk.kast.color.Color.PALE_TURQUOISE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.PALE_VIOLET_RED">
+<span class="sig-name descname"><span class="pre">PALE_VIOLET_RED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'PaleVioletRed'</span></em><a class="headerlink" href="#pyk.kast.color.Color.PALE_VIOLET_RED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.PAPAYA_WHIP">
+<span class="sig-name descname"><span class="pre">PAPAYA_WHIP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'PapayaWhip'</span></em><a class="headerlink" href="#pyk.kast.color.Color.PAPAYA_WHIP" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.PEACH">
+<span class="sig-name descname"><span class="pre">PEACH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Peach'</span></em><a class="headerlink" href="#pyk.kast.color.Color.PEACH" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.PEACH_PUFF">
+<span class="sig-name descname"><span class="pre">PEACH_PUFF</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'PeachPuff'</span></em><a class="headerlink" href="#pyk.kast.color.Color.PEACH_PUFF" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.PERIWINKLE">
+<span class="sig-name descname"><span class="pre">PERIWINKLE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Periwinkle'</span></em><a class="headerlink" href="#pyk.kast.color.Color.PERIWINKLE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.PERU">
+<span class="sig-name descname"><span class="pre">PERU</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Peru'</span></em><a class="headerlink" href="#pyk.kast.color.Color.PERU" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.PINE_GREEN">
+<span class="sig-name descname"><span class="pre">PINE_GREEN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'PineGreen'</span></em><a class="headerlink" href="#pyk.kast.color.Color.PINE_GREEN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.PINK">
+<span class="sig-name descname"><span class="pre">PINK</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pink'</span></em><a class="headerlink" href="#pyk.kast.color.Color.PINK" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.PLUM">
+<span class="sig-name descname"><span class="pre">PLUM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Plum'</span></em><a class="headerlink" href="#pyk.kast.color.Color.PLUM" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.POWDER_BLUE">
+<span class="sig-name descname"><span class="pre">POWDER_BLUE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'PowderBlue'</span></em><a class="headerlink" href="#pyk.kast.color.Color.POWDER_BLUE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.PROCESS_BLUE">
+<span class="sig-name descname"><span class="pre">PROCESS_BLUE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ProcessBlue'</span></em><a class="headerlink" href="#pyk.kast.color.Color.PROCESS_BLUE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.PURPLE">
+<span class="sig-name descname"><span class="pre">PURPLE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'purple'</span></em><a class="headerlink" href="#pyk.kast.color.Color.PURPLE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.RAW_SIENNA">
+<span class="sig-name descname"><span class="pre">RAW_SIENNA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'RawSienna'</span></em><a class="headerlink" href="#pyk.kast.color.Color.RAW_SIENNA" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.RED">
+<span class="sig-name descname"><span class="pre">RED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'red'</span></em><a class="headerlink" href="#pyk.kast.color.Color.RED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.RED_ORANGE">
+<span class="sig-name descname"><span class="pre">RED_ORANGE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'RedOrange'</span></em><a class="headerlink" href="#pyk.kast.color.Color.RED_ORANGE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.RED_VIOLET">
+<span class="sig-name descname"><span class="pre">RED_VIOLET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'RedViolet'</span></em><a class="headerlink" href="#pyk.kast.color.Color.RED_VIOLET" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.RHODAMINE">
+<span class="sig-name descname"><span class="pre">RHODAMINE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Rhodamine'</span></em><a class="headerlink" href="#pyk.kast.color.Color.RHODAMINE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.ROSY_BROWN">
+<span class="sig-name descname"><span class="pre">ROSY_BROWN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'RosyBrown'</span></em><a class="headerlink" href="#pyk.kast.color.Color.ROSY_BROWN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.ROYAL_BLUE">
+<span class="sig-name descname"><span class="pre">ROYAL_BLUE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'RoyalBlue'</span></em><a class="headerlink" href="#pyk.kast.color.Color.ROYAL_BLUE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.ROYAL_PURPLE">
+<span class="sig-name descname"><span class="pre">ROYAL_PURPLE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'RoyalPurple'</span></em><a class="headerlink" href="#pyk.kast.color.Color.ROYAL_PURPLE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.RUBINE_RED">
+<span class="sig-name descname"><span class="pre">RUBINE_RED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'RubineRed'</span></em><a class="headerlink" href="#pyk.kast.color.Color.RUBINE_RED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.SADDLE_BROWN">
+<span class="sig-name descname"><span class="pre">SADDLE_BROWN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'SaddleBrown'</span></em><a class="headerlink" href="#pyk.kast.color.Color.SADDLE_BROWN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.SALMON">
+<span class="sig-name descname"><span class="pre">SALMON</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Salmon'</span></em><a class="headerlink" href="#pyk.kast.color.Color.SALMON" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.SANDY_BROWN">
+<span class="sig-name descname"><span class="pre">SANDY_BROWN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'SandyBrown'</span></em><a class="headerlink" href="#pyk.kast.color.Color.SANDY_BROWN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.SEASHELL">
+<span class="sig-name descname"><span class="pre">SEASHELL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Seashell'</span></em><a class="headerlink" href="#pyk.kast.color.Color.SEASHELL" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.SEA_GREEN">
+<span class="sig-name descname"><span class="pre">SEA_GREEN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'SeaGreen'</span></em><a class="headerlink" href="#pyk.kast.color.Color.SEA_GREEN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.SEPIA">
+<span class="sig-name descname"><span class="pre">SEPIA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Sepia'</span></em><a class="headerlink" href="#pyk.kast.color.Color.SEPIA" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.SIENNA">
+<span class="sig-name descname"><span class="pre">SIENNA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Sienna'</span></em><a class="headerlink" href="#pyk.kast.color.Color.SIENNA" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.SILVER">
+<span class="sig-name descname"><span class="pre">SILVER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Silver'</span></em><a class="headerlink" href="#pyk.kast.color.Color.SILVER" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.SKY_BLUE">
+<span class="sig-name descname"><span class="pre">SKY_BLUE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'SkyBlue'</span></em><a class="headerlink" href="#pyk.kast.color.Color.SKY_BLUE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.SLATE_BLUE">
+<span class="sig-name descname"><span class="pre">SLATE_BLUE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'SlateBlue'</span></em><a class="headerlink" href="#pyk.kast.color.Color.SLATE_BLUE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.SLATE_GRAY">
+<span class="sig-name descname"><span class="pre">SLATE_GRAY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'SlateGray'</span></em><a class="headerlink" href="#pyk.kast.color.Color.SLATE_GRAY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.SLATE_GREY">
+<span class="sig-name descname"><span class="pre">SLATE_GREY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'SlateGrey'</span></em><a class="headerlink" href="#pyk.kast.color.Color.SLATE_GREY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.SNOW">
+<span class="sig-name descname"><span class="pre">SNOW</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Snow'</span></em><a class="headerlink" href="#pyk.kast.color.Color.SNOW" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.SPRING_GREEN">
+<span class="sig-name descname"><span class="pre">SPRING_GREEN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'SpringGreen'</span></em><a class="headerlink" href="#pyk.kast.color.Color.SPRING_GREEN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.STEEL_BLUE">
+<span class="sig-name descname"><span class="pre">STEEL_BLUE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'SteelBlue'</span></em><a class="headerlink" href="#pyk.kast.color.Color.STEEL_BLUE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.TAN">
+<span class="sig-name descname"><span class="pre">TAN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Tan'</span></em><a class="headerlink" href="#pyk.kast.color.Color.TAN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.TEAL">
+<span class="sig-name descname"><span class="pre">TEAL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'teal'</span></em><a class="headerlink" href="#pyk.kast.color.Color.TEAL" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.TEAL_BLUE">
+<span class="sig-name descname"><span class="pre">TEAL_BLUE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'TealBlue'</span></em><a class="headerlink" href="#pyk.kast.color.Color.TEAL_BLUE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.THISTLE">
+<span class="sig-name descname"><span class="pre">THISTLE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Thistle'</span></em><a class="headerlink" href="#pyk.kast.color.Color.THISTLE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.TOMATO">
+<span class="sig-name descname"><span class="pre">TOMATO</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Tomato'</span></em><a class="headerlink" href="#pyk.kast.color.Color.TOMATO" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.TURQUOISE">
+<span class="sig-name descname"><span class="pre">TURQUOISE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Turquoise'</span></em><a class="headerlink" href="#pyk.kast.color.Color.TURQUOISE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.VIOLET">
+<span class="sig-name descname"><span class="pre">VIOLET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'violet'</span></em><a class="headerlink" href="#pyk.kast.color.Color.VIOLET" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.VIOLET_RED">
+<span class="sig-name descname"><span class="pre">VIOLET_RED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'VioletRed'</span></em><a class="headerlink" href="#pyk.kast.color.Color.VIOLET_RED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.WHEAT">
+<span class="sig-name descname"><span class="pre">WHEAT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Wheat'</span></em><a class="headerlink" href="#pyk.kast.color.Color.WHEAT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.WHITE">
+<span class="sig-name descname"><span class="pre">WHITE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'white'</span></em><a class="headerlink" href="#pyk.kast.color.Color.WHITE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.WHITE_SMOKE">
+<span class="sig-name descname"><span class="pre">WHITE_SMOKE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'WhiteSmoke'</span></em><a class="headerlink" href="#pyk.kast.color.Color.WHITE_SMOKE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.WILD_STRAWBERRY">
+<span class="sig-name descname"><span class="pre">WILD_STRAWBERRY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'WildStrawberry'</span></em><a class="headerlink" href="#pyk.kast.color.Color.WILD_STRAWBERRY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.YELLOW">
+<span class="sig-name descname"><span class="pre">YELLOW</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'yellow'</span></em><a class="headerlink" href="#pyk.kast.color.Color.YELLOW" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.YELLOW_GREEN">
+<span class="sig-name descname"><span class="pre">YELLOW_GREEN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'YellowGreen'</span></em><a class="headerlink" href="#pyk.kast.color.Color.YELLOW_GREEN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.YELLOW_ORANGE">
+<span class="sig-name descname"><span class="pre">YELLOW_ORANGE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'YellowOrange'</span></em><a class="headerlink" href="#pyk.kast.color.Color.YELLOW_ORANGE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.ansi_code">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ansi_code</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.kast.color.Color.ansi_code" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.reset">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file:</span> <span class="pre">IO[str]</span> <span class="pre">=</span> <span class="pre">&lt;_io.TextIOWrapper</span> <span class="pre">name='&lt;stdout&gt;'</span> <span class="pre">mode='w'</span> <span class="pre">encoding='utf-8'&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kast/color.html#Color.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.color.Color.reset" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.reset_code">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reset_code</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/pyk/kast/color.html#Color.reset_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.color.Color.reset_code" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kast.color.Color.set">
+<span class="sig-name descname"><span class="pre">set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file:</span> <span class="pre">IO[str]</span> <span class="pre">=</span> <span class="pre">&lt;_io.TextIOWrapper</span> <span class="pre">name='&lt;stdout&gt;'</span> <span class="pre">mode='w'</span> <span class="pre">encoding='utf-8'&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kast/color.html#Color.set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.color.Color.set" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pyk.kast.att.html" class="btn btn-neutral float-left" title="pyk.kast.att module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pyk.kast.formatter.html" class="btn btn-neutral float-right" title="pyk.kast.formatter module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Runtime Verification, Inc.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

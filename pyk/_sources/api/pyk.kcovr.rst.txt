@@ -1,0 +1,7 @@
+pyk.kcovr module
+================
+
+.. automodule:: pyk.kcovr
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,405 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyk.kcfg.minimize &mdash; pyk 7.1.313 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=9c1be6d9"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            pyk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">pyk</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pyk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pyk.kcfg.minimize</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyk.kcfg.minimize</h1><div class="highlight"><pre>
+<span></span><span class="linenos">  1</span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<span class="linenos">  2</span>
+<span class="linenos">  3</span><span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">reduce</span>
+<span class="linenos">  4</span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="linenos">  5</span>
+<span class="linenos">  6</span><span class="kn">from</span><span class="w"> </span><span class="nn">..cterm.cterm</span><span class="w"> </span><span class="kn">import</span> <span class="n">cterms_anti_unify</span>
+<span class="linenos">  7</span><span class="kn">from</span><span class="w"> </span><span class="nn">..utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">partition</span><span class="p">,</span> <span class="n">single</span>
+<span class="linenos">  8</span><span class="kn">from</span><span class="w"> </span><span class="nn">.semantics</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultSemantics</span>
+<span class="linenos">  9</span>
+<span class="linenos"> 10</span><span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+<span class="linenos"> 11</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
+<span class="linenos"> 12</span>
+<span class="linenos"> 13</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">..kast.outer</span><span class="w"> </span><span class="kn">import</span> <span class="n">KDefinition</span>
+<span class="linenos"> 14</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">.kcfg</span><span class="w"> </span><span class="kn">import</span> <span class="n">KCFG</span><span class="p">,</span> <span class="n">NodeIdLike</span>
+<span class="linenos"> 15</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">.semantics</span><span class="w"> </span><span class="kn">import</span> <span class="n">KCFGSemantics</span>
+<span class="linenos"> 16</span>
+<span class="linenos"> 17</span>
+<div class="viewcode-block" id="KCFGMinimizer">
+<a class="viewcode-back" href="../../../api/pyk.kcfg.minimize.html#pyk.kcfg.minimize.KCFGMinimizer">[docs]</a>
+<span class="linenos"> 18</span><span class="k">class</span><span class="w"> </span><span class="nc">KCFGMinimizer</span><span class="p">:</span>
+<span class="linenos"> 19</span>    <span class="n">kcfg</span><span class="p">:</span> <span class="n">KCFG</span>
+<span class="linenos"> 20</span>    <span class="n">semantics</span><span class="p">:</span> <span class="n">KCFGSemantics</span>
+<span class="linenos"> 21</span>    <span class="n">kdef</span><span class="p">:</span> <span class="n">KDefinition</span> <span class="o">|</span> <span class="kc">None</span>
+<span class="linenos"> 22</span>
+<span class="linenos"> 23</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcfg</span><span class="p">:</span> <span class="n">KCFG</span><span class="p">,</span> <span class="n">heuristics</span><span class="p">:</span> <span class="n">KCFGSemantics</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">kdef</span><span class="p">:</span> <span class="n">KDefinition</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos"> 24</span>        <span class="k">if</span> <span class="n">heuristics</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos"> 25</span>            <span class="n">heuristics</span> <span class="o">=</span> <span class="n">DefaultSemantics</span><span class="p">()</span>
+<span class="linenos"> 26</span>        <span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span> <span class="o">=</span> <span class="n">kcfg</span>
+<span class="linenos"> 27</span>        <span class="bp">self</span><span class="o">.</span><span class="n">semantics</span> <span class="o">=</span> <span class="n">heuristics</span>
+<span class="linenos"> 28</span>        <span class="bp">self</span><span class="o">.</span><span class="n">kdef</span> <span class="o">=</span> <span class="n">kdef</span>
+<span class="linenos"> 29</span>
+<div class="viewcode-block" id="KCFGMinimizer.lift_edge">
+<a class="viewcode-back" href="../../../api/pyk.kcfg.minimize.html#pyk.kcfg.minimize.KCFGMinimizer.lift_edge">[docs]</a>
+<span class="linenos"> 30</span>    <span class="k">def</span><span class="w"> </span><span class="nf">lift_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b_id</span><span class="p">:</span> <span class="n">NodeIdLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos"> 31</span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Lift an edge up another edge directly preceding it.</span>
+<span class="linenos"> 32</span>
+<span class="linenos"> 33</span><span class="sd">        `A --M steps--&gt; B --N steps--&gt; C` becomes `A --(M + N) steps--&gt; C`. Node `B` is removed.</span>
+<span class="linenos"> 34</span>
+<span class="linenos"> 35</span><span class="sd">        Args:</span>
+<span class="linenos"> 36</span><span class="sd">            b_id: the identifier of the central node `B` of a sequence of edges `A --&gt; B --&gt; C`.</span>
+<span class="linenos"> 37</span>
+<span class="linenos"> 38</span><span class="sd">        Raises:</span>
+<span class="linenos"> 39</span><span class="sd">            AssertionError: If the edges in question are not in place.</span>
+<span class="linenos"> 40</span><span class="sd">        &quot;&quot;&quot;</span>
+<span class="linenos"> 41</span>        <span class="c1"># Obtain edges `A -&gt; B`, `B -&gt; C`</span>
+<span class="linenos"> 42</span>        <span class="n">a_to_b</span> <span class="o">=</span> <span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">target_id</span><span class="o">=</span><span class="n">b_id</span><span class="p">))</span>
+<span class="linenos"> 43</span>        <span class="n">b_to_c</span> <span class="o">=</span> <span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">source_id</span><span class="o">=</span><span class="n">b_id</span><span class="p">))</span>
+<span class="linenos"> 44</span>        <span class="c1"># Remove the node `B`, effectively removing the entire initial structure</span>
+<span class="linenos"> 45</span>        <span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">remove_node</span><span class="p">(</span><span class="n">b_id</span><span class="p">)</span>
+<span class="linenos"> 46</span>        <span class="c1"># Create edge `A -&gt; C`</span>
+<span class="linenos"> 47</span>        <span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">create_edge</span><span class="p">(</span>
+<span class="linenos"> 48</span>            <span class="n">a_to_b</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">b_to_c</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">a_to_b</span><span class="o">.</span><span class="n">depth</span> <span class="o">+</span> <span class="n">b_to_c</span><span class="o">.</span><span class="n">depth</span><span class="p">,</span> <span class="n">a_to_b</span><span class="o">.</span><span class="n">rules</span> <span class="o">+</span> <span class="n">b_to_c</span><span class="o">.</span><span class="n">rules</span>
+<span class="linenos"> 49</span>        <span class="p">)</span></div>
+
+<span class="linenos"> 50</span>
+<div class="viewcode-block" id="KCFGMinimizer.lift_edges">
+<a class="viewcode-back" href="../../../api/pyk.kcfg.minimize.html#pyk.kcfg.minimize.KCFGMinimizer.lift_edges">[docs]</a>
+<span class="linenos"> 51</span>    <span class="k">def</span><span class="w"> </span><span class="nf">lift_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="linenos"> 52</span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform all possible edge lifts across the KCFG.</span>
+<span class="linenos"> 53</span>
+<span class="linenos"> 54</span><span class="sd">        The KCFG is transformed to an equivalent in which no further edge lifts are possible.</span>
+<span class="linenos"> 55</span>
+<span class="linenos"> 56</span><span class="sd">        Given the KCFG design, it is not possible for one edge lift to either disallow another or</span>
+<span class="linenos"> 57</span><span class="sd">        allow another that was not previously possible. Therefore, this function is guaranteed to</span>
+<span class="linenos"> 58</span><span class="sd">        lift all possible edges without having to loop.</span>
+<span class="linenos"> 59</span>
+<span class="linenos"> 60</span><span class="sd">        Returns:</span>
+<span class="linenos"> 61</span><span class="sd">            An indicator of whether or not at least one edge lift was performed.</span>
+<span class="linenos"> 62</span><span class="sd">        &quot;&quot;&quot;</span>
+<span class="linenos"> 63</span>        <span class="n">edges_to_lift</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+<span class="linenos"> 64</span>            <span class="p">[</span>
+<span class="linenos"> 65</span>                <span class="n">node</span><span class="o">.</span><span class="n">id</span>
+<span class="linenos"> 66</span>                <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">nodes</span>
+<span class="linenos"> 67</span>                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">source_id</span><span class="o">=</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">target_id</span><span class="o">=</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span>
+<span class="linenos"> 68</span>            <span class="p">]</span>
+<span class="linenos"> 69</span>        <span class="p">)</span>
+<span class="linenos"> 70</span>        <span class="k">for</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="n">edges_to_lift</span><span class="p">:</span>
+<span class="linenos"> 71</span>            <span class="bp">self</span><span class="o">.</span><span class="n">lift_edge</span><span class="p">(</span><span class="n">node_id</span><span class="p">)</span>
+<span class="linenos"> 72</span>        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">edges_to_lift</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
+
+<span class="linenos"> 73</span>
+<div class="viewcode-block" id="KCFGMinimizer.lift_split_edge">
+<a class="viewcode-back" href="../../../api/pyk.kcfg.minimize.html#pyk.kcfg.minimize.KCFGMinimizer.lift_split_edge">[docs]</a>
+<span class="linenos"> 74</span>    <span class="k">def</span><span class="w"> </span><span class="nf">lift_split_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b_id</span><span class="p">:</span> <span class="n">NodeIdLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos"> 75</span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Lift a split up an edge directly preceding it.</span>
+<span class="linenos"> 76</span>
+<span class="linenos"> 77</span><span class="sd">        `A --M steps--&gt; B --[cond_1, ..., cond_N]--&gt; [C_1, ..., C_N]` becomes</span>
+<span class="linenos"> 78</span><span class="sd">        `A --[cond_1, ..., cond_N]--&gt; [A #And cond_1 --M steps--&gt; C_1, ..., A #And cond_N --M steps--&gt; C_N]`.</span>
+<span class="linenos"> 79</span><span class="sd">        Node `B` is removed.</span>
+<span class="linenos"> 80</span>
+<span class="linenos"> 81</span><span class="sd">        Args:</span>
+<span class="linenos"> 82</span><span class="sd">            b_id: The identifier of the central node `B` of the structure `A --&gt; B --&gt; [C_1, ..., C_N]`.</span>
+<span class="linenos"> 83</span>
+<span class="linenos"> 84</span><span class="sd">        Raises:</span>
+<span class="linenos"> 85</span><span class="sd">            AssertionError: If the structure in question is not in place.</span>
+<span class="linenos"> 86</span><span class="sd">            AssertionError: If any of the `cond_i` contain variables not present in `A`.</span>
+<span class="linenos"> 87</span><span class="sd">        &quot;&quot;&quot;</span>
+<span class="linenos"> 88</span>        <span class="c1"># Obtain edge `A -&gt; B`, split `[cond_I, C_I | I = 1..N ]`</span>
+<span class="linenos"> 89</span>        <span class="n">a_to_b</span> <span class="o">=</span> <span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">target_id</span><span class="o">=</span><span class="n">b_id</span><span class="p">))</span>
+<span class="linenos"> 90</span>        <span class="n">a</span> <span class="o">=</span> <span class="n">a_to_b</span><span class="o">.</span><span class="n">source</span>
+<span class="linenos"> 91</span>        <span class="n">split_from_b</span> <span class="o">=</span> <span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">splits</span><span class="p">(</span><span class="n">source_id</span><span class="o">=</span><span class="n">b_id</span><span class="p">))</span>
+<span class="linenos"> 92</span>        <span class="n">ci</span><span class="p">,</span> <span class="n">csubsts</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">split_from_b</span><span class="o">.</span><span class="n">splits</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="nb">list</span><span class="p">(</span><span class="n">split_from_b</span><span class="o">.</span><span class="n">splits</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+<span class="linenos"> 93</span>        <span class="c1"># Ensure split can be lifted soundly (i.e., that it does not introduce fresh variables)</span>
+<span class="linenos"> 94</span>        <span class="k">assert</span> <span class="p">(</span>
+<span class="linenos"> 95</span>            <span class="nb">len</span><span class="p">(</span><span class="n">split_from_b</span><span class="o">.</span><span class="n">source_vars</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">free_vars</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span>
+<span class="linenos"> 96</span>            <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">split_from_b</span><span class="o">.</span><span class="n">target_vars</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">split_from_b</span><span class="o">.</span><span class="n">source_vars</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span>  <span class="c1"># &lt;-- Can we delete this check?</span>
+<span class="linenos"> 97</span>        <span class="p">)</span>
+<span class="linenos"> 98</span>        <span class="c1"># Create CTerms and CSubsts corresponding to the new targets of the split</span>
+<span class="linenos"> 99</span>        <span class="n">new_cterms</span> <span class="o">=</span> <span class="p">[</span><span class="n">csubst</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">cterm</span><span class="p">)</span> <span class="k">for</span> <span class="n">csubst</span> <span class="ow">in</span> <span class="n">csubsts</span><span class="p">]</span>
+<span class="linenos">100</span>        <span class="c1"># Remove the node `B`, effectively removing the entire initial structure</span>
+<span class="linenos">101</span>        <span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">remove_node</span><span class="p">(</span><span class="n">b_id</span><span class="p">)</span>
+<span class="linenos">102</span>        <span class="c1"># Create the nodes `[ A #And cond_I | I = 1..N ]`.</span>
+<span class="linenos">103</span>        <span class="n">ai</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">NodeIdLike</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">create_node</span><span class="p">(</span><span class="n">cterm</span><span class="p">)</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">cterm</span> <span class="ow">in</span> <span class="n">new_cterms</span><span class="p">]</span>
+<span class="linenos">104</span>        <span class="c1"># Create the edges `[A #And cond_1 --M steps--&gt; C_I | I = 1..N ]`</span>
+<span class="linenos">105</span>        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ai</span><span class="p">)):</span>
+<span class="linenos">106</span>            <span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">create_edge</span><span class="p">(</span><span class="n">ai</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">ci</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">a_to_b</span><span class="o">.</span><span class="n">depth</span><span class="p">,</span> <span class="n">a_to_b</span><span class="o">.</span><span class="n">rules</span><span class="p">)</span>
+<span class="linenos">107</span>        <span class="c1"># Create the split `A --[cond_1, ..., cond_N]--&gt; [A #And cond_1, ..., A #And cond_N]</span>
+<span class="linenos">108</span>        <span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">create_split_by_nodes</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">ai</span><span class="p">)</span></div>
+
+<span class="linenos">109</span>
+<div class="viewcode-block" id="KCFGMinimizer.lift_split_split">
+<a class="viewcode-back" href="../../../api/pyk.kcfg.minimize.html#pyk.kcfg.minimize.KCFGMinimizer.lift_split_split">[docs]</a>
+<span class="linenos">110</span>    <span class="k">def</span><span class="w"> </span><span class="nf">lift_split_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b_id</span><span class="p">:</span> <span class="n">NodeIdLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">111</span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Lift a split up a split directly preceding it, joining them into a single split.</span>
+<span class="linenos">112</span>
+<span class="linenos">113</span><span class="sd">        `A --[..., cond_B, ...]--&gt; [..., B, ...]` with `B --[cond_1, ..., cond_N]--&gt; [C_1, ..., C_N]` becomes</span>
+<span class="linenos">114</span><span class="sd">        `A --[..., cond_B #And cond_1, ..., cond_B #And cond_N, ...]--&gt; [..., C_1, ..., C_N, ...]`.</span>
+<span class="linenos">115</span><span class="sd">        Node `B` is removed.</span>
+<span class="linenos">116</span>
+<span class="linenos">117</span><span class="sd">        Args:</span>
+<span class="linenos">118</span><span class="sd">            b_id: the identifier of the node `B` of the structure</span>
+<span class="linenos">119</span><span class="sd">              `A --[..., cond_B, ...]--&gt; [..., B, ...]` with `B --[cond_1, ..., cond_N]--&gt; [C_1, ..., C_N]`.</span>
+<span class="linenos">120</span>
+<span class="linenos">121</span><span class="sd">        Raises:</span>
+<span class="linenos">122</span><span class="sd">            AssertionError: If the structure in question is not in place.</span>
+<span class="linenos">123</span><span class="sd">        &quot;&quot;&quot;</span>
+<span class="linenos">124</span>        <span class="c1"># Obtain splits `A --[..., cond_B, ...]--&gt; [..., B, ...]` and</span>
+<span class="linenos">125</span>        <span class="c1"># `B --[cond_1, ..., cond_N]--&gt; [C_1, ..., C_N]-&gt; [C_1, ..., C_N]`</span>
+<span class="linenos">126</span>        <span class="n">split_from_a</span><span class="p">,</span> <span class="n">split_from_b</span> <span class="o">=</span> <span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">splits</span><span class="p">(</span><span class="n">target_id</span><span class="o">=</span><span class="n">b_id</span><span class="p">)),</span> <span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">splits</span><span class="p">(</span><span class="n">source_id</span><span class="o">=</span><span class="n">b_id</span><span class="p">))</span>
+<span class="linenos">127</span>        <span class="n">splits_from_a</span><span class="p">,</span> <span class="n">splits_from_b</span> <span class="o">=</span> <span class="n">split_from_a</span><span class="o">.</span><span class="n">splits</span><span class="p">,</span> <span class="n">split_from_b</span><span class="o">.</span><span class="n">splits</span>
+<span class="linenos">128</span>        <span class="n">a</span> <span class="o">=</span> <span class="n">split_from_a</span><span class="o">.</span><span class="n">source</span>
+<span class="linenos">129</span>        <span class="nb">list</span><span class="p">(</span><span class="n">splits_from_b</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+<span class="linenos">130</span>        <span class="c1"># Ensure split can be lifted soundly (i.e., that it does not introduce fresh variables)</span>
+<span class="linenos">131</span>        <span class="k">assert</span> <span class="p">(</span>  <span class="c1"># &lt;-- Does it will be a problem when using merging nodes, because it would introduce new variables?</span>
+<span class="linenos">132</span>            <span class="nb">len</span><span class="p">(</span><span class="n">split_from_b</span><span class="o">.</span><span class="n">source_vars</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">free_vars</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span>
+<span class="linenos">133</span>            <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">split_from_b</span><span class="o">.</span><span class="n">target_vars</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">split_from_b</span><span class="o">.</span><span class="n">source_vars</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span>
+<span class="linenos">134</span>        <span class="p">)</span>
+<span class="linenos">135</span>        <span class="c1"># Remove the node `B`, thereby removing the two splits as well</span>
+<span class="linenos">136</span>        <span class="n">splits_from_a</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">b_id</span><span class="p">)</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+<span class="linenos">137</span>        <span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">remove_node</span><span class="p">(</span><span class="n">b_id</span><span class="p">)</span>
+<span class="linenos">138</span>        <span class="c1"># Create the new split `A --[..., cond_B #And cond_1, ..., cond_B #And cond_N, ...]--&gt; [..., C_1, ..., C_N, ...]`</span>
+<span class="linenos">139</span>        <span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">create_split_by_nodes</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">splits_from_a</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">splits_from_b</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span></div>
+
+<span class="linenos">140</span>
+<div class="viewcode-block" id="KCFGMinimizer.lift_splits">
+<a class="viewcode-back" href="../../../api/pyk.kcfg.minimize.html#pyk.kcfg.minimize.KCFGMinimizer.lift_splits">[docs]</a>
+<span class="linenos">141</span>    <span class="k">def</span><span class="w"> </span><span class="nf">lift_splits</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="linenos">142</span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform all possible split liftings.</span>
+<span class="linenos">143</span>
+<span class="linenos">144</span><span class="sd">        The KCFG is transformed to an equivalent in which no further split lifts are possible.</span>
+<span class="linenos">145</span>
+<span class="linenos">146</span><span class="sd">        Returns:</span>
+<span class="linenos">147</span><span class="sd">            An indicator of whether or not at least one split lift was performed.</span>
+<span class="linenos">148</span><span class="sd">        &quot;&quot;&quot;</span>
+<span class="linenos">149</span>
+<span class="linenos">150</span>        <span class="k">def</span><span class="w"> </span><span class="nf">_lift_split</span><span class="p">(</span><span class="n">finder</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">lifter</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="linenos">151</span>            <span class="n">result</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="linenos">152</span>            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+<span class="linenos">153</span>                <span class="n">splits_to_lift</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+<span class="linenos">154</span>                    <span class="p">[</span>
+<span class="linenos">155</span>                        <span class="n">node</span><span class="o">.</span><span class="n">id</span>
+<span class="linenos">156</span>                        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">nodes</span>
+<span class="linenos">157</span>                        <span class="k">if</span> <span class="p">(</span><span class="n">splits</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">splits</span><span class="p">(</span><span class="n">source_id</span><span class="o">=</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">))</span> <span class="o">!=</span> <span class="p">[]</span>
+<span class="linenos">158</span>                        <span class="ow">and</span> <span class="p">(</span><span class="n">sources</span> <span class="o">:=</span> <span class="n">finder</span><span class="p">(</span><span class="n">target_id</span><span class="o">=</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">))</span> <span class="o">!=</span> <span class="p">[]</span>
+<span class="linenos">159</span>                        <span class="ow">and</span> <span class="p">(</span><span class="n">source</span> <span class="o">:=</span> <span class="n">single</span><span class="p">(</span><span class="n">sources</span><span class="p">)</span><span class="o">.</span><span class="n">source</span><span class="p">)</span>
+<span class="linenos">160</span>                        <span class="ow">and</span> <span class="p">(</span><span class="n">split</span> <span class="o">:=</span> <span class="n">single</span><span class="p">(</span><span class="n">splits</span><span class="p">))</span>
+<span class="linenos">161</span>                        <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">split</span><span class="o">.</span><span class="n">source_vars</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">free_vars</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span>
+<span class="linenos">162</span>                        <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">split</span><span class="o">.</span><span class="n">target_vars</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">split</span><span class="o">.</span><span class="n">source_vars</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span>
+<span class="linenos">163</span>                    <span class="p">]</span>
+<span class="linenos">164</span>                <span class="p">)</span>
+<span class="linenos">165</span>                <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">splits_to_lift</span><span class="p">:</span>
+<span class="linenos">166</span>                    <span class="n">lifter</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+<span class="linenos">167</span>                    <span class="n">result</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="linenos">168</span>                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">splits_to_lift</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+<span class="linenos">169</span>                    <span class="k">break</span>
+<span class="linenos">170</span>            <span class="k">return</span> <span class="n">result</span>
+<span class="linenos">171</span>
+<span class="linenos">172</span>        <span class="k">def</span><span class="w"> </span><span class="nf">_fold_lift</span><span class="p">(</span><span class="n">result</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">finder_lifter</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="n">Callable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="linenos">173</span>            <span class="k">return</span> <span class="n">_lift_split</span><span class="p">(</span><span class="n">finder_lifter</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">finder_lifter</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="ow">or</span> <span class="n">result</span>
+<span class="linenos">174</span>
+<span class="linenos">175</span>        <span class="k">return</span> <span class="n">reduce</span><span class="p">(</span>
+<span class="linenos">176</span>            <span class="n">_fold_lift</span><span class="p">,</span> <span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lift_split_edge</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">splits</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lift_split_split</span><span class="p">)],</span> <span class="kc">False</span>
+<span class="linenos">177</span>        <span class="p">)</span></div>
+
+<span class="linenos">178</span>
+<div class="viewcode-block" id="KCFGMinimizer.merge_nodes">
+<a class="viewcode-back" href="../../../api/pyk.kcfg.minimize.html#pyk.kcfg.minimize.KCFGMinimizer.merge_nodes">[docs]</a>
+<span class="linenos">179</span>    <span class="k">def</span><span class="w"> </span><span class="nf">merge_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="linenos">180</span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Merge targets of Split for cutting down the number of branches, using heuristics KCFGSemantics.is_mergeable.</span>
+<span class="linenos">181</span>
+<span class="linenos">182</span><span class="sd">        Side Effect: The KCFG is rewritten by the following rewrite pattern,</span>
+<span class="linenos">183</span><span class="sd">            - Match: A -|Split|-&gt; A_i -|Edge|-&gt; B_i</span>
+<span class="linenos">184</span><span class="sd">            - Rewrite:</span>
+<span class="linenos">185</span><span class="sd">                - if `B_x, B_y, ..., B_z are not mergeable` then unchanged</span>
+<span class="linenos">186</span><span class="sd">                - if `B_x, B_y, ..., B_z are mergeable`, then</span>
+<span class="linenos">187</span><span class="sd">                    - A -|Split|-&gt; A_x or A_y or ... or A_z</span>
+<span class="linenos">188</span><span class="sd">                    - A_x or A_y or ... or A_z -|Edge|-&gt; B_x or B_y or ... or B_z</span>
+<span class="linenos">189</span><span class="sd">                    - B_x or B_y or ... or B_z -|Split|-&gt; B_x, B_y, ..., B_z</span>
+<span class="linenos">190</span>
+<span class="linenos">191</span><span class="sd">        Specifically, when `B_merge = B_x or B_y or ... or B_z`</span>
+<span class="linenos">192</span><span class="sd">        - `or`: fresh variables in places where the configurations differ</span>
+<span class="linenos">193</span><span class="sd">        - `Edge` in A_merged -|Edge|-&gt; B_merge: list of merged edges is from A_i -|Edge|-&gt; B_i</span>
+<span class="linenos">194</span><span class="sd">        - `Split` in B_merge -|Split|-&gt; B_x, B_y, ..., B_z: subst for it is from A -|Split|-&gt; A_1, A_2, ..., A_n</span>
+<span class="linenos">195</span><span class="sd">        :param semantics: provides the is_mergeable heuristic</span>
+<span class="linenos">196</span><span class="sd">        :return: whether any merge was performed</span>
+<span class="linenos">197</span><span class="sd">        &quot;&quot;&quot;</span>
+<span class="linenos">198</span>
+<span class="linenos">199</span>        <span class="k">def</span><span class="w"> </span><span class="nf">_is_mergeable</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">KCFG</span><span class="o">.</span><span class="n">Edge</span> <span class="o">|</span> <span class="n">KCFG</span><span class="o">.</span><span class="n">MergedEdge</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">KCFG</span><span class="o">.</span><span class="n">Edge</span> <span class="o">|</span> <span class="n">KCFG</span><span class="o">.</span><span class="n">MergedEdge</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="linenos">200</span>            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">semantics</span><span class="o">.</span><span class="n">is_mergeable</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">cterm</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">cterm</span><span class="p">)</span>
+<span class="linenos">201</span>
+<span class="linenos">202</span>        <span class="c1"># ---- Match ----</span>
+<span class="linenos">203</span>
+<span class="linenos">204</span>        <span class="c1"># A -|Split|&gt; Ai -|Edge/MergedEdge|&gt; Mergeable Bi</span>
+<span class="linenos">205</span>        <span class="n">sub_graphs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">KCFG</span><span class="o">.</span><span class="n">Split</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">KCFG</span><span class="o">.</span><span class="n">Edge</span> <span class="o">|</span> <span class="n">KCFG</span><span class="o">.</span><span class="n">MergedEdge</span><span class="p">]]]]</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">206</span>
+<span class="linenos">207</span>        <span class="k">for</span> <span class="n">split</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">splits</span><span class="p">():</span>
+<span class="linenos">208</span>            <span class="n">_edges</span> <span class="o">=</span> <span class="p">[</span>
+<span class="linenos">209</span>                <span class="n">single</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">general_edges</span><span class="p">(</span><span class="n">source_id</span><span class="o">=</span><span class="n">ai</span><span class="p">))</span>
+<span class="linenos">210</span>                <span class="k">for</span> <span class="n">ai</span> <span class="ow">in</span> <span class="n">split</span><span class="o">.</span><span class="n">target_ids</span>
+<span class="linenos">211</span>                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">general_edges</span><span class="p">(</span><span class="n">source_id</span><span class="o">=</span><span class="n">ai</span><span class="p">)</span>
+<span class="linenos">212</span>            <span class="p">]</span>
+<span class="linenos">213</span>            <span class="n">_partitions</span> <span class="o">=</span> <span class="n">partition</span><span class="p">(</span><span class="n">_edges</span><span class="p">,</span> <span class="n">_is_mergeable</span><span class="p">)</span>
+<span class="linenos">214</span>            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">_partitions</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">_edges</span><span class="p">):</span>
+<span class="linenos">215</span>                <span class="n">sub_graphs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">split</span><span class="p">,</span> <span class="n">_partitions</span><span class="p">))</span>
+<span class="linenos">216</span>
+<span class="linenos">217</span>        <span class="k">if</span> <span class="ow">not</span> <span class="n">sub_graphs</span><span class="p">:</span>
+<span class="linenos">218</span>            <span class="k">return</span> <span class="kc">False</span>
+<span class="linenos">219</span>
+<span class="linenos">220</span>        <span class="c1"># ---- Rewrite ----</span>
+<span class="linenos">221</span>
+<span class="linenos">222</span>        <span class="k">for</span> <span class="n">split</span><span class="p">,</span> <span class="n">edge_partitions</span> <span class="ow">in</span> <span class="n">sub_graphs</span><span class="p">:</span>
+<span class="linenos">223</span>
+<span class="linenos">224</span>            <span class="c1"># Remove the original sub-graphs</span>
+<span class="linenos">225</span>            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">edge_partitions</span><span class="p">:</span>
+<span class="linenos">226</span>                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+<span class="linenos">227</span>                    <span class="k">continue</span>
+<span class="linenos">228</span>                <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">p</span><span class="p">:</span>
+<span class="linenos">229</span>                    <span class="c1"># TODO: remove the split and edges, then safely remove the nodes.</span>
+<span class="linenos">230</span>                    <span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">remove_edges_around</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+<span class="linenos">231</span>
+<span class="linenos">232</span>            <span class="c1"># Create A -|MergedEdge|-&gt; Merged_Bi -|Split|-&gt; Bi, if one edge partition covers all the splits</span>
+<span class="linenos">233</span>            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">edge_partitions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+<span class="linenos">234</span>                <span class="n">merged_bi_cterm</span><span class="p">,</span> <span class="n">merged_bi_subst</span> <span class="o">=</span> <span class="n">cterms_anti_unify</span><span class="p">(</span>
+<span class="linenos">235</span>                    <span class="p">[</span><span class="n">edge</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">cterm</span> <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">edge_partitions</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">keep_values</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">kdef</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kdef</span>
+<span class="linenos">236</span>                <span class="p">)</span>
+<span class="linenos">237</span>                <span class="n">merged_bi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">create_node</span><span class="p">(</span><span class="n">merged_bi_cterm</span><span class="p">)</span>
+<span class="linenos">238</span>                <span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">create_merged_edge</span><span class="p">(</span><span class="n">split</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">merged_bi</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">edge_partitions</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="linenos">239</span>                <span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">create_split</span><span class="p">(</span>
+<span class="linenos">240</span>                    <span class="n">merged_bi</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="nb">zip</span><span class="p">([</span><span class="n">e</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">edge_partitions</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">merged_bi_subst</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">241</span>                <span class="p">)</span>
+<span class="linenos">242</span>                <span class="k">continue</span>
+<span class="linenos">243</span>
+<span class="linenos">244</span>            <span class="c1"># Create A -|Split|-&gt; Others &amp; Merged_Ai -|MergedEdge|-&gt; Merged_Bi -|Split|-&gt; Bi</span>
+<span class="linenos">245</span>            <span class="n">_split_nodes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">NodeIdLike</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">246</span>            <span class="k">for</span> <span class="n">edge_partition</span> <span class="ow">in</span> <span class="n">edge_partitions</span><span class="p">:</span>
+<span class="linenos">247</span>                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">edge_partition</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+<span class="linenos">248</span>                    <span class="n">_split_nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">edge_partition</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+<span class="linenos">249</span>                    <span class="k">continue</span>
+<span class="linenos">250</span>                <span class="n">merged_ai_cterm</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">cterms_anti_unify</span><span class="p">(</span>
+<span class="linenos">251</span>                    <span class="p">[</span><span class="n">ai2bi</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">cterm</span> <span class="k">for</span> <span class="n">ai2bi</span> <span class="ow">in</span> <span class="n">edge_partition</span><span class="p">],</span> <span class="n">keep_values</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">kdef</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kdef</span>
+<span class="linenos">252</span>                <span class="p">)</span>
+<span class="linenos">253</span>                <span class="n">merged_bi_cterm</span><span class="p">,</span> <span class="n">merged_bi_subst</span> <span class="o">=</span> <span class="n">cterms_anti_unify</span><span class="p">(</span>
+<span class="linenos">254</span>                    <span class="p">[</span><span class="n">ai2bi</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">cterm</span> <span class="k">for</span> <span class="n">ai2bi</span> <span class="ow">in</span> <span class="n">edge_partition</span><span class="p">],</span> <span class="n">keep_values</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">kdef</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kdef</span>
+<span class="linenos">255</span>                <span class="p">)</span>
+<span class="linenos">256</span>                <span class="n">merged_ai</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">create_node</span><span class="p">(</span><span class="n">merged_ai_cterm</span><span class="p">)</span>
+<span class="linenos">257</span>                <span class="n">_split_nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">merged_ai</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+<span class="linenos">258</span>                <span class="n">merged_bi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">create_node</span><span class="p">(</span><span class="n">merged_bi_cterm</span><span class="p">)</span>
+<span class="linenos">259</span>                <span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">create_merged_edge</span><span class="p">(</span><span class="n">merged_ai</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">merged_bi</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">edge_partition</span><span class="p">)</span>
+<span class="linenos">260</span>                <span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">create_split</span><span class="p">(</span>
+<span class="linenos">261</span>                    <span class="n">merged_bi</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="nb">zip</span><span class="p">([</span><span class="n">ai2bi</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">ai2bi</span> <span class="ow">in</span> <span class="n">edge_partition</span><span class="p">],</span> <span class="n">merged_bi_subst</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">262</span>                <span class="p">)</span>
+<span class="linenos">263</span>            <span class="bp">self</span><span class="o">.</span><span class="n">kcfg</span><span class="o">.</span><span class="n">create_split_by_nodes</span><span class="p">(</span><span class="n">split</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">_split_nodes</span><span class="p">)</span>
+<span class="linenos">264</span>
+<span class="linenos">265</span>        <span class="k">return</span> <span class="kc">True</span></div>
+
+<span class="linenos">266</span>
+<div class="viewcode-block" id="KCFGMinimizer.minimize">
+<a class="viewcode-back" href="../../../api/pyk.kcfg.minimize.html#pyk.kcfg.minimize.KCFGMinimizer.minimize">[docs]</a>
+<span class="linenos">267</span>    <span class="k">def</span><span class="w"> </span><span class="nf">minimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">merge</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">268</span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Minimize KCFG by repeatedly performing the lifting transformations.</span>
+<span class="linenos">269</span>
+<span class="linenos">270</span><span class="sd">        The KCFG is transformed to an equivalent in which no further lifting transformations are possible.</span>
+<span class="linenos">271</span><span class="sd">        The loop is designed so that each transformation is performed once in each iteration.</span>
+<span class="linenos">272</span><span class="sd">        &quot;&quot;&quot;</span>
+<span class="linenos">273</span>        <span class="n">repeat</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="linenos">274</span>        <span class="k">while</span> <span class="n">repeat</span><span class="p">:</span>
+<span class="linenos">275</span>            <span class="n">repeat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lift_edges</span><span class="p">()</span>
+<span class="linenos">276</span>            <span class="n">repeat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lift_splits</span><span class="p">()</span> <span class="ow">or</span> <span class="n">repeat</span>
+<span class="linenos">277</span>
+<span class="linenos">278</span>        <span class="n">repeat</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="linenos">279</span>        <span class="k">while</span> <span class="n">repeat</span> <span class="ow">and</span> <span class="n">merge</span><span class="p">:</span>
+<span class="linenos">280</span>            <span class="n">repeat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">merge_nodes</span><span class="p">()</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Runtime Verification, Inc.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

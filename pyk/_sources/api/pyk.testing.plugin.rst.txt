@@ -1,0 +1,7 @@
+pyk.testing.plugin module
+=========================
+
+.. automodule:: pyk.testing.plugin
+   :members:
+   :undoc-members:
+   :show-inheritance:

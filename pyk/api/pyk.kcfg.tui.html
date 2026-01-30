@@ -1,0 +1,615 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyk.kcfg.tui module &mdash; pyk 7.1.313 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=9c1be6d9"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyk.kdist package" href="pyk.kdist.html" />
+    <link rel="prev" title="pyk.kcfg.store module" href="pyk.kcfg.store.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            pyk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">pyk</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pyk.html">pyk package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="pyk.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="pyk.cterm.html">pyk.cterm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kast.html">pyk.kast package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kbuild.html">pyk.kbuild package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="pyk.kcfg.html">pyk.kcfg package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kdist.html">pyk.kdist package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.klean.html">pyk.klean package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kllvm.html">pyk.kllvm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.konvert.html">pyk.konvert package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kore.html">pyk.kore package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kore_exec_covr.html">pyk.kore_exec_covr package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.ktool.html">pyk.ktool package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.proof.html">pyk.proof package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.testing.html">pyk.testing package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">pyk</a></li>
+          <li class="breadcrumb-item"><a href="pyk.html">pyk package</a></li>
+          <li class="breadcrumb-item"><a href="pyk.kcfg.html">pyk.kcfg package</a></li>
+      <li class="breadcrumb-item active">pyk.kcfg.tui module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/pyk.kcfg.tui.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pyk.kcfg.tui">
+<span id="pyk-kcfg-tui-module"></span><h1>pyk.kcfg.tui module<a class="headerlink" href="#module-pyk.kcfg.tui" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.BehaviorView">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BehaviorView</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kcfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG" title="pyk.kcfg.kcfg.KCFG"><span class="pre">KCFG</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">definition</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.outer.html#pyk.kast.outer.KDefinition" title="pyk.kast.outer.KDefinition"><span class="pre">KDefinition</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_printer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kcfg.show.html#pyk.kcfg.show.NodePrinter" title="pyk.kcfg.show.NodePrinter"><span class="pre">NodePrinter</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#BehaviorView"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.BehaviorView" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ScrollableContainer</span></code></p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.BehaviorView.Selected">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Selected</span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#BehaviorView.Selected"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.BehaviorView.Selected" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Message</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.BehaviorView.Selected.bubble">
+<span class="sig-name descname"><span class="pre">bubble</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pyk.kcfg.tui.BehaviorView.Selected.bubble" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.BehaviorView.Selected.handler_name">
+<span class="sig-name descname"><span class="pre">handler_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'on_behavior_view_selected'</span></em><a class="headerlink" href="#pyk.kcfg.tui.BehaviorView.Selected.handler_name" title="Link to this definition"></a></dt>
+<dd><p>Name of the default message handler.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.BehaviorView.Selected.no_dispatch">
+<span class="sig-name descname"><span class="pre">no_dispatch</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#pyk.kcfg.tui.BehaviorView.Selected.no_dispatch" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.BehaviorView.Selected.time">
+<span class="sig-name descname"><span class="pre">time</span></span><a class="headerlink" href="#pyk.kcfg.tui.BehaviorView.Selected.time" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.BehaviorView.Selected.verbose">
+<span class="sig-name descname"><span class="pre">verbose</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#pyk.kcfg.tui.BehaviorView.Selected.verbose" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.BehaviorView.can_focus">
+<span class="sig-name descname"><span class="pre">can_focus</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pyk.kcfg.tui.BehaviorView.can_focus" title="Link to this definition"></a></dt>
+<dd><p>Widget may receive focus.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.BehaviorView.can_focus_children">
+<span class="sig-name descname"><span class="pre">can_focus_children</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pyk.kcfg.tui.BehaviorView.can_focus_children" title="Link to this definition"></a></dt>
+<dd><p>Widget’s children may receive focus.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.BehaviorView.compose">
+<span class="sig-name descname"><span class="pre">compose</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ComposeResult</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#BehaviorView.compose"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.BehaviorView.compose" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.BehaviorView.on_click">
+<span class="sig-name descname"><span class="pre">on_click</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">click</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Click</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#BehaviorView.on_click"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.BehaviorView.on_click" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.Constraint">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Constraint</span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#Constraint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.Constraint" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.kcfg.tui.NavWidget" title="pyk.kcfg.tui.NavWidget"><code class="xref py py-class docutils literal notranslate"><span class="pre">NavWidget</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.Constraint.can_focus">
+<span class="sig-name descname"><span class="pre">can_focus</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pyk.kcfg.tui.Constraint.can_focus" title="Link to this definition"></a></dt>
+<dd><p>Widget may receive focus.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.Constraint.can_focus_children">
+<span class="sig-name descname"><span class="pre">can_focus_children</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pyk.kcfg.tui.Constraint.can_focus_children" title="Link to this definition"></a></dt>
+<dd><p>Widget’s children may receive focus.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.Constraint.on_click">
+<span class="sig-name descname"><span class="pre">on_click</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">click</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Click</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#Constraint.on_click"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.Constraint.on_click" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.Custom">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Custom</span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#Custom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.Custom" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.kcfg.tui.NavWidget" title="pyk.kcfg.tui.NavWidget"><code class="xref py py-class docutils literal notranslate"><span class="pre">NavWidget</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.Custom.can_focus">
+<span class="sig-name descname"><span class="pre">can_focus</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pyk.kcfg.tui.Custom.can_focus" title="Link to this definition"></a></dt>
+<dd><p>Widget may receive focus.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.Custom.can_focus_children">
+<span class="sig-name descname"><span class="pre">can_focus_children</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pyk.kcfg.tui.Custom.can_focus_children" title="Link to this definition"></a></dt>
+<dd><p>Widget’s children may receive focus.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.Custom.on_click">
+<span class="sig-name descname"><span class="pre">on_click</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">click</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Click</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#Custom.on_click"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.Custom.on_click" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.GraphChunk">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GraphChunk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#GraphChunk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.GraphChunk" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Static</span></code></p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.GraphChunk.Selected">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Selected</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chunk_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#GraphChunk.Selected"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.GraphChunk.Selected" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Message</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.GraphChunk.Selected.bubble">
+<span class="sig-name descname"><span class="pre">bubble</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pyk.kcfg.tui.GraphChunk.Selected.bubble" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.GraphChunk.Selected.chunk_id">
+<span class="sig-name descname"><span class="pre">chunk_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyk.kcfg.tui.GraphChunk.Selected.chunk_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.GraphChunk.Selected.handler_name">
+<span class="sig-name descname"><span class="pre">handler_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'on_graph_chunk_selected'</span></em><a class="headerlink" href="#pyk.kcfg.tui.GraphChunk.Selected.handler_name" title="Link to this definition"></a></dt>
+<dd><p>Name of the default message handler.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.GraphChunk.Selected.no_dispatch">
+<span class="sig-name descname"><span class="pre">no_dispatch</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#pyk.kcfg.tui.GraphChunk.Selected.no_dispatch" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.GraphChunk.Selected.time">
+<span class="sig-name descname"><span class="pre">time</span></span><a class="headerlink" href="#pyk.kcfg.tui.GraphChunk.Selected.time" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.GraphChunk.Selected.verbose">
+<span class="sig-name descname"><span class="pre">verbose</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#pyk.kcfg.tui.GraphChunk.Selected.verbose" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.GraphChunk.can_focus">
+<span class="sig-name descname"><span class="pre">can_focus</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#pyk.kcfg.tui.GraphChunk.can_focus" title="Link to this definition"></a></dt>
+<dd><p>Widget may receive focus.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.GraphChunk.can_focus_children">
+<span class="sig-name descname"><span class="pre">can_focus_children</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pyk.kcfg.tui.GraphChunk.can_focus_children" title="Link to this definition"></a></dt>
+<dd><p>Widget’s children may receive focus.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.GraphChunk.on_click">
+<span class="sig-name descname"><span class="pre">on_click</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">click</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Click</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#GraphChunk.on_click"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.GraphChunk.on_click" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.GraphChunk.on_enter">
+<span class="sig-name descname"><span class="pre">on_enter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#GraphChunk.on_enter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.GraphChunk.on_enter" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.GraphChunk.on_leave">
+<span class="sig-name descname"><span class="pre">on_leave</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#GraphChunk.on_leave"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.GraphChunk.on_leave" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.Info">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Info</span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#Info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.Info" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Widget</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.Info.can_focus">
+<span class="sig-name descname"><span class="pre">can_focus</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#pyk.kcfg.tui.Info.can_focus" title="Link to this definition"></a></dt>
+<dd><p>Widget may receive focus.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.Info.can_focus_children">
+<span class="sig-name descname"><span class="pre">can_focus_children</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pyk.kcfg.tui.Info.can_focus_children" title="Link to this definition"></a></dt>
+<dd><p>Widget’s children may receive focus.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.Info.compose">
+<span class="sig-name descname"><span class="pre">compose</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ComposeResult</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#Info.compose"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.Info.compose" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.Info.text">
+<span class="sig-name descname"><span class="pre">text</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">reactive</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.kcfg.tui.Info.text" title="Link to this definition"></a></dt>
+<dd><p>Create a reactive attribute.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>default</strong> – A default value or callable that returns a default.</p></li>
+<li><p><strong>layout</strong> – Perform a layout on change.</p></li>
+<li><p><strong>repaint</strong> – Perform a repaint on change.</p></li>
+<li><p><strong>init</strong> – Call watchers on initialize (post mount).</p></li>
+<li><p><strong>always_update</strong> – Call watchers even when the new value equals the old value.</p></li>
+<li><p><strong>recompose</strong> – Compose the widget again when the attribute changes.</p></li>
+<li><p><strong>bindings</strong> – Refresh bindings when the reactive changes.</p></li>
+<li><p><strong>toggle_class</strong> – An optional TCSS classname(s) to toggle based on the truthiness of the value.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.Info.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#Info.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.Info.update" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.Info.watch_text">
+<span class="sig-name descname"><span class="pre">watch_text</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#Info.watch_text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.Info.watch_text" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.KCFGViewer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">KCFGViewer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kcfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG" title="pyk.kcfg.kcfg.KCFG"><span class="pre">KCFG</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">definition</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.outer.html#pyk.kast.outer.KDefinition" title="pyk.kast.outer.KDefinition"><span class="pre">KDefinition</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_printer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kcfg.show.html#pyk.kcfg.show.NodePrinter" title="pyk.kcfg.show.NodePrinter"><span class="pre">NodePrinter</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_view</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">KCFGElem</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cterm_show</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.cterm.show.html#pyk.cterm.show.CTermShow" title="pyk.cterm.show.CTermShow"><span class="pre">CTermShow</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#KCFGViewer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.KCFGViewer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">App</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.KCFGViewer.BINDINGS">
+<span class="sig-name descname"><span class="pre">BINDINGS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">BindingType</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('h',</span> <span class="pre">'keystroke(&quot;h&quot;)',</span> <span class="pre">'Hide</span> <span class="pre">selected</span> <span class="pre">node.'),</span> <span class="pre">('H',</span> <span class="pre">'keystroke(&quot;H&quot;)',</span> <span class="pre">'Unhide</span> <span class="pre">all</span> <span class="pre">nodes.'),</span> <span class="pre">('t',</span> <span class="pre">'keystroke(&quot;term&quot;)',</span> <span class="pre">'Toggle</span> <span class="pre">term.'),</span> <span class="pre">('c',</span> <span class="pre">'keystroke(&quot;constraint&quot;)',</span> <span class="pre">'Toggle</span> <span class="pre">constraint.'),</span> <span class="pre">('m',</span> <span class="pre">'keystroke(&quot;minimize&quot;)',</span> <span class="pre">'Toggle</span> <span class="pre">minimization.'),</span> <span class="pre">('s',</span> <span class="pre">'keystroke(&quot;status&quot;)',</span> <span class="pre">'Toggle</span> <span class="pre">status.'),</span> <span class="pre">Binding(key='q',</span> <span class="pre">action='quit',</span> <span class="pre">description='',</span> <span class="pre">show=True,</span> <span class="pre">key_display=None,</span> <span class="pre">priority=True,</span> <span class="pre">tooltip='',</span> <span class="pre">id=None,</span> <span class="pre">system=False,</span> <span class="pre">group=None)]</span></em><a class="headerlink" href="#pyk.kcfg.tui.KCFGViewer.BINDINGS" title="Link to this definition"></a></dt>
+<dd><p>The default key bindings.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.KCFGViewer.CSS_PATH">
+<span class="sig-name descname"><span class="pre">CSS_PATH</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">CSSPathType</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">PosixPath('/home/user/src/pyk/kcfg/style.css')</span></em><a class="headerlink" href="#pyk.kcfg.tui.KCFGViewer.CSS_PATH" title="Link to this definition"></a></dt>
+<dd><p>File paths to load CSS from.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.KCFGViewer.action_keystroke">
+<span class="sig-name descname"><span class="pre">action_keystroke</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#KCFGViewer.action_keystroke"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.KCFGViewer.action_keystroke" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.KCFGViewer.compose">
+<span class="sig-name descname"><span class="pre">compose</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ComposeResult</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#KCFGViewer.compose"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.KCFGViewer.compose" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.KCFGViewer.on_graph_chunk_selected">
+<span class="sig-name descname"><span class="pre">on_graph_chunk_selected</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pyk.kcfg.tui.GraphChunk.Selected" title="pyk.kcfg.tui.GraphChunk.Selected"><span class="pre">Selected</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#KCFGViewer.on_graph_chunk_selected"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.KCFGViewer.on_graph_chunk_selected" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.NavWidget">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NavWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#NavWidget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.NavWidget" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ScrollableContainer</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.NavWidget.BINDINGS">
+<span class="sig-name descname"><span class="pre">BINDINGS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">BindingType</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('g',</span> <span class="pre">'scroll_home',</span> <span class="pre">'Go</span> <span class="pre">to</span> <span class="pre">vert</span> <span class="pre">start'),</span> <span class="pre">('G',</span> <span class="pre">'scroll_end',</span> <span class="pre">'Go</span> <span class="pre">to</span> <span class="pre">vert</span> <span class="pre">end')]</span></em><a class="headerlink" href="#pyk.kcfg.tui.NavWidget.BINDINGS" title="Link to this definition"></a></dt>
+<dd><p>Keyboard bindings for scrollable containers.</p>
+<div class="line-block">
+<div class="line">Key(s) | Description |</div>
+<div class="line">:- | :- |</div>
+<div class="line">up | Scroll up, if vertical scrolling is available. |</div>
+<div class="line">down | Scroll down, if vertical scrolling is available. |</div>
+<div class="line">left | Scroll left, if horizontal scrolling is available. |</div>
+<div class="line">right | Scroll right, if horizontal scrolling is available. |</div>
+<div class="line">home | Scroll to the home position, if scrolling is available. |</div>
+<div class="line">end | Scroll to the end position, if scrolling is available. |</div>
+<div class="line">pageup | Scroll up one page, if vertical scrolling is available. |</div>
+<div class="line">pagedown | Scroll down one page, if vertical scrolling is available. |</div>
+<div class="line">ctrl+pageup | Scroll left one page, if horizontal scrolling is available. |</div>
+<div class="line">ctrl+pagedown | Scroll right one page, if horizontal scrolling is available. |</div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.NavWidget.Selected">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Selected</span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#NavWidget.Selected"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.NavWidget.Selected" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Message</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.NavWidget.Selected.bubble">
+<span class="sig-name descname"><span class="pre">bubble</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pyk.kcfg.tui.NavWidget.Selected.bubble" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.NavWidget.Selected.handler_name">
+<span class="sig-name descname"><span class="pre">handler_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'on_nav_widget_selected'</span></em><a class="headerlink" href="#pyk.kcfg.tui.NavWidget.Selected.handler_name" title="Link to this definition"></a></dt>
+<dd><p>Name of the default message handler.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.NavWidget.Selected.no_dispatch">
+<span class="sig-name descname"><span class="pre">no_dispatch</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#pyk.kcfg.tui.NavWidget.Selected.no_dispatch" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.NavWidget.Selected.time">
+<span class="sig-name descname"><span class="pre">time</span></span><a class="headerlink" href="#pyk.kcfg.tui.NavWidget.Selected.time" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.NavWidget.Selected.verbose">
+<span class="sig-name descname"><span class="pre">verbose</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#pyk.kcfg.tui.NavWidget.Selected.verbose" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.NavWidget.can_focus">
+<span class="sig-name descname"><span class="pre">can_focus</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pyk.kcfg.tui.NavWidget.can_focus" title="Link to this definition"></a></dt>
+<dd><p>Widget may receive focus.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.NavWidget.can_focus_children">
+<span class="sig-name descname"><span class="pre">can_focus_children</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pyk.kcfg.tui.NavWidget.can_focus_children" title="Link to this definition"></a></dt>
+<dd><p>Widget’s children may receive focus.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.NavWidget.compose">
+<span class="sig-name descname"><span class="pre">compose</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ComposeResult</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#NavWidget.compose"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.NavWidget.compose" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.NavWidget.text">
+<span class="sig-name descname"><span class="pre">text</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">reactive</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyk.kcfg.tui.NavWidget.text" title="Link to this definition"></a></dt>
+<dd><p>Create a reactive attribute.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>default</strong> – A default value or callable that returns a default.</p></li>
+<li><p><strong>layout</strong> – Perform a layout on change.</p></li>
+<li><p><strong>repaint</strong> – Perform a repaint on change.</p></li>
+<li><p><strong>init</strong> – Call watchers on initialize (post mount).</p></li>
+<li><p><strong>always_update</strong> – Call watchers even when the new value equals the old value.</p></li>
+<li><p><strong>recompose</strong> – Compose the widget again when the attribute changes.</p></li>
+<li><p><strong>bindings</strong> – Refresh bindings when the reactive changes.</p></li>
+<li><p><strong>toggle_class</strong> – An optional TCSS classname(s) to toggle based on the truthiness of the value.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.NavWidget.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#NavWidget.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.NavWidget.update" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.NavWidget.watch_text">
+<span class="sig-name descname"><span class="pre">watch_text</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#NavWidget.watch_text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.NavWidget.watch_text" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.NodeView">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NodeView</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">definition</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.outer.html#pyk.kast.outer.KDefinition" title="pyk.kast.outer.KDefinition"><span class="pre">KDefinition</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">term_on</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraint_on</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_on</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status_on</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_view</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">KCFGElem</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cterm_show</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.cterm.show.html#pyk.cterm.show.CTermShow" title="pyk.cterm.show.CTermShow"><span class="pre">CTermShow</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proof_status</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proof_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exec_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#NodeView"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.NodeView" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Widget</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.NodeView.can_focus">
+<span class="sig-name descname"><span class="pre">can_focus</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#pyk.kcfg.tui.NodeView.can_focus" title="Link to this definition"></a></dt>
+<dd><p>Widget may receive focus.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.NodeView.can_focus_children">
+<span class="sig-name descname"><span class="pre">can_focus_children</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pyk.kcfg.tui.NodeView.can_focus_children" title="Link to this definition"></a></dt>
+<dd><p>Widget’s children may receive focus.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.NodeView.compose">
+<span class="sig-name descname"><span class="pre">compose</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ComposeResult</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#NodeView.compose"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.NodeView.compose" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.NodeView.on_behavior_view_selected">
+<span class="sig-name descname"><span class="pre">on_behavior_view_selected</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#NodeView.on_behavior_view_selected"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.NodeView.on_behavior_view_selected" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.NodeView.on_constraint_selected">
+<span class="sig-name descname"><span class="pre">on_constraint_selected</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#NodeView.on_constraint_selected"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.NodeView.on_constraint_selected" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.NodeView.on_custom_selected">
+<span class="sig-name descname"><span class="pre">on_custom_selected</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#NodeView.on_custom_selected"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.NodeView.on_custom_selected" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.NodeView.on_mount">
+<span class="sig-name descname"><span class="pre">on_mount</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#NodeView.on_mount"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.NodeView.on_mount" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.NodeView.on_status_selected">
+<span class="sig-name descname"><span class="pre">on_status_selected</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#NodeView.on_status_selected"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.NodeView.on_status_selected" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.NodeView.on_term_selected">
+<span class="sig-name descname"><span class="pre">on_term_selected</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#NodeView.on_term_selected"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.NodeView.on_term_selected" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.NodeView.toggle_option">
+<span class="sig-name descname"><span class="pre">toggle_option</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#NodeView.toggle_option"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.NodeView.toggle_option" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.NodeView.toggle_view">
+<span class="sig-name descname"><span class="pre">toggle_view</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#NodeView.toggle_view"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.NodeView.toggle_view" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.NodeView.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Node" title="pyk.kcfg.kcfg.KCFG.Node"><span class="pre">Node</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="pyk.kcfg.kcfg.html#pyk.kcfg.kcfg.KCFG.Successor" title="pyk.kcfg.kcfg.KCFG.Successor"><span class="pre">Successor</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#NodeView.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.NodeView.update" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.Status">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Status</span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#Status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.Status" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.kcfg.tui.NavWidget" title="pyk.kcfg.tui.NavWidget"><code class="xref py py-class docutils literal notranslate"><span class="pre">NavWidget</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.Status.can_focus">
+<span class="sig-name descname"><span class="pre">can_focus</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pyk.kcfg.tui.Status.can_focus" title="Link to this definition"></a></dt>
+<dd><p>Widget may receive focus.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.Status.can_focus_children">
+<span class="sig-name descname"><span class="pre">can_focus_children</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pyk.kcfg.tui.Status.can_focus_children" title="Link to this definition"></a></dt>
+<dd><p>Widget’s children may receive focus.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.Status.on_click">
+<span class="sig-name descname"><span class="pre">on_click</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">click</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Click</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#Status.on_click"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.Status.on_click" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.Term">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Term</span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#Term"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.Term" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyk.kcfg.tui.NavWidget" title="pyk.kcfg.tui.NavWidget"><code class="xref py py-class docutils literal notranslate"><span class="pre">NavWidget</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.Term.can_focus">
+<span class="sig-name descname"><span class="pre">can_focus</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pyk.kcfg.tui.Term.can_focus" title="Link to this definition"></a></dt>
+<dd><p>Widget may receive focus.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.Term.can_focus_children">
+<span class="sig-name descname"><span class="pre">can_focus_children</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pyk.kcfg.tui.Term.can_focus_children" title="Link to this definition"></a></dt>
+<dd><p>Widget’s children may receive focus.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyk.kcfg.tui.Term.on_click">
+<span class="sig-name descname"><span class="pre">on_click</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">click</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Click</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/pyk/kcfg/tui.html#Term.on_click"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kcfg.tui.Term.on_click" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pyk.kcfg.store.html" class="btn btn-neutral float-left" title="pyk.kcfg.store module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pyk.kdist.html" class="btn btn-neutral float-right" title="pyk.kdist package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Runtime Verification, Inc.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

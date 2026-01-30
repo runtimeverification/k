@@ -1,0 +1,7 @@
+pyk.kast.outer module
+=====================
+
+.. automodule:: pyk.kast.outer
+   :members:
+   :undoc-members:
+   :show-inheritance:

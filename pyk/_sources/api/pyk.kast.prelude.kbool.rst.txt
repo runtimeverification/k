@@ -1,0 +1,7 @@
+pyk.kast.prelude.kbool module
+=============================
+
+.. automodule:: pyk.kast.prelude.kbool
+   :members:
+   :undoc-members:
+   :show-inheritance:

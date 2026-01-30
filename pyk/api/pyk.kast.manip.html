@@ -1,0 +1,538 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyk.kast.manip module &mdash; pyk 7.1.313 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=9c1be6d9"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyk.kast.markdown module" href="pyk.kast.markdown.html" />
+    <link rel="prev" title="pyk.kast.lexer module" href="pyk.kast.lexer.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            pyk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">pyk</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pyk.html">pyk package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="pyk.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="pyk.cterm.html">pyk.cterm package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="pyk.kast.html">pyk.kast package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kbuild.html">pyk.kbuild package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.html">pyk.kcfg package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kdist.html">pyk.kdist package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.klean.html">pyk.klean package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kllvm.html">pyk.kllvm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.konvert.html">pyk.konvert package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kore.html">pyk.kore package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kore_exec_covr.html">pyk.kore_exec_covr package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.ktool.html">pyk.ktool package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.proof.html">pyk.proof package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.testing.html">pyk.testing package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">pyk</a></li>
+          <li class="breadcrumb-item"><a href="pyk.html">pyk package</a></li>
+          <li class="breadcrumb-item"><a href="pyk.kast.html">pyk.kast package</a></li>
+      <li class="breadcrumb-item active">pyk.kast.manip module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/pyk.kast.manip.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pyk.kast.manip">
+<span id="pyk-kast-manip-module"></span><h1>pyk.kast.manip module<a class="headerlink" href="#module-pyk.kast.manip" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.abstract_term_safely">
+<span class="sig-name descname"><span class="pre">abstract_term_safely</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kast</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'V'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KSort" title="pyk.kast.inner.KSort"><span class="pre">KSort</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">existing_var_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">set</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KVariable" title="pyk.kast.inner.KVariable"><span class="pre">KVariable</span></a></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#abstract_term_safely"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.abstract_term_safely" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.apply_existential_substitutions">
+<span class="sig-name descname"><span class="pre">apply_existential_substitutions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#apply_existential_substitutions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.apply_existential_substitutions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.bool_to_ml_pred">
+<span class="sig-name descname"><span class="pre">bool_to_ml_pred</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kast</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KSort" title="pyk.kast.inner.KSort"><span class="pre">KSort</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">KSort(name='GeneratedTopCell')</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#bool_to_ml_pred"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.bool_to_ml_pred" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.build_claim">
+<span class="sig-name descname"><span class="pre">build_claim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">claim_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">final_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_constraints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">final_constraints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_vars</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.outer.html#pyk.kast.outer.KClaim" title="pyk.kast.outer.KClaim"><span class="pre">KClaim</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.Subst" title="pyk.kast.inner.Subst"><span class="pre">Subst</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#build_claim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.build_claim" title="Link to this definition"></a></dt>
+<dd><p>Return a <cite>KClaim</cite> between the supplied initial and final states.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>claim_id</strong> – Label to give the claim.</p></li>
+<li><p><strong>init_config</strong> – State to put on LHS of the rule.</p></li>
+<li><p><strong>final_config</strong> – State to put on RHS of the rule.</p></li>
+<li><p><strong>init_constraints</strong> – Constraints to use as <cite>requires</cite> clause.</p></li>
+<li><p><strong>final_constraints</strong> – Constraints to use as <cite>ensures</cite> clause.</p></li>
+<li><p><strong>keep_vars</strong> – Variables to leave in the side-conditions even if not bound in the configuration.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>A tuple <code class="docutils literal notranslate"><span class="pre">(claim,</span> <span class="pre">var_map)</span></code> where</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">claim</span></code>: A <cite>KClaim</cite> with variable naming conventions applied
+so that it should be parseable by the K Frontend.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">var_map</span></code>: The variable renamings applied to make the claim parseable by the K Frontend
+(which can be undone to recover the original variables).</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.build_rule">
+<span class="sig-name descname"><span class="pre">build_rule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">final_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_constraints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">final_constraints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_vars</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defunc_with</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.outer.html#pyk.kast.outer.KDefinition" title="pyk.kast.outer.KDefinition"><span class="pre">KDefinition</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.outer.html#pyk.kast.outer.KRule" title="pyk.kast.outer.KRule"><span class="pre">KRule</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.Subst" title="pyk.kast.inner.Subst"><span class="pre">Subst</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#build_rule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.build_rule" title="Link to this definition"></a></dt>
+<dd><p>Return a <cite>KRule</cite> between the supplied initial and final states.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rule_id</strong> – Label to give the rule.</p></li>
+<li><p><strong>init_config</strong> – State to put on LHS of the rule.</p></li>
+<li><p><strong>final_config</strong> – State to put on RHS of the rule.</p></li>
+<li><p><strong>init_constraints</strong> – Constraints to use as <cite>requires</cite> clause.</p></li>
+<li><p><strong>final_constraints</strong> – Constraints to use as <cite>ensures</cite> clause.</p></li>
+<li><p><strong>priority</strong> – Priority index to assign to generated rules.</p></li>
+<li><p><strong>keep_vars</strong> – Variables to leave in the side-conditions even if not bound in the configuration.</p></li>
+<li><p><strong>defunc_with</strong> – KDefinition for filtering out function symbols on LHS of rules.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>A tuple <code class="docutils literal notranslate"><span class="pre">(rule,</span> <span class="pre">var_map)</span></code> where</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">rule</span></code>: A <cite>KRule</cite> with variable naming conventions applied
+so that it should be parseable by the K Frontend.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">var_map</span></code>: The variable renamings applied to make the rule parseable by the K Frontend
+(which can be undone to recover the original variables).</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.cell_label_to_var_name">
+<span class="sig-name descname"><span class="pre">cell_label_to_var_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#cell_label_to_var_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.cell_label_to_var_name" title="Link to this definition"></a></dt>
+<dd><p>Return a variable name based on a cell label.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.collapse_dots">
+<span class="sig-name descname"><span class="pre">collapse_dots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kast</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#collapse_dots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.collapse_dots" title="Link to this definition"></a></dt>
+<dd><p>Given a configuration with structural frames <cite>…</cite>, minimize the structural frames needed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kast</strong> – A configuration, potentially with structural frames.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The same configuration, with the amount of structural framing minimized.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.count_vars">
+<span class="sig-name descname"><span class="pre">count_vars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Counter</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#count_vars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.count_vars" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.defunctionalize">
+<span class="sig-name descname"><span class="pre">defunctionalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">defn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.outer.html#pyk.kast.outer.KDefinition" title="pyk.kast.outer.KDefinition"><span class="pre">KDefinition</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">kinner</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#defunctionalize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.defunctionalize" title="Link to this definition"></a></dt>
+<dd><p>Turn non-constructor arguments into side-conditions so that a term is only constructor-like.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>defn</strong> – The definition to pull function label information from.</p></li>
+<li><p><strong>kinner</strong> – The term to defunctionalize.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple of the defunctionalized term and the list of constraints generated.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.extract_cells">
+<span class="sig-name descname"><span class="pre">extract_cells</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kast</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_cells</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.internal.html#pyk.kore.internal.Collection" title="pyk.kore.internal.Collection"><span class="pre">Collection</span></a><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#extract_cells"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.extract_cells" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.extract_lhs">
+<span class="sig-name descname"><span class="pre">extract_lhs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#extract_lhs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.extract_lhs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.extract_rhs">
+<span class="sig-name descname"><span class="pre">extract_rhs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#extract_rhs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.extract_rhs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.extract_subst">
+<span class="sig-name descname"><span class="pre">extract_subst</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.Subst" title="pyk.kast.inner.Subst"><span class="pre">Subst</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#extract_subst"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.extract_subst" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.free_vars">
+<span class="sig-name descname"><span class="pre">free_vars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kast</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">frozenset</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#free_vars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.free_vars" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.if_ktype">
+<span class="sig-name descname"><span class="pre">if_ktype</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ktype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">type</span><span class="p"><span class="pre">[</span></span><span class="pre">KI</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">then</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">KI</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#if_ktype"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.if_ktype" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.inline_cell_maps">
+<span class="sig-name descname"><span class="pre">inline_cell_maps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kast</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#inline_cell_maps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.inline_cell_maps" title="Link to this definition"></a></dt>
+<dd><p>Ensure that cell map collections are printed nicely, not as Maps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kast</strong> – A KAST term.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The KAST term with cell maps inlined.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.is_anon_var">
+<span class="sig-name descname"><span class="pre">is_anon_var</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kast</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#is_anon_var"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.is_anon_var" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.is_spurious_constraint">
+<span class="sig-name descname"><span class="pre">is_spurious_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#is_spurious_constraint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.is_spurious_constraint" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.is_term_like">
+<span class="sig-name descname"><span class="pre">is_term_like</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kast</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#is_term_like"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.is_term_like" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.labels_to_dots">
+<span class="sig-name descname"><span class="pre">labels_to_dots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kast</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.internal.html#pyk.kore.internal.Collection" title="pyk.kore.internal.Collection"><span class="pre">Collection</span></a><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#labels_to_dots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.labels_to_dots" title="Link to this definition"></a></dt>
+<dd><p>Abstract specific labels for printing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>kast</strong> – A term.</p></li>
+<li><p><strong>labels</strong> – List of labels to abstract.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Returns</dt><dd><p>The term with <cite>labels</cite> abstracted.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.minimize_rule_like">
+<span class="sig-name descname"><span class="pre">minimize_rule_like</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">RL</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_vars</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">RL</span></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#minimize_rule_like"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.minimize_rule_like" title="Link to this definition"></a></dt>
+<dd><p>Minimize a K rule or claim for pretty-printing.</p>
+<ul class="simple">
+<li><p>Variables only used once will be removed.</p></li>
+<li><p>Unused cells will be abstracted.</p></li>
+<li><p>Useless side-conditions will be attempted to be removed.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rule</strong> – A K rule or claim.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The rule or claim, minimized.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.minimize_term">
+<span class="sig-name descname"><span class="pre">minimize_term</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_vars</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#minimize_term"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.minimize_term" title="Link to this definition"></a></dt>
+<dd><p>Minimize a K term for pretty-printing.</p>
+<ul class="simple">
+<li><p>Variables only used once will be removed.</p></li>
+<li><p>Unused cells will be abstracted.</p></li>
+<li><p>Useless conditions will be attempted to be removed.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kast</strong> – A term.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The term, minimized.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.ml_pred_to_bool">
+<span class="sig-name descname"><span class="pre">ml_pred_to_bool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kast</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">unsafe</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#ml_pred_to_bool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.ml_pred_to_bool" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.no_cell_rewrite_to_dots">
+<span class="sig-name descname"><span class="pre">no_cell_rewrite_to_dots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#no_cell_rewrite_to_dots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.no_cell_rewrite_to_dots" title="Link to this definition"></a></dt>
+<dd><p>Transform a given term by replacing the contents of each cell with dots if the LHS and RHS are the same.</p>
+<p>This function recursively traverses the cells in a term.
+When it finds a cell whose left-hand side (LHS) is identical to its right-hand side (RHS),
+it replaces the cell’s contents with a predefined DOTS.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>term</strong> – The term to be transformed.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The transformed term, where specific cell contents have been replaced with dots.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.normalize_constraints">
+<span class="sig-name descname"><span class="pre">normalize_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">constraints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#normalize_constraints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.normalize_constraints" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.normalize_ml_pred">
+<span class="sig-name descname"><span class="pre">normalize_ml_pred</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pred</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#normalize_ml_pred"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.normalize_ml_pred" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.on_attributes">
+<span class="sig-name descname"><span class="pre">on_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kast</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">W</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.att.html#pyk.kast.att.KAtt" title="pyk.kast.att.KAtt"><span class="pre">KAtt</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.att.html#pyk.kast.att.KAtt" title="pyk.kast.att.KAtt"><span class="pre">KAtt</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">W</span></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#on_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.on_attributes" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.propagate_up_constraints">
+<span class="sig-name descname"><span class="pre">propagate_up_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#propagate_up_constraints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.propagate_up_constraints" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.push_down_rewrites">
+<span class="sig-name descname"><span class="pre">push_down_rewrites</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kast</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#push_down_rewrites"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.push_down_rewrites" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.remove_attrs">
+<span class="sig-name descname"><span class="pre">remove_attrs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#remove_attrs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.remove_attrs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.remove_generated_cells">
+<span class="sig-name descname"><span class="pre">remove_generated_cells</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#remove_generated_cells"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.remove_generated_cells" title="Link to this definition"></a></dt>
+<dd><p>Remove &lt;generatedTop&gt; and &lt;generatedCounter&gt; from a configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>term</strong> – A term.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The term with those cells removed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.remove_semantic_casts">
+<span class="sig-name descname"><span class="pre">remove_semantic_casts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kast</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#remove_semantic_casts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.remove_semantic_casts" title="Link to this definition"></a></dt>
+<dd><p>Remove injected <cite>#SemanticCast*</cite> nodes in AST.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kast</strong> – A term (possibly) containing automatically injected <cite>#SemanticCast*</cite> KApply nodes.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The term without the <cite>#SemanticCast*</cite> nodes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.remove_source_map">
+<span class="sig-name descname"><span class="pre">remove_source_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">definition</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.outer.html#pyk.kast.outer.KDefinition" title="pyk.kast.outer.KDefinition"><span class="pre">KDefinition</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.outer.html#pyk.kast.outer.KDefinition" title="pyk.kast.outer.KDefinition"><span class="pre">KDefinition</span></a></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#remove_source_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.remove_source_map" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.remove_useless_constraints">
+<span class="sig-name descname"><span class="pre">remove_useless_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">constraints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_vars</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#remove_useless_constraints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.remove_useless_constraints" title="Link to this definition"></a></dt>
+<dd><p>Remove constraints that do not depend on a given iterable of variables (directly or indirectly).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>constraints</strong> – Iterable of constraints to filter.</p></li>
+<li><p><strong>initial_vars</strong> – Initial iterable of variables to keep constraints for.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of constraints with only those constraints that contain the initial variables,
+or variables that depend on those through other constraints in the list.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.rename_generated_vars">
+<span class="sig-name descname"><span class="pre">rename_generated_vars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#rename_generated_vars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.rename_generated_vars" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.replace_rewrites_with_implies">
+<span class="sig-name descname"><span class="pre">replace_rewrites_with_implies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kast</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#replace_rewrites_with_implies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.replace_rewrites_with_implies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.set_cell">
+<span class="sig-name descname"><span class="pre">set_cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">constrained_term</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#set_cell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.set_cell" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.simplify_bool">
+<span class="sig-name descname"><span class="pre">simplify_bool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#simplify_bool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.simplify_bool" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.sort_ac_collections">
+<span class="sig-name descname"><span class="pre">sort_ac_collections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kast</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#sort_ac_collections"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.sort_ac_collections" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.sort_assoc_label">
+<span class="sig-name descname"><span class="pre">sort_assoc_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kast</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#sort_assoc_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.sort_assoc_label" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.split_config_and_constraints">
+<span class="sig-name descname"><span class="pre">split_config_and_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kast</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#split_config_and_constraints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.split_config_and_constraints" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.split_config_from">
+<span class="sig-name descname"><span class="pre">split_config_from</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">configuration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#split_config_from"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.split_config_from" title="Link to this definition"></a></dt>
+<dd><p>Split the substitution from a given configuration.</p>
+<p>Given an input configuration <cite>config</cite>, will return a tuple <cite>(symbolic_config, subst)</cite>, where:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p><cite>config == substitute(symbolic_config, subst)</cite></p></li>
+<li><p><cite>symbolic_config</cite> is the same configuration structure, but where the contents of leaf cells is replaced with a fresh KVariable.</p></li>
+<li><p><cite>subst</cite> is the substitution for the generated KVariables back to the original configuration contents.</p></li>
+</ol>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.undo_aliases">
+<span class="sig-name descname"><span class="pre">undo_aliases</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">definition</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.outer.html#pyk.kast.outer.KDefinition" title="pyk.kast.outer.KDefinition"><span class="pre">KDefinition</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">kast</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#undo_aliases"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.undo_aliases" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kast.manip.useless_vars_to_dots">
+<span class="sig-name descname"><span class="pre">useless_vars_to_dots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kast</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_vars</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kast.inner.html#pyk.kast.inner.KInner" title="pyk.kast.inner.KInner"><span class="pre">KInner</span></a></span></span><a class="reference internal" href="../_modules/pyk/kast/manip.html#useless_vars_to_dots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kast.manip.useless_vars_to_dots" title="Link to this definition"></a></dt>
+<dd><p>Structurally abstract away useless variables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>kast</strong> – A term.</p></li>
+<li><p><strong>keep_vars</strong> – Iterable of variables to keep.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The term with the useless varables structurally abstracted.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pyk.kast.lexer.html" class="btn btn-neutral float-left" title="pyk.kast.lexer module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pyk.kast.markdown.html" class="btn btn-neutral float-right" title="pyk.kast.markdown module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Runtime Verification, Inc.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,329 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyk.kore.prelude module &mdash; pyk 7.1.313 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=9c1be6d9"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyk.kore.rpc module" href="pyk.kore.rpc.html" />
+    <link rel="prev" title="pyk.kore.pool module" href="pyk.kore.pool.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            pyk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">pyk</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pyk.html">pyk package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="pyk.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="pyk.cterm.html">pyk.cterm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kast.html">pyk.kast package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kbuild.html">pyk.kbuild package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kcfg.html">pyk.kcfg package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kdist.html">pyk.kdist package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.klean.html">pyk.klean package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kllvm.html">pyk.kllvm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.konvert.html">pyk.konvert package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="pyk.kore.html">pyk.kore package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.kore_exec_covr.html">pyk.kore_exec_covr package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.ktool.html">pyk.ktool package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.proof.html">pyk.proof package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyk.testing.html">pyk.testing package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyk.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">pyk</a></li>
+          <li class="breadcrumb-item"><a href="pyk.html">pyk package</a></li>
+          <li class="breadcrumb-item"><a href="pyk.kore.html">pyk.kore package</a></li>
+      <li class="breadcrumb-item active">pyk.kore.prelude module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/pyk.kore.prelude.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pyk.kore.prelude">
+<span id="pyk-kore-prelude-module"></span><h1>pyk.kore.prelude module<a class="headerlink" href="#module-pyk.kore.prelude" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.and_bool">
+<span class="sig-name descname"><span class="pre">and_bool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">right</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#and_bool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.and_bool" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.bool_dv">
+<span class="sig-name descname"><span class="pre">bool_dv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.DV" title="pyk.kore.syntax.DV"><span class="pre">DV</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#bool_dv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.bool_dv" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.bytes_dv">
+<span class="sig-name descname"><span class="pre">bytes_dv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.DV" title="pyk.kore.syntax.DV"><span class="pre">DV</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#bytes_dv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.bytes_dv" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.dv">
+<span class="sig-name descname"><span class="pre">dv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.DV" title="pyk.kore.syntax.DV"><span class="pre">DV</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#dv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.dv" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.eq_bool">
+<span class="sig-name descname"><span class="pre">eq_bool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">right</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#eq_bool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.eq_bool" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.eq_int">
+<span class="sig-name descname"><span class="pre">eq_int</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">right</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#eq_int"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.eq_int" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.ge_int">
+<span class="sig-name descname"><span class="pre">ge_int</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">right</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#ge_int"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.ge_int" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.generated_counter">
+<span class="sig-name descname"><span class="pre">generated_counter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.App" title="pyk.kore.syntax.App"><span class="pre">App</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#generated_counter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.generated_counter" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.generated_top">
+<span class="sig-name descname"><span class="pre">generated_top</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">patterns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.App" title="pyk.kore.syntax.App"><span class="pre">App</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#generated_top"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.generated_top" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.gt_int">
+<span class="sig-name descname"><span class="pre">gt_int</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">right</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#gt_int"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.gt_int" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.implies_bool">
+<span class="sig-name descname"><span class="pre">implies_bool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">right</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#implies_bool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.implies_bool" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.init_generated_top_cell">
+<span class="sig-name descname"><span class="pre">init_generated_top_cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.App" title="pyk.kore.syntax.App"><span class="pre">App</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#init_generated_top_cell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.init_generated_top_cell" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.inj">
+<span class="sig-name descname"><span class="pre">inj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sort1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.outer_syntax.html#pyk.kast.outer_syntax.Sort" title="pyk.kast.outer_syntax.Sort"><span class="pre">Sort</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kast.outer_syntax.html#pyk.kast.outer_syntax.Sort" title="pyk.kast.outer_syntax.Sort"><span class="pre">Sort</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.App" title="pyk.kore.syntax.App"><span class="pre">App</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#inj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.inj" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.int_dv">
+<span class="sig-name descname"><span class="pre">int_dv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.DV" title="pyk.kore.syntax.DV"><span class="pre">DV</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#int_dv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.int_dv" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.json2string">
+<span class="sig-name descname"><span class="pre">json2string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.App" title="pyk.kore.syntax.App"><span class="pre">App</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#json2string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.json2string" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.json_entry">
+<span class="sig-name descname"><span class="pre">json_entry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.App" title="pyk.kore.syntax.App"><span class="pre">App</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#json_entry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.json_entry" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.json_key">
+<span class="sig-name descname"><span class="pre">json_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.App" title="pyk.kore.syntax.App"><span class="pre">App</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#json_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.json_key" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.json_list">
+<span class="sig-name descname"><span class="pre">json_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.App" title="pyk.kore.syntax.App"><span class="pre">App</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#json_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.json_list" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.json_object">
+<span class="sig-name descname"><span class="pre">json_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.App" title="pyk.kore.syntax.App"><span class="pre">App</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#json_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.json_object" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.json_to_kore">
+<span class="sig-name descname"><span class="pre">json_to_kore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#json_to_kore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.json_to_kore" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.jsons">
+<span class="sig-name descname"><span class="pre">jsons</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">patterns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.RightAssoc" title="pyk.kore.syntax.RightAssoc"><span class="pre">RightAssoc</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#jsons"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.jsons" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.k">
+<span class="sig-name descname"><span class="pre">k</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.App" title="pyk.kore.syntax.App"><span class="pre">App</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#k"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.k" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.k_config_var">
+<span class="sig-name descname"><span class="pre">k_config_var</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.DV" title="pyk.kore.syntax.DV"><span class="pre">DV</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#k_config_var"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.k_config_var" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.kore_to_json">
+<span class="sig-name descname"><span class="pre">kore_to_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#kore_to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.kore_to_json" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.kseq">
+<span class="sig-name descname"><span class="pre">kseq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kitems</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dotvar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.EVar" title="pyk.kore.syntax.EVar"><span class="pre">EVar</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#kseq"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.kseq" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.le_int">
+<span class="sig-name descname"><span class="pre">le_int</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">right</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#le_int"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.le_int" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.list_pattern">
+<span class="sig-name descname"><span class="pre">list_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#list_pattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.list_pattern" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.lt_int">
+<span class="sig-name descname"><span class="pre">lt_int</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">right</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#lt_int"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.lt_int" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.map_pattern">
+<span class="sig-name descname"><span class="pre">map_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#map_pattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.map_pattern" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.ne_bool">
+<span class="sig-name descname"><span class="pre">ne_bool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">right</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#ne_bool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.ne_bool" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.ne_int">
+<span class="sig-name descname"><span class="pre">ne_int</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">right</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#ne_int"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.ne_int" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.not_bool">
+<span class="sig-name descname"><span class="pre">not_bool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#not_bool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.not_bool" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.or_bool">
+<span class="sig-name descname"><span class="pre">or_bool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">right</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#or_bool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.or_bool" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.rangemap_pattern">
+<span class="sig-name descname"><span class="pre">rangemap_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#rangemap_pattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.rangemap_pattern" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.set_pattern">
+<span class="sig-name descname"><span class="pre">set_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#set_pattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.set_pattern" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.str_dv">
+<span class="sig-name descname"><span class="pre">str_dv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.DV" title="pyk.kore.syntax.DV"><span class="pre">DV</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#str_dv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.str_dv" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.string2json">
+<span class="sig-name descname"><span class="pre">string2json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.App" title="pyk.kore.syntax.App"><span class="pre">App</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#string2json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.string2json" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.top_cell_initializer">
+<span class="sig-name descname"><span class="pre">top_cell_initializer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.App" title="pyk.kore.syntax.App"><span class="pre">App</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#top_cell_initializer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.top_cell_initializer" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyk.kore.prelude.xor_bool">
+<span class="sig-name descname"><span class="pre">xor_bool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">right</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pyk.kore.syntax.html#pyk.kore.syntax.Pattern" title="pyk.kore.syntax.Pattern"><span class="pre">Pattern</span></a></span></span><a class="reference internal" href="../_modules/pyk/kore/prelude.html#xor_bool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyk.kore.prelude.xor_bool" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pyk.kore.pool.html" class="btn btn-neutral float-left" title="pyk.kore.pool module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pyk.kore.rpc.html" class="btn btn-neutral float-right" title="pyk.kore.rpc module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Runtime Verification, Inc.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

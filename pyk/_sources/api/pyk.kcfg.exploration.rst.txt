@@ -1,0 +1,7 @@
+pyk.kcfg.exploration module
+===========================
+
+.. automodule:: pyk.kcfg.exploration
+   :members:
+   :undoc-members:
+   :show-inheritance:

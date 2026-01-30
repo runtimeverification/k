@@ -1,0 +1,789 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyk.kast.att &mdash; pyk 7.1.313 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=9c1be6d9"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            pyk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">pyk</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pyk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pyk.kast.att</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyk.kast.att</h1><div class="highlight"><pre>
+<span></span><span class="linenos">  1</span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<span class="linenos">  2</span>
+<span class="linenos">  3</span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="linenos">  4</span><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="linenos">  5</span><span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="linenos">  6</span><span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapping</span>
+<span class="linenos">  7</span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="linenos">  8</span><span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">cache</span>
+<span class="linenos">  9</span><span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">chain</span>
+<span class="linenos"> 10</span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="linenos"> 11</span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClassVar</span>  <span class="c1"># noqa: TC003</span>
+<span class="linenos"> 12</span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">final</span><span class="p">,</span> <span class="n">overload</span>
+<span class="linenos"> 13</span>
+<span class="linenos"> 14</span><span class="kn">from</span><span class="w"> </span><span class="nn">..utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrozenDict</span>
+<span class="linenos"> 15</span><span class="kn">from</span><span class="w"> </span><span class="nn">.color</span><span class="w"> </span><span class="kn">import</span> <span class="n">Color</span>
+<span class="linenos"> 16</span><span class="kn">from</span><span class="w"> </span><span class="nn">.kast</span><span class="w"> </span><span class="kn">import</span> <span class="n">KAst</span>
+<span class="linenos"> 17</span>
+<span class="linenos"> 18</span><span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+<span class="linenos"> 19</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Container</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterator</span>
+<span class="linenos"> 20</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Final</span>
+<span class="linenos"> 21</span>
+<span class="linenos"> 22</span>    <span class="n">U</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;U&#39;</span><span class="p">)</span>
+<span class="linenos"> 23</span>    <span class="n">W</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;W&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;WithKAtt&#39;</span><span class="p">)</span>
+<span class="linenos"> 24</span>
+<span class="linenos"> 25</span>
+<span class="linenos"> 26</span><span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;T&#39;</span><span class="p">)</span>
+<span class="linenos"> 27</span><span class="n">_LOGGER</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="linenos"> 28</span>
+<span class="linenos"> 29</span>
+<div class="viewcode-block" id="AttType">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.AttType">[docs]</a>
+<span class="linenos"> 30</span><span class="k">class</span><span class="w"> </span><span class="nc">AttType</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="AttType.from_dict">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.AttType.from_dict">[docs]</a>
+<span class="linenos"> 31</span>    <span class="nd">@abstractmethod</span>
+<span class="linenos"> 32</span>    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span> <span class="o">...</span></div>
+
+<span class="linenos"> 33</span>
+<div class="viewcode-block" id="AttType.to_dict">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.AttType.to_dict">[docs]</a>
+<span class="linenos"> 34</span>    <span class="nd">@abstractmethod</span>
+<span class="linenos"> 35</span>    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span> <span class="o">...</span></div>
+
+<span class="linenos"> 36</span>
+<div class="viewcode-block" id="AttType.unparse">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.AttType.unparse">[docs]</a>
+<span class="linenos"> 37</span>    <span class="nd">@abstractmethod</span>
+<span class="linenos"> 38</span>    <span class="k">def</span><span class="w"> </span><span class="nf">unparse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
+
+<span class="linenos"> 39</span>
+<div class="viewcode-block" id="AttType.parse">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.AttType.parse">[docs]</a>
+<span class="linenos"> 40</span>    <span class="nd">@abstractmethod</span>
+<span class="linenos"> 41</span>    <span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span> <span class="o">...</span></div>
+</div>
+
+<span class="linenos"> 42</span>
+<span class="linenos"> 43</span>
+<div class="viewcode-block" id="NoneType">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.NoneType">[docs]</a>
+<span class="linenos"> 44</span><span class="k">class</span><span class="w"> </span><span class="nc">NoneType</span><span class="p">(</span><span class="n">AttType</span><span class="p">[</span><span class="kc">None</span><span class="p">]):</span>
+<div class="viewcode-block" id="NoneType.from_dict">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.NoneType.from_dict">[docs]</a>
+<span class="linenos"> 45</span>    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos"> 46</span>        <span class="k">assert</span> <span class="n">obj</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span>
+<span class="linenos"> 47</span>        <span class="k">return</span> <span class="kc">None</span></div>
+
+<span class="linenos"> 48</span>
+<div class="viewcode-block" id="NoneType.to_dict">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.NoneType.to_dict">[docs]</a>
+<span class="linenos"> 49</span>    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="linenos"> 50</span>        <span class="k">assert</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span>
+<span class="linenos"> 51</span>        <span class="k">return</span> <span class="s1">&#39;&#39;</span></div>
+
+<span class="linenos"> 52</span>
+<div class="viewcode-block" id="NoneType.unparse">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.NoneType.unparse">[docs]</a>
+<span class="linenos"> 53</span>    <span class="k">def</span><span class="w"> </span><span class="nf">unparse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos"> 54</span>        <span class="k">return</span> <span class="kc">None</span></div>
+
+<span class="linenos"> 55</span>
+<div class="viewcode-block" id="NoneType.parse">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.NoneType.parse">[docs]</a>
+<span class="linenos"> 56</span>    <span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos"> 57</span>        <span class="k">assert</span> <span class="n">text</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span>
+<span class="linenos"> 58</span>        <span class="k">return</span> <span class="kc">None</span></div>
+</div>
+
+<span class="linenos"> 59</span>
+<span class="linenos"> 60</span>
+<div class="viewcode-block" id="OptionalType">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.OptionalType">[docs]</a>
+<span class="linenos"> 61</span><span class="k">class</span><span class="w"> </span><span class="nc">OptionalType</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">AttType</span><span class="p">[</span><span class="n">T</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]):</span>
+<span class="linenos"> 62</span>    <span class="n">_value_type</span><span class="p">:</span> <span class="n">AttType</span><span class="p">[</span><span class="n">T</span><span class="p">]</span>
+<span class="linenos"> 63</span>
+<span class="linenos"> 64</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value_type</span><span class="p">:</span> <span class="n">AttType</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
+<span class="linenos"> 65</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_value_type</span> <span class="o">=</span> <span class="n">value_type</span>
+<span class="linenos"> 66</span>
+<div class="viewcode-block" id="OptionalType.from_dict">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.OptionalType.from_dict">[docs]</a>
+<span class="linenos"> 67</span>    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos"> 68</span>        <span class="k">if</span> <span class="n">obj</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+<span class="linenos"> 69</span>            <span class="k">return</span> <span class="kc">None</span>
+<span class="linenos"> 70</span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value_type</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span></div>
+
+<span class="linenos"> 71</span>
+<div class="viewcode-block" id="OptionalType.to_dict">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.OptionalType.to_dict">[docs]</a>
+<span class="linenos"> 72</span>    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">T</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="linenos"> 73</span>        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos"> 74</span>            <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+<span class="linenos"> 75</span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value_type</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+<span class="linenos"> 76</span>
+<div class="viewcode-block" id="OptionalType.unparse">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.OptionalType.unparse">[docs]</a>
+<span class="linenos"> 77</span>    <span class="k">def</span><span class="w"> </span><span class="nf">unparse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">T</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos"> 78</span>        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos"> 79</span>            <span class="k">return</span> <span class="kc">None</span>
+<span class="linenos"> 80</span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value_type</span><span class="o">.</span><span class="n">unparse</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+<span class="linenos"> 81</span>
+<div class="viewcode-block" id="OptionalType.parse">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.OptionalType.parse">[docs]</a>
+<span class="linenos"> 82</span>    <span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos"> 83</span>        <span class="k">if</span> <span class="n">text</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+<span class="linenos"> 84</span>            <span class="k">return</span> <span class="kc">None</span>
+<span class="linenos"> 85</span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value_type</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">text</span><span class="p">)</span></div>
+</div>
+
+<span class="linenos"> 86</span>
+<span class="linenos"> 87</span>
+<div class="viewcode-block" id="AnyType">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.AnyType">[docs]</a>
+<span class="linenos"> 88</span><span class="k">class</span><span class="w"> </span><span class="nc">AnyType</span><span class="p">(</span><span class="n">AttType</span><span class="p">[</span><span class="n">Any</span><span class="p">]):</span>
+<div class="viewcode-block" id="AnyType.from_dict">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.AnyType.from_dict">[docs]</a>
+<span class="linenos"> 89</span>    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="linenos"> 90</span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_freeze</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span></div>
+
+<span class="linenos"> 91</span>
+<div class="viewcode-block" id="AnyType.to_dict">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.AnyType.to_dict">[docs]</a>
+<span class="linenos"> 92</span>    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="linenos"> 93</span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unfreeze</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+<span class="linenos"> 94</span>
+<div class="viewcode-block" id="AnyType.unparse">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.AnyType.unparse">[docs]</a>
+<span class="linenos"> 95</span>    <span class="k">def</span><span class="w"> </span><span class="nf">unparse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos"> 96</span>        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+<span class="linenos"> 97</span>
+<div class="viewcode-block" id="AnyType.parse">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.AnyType.parse">[docs]</a>
+<span class="linenos"> 98</span>    <span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="linenos"> 99</span>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Parsing a string into an Any attribute type is not supported. Attempted to parse: </span><span class="si">{</span><span class="n">text</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+<span class="linenos">100</span>
+<span class="linenos">101</span>    <span class="nd">@staticmethod</span>
+<span class="linenos">102</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_freeze</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="linenos">103</span>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+<span class="linenos">104</span>            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">AnyType</span><span class="o">.</span><span class="n">_freeze</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">)</span>
+<span class="linenos">105</span>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="linenos">106</span>            <span class="k">return</span> <span class="n">FrozenDict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">AnyType</span><span class="o">.</span><span class="n">_freeze</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+<span class="linenos">107</span>        <span class="k">return</span> <span class="n">obj</span>
+<span class="linenos">108</span>
+<span class="linenos">109</span>    <span class="nd">@staticmethod</span>
+<span class="linenos">110</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_unfreeze</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="linenos">111</span>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+<span class="linenos">112</span>            <span class="k">return</span> <span class="p">[</span><span class="n">AnyType</span><span class="o">.</span><span class="n">_unfreeze</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
+<span class="linenos">113</span>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">FrozenDict</span><span class="p">):</span>
+<span class="linenos">114</span>            <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">AnyType</span><span class="o">.</span><span class="n">_unfreeze</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+<span class="linenos">115</span>        <span class="k">return</span> <span class="n">value</span></div>
+
+<span class="linenos">116</span>
+<span class="linenos">117</span>
+<div class="viewcode-block" id="IntType">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.IntType">[docs]</a>
+<span class="linenos">118</span><span class="k">class</span><span class="w"> </span><span class="nc">IntType</span><span class="p">(</span><span class="n">AttType</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
+<div class="viewcode-block" id="IntType.from_dict">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.IntType.from_dict">[docs]</a>
+<span class="linenos">119</span>    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="linenos">120</span>        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+<span class="linenos">121</span>        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span></div>
+
+<span class="linenos">122</span>
+<div class="viewcode-block" id="IntType.to_dict">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.IntType.to_dict">[docs]</a>
+<span class="linenos">123</span>    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">124</span>        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+<span class="linenos">125</span>
+<div class="viewcode-block" id="IntType.unparse">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.IntType.unparse">[docs]</a>
+<span class="linenos">126</span>    <span class="k">def</span><span class="w"> </span><span class="nf">unparse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">127</span>        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+<span class="linenos">128</span>
+<div class="viewcode-block" id="IntType.parse">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.IntType.parse">[docs]</a>
+<span class="linenos">129</span>    <span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="linenos">130</span>        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">text</span><span class="p">)</span></div>
+</div>
+
+<span class="linenos">131</span>
+<span class="linenos">132</span>
+<div class="viewcode-block" id="StrType">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.StrType">[docs]</a>
+<span class="linenos">133</span><span class="k">class</span><span class="w"> </span><span class="nc">StrType</span><span class="p">(</span><span class="n">AttType</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<div class="viewcode-block" id="StrType.from_dict">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.StrType.from_dict">[docs]</a>
+<span class="linenos">134</span>    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">135</span>        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+<span class="linenos">136</span>        <span class="k">return</span> <span class="n">obj</span></div>
+
+<span class="linenos">137</span>
+<div class="viewcode-block" id="StrType.to_dict">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.StrType.to_dict">[docs]</a>
+<span class="linenos">138</span>    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="linenos">139</span>        <span class="k">return</span> <span class="n">value</span></div>
+
+<span class="linenos">140</span>
+<div class="viewcode-block" id="StrType.unparse">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.StrType.unparse">[docs]</a>
+<span class="linenos">141</span>    <span class="k">def</span><span class="w"> </span><span class="nf">unparse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">142</span>        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">&quot;&#39;</span></div>
+
+<span class="linenos">143</span>
+<div class="viewcode-block" id="StrType.parse">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.StrType.parse">[docs]</a>
+<span class="linenos">144</span>    <span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">145</span>        <span class="k">return</span> <span class="n">text</span></div>
+</div>
+
+<span class="linenos">146</span>
+<span class="linenos">147</span>
+<div class="viewcode-block" id="LocationType">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.LocationType">[docs]</a>
+<span class="linenos">148</span><span class="k">class</span><span class="w"> </span><span class="nc">LocationType</span><span class="p">(</span><span class="n">AttType</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]):</span>
+<span class="linenos">149</span>    <span class="n">_PARSE_REGEX</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;(</span><span class="se">\\</span><span class="s1">d+),(</span><span class="se">\\</span><span class="s1">d+),(</span><span class="se">\\</span><span class="s1">d+),(</span><span class="se">\\</span><span class="s1">d+)&#39;</span><span class="p">)</span>
+<span class="linenos">150</span>
+<div class="viewcode-block" id="LocationType.from_dict">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.LocationType.from_dict">[docs]</a>
+<span class="linenos">151</span>    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="linenos">152</span>        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
+<span class="linenos">153</span>        <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">obj</span>
+<span class="linenos">154</span>        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+<span class="linenos">155</span>        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+<span class="linenos">156</span>        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+<span class="linenos">157</span>        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+<span class="linenos">158</span>        <span class="k">return</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span></div>
+
+<span class="linenos">159</span>
+<div class="viewcode-block" id="LocationType.to_dict">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.LocationType.to_dict">[docs]</a>
+<span class="linenos">160</span>    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="linenos">161</span>        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+<span class="linenos">162</span>
+<div class="viewcode-block" id="LocationType.unparse">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.LocationType.unparse">[docs]</a>
+<span class="linenos">163</span>    <span class="k">def</span><span class="w"> </span><span class="nf">unparse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">164</span>        <span class="k">return</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)</span></div>
+
+<span class="linenos">165</span>
+<div class="viewcode-block" id="LocationType.parse">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.LocationType.parse">[docs]</a>
+<span class="linenos">166</span>    <span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="linenos">167</span>        <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_PARSE_REGEX</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+<span class="linenos">168</span>        <span class="k">assert</span> <span class="n">m</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+<span class="linenos">169</span>        <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">m</span><span class="o">.</span><span class="n">groups</span><span class="p">())</span>
+<span class="linenos">170</span>        <span class="k">return</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span></div>
+</div>
+
+<span class="linenos">171</span>
+<span class="linenos">172</span>
+<div class="viewcode-block" id="PathType">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.PathType">[docs]</a>
+<span class="linenos">173</span><span class="k">class</span><span class="w"> </span><span class="nc">PathType</span><span class="p">(</span><span class="n">AttType</span><span class="p">[</span><span class="n">Path</span><span class="p">]):</span>
+<div class="viewcode-block" id="PathType.from_dict">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.PathType.from_dict">[docs]</a>
+<span class="linenos">174</span>    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="linenos">175</span>        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+<span class="linenos">176</span>        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span></div>
+
+<span class="linenos">177</span>
+<div class="viewcode-block" id="PathType.to_dict">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.PathType.to_dict">[docs]</a>
+<span class="linenos">178</span>    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="linenos">179</span>        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+<span class="linenos">180</span>
+<div class="viewcode-block" id="PathType.unparse">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.PathType.unparse">[docs]</a>
+<span class="linenos">181</span>    <span class="k">def</span><span class="w"> </span><span class="nf">unparse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">182</span>        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">&quot;&#39;</span></div>
+
+<span class="linenos">183</span>
+<div class="viewcode-block" id="PathType.parse">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.PathType.parse">[docs]</a>
+<span class="linenos">184</span>    <span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="linenos">185</span>        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">text</span><span class="p">)</span></div>
+</div>
+
+<span class="linenos">186</span>
+<span class="linenos">187</span>
+<div class="viewcode-block" id="Format">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.Format">[docs]</a>
+<span class="linenos">188</span><span class="nd">@final</span>
+<span class="linenos">189</span><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">190</span><span class="k">class</span><span class="w"> </span><span class="nc">Format</span><span class="p">:</span>
+<span class="linenos">191</span>    <span class="n">tokens</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+<span class="linenos">192</span>
+<span class="linenos">193</span>    <span class="n">_pattern</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="n">re</span><span class="o">.</span><span class="n">Pattern</span><span class="p">]</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;%\D|%\d+|[^%]+&#39;</span><span class="p">)</span>
+<span class="linenos">194</span>
+<span class="linenos">195</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokens</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">()):</span>
+<span class="linenos">196</span>        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;tokens&#39;</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">tokens</span><span class="p">))</span>
+<span class="linenos">197</span>
+<div class="viewcode-block" id="Format.parse">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.Format.parse">[docs]</a>
+<span class="linenos">198</span>    <span class="nd">@classmethod</span>
+<span class="linenos">199</span>    <span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Format</span><span class="p">:</span>
+<span class="linenos">200</span>        <span class="n">matches</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_pattern</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+<span class="linenos">201</span>
+<span class="linenos">202</span>        <span class="n">matched_len</span><span class="p">:</span> <span class="nb">int</span>
+<span class="linenos">203</span>        <span class="k">if</span> <span class="ow">not</span> <span class="n">matches</span><span class="p">:</span>
+<span class="linenos">204</span>            <span class="n">matched_len</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="linenos">205</span>        <span class="k">else</span><span class="p">:</span>
+<span class="linenos">206</span>            <span class="n">_</span><span class="p">,</span> <span class="n">matched_len</span> <span class="o">=</span> <span class="n">matches</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">span</span><span class="p">()</span>
+<span class="linenos">207</span>
+<span class="linenos">208</span>        <span class="k">if</span> <span class="n">matched_len</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+<span class="linenos">209</span>            <span class="k">assert</span> <span class="n">s</span> <span class="ow">and</span> <span class="n">s</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;%&#39;</span>
+<span class="linenos">210</span>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Incomplete escape sequence at the end of format string: </span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos">211</span>
+<span class="linenos">212</span>        <span class="k">return</span> <span class="n">Format</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">matches</span><span class="p">)</span></div>
+
+<span class="linenos">213</span>
+<div class="viewcode-block" id="Format.unparse">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.Format.unparse">[docs]</a>
+<span class="linenos">214</span>    <span class="k">def</span><span class="w"> </span><span class="nf">unparse</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">215</span>        <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tokens</span><span class="p">)</span></div>
+</div>
+
+<span class="linenos">216</span>
+<span class="linenos">217</span>
+<div class="viewcode-block" id="FormatType">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.FormatType">[docs]</a>
+<span class="linenos">218</span><span class="k">class</span><span class="w"> </span><span class="nc">FormatType</span><span class="p">(</span><span class="n">AttType</span><span class="p">[</span><span class="n">Format</span><span class="p">]):</span>
+<div class="viewcode-block" id="FormatType.from_dict">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.FormatType.from_dict">[docs]</a>
+<span class="linenos">219</span>    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Format</span><span class="p">:</span>
+<span class="linenos">220</span>        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+<span class="linenos">221</span>        <span class="k">return</span> <span class="n">Format</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span></div>
+
+<span class="linenos">222</span>
+<div class="viewcode-block" id="FormatType.to_dict">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.FormatType.to_dict">[docs]</a>
+<span class="linenos">223</span>    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Format</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="linenos">224</span>        <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">unparse</span><span class="p">()</span></div>
+
+<span class="linenos">225</span>
+<div class="viewcode-block" id="FormatType.unparse">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.FormatType.unparse">[docs]</a>
+<span class="linenos">226</span>    <span class="k">def</span><span class="w"> </span><span class="nf">unparse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Format</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">227</span>        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="n">value</span><span class="o">.</span><span class="n">unparse</span><span class="si">}</span><span class="s1">&quot;&#39;</span></div>
+
+<span class="linenos">228</span>
+<div class="viewcode-block" id="FormatType.parse">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.FormatType.parse">[docs]</a>
+<span class="linenos">229</span>    <span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Format</span><span class="p">:</span>
+<span class="linenos">230</span>        <span class="k">return</span> <span class="n">Format</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">text</span><span class="p">)</span></div>
+</div>
+
+<span class="linenos">231</span>
+<span class="linenos">232</span>
+<div class="viewcode-block" id="ColorType">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.ColorType">[docs]</a>
+<span class="linenos">233</span><span class="k">class</span><span class="w"> </span><span class="nc">ColorType</span><span class="p">(</span><span class="n">AttType</span><span class="p">[</span><span class="n">Color</span><span class="p">]):</span>
+<div class="viewcode-block" id="ColorType.from_dict">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.ColorType.from_dict">[docs]</a>
+<span class="linenos">234</span>    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Color</span><span class="p">:</span>
+<span class="linenos">235</span>        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+<span class="linenos">236</span>        <span class="k">return</span> <span class="n">Color</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span></div>
+
+<span class="linenos">237</span>
+<div class="viewcode-block" id="ColorType.to_dict">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.ColorType.to_dict">[docs]</a>
+<span class="linenos">238</span>    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Color</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">239</span>        <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">value</span></div>
+
+<span class="linenos">240</span>
+<div class="viewcode-block" id="ColorType.unparse">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.ColorType.unparse">[docs]</a>
+<span class="linenos">241</span>    <span class="k">def</span><span class="w"> </span><span class="nf">unparse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Color</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">242</span>        <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">value</span></div>
+
+<span class="linenos">243</span>
+<div class="viewcode-block" id="ColorType.parse">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.ColorType.parse">[docs]</a>
+<span class="linenos">244</span>    <span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Color</span><span class="p">:</span>
+<span class="linenos">245</span>        <span class="k">return</span> <span class="n">Color</span><span class="p">(</span><span class="n">text</span><span class="p">)</span></div>
+</div>
+
+<span class="linenos">246</span>
+<span class="linenos">247</span>
+<div class="viewcode-block" id="ColorsType">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.ColorsType">[docs]</a>
+<span class="linenos">248</span><span class="k">class</span><span class="w"> </span><span class="nc">ColorsType</span><span class="p">(</span><span class="n">AttType</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">Color</span><span class="p">,</span> <span class="o">...</span><span class="p">]]):</span>
+<div class="viewcode-block" id="ColorsType.from_dict">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.ColorsType.from_dict">[docs]</a>
+<span class="linenos">249</span>    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Color</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<span class="linenos">250</span>        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+<span class="linenos">251</span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span></div>
+
+<span class="linenos">252</span>
+<div class="viewcode-block" id="ColorsType.to_dict">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.ColorsType.to_dict">[docs]</a>
+<span class="linenos">253</span>    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Color</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">254</span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">unparse</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+<span class="linenos">255</span>
+<div class="viewcode-block" id="ColorsType.unparse">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.ColorsType.unparse">[docs]</a>
+<span class="linenos">256</span>    <span class="k">def</span><span class="w"> </span><span class="nf">unparse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Color</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">257</span>        <span class="k">return</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)</span></div>
+
+<span class="linenos">258</span>
+<div class="viewcode-block" id="ColorsType.parse">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.ColorsType.parse">[docs]</a>
+<span class="linenos">259</span>    <span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Color</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<span class="linenos">260</span>        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">Color</span><span class="p">(</span><span class="n">color</span><span class="p">)</span> <span class="k">for</span> <span class="n">color</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">))</span></div>
+</div>
+
+<span class="linenos">261</span>
+<span class="linenos">262</span>
+<span class="linenos">263</span><span class="n">_NONE</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">NoneType</span><span class="p">()</span>
+<span class="linenos">264</span><span class="n">_ANY</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AnyType</span><span class="p">()</span>
+<span class="linenos">265</span><span class="n">_INT</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">IntType</span><span class="p">()</span>
+<span class="linenos">266</span><span class="n">_STR</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">StrType</span><span class="p">()</span>
+<span class="linenos">267</span><span class="n">_LOCATION</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">LocationType</span><span class="p">()</span>
+<span class="linenos">268</span><span class="n">_PATH</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">PathType</span><span class="p">()</span>
+<span class="linenos">269</span>
+<span class="linenos">270</span>
+<div class="viewcode-block" id="AttKey">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.AttKey">[docs]</a>
+<span class="linenos">271</span><span class="nd">@final</span>
+<span class="linenos">272</span><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">273</span><span class="k">class</span><span class="w"> </span><span class="nc">AttKey</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
+<span class="linenos">274</span>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="linenos">275</span>    <span class="nb">type</span><span class="p">:</span> <span class="n">AttType</span><span class="p">[</span><span class="n">T</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">compare</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">kw_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">276</span>
+<span class="linenos">277</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AttEntry</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+<span class="linenos">278</span>        <span class="k">return</span> <span class="n">AttEntry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+
+<span class="linenos">279</span>
+<span class="linenos">280</span>
+<div class="viewcode-block" id="AttEntry">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.AttEntry">[docs]</a>
+<span class="linenos">281</span><span class="nd">@final</span>
+<span class="linenos">282</span><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">283</span><span class="k">class</span><span class="w"> </span><span class="nc">AttEntry</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
+<span class="linenos">284</span>    <span class="n">key</span><span class="p">:</span> <span class="n">AttKey</span><span class="p">[</span><span class="n">T</span><span class="p">]</span>
+<span class="linenos">285</span>    <span class="n">value</span><span class="p">:</span> <span class="n">T</span></div>
+
+<span class="linenos">286</span>
+<span class="linenos">287</span>
+<div class="viewcode-block" id="Atts">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.Atts">[docs]</a>
+<span class="linenos">288</span><span class="k">class</span><span class="w"> </span><span class="nc">Atts</span><span class="p">:</span>
+<span class="linenos">289</span>    <span class="n">ALIAS</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;alias&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">290</span>    <span class="n">ALIAS_REC</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;alias-rec&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">291</span>    <span class="n">ANYWHERE</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;anywhere&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">292</span>    <span class="n">ASSOC</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;assoc&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">293</span>    <span class="n">AVOID</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;avoid&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">294</span>    <span class="n">BRACKET</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;bracket&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">295</span>    <span class="n">BRACKET_LABEL</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;bracketLabel&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_ANY</span><span class="p">)</span>
+<span class="linenos">296</span>    <span class="n">CIRCULARITY</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;circularity&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">297</span>    <span class="n">CELL</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;cell&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">298</span>    <span class="n">CELL_COLLECTION</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;cellCollection&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">299</span>    <span class="n">CELL_FRAGMENT</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;cellFragment&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_ANY</span><span class="p">)</span>
+<span class="linenos">300</span>    <span class="n">CELL_NAME</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;cellName&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_STR</span><span class="p">)</span>
+<span class="linenos">301</span>    <span class="n">CELL_OPT_ABSENT</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;cellOptAbsent&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_ANY</span><span class="p">)</span>
+<span class="linenos">302</span>    <span class="n">COLOR</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;color&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">ColorType</span><span class="p">())</span>
+<span class="linenos">303</span>    <span class="n">COLORS</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;colors&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">ColorsType</span><span class="p">())</span>
+<span class="linenos">304</span>    <span class="n">COMM</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;comm&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">305</span>    <span class="n">CONCAT</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;concat&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_ANY</span><span class="p">)</span>
+<span class="linenos">306</span>    <span class="n">CONCRETE</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;concrete&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">OptionalType</span><span class="p">(</span><span class="n">_STR</span><span class="p">))</span>
+<span class="linenos">307</span>    <span class="n">CONSTRUCTOR</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;constructor&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">308</span>    <span class="n">DEPENDS</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;depends&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_ANY</span><span class="p">)</span>
+<span class="linenos">309</span>    <span class="n">DIGEST</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;digest&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_ANY</span><span class="p">)</span>
+<span class="linenos">310</span>    <span class="n">ELEMENT</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;element&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_ANY</span><span class="p">)</span>
+<span class="linenos">311</span>    <span class="n">EXIT</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;exit&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_ANY</span><span class="p">)</span>
+<span class="linenos">312</span>    <span class="n">FORMAT</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;format&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">FormatType</span><span class="p">())</span>
+<span class="linenos">313</span>    <span class="n">FRESH_GENERATOR</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;freshGenerator&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">314</span>    <span class="n">FUNCTION</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;function&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">315</span>    <span class="n">FUNCTIONAL</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;functional&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">316</span>    <span class="n">GROUP</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_STR</span><span class="p">)</span>
+<span class="linenos">317</span>    <span class="n">HAS_DOMAIN_VALUES</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;hasDomainValues&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">318</span>    <span class="n">HOOK</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;hook&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_ANY</span><span class="p">)</span>
+<span class="linenos">319</span>    <span class="n">IDEM</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;idem&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">320</span>    <span class="n">IMPURE</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;impure&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">321</span>    <span class="n">INDEX</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_INT</span><span class="p">)</span>
+<span class="linenos">322</span>    <span class="n">INITIALIZER</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;initializer&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">323</span>    <span class="n">INJECTIVE</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;injective&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">324</span>    <span class="n">LABEL</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;label&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_ANY</span><span class="p">)</span>
+<span class="linenos">325</span>    <span class="n">LEFT</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_ANY</span><span class="p">)</span>  <span class="c1"># LEFT and LEFT_INTERNAL on the Frontend</span>
+<span class="linenos">326</span>    <span class="n">LOCATION</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;org.kframework.attributes.Location&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_LOCATION</span><span class="p">)</span>
+<span class="linenos">327</span>    <span class="n">MACRO</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;macro&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">328</span>    <span class="n">MACRO_REC</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;macro-rec&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">329</span>    <span class="n">MAINCELL</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;maincell&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">330</span>    <span class="n">MULTIPLICITY</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;multiplicity&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_ANY</span><span class="p">)</span>
+<span class="linenos">331</span>    <span class="n">NO_EVALUATORS</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;no-evaluators&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">332</span>    <span class="n">OVERLOAD</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;overload&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_STR</span><span class="p">)</span>
+<span class="linenos">333</span>    <span class="n">OWISE</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;owise&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">334</span>    <span class="n">PREDICATE</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;predicate&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_ANY</span><span class="p">)</span>
+<span class="linenos">335</span>    <span class="n">PREFER</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;prefer&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">336</span>    <span class="n">PRIORITY</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;priority&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_ANY</span><span class="p">)</span>
+<span class="linenos">337</span>    <span class="n">PRIORITIES</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;priorities&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_ANY</span><span class="p">)</span>  <span class="c1"># only in KORE output</span>
+<span class="linenos">338</span>    <span class="n">PRIVATE</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;private&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">339</span>    <span class="n">PRODUCTION</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;org.kframework.definition.Production&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_ANY</span><span class="p">)</span>
+<span class="linenos">340</span>    <span class="n">PROJECTION</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;projection&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">341</span>    <span class="n">RIGHT</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_ANY</span><span class="p">)</span>  <span class="c1"># RIGHT and RIGHT_INTERNAL on the Frontend</span>
+<span class="linenos">342</span>    <span class="n">RETURNS_UNIT</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;returnsUnit&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">343</span>    <span class="n">SIMPLIFICATION</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;simplification&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_ANY</span><span class="p">)</span>
+<span class="linenos">344</span>    <span class="n">SEQSTRICT</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;seqstrict&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_ANY</span><span class="p">)</span>
+<span class="linenos">345</span>    <span class="n">SORT</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;org.kframework.kore.Sort&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_ANY</span><span class="p">)</span>
+<span class="linenos">346</span>    <span class="n">SOURCE</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;org.kframework.attributes.Source&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_PATH</span><span class="p">)</span>
+<span class="linenos">347</span>    <span class="n">SMTLEMMA</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;smt-lemma&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">348</span>    <span class="n">STRICT</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;strict&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_ANY</span><span class="p">)</span>
+<span class="linenos">349</span>    <span class="n">SYMBOL</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;symbol&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_STR</span><span class="p">)</span>
+<span class="linenos">350</span>    <span class="n">SYNTAX_MODULE</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;syntaxModule&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_STR</span><span class="p">)</span>
+<span class="linenos">351</span>    <span class="n">SYMBOLIC</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;symbolic&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">OptionalType</span><span class="p">(</span><span class="n">_STR</span><span class="p">))</span>
+<span class="linenos">352</span>    <span class="n">TERMINALS</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;terminals&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_STR</span><span class="p">)</span>
+<span class="linenos">353</span>    <span class="n">TERMINATOR_SYMBOL</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;terminator-symbol&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_ANY</span><span class="p">)</span>
+<span class="linenos">354</span>    <span class="n">TOKEN</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;token&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">355</span>    <span class="n">TOTAL</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;total&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">356</span>    <span class="n">TRUSTED</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;trusted&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">357</span>    <span class="n">TYPE</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_ANY</span><span class="p">)</span>
+<span class="linenos">358</span>    <span class="n">UNIT</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;unit&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_STR</span><span class="p">)</span>
+<span class="linenos">359</span>    <span class="n">UNIQUE_ID</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;UNIQUE_ID&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_ANY</span><span class="p">)</span>
+<span class="linenos">360</span>    <span class="n">UNPARSE_AVOID</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;unparseAvoid&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_NONE</span><span class="p">)</span>
+<span class="linenos">361</span>    <span class="n">UPDATE</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;update&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_ANY</span><span class="p">)</span>
+<span class="linenos">362</span>    <span class="n">USER_LIST</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;userList&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_ANY</span><span class="p">)</span>
+<span class="linenos">363</span>    <span class="n">WRAP_ELEMENT</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">AttKey</span><span class="p">(</span><span class="s1">&#39;wrapElement&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_ANY</span><span class="p">)</span>
+<span class="linenos">364</span>
+<div class="viewcode-block" id="Atts.keys">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.Atts.keys">[docs]</a>
+<span class="linenos">365</span>    <span class="nd">@classmethod</span>
+<span class="linenos">366</span>    <span class="nd">@cache</span>
+<span class="linenos">367</span>    <span class="k">def</span><span class="w"> </span><span class="nf">keys</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FrozenDict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">AttKey</span><span class="p">]:</span>
+<span class="linenos">368</span>        <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">AttKey</span><span class="p">)]</span>
+<span class="linenos">369</span>        <span class="n">res</span><span class="p">:</span> <span class="n">FrozenDict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">AttKey</span><span class="p">]</span> <span class="o">=</span> <span class="n">FrozenDict</span><span class="p">({</span><span class="n">key</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">})</span>
+<span class="linenos">370</span>        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>  <span class="c1"># Fails on duplicate key name</span>
+<span class="linenos">371</span>        <span class="k">return</span> <span class="n">res</span></div>
+</div>
+
+<span class="linenos">372</span>
+<span class="linenos">373</span>
+<div class="viewcode-block" id="KAtt">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.KAtt">[docs]</a>
+<span class="linenos">374</span><span class="nd">@final</span>
+<span class="linenos">375</span><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">376</span><span class="k">class</span><span class="w"> </span><span class="nc">KAtt</span><span class="p">(</span><span class="n">KAst</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">[</span><span class="n">AttKey</span><span class="p">,</span> <span class="n">Any</span><span class="p">]):</span>
+<span class="linenos">377</span>    <span class="n">atts</span><span class="p">:</span> <span class="n">FrozenDict</span><span class="p">[</span><span class="n">AttKey</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+<span class="linenos">378</span>
+<span class="linenos">379</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entries</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">AttEntry</span><span class="p">]</span> <span class="o">=</span> <span class="p">()):</span>
+<span class="linenos">380</span>        <span class="n">atts</span><span class="p">:</span> <span class="n">FrozenDict</span><span class="p">[</span><span class="n">AttKey</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">FrozenDict</span><span class="p">((</span><span class="n">e</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">)</span>
+<span class="linenos">381</span>        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;atts&#39;</span><span class="p">,</span> <span class="n">atts</span><span class="p">)</span>
+<span class="linenos">382</span>
+<span class="linenos">383</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">AttKey</span><span class="p">]:</span>
+<span class="linenos">384</span>        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atts</span><span class="p">)</span>
+<span class="linenos">385</span>
+<span class="linenos">386</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="linenos">387</span>        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atts</span><span class="p">)</span>
+<span class="linenos">388</span>
+<span class="linenos">389</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">AttKey</span><span class="p">[</span><span class="n">T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+<span class="linenos">390</span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">atts</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+<span class="linenos">391</span>
+<span class="linenos">392</span>    <span class="nd">@overload</span>
+<span class="linenos">393</span>    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">AttKey</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
+<span class="linenos">394</span>
+<span class="linenos">395</span>    <span class="nd">@overload</span>
+<span class="linenos">396</span>    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">AttKey</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="o">/</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">U</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span> <span class="o">|</span> <span class="n">U</span><span class="p">:</span> <span class="o">...</span>
+<span class="linenos">397</span>
+<div class="viewcode-block" id="KAtt.get">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.KAtt.get">[docs]</a>
+<span class="linenos">398</span>    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="linenos">399</span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">atts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<span class="linenos">400</span>
+<div class="viewcode-block" id="KAtt.entries">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.KAtt.entries">[docs]</a>
+<span class="linenos">401</span>    <span class="k">def</span><span class="w"> </span><span class="nf">entries</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">AttEntry</span><span class="p">]:</span>
+<span class="linenos">402</span>        <span class="k">return</span> <span class="p">(</span><span class="n">key</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atts</span><span class="o">.</span><span class="n">items</span><span class="p">())</span></div>
+
+<span class="linenos">403</span>
+<div class="viewcode-block" id="KAtt.from_dict">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.KAtt.from_dict">[docs]</a>
+<span class="linenos">404</span>    <span class="nd">@classmethod</span>
+<span class="linenos">405</span>    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">KAtt</span><span class="p">],</span> <span class="n">d</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">KAtt</span><span class="p">:</span>
+<span class="linenos">406</span>        <span class="n">entries</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">AttEntry</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">407</span>        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;att&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<span class="linenos">408</span>            <span class="n">key</span> <span class="o">=</span> <span class="n">Atts</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">AttKey</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_ANY</span><span class="p">))</span>
+<span class="linenos">409</span>            <span class="n">value</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+<span class="linenos">410</span>            <span class="n">entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+<span class="linenos">411</span>        <span class="k">return</span> <span class="n">KAtt</span><span class="p">(</span><span class="n">entries</span><span class="o">=</span><span class="n">entries</span><span class="p">)</span></div>
+
+<span class="linenos">412</span>
+<div class="viewcode-block" id="KAtt.to_dict">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.KAtt.to_dict">[docs]</a>
+<span class="linenos">413</span>    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="linenos">414</span>        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;node&#39;</span><span class="p">:</span> <span class="s1">&#39;KAtt&#39;</span><span class="p">,</span> <span class="s1">&#39;att&#39;</span><span class="p">:</span> <span class="p">{</span><span class="n">key</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">key</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atts</span><span class="o">.</span><span class="n">items</span><span class="p">()}}</span></div>
+
+<span class="linenos">415</span>
+<div class="viewcode-block" id="KAtt.parse">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.KAtt.parse">[docs]</a>
+<span class="linenos">416</span>    <span class="nd">@classmethod</span>
+<span class="linenos">417</span>    <span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">KAtt</span><span class="p">],</span> <span class="n">d</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">KAtt</span><span class="p">:</span>
+<span class="linenos">418</span>        <span class="n">entries</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">AttEntry</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">419</span>        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<span class="linenos">420</span>            <span class="n">key</span> <span class="o">=</span> <span class="n">Atts</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">AttKey</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">_ANY</span><span class="p">))</span>
+<span class="linenos">421</span>            <span class="n">value</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+<span class="linenos">422</span>            <span class="n">entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+<span class="linenos">423</span>        <span class="k">return</span> <span class="n">KAtt</span><span class="p">(</span><span class="n">entries</span><span class="o">=</span><span class="n">entries</span><span class="p">)</span></div>
+
+<span class="linenos">424</span>
+<span class="linenos">425</span>    <span class="nd">@property</span>
+<span class="linenos">426</span>    <span class="k">def</span><span class="w"> </span><span class="nf">pretty</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">427</span>        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">:</span>
+<span class="linenos">428</span>            <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+<span class="linenos">429</span>        <span class="n">att_strs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">430</span>        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<span class="linenos">431</span>            <span class="n">value_str</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">unparse</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+<span class="linenos">432</span>            <span class="k">if</span> <span class="n">value_str</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">433</span>                <span class="n">att_strs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<span class="linenos">434</span>            <span class="k">else</span><span class="p">:</span>
+<span class="linenos">435</span>                <span class="n">att_strs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">(</span><span class="si">{</span><span class="n">value_str</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+<span class="linenos">436</span>        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;[</span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">att_strs</span><span class="p">)</span><span class="si">}</span><span class="s1">]&#39;</span>
+<span class="linenos">437</span>
+<div class="viewcode-block" id="KAtt.update">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.KAtt.update">[docs]</a>
+<span class="linenos">438</span>    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entries</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">AttEntry</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">KAtt</span><span class="p">:</span>
+<span class="linenos">439</span>        <span class="n">entries</span> <span class="o">=</span> <span class="n">chain</span><span class="p">((</span><span class="n">AttEntry</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atts</span><span class="o">.</span><span class="n">items</span><span class="p">()),</span> <span class="n">entries</span><span class="p">)</span>
+<span class="linenos">440</span>        <span class="k">return</span> <span class="n">KAtt</span><span class="p">(</span><span class="n">entries</span><span class="o">=</span><span class="n">entries</span><span class="p">)</span></div>
+
+<span class="linenos">441</span>
+<div class="viewcode-block" id="KAtt.discard">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.KAtt.discard">[docs]</a>
+<span class="linenos">442</span>    <span class="k">def</span><span class="w"> </span><span class="nf">discard</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keys</span><span class="p">:</span> <span class="n">Container</span><span class="p">[</span><span class="n">AttKey</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">KAtt</span><span class="p">:</span>
+<span class="linenos">443</span>        <span class="n">entries</span> <span class="o">=</span> <span class="p">(</span><span class="n">AttEntry</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atts</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">)</span>
+<span class="linenos">444</span>        <span class="k">return</span> <span class="n">KAtt</span><span class="p">(</span><span class="n">entries</span><span class="o">=</span><span class="n">entries</span><span class="p">)</span></div>
+
+<span class="linenos">445</span>
+<div class="viewcode-block" id="KAtt.drop_source">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.KAtt.drop_source">[docs]</a>
+<span class="linenos">446</span>    <span class="k">def</span><span class="w"> </span><span class="nf">drop_source</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KAtt</span><span class="p">:</span>
+<span class="linenos">447</span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">discard</span><span class="p">([</span><span class="n">Atts</span><span class="o">.</span><span class="n">SOURCE</span><span class="p">,</span> <span class="n">Atts</span><span class="o">.</span><span class="n">LOCATION</span><span class="p">])</span></div>
+</div>
+
+<span class="linenos">448</span>
+<span class="linenos">449</span>
+<span class="linenos">450</span><span class="n">EMPTY_ATT</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">KAtt</span><span class="p">()</span>
+<span class="linenos">451</span>
+<span class="linenos">452</span>
+<div class="viewcode-block" id="WithKAtt">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.WithKAtt">[docs]</a>
+<span class="linenos">453</span><span class="k">class</span><span class="w"> </span><span class="nc">WithKAtt</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="linenos">454</span>    <span class="n">att</span><span class="p">:</span> <span class="n">KAtt</span>
+<span class="linenos">455</span>
+<div class="viewcode-block" id="WithKAtt.let_att">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.WithKAtt.let_att">[docs]</a>
+<span class="linenos">456</span>    <span class="nd">@abstractmethod</span>
+<span class="linenos">457</span>    <span class="k">def</span><span class="w"> </span><span class="nf">let_att</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">W</span><span class="p">,</span> <span class="n">att</span><span class="p">:</span> <span class="n">KAtt</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">W</span><span class="p">:</span> <span class="o">...</span></div>
+
+<span class="linenos">458</span>
+<div class="viewcode-block" id="WithKAtt.map_att">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.WithKAtt.map_att">[docs]</a>
+<span class="linenos">459</span>    <span class="k">def</span><span class="w"> </span><span class="nf">map_att</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">W</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">KAtt</span><span class="p">],</span> <span class="n">KAtt</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">W</span><span class="p">:</span>
+<span class="linenos">460</span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">let_att</span><span class="p">(</span><span class="n">att</span><span class="o">=</span><span class="n">f</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">att</span><span class="p">))</span></div>
+
+<span class="linenos">461</span>
+<div class="viewcode-block" id="WithKAtt.update_atts">
+<a class="viewcode-back" href="../../../api/pyk.kast.att.html#pyk.kast.att.WithKAtt.update_atts">[docs]</a>
+<span class="linenos">462</span>    <span class="k">def</span><span class="w"> </span><span class="nf">update_atts</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">W</span><span class="p">,</span> <span class="n">entries</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">AttEntry</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">W</span><span class="p">:</span>
+<span class="linenos">463</span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">let_att</span><span class="p">(</span><span class="n">att</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">att</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">entries</span><span class="p">))</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Runtime Verification, Inc.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

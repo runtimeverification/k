@@ -1,0 +1,356 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyk.kast.formatter &mdash; pyk 7.1.313 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=9c1be6d9"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            pyk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">pyk</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pyk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pyk.kast.formatter</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyk.kast.formatter</h1><div class="highlight"><pre>
+<span></span><span class="linenos">  1</span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<span class="linenos">  2</span>
+<span class="linenos">  3</span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="linenos">  4</span>
+<span class="linenos">  5</span><span class="kn">from</span><span class="w"> </span><span class="nn">..kast.prelude.k</span><span class="w"> </span><span class="kn">import</span> <span class="n">K_ITEM</span>
+<span class="linenos">  6</span><span class="kn">from</span><span class="w"> </span><span class="nn">..utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">intersperse</span>
+<span class="linenos">  7</span><span class="kn">from</span><span class="w"> </span><span class="nn">.att</span><span class="w"> </span><span class="kn">import</span> <span class="n">Atts</span><span class="p">,</span> <span class="n">Format</span><span class="p">,</span> <span class="n">KAtt</span>
+<span class="linenos">  8</span><span class="kn">from</span><span class="w"> </span><span class="nn">.inner</span><span class="w"> </span><span class="kn">import</span> <span class="n">KApply</span><span class="p">,</span> <span class="n">KToken</span><span class="p">,</span> <span class="n">KVariable</span><span class="p">,</span> <span class="n">bottom_up</span>
+<span class="linenos">  9</span><span class="kn">from</span><span class="w"> </span><span class="nn">.outer</span><span class="w"> </span><span class="kn">import</span> <span class="n">KNonTerminal</span><span class="p">,</span> <span class="n">KProduction</span><span class="p">,</span> <span class="n">KRegexTerminal</span><span class="p">,</span> <span class="n">KSequence</span><span class="p">,</span> <span class="n">KTerminal</span>
+<span class="linenos"> 10</span>
+<span class="linenos"> 11</span><span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+<span class="linenos"> 12</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Final</span>
+<span class="linenos"> 13</span>
+<span class="linenos"> 14</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">KInner</span>
+<span class="linenos"> 15</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">.inner</span><span class="w"> </span><span class="kn">import</span> <span class="n">KSort</span>
+<span class="linenos"> 16</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">.outer</span><span class="w"> </span><span class="kn">import</span> <span class="n">KDefinition</span>
+<span class="linenos"> 17</span>
+<span class="linenos"> 18</span>
+<span class="linenos"> 19</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos"> 20</span><span class="sd">Notes on _DEFAULT_BRACKET</span>
+<span class="linenos"> 21</span><span class="sd">-------------------------</span>
+<span class="linenos"> 22</span>
+<span class="linenos"> 23</span><span class="sd">Module KSEQ defines the following production:</span>
+<span class="linenos"> 24</span>
+<span class="linenos"> 25</span><span class="sd">syntax {Sort} Sort ::= &quot;(&quot; Sort &quot;)&quot; [bracket, group(defaultBracket), applyPriority(1)]</span>
+<span class="linenos"> 26</span>
+<span class="linenos"> 27</span><span class="sd">https://github.com/runtimeverification/k/blob/5c84d48f697b73ad779395c53b7edc934ed4e8f5/k-distribution/include/kframework/builtin/kast.md?plain=1#L102</span>
+<span class="linenos"> 28</span>
+<span class="linenos"> 29</span><span class="sd">For pretty printing, the K Frontend instantiates a module where parametric productions,</span>
+<span class="linenos"> 30</span><span class="sd">including this one, are instantiated with actual sorts:</span>
+<span class="linenos"> 31</span>
+<span class="linenos"> 32</span><span class="sd">https://github.com/runtimeverification/k/blob/5c84d48f697b73ad779395c53b7edc934ed4e8f5/k-frontend/src/main/java/org/kframework/parser/inner/RuleGrammarGenerator.java</span>
+<span class="linenos"> 33</span>
+<span class="linenos"> 34</span><span class="sd">_DEFAULT_BRACKET emulates this behavior without the need of actually constructing the module.</span>
+<span class="linenos"> 35</span>
+<span class="linenos"> 36</span><span class="sd">Since the default bracket production is not included in syntaxDefinition.kore,</span>
+<span class="linenos"> 37</span><span class="sd">the pretty printer of the LLVM backend follows a similar approach (on the KORE level):</span>
+<span class="linenos"> 38</span>
+<span class="linenos"> 39</span><span class="sd">https://github.com/runtimeverification/llvm-backend/blob/d5eab4b0f0e610bc60843ebb482f79c043b92702/lib/printer/addBrackets.cpp#L446-L447</span>
+<span class="linenos"> 40</span><span class="sd">https://github.com/runtimeverification/llvm-backend/blob/d5eab4b0f0e610bc60843ebb482f79c043b92702/lib/printer/printer.cpp#L63</span>
+<span class="linenos"> 41</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos"> 42</span><span class="n">_DEFAULT_BRACKET_LABEL</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="s1">&#39;__bracket__&#39;</span>
+<span class="linenos"> 43</span><span class="n">_DEFAULT_BRACKET</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">KProduction</span><span class="p">(</span>
+<span class="linenos"> 44</span>    <span class="n">sort</span><span class="o">=</span><span class="n">K_ITEM</span><span class="p">,</span>  <span class="c1"># sort is irrelevant</span>
+<span class="linenos"> 45</span>    <span class="n">items</span><span class="o">=</span><span class="p">(</span>
+<span class="linenos"> 46</span>        <span class="n">KTerminal</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">),</span>
+<span class="linenos"> 47</span>        <span class="n">KNonTerminal</span><span class="p">(</span><span class="n">K_ITEM</span><span class="p">),</span>  <span class="c1"># sort is irrelevant</span>
+<span class="linenos"> 48</span>        <span class="n">KTerminal</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="s1">&#39;)&#39;</span><span class="p">),</span>
+<span class="linenos"> 49</span>    <span class="p">),</span>
+<span class="linenos"> 50</span>    <span class="n">att</span><span class="o">=</span><span class="n">KAtt</span><span class="p">(</span>  <span class="c1"># except for &#39;format&#39;, the other attributes are not necessary</span>
+<span class="linenos"> 51</span>        <span class="p">(</span>
+<span class="linenos"> 52</span>            <span class="n">Atts</span><span class="o">.</span><span class="n">BRACKET_LABEL</span><span class="p">({</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">_DEFAULT_BRACKET_LABEL</span><span class="p">}),</span>
+<span class="linenos"> 53</span>            <span class="n">Atts</span><span class="o">.</span><span class="n">BRACKET</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span>
+<span class="linenos"> 54</span>            <span class="n">Atts</span><span class="o">.</span><span class="n">FORMAT</span><span class="p">(</span><span class="n">Format</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s1">&#39;%1 %2 %3&#39;</span><span class="p">)),</span>
+<span class="linenos"> 55</span>        <span class="p">)</span>
+<span class="linenos"> 56</span>    <span class="p">),</span>
+<span class="linenos"> 57</span><span class="p">)</span>
+<span class="linenos"> 58</span>
+<span class="linenos"> 59</span>
+<div class="viewcode-block" id="Formatter">
+<a class="viewcode-back" href="../../../api/pyk.kast.formatter.html#pyk.kast.formatter.Formatter">[docs]</a>
+<span class="linenos"> 60</span><span class="k">class</span><span class="w"> </span><span class="nc">Formatter</span><span class="p">:</span>
+<span class="linenos"> 61</span>    <span class="n">definition</span><span class="p">:</span> <span class="n">KDefinition</span>
+<span class="linenos"> 62</span>
+<span class="linenos"> 63</span>    <span class="n">_indent</span><span class="p">:</span> <span class="nb">int</span>
+<span class="linenos"> 64</span>    <span class="n">_brackets</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="linenos"> 65</span>
+<span class="linenos"> 66</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">definition</span><span class="p">:</span> <span class="n">KDefinition</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">indent</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">brackets</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="linenos"> 67</span>        <span class="bp">self</span><span class="o">.</span><span class="n">definition</span> <span class="o">=</span> <span class="n">definition</span>
+<span class="linenos"> 68</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_indent</span> <span class="o">=</span> <span class="n">indent</span>
+<span class="linenos"> 69</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_brackets</span> <span class="o">=</span> <span class="n">brackets</span>
+<span class="linenos"> 70</span>
+<span class="linenos"> 71</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">term</span><span class="p">:</span> <span class="n">KInner</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos"> 72</span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">term</span><span class="p">)</span>
+<span class="linenos"> 73</span>
+<div class="viewcode-block" id="Formatter.format">
+<a class="viewcode-back" href="../../../api/pyk.kast.formatter.html#pyk.kast.formatter.Formatter.format">[docs]</a>
+<span class="linenos"> 74</span>    <span class="k">def</span><span class="w"> </span><span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">term</span><span class="p">:</span> <span class="n">KInner</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos"> 75</span>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_brackets</span><span class="p">:</span>
+<span class="linenos"> 76</span>            <span class="n">term</span> <span class="o">=</span> <span class="n">add_brackets</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">definition</span><span class="p">,</span> <span class="n">term</span><span class="p">)</span>
+<span class="linenos"> 77</span>        <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">term</span><span class="p">))</span></div>
+
+<span class="linenos"> 78</span>
+<span class="linenos"> 79</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">term</span><span class="p">:</span> <span class="n">KInner</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="linenos"> 80</span>        <span class="k">match</span> <span class="n">term</span><span class="p">:</span>
+<span class="linenos"> 81</span>            <span class="k">case</span><span class="w"> </span><span class="n">KToken</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="k">_</span><span class="p">):</span>
+<span class="linenos"> 82</span>                <span class="k">return</span> <span class="p">[</span><span class="n">token</span><span class="p">]</span>
+<span class="linenos"> 83</span>            <span class="k">case</span> <span class="n">KVariable</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">sort</span><span class="p">):</span>
+<span class="linenos"> 84</span>                <span class="n">sort_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;:</span><span class="si">{</span><span class="n">sort</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">if</span> <span class="n">sort</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+<span class="linenos"> 85</span>                <span class="k">return</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}{</span><span class="n">sort_str</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span>
+<span class="linenos"> 86</span>            <span class="k">case</span> <span class="n">KSequence</span><span class="p">():</span>
+<span class="linenos"> 87</span>                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format_ksequence</span><span class="p">(</span><span class="n">term</span><span class="p">)</span>
+<span class="linenos"> 88</span>            <span class="k">case</span> <span class="n">KApply</span><span class="p">():</span>
+<span class="linenos"> 89</span>                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format_kapply</span><span class="p">(</span><span class="n">term</span><span class="p">)</span>
+<span class="linenos"> 90</span>            <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+<span class="linenos"> 91</span>                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unsupported term: </span><span class="si">{</span><span class="n">term</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos"> 92</span>
+<span class="linenos"> 93</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_format_ksequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ksequence</span><span class="p">:</span> <span class="n">KSequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="linenos"> 94</span>        <span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">ksequence</span><span class="o">.</span><span class="n">items</span><span class="p">]</span>  <span class="c1"># recur</span>
+<span class="linenos"> 95</span>        <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;.K&#39;</span><span class="p">])</span>
+<span class="linenos"> 96</span>        <span class="k">return</span> <span class="p">[</span><span class="n">chunk</span> <span class="k">for</span> <span class="n">chunks</span> <span class="ow">in</span> <span class="n">intersperse</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39; ~&gt; &#39;</span><span class="p">])</span> <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">chunks</span><span class="p">]</span>
+<span class="linenos"> 97</span>
+<span class="linenos"> 98</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_format_kapply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kapply</span><span class="p">:</span> <span class="n">KApply</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="linenos"> 99</span>        <span class="n">production</span><span class="p">:</span> <span class="n">KProduction</span>
+<span class="linenos">100</span>        <span class="k">if</span> <span class="n">kapply</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">_DEFAULT_BRACKET_LABEL</span><span class="p">:</span>
+<span class="linenos">101</span>            <span class="n">production</span> <span class="o">=</span> <span class="n">_DEFAULT_BRACKET</span>
+<span class="linenos">102</span>        <span class="k">else</span><span class="p">:</span>
+<span class="linenos">103</span>            <span class="n">production</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">definition</span><span class="o">.</span><span class="n">syntax_symbols</span><span class="p">[</span><span class="n">kapply</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+<span class="linenos">104</span>
+<span class="linenos">105</span>        <span class="n">formatt</span> <span class="o">=</span> <span class="n">production</span><span class="o">.</span><span class="n">att</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Atts</span><span class="o">.</span><span class="n">FORMAT</span><span class="p">,</span> <span class="n">production</span><span class="o">.</span><span class="n">default_format</span><span class="p">)</span>
+<span class="linenos">106</span>        <span class="k">return</span> <span class="p">[</span>
+<span class="linenos">107</span>            <span class="n">chunk</span>
+<span class="linenos">108</span>            <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">formatt</span><span class="o">.</span><span class="n">tokens</span>
+<span class="linenos">109</span>            <span class="k">for</span> <span class="n">chunks</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interpret_token</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">production</span><span class="p">,</span> <span class="n">kapply</span><span class="p">)</span>
+<span class="linenos">110</span>            <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">chunks</span>
+<span class="linenos">111</span>        <span class="p">]</span>
+<span class="linenos">112</span>
+<span class="linenos">113</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_interpret_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">production</span><span class="p">:</span> <span class="n">KProduction</span><span class="p">,</span> <span class="n">kapply</span><span class="p">:</span> <span class="n">KApply</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="linenos">114</span>        <span class="k">if</span> <span class="ow">not</span> <span class="n">token</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;%&#39;</span><span class="p">:</span>
+<span class="linenos">115</span>            <span class="k">return</span> <span class="p">[</span><span class="n">token</span><span class="p">]</span>
+<span class="linenos">116</span>
+<span class="linenos">117</span>        <span class="n">escape</span> <span class="o">=</span> <span class="n">token</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+<span class="linenos">118</span>
+<span class="linenos">119</span>        <span class="k">if</span> <span class="n">escape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+<span class="linenos">120</span>            <span class="k">try</span><span class="p">:</span>
+<span class="linenos">121</span>                <span class="n">index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">escape</span><span class="p">)</span>
+<span class="linenos">122</span>            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+<span class="linenos">123</span>                <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Incorrect format escape sequence: </span><span class="si">{</span><span class="n">token</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">err</span>
+<span class="linenos">124</span>            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interpret_index</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">production</span><span class="p">,</span> <span class="n">kapply</span><span class="p">)</span>
+<span class="linenos">125</span>
+<span class="linenos">126</span>        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">escape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+<span class="linenos">127</span>
+<span class="linenos">128</span>        <span class="k">match</span> <span class="n">escape</span><span class="p">:</span>
+<span class="linenos">129</span>            <span class="k">case</span> <span class="s1">&#39;n&#39;</span><span class="p">:</span>
+<span class="linenos">130</span>                <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_indent</span> <span class="o">*</span> <span class="s1">&#39;  &#39;</span><span class="p">]</span>
+<span class="linenos">131</span>            <span class="k">case</span> <span class="s1">&#39;i&#39;</span><span class="p">:</span>
+<span class="linenos">132</span>                <span class="bp">self</span><span class="o">.</span><span class="n">_indent</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="linenos">133</span>                <span class="k">return</span> <span class="p">[]</span>
+<span class="linenos">134</span>            <span class="k">case</span> <span class="s1">&#39;d&#39;</span><span class="p">:</span>
+<span class="linenos">135</span>                <span class="bp">self</span><span class="o">.</span><span class="n">_indent</span> <span class="o">-=</span> <span class="mi">1</span>
+<span class="linenos">136</span>                <span class="k">return</span> <span class="p">[]</span>
+<span class="linenos">137</span>            <span class="k">case</span> <span class="s1">&#39;c&#39;</span> <span class="o">|</span> <span class="s1">&#39;r&#39;</span><span class="p">:</span>
+<span class="linenos">138</span>                <span class="k">return</span> <span class="p">[]</span>  <span class="c1"># TODO add color support</span>
+<span class="linenos">139</span>            <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+<span class="linenos">140</span>                <span class="k">return</span> <span class="p">[</span><span class="n">escape</span><span class="p">]</span>
+<span class="linenos">141</span>
+<span class="linenos">142</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_interpret_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">production</span><span class="p">:</span> <span class="n">KProduction</span><span class="p">,</span> <span class="n">kapply</span><span class="p">:</span> <span class="n">KApply</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="linenos">143</span>        <span class="k">assert</span> <span class="n">index</span> <span class="o">&gt;</span> <span class="mi">0</span>
+<span class="linenos">144</span>        <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">production</span><span class="o">.</span><span class="n">items</span><span class="p">):</span>
+<span class="linenos">145</span>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Format escape index out of bounds: </span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">production</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos">146</span>
+<span class="linenos">147</span>        <span class="n">item</span> <span class="o">=</span> <span class="n">production</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="n">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+<span class="linenos">148</span>        <span class="k">match</span> <span class="n">item</span><span class="p">:</span>
+<span class="linenos">149</span>            <span class="k">case</span> <span class="n">KTerminal</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+<span class="linenos">150</span>                <span class="k">return</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span>
+<span class="linenos">151</span>            <span class="k">case</span> <span class="n">KNonTerminal</span><span class="p">():</span>
+<span class="linenos">152</span>                <span class="n">arg_index</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">KNonTerminal</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">production</span><span class="o">.</span><span class="n">items</span><span class="p">[:</span> <span class="n">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+<span class="linenos">153</span>                <span class="k">if</span> <span class="n">arg_index</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">kapply</span><span class="o">.</span><span class="n">args</span><span class="p">):</span>
+<span class="linenos">154</span>                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;NonTerminal index out of bounds: </span><span class="si">{arg_index}</span><span class="s1">: </span><span class="si">{kapply}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos">155</span>                <span class="n">arg</span> <span class="o">=</span> <span class="n">kapply</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="n">arg_index</span><span class="p">]</span>
+<span class="linenos">156</span>                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>  <span class="c1"># recur</span>
+<span class="linenos">157</span>            <span class="k">case</span> <span class="n">KRegexTerminal</span><span class="p">():</span>
+<span class="linenos">158</span>                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid format index escape to regex terminal: </span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">production</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos">159</span>            <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+<span class="linenos">160</span>                <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">()</span></div>
+
+<span class="linenos">161</span>
+<span class="linenos">162</span>
+<div class="viewcode-block" id="add_brackets">
+<a class="viewcode-back" href="../../../api/pyk.kast.formatter.html#pyk.kast.formatter.add_brackets">[docs]</a>
+<span class="linenos">163</span><span class="k">def</span><span class="w"> </span><span class="nf">add_brackets</span><span class="p">(</span><span class="n">definition</span><span class="p">:</span> <span class="n">KDefinition</span><span class="p">,</span> <span class="n">term</span><span class="p">:</span> <span class="n">KInner</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KInner</span><span class="p">:</span>
+<span class="linenos">164</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_add_brackets</span><span class="p">(</span><span class="n">term</span><span class="p">:</span> <span class="n">KInner</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KInner</span><span class="p">:</span>
+<span class="linenos">165</span>        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="n">KApply</span><span class="p">):</span>
+<span class="linenos">166</span>            <span class="k">return</span> <span class="n">term</span>
+<span class="linenos">167</span>
+<span class="linenos">168</span>        <span class="n">prod</span> <span class="o">=</span> <span class="n">definition</span><span class="o">.</span><span class="n">symbols</span><span class="p">[</span><span class="n">term</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+<span class="linenos">169</span>
+<span class="linenos">170</span>        <span class="n">args</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">KInner</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">171</span>
+<span class="linenos">172</span>        <span class="n">arg_index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+<span class="linenos">173</span>        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">prod</span><span class="o">.</span><span class="n">items</span><span class="p">):</span>
+<span class="linenos">174</span>            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">KNonTerminal</span><span class="p">):</span>
+<span class="linenos">175</span>                <span class="k">continue</span>
+<span class="linenos">176</span>
+<span class="linenos">177</span>            <span class="n">arg_index</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="linenos">178</span>            <span class="n">arg</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="n">arg_index</span><span class="p">]</span>
+<span class="linenos">179</span>            <span class="n">arg</span> <span class="o">=</span> <span class="n">_with_bracket</span><span class="p">(</span><span class="n">definition</span><span class="p">,</span> <span class="n">term</span><span class="p">,</span> <span class="n">arg</span><span class="p">,</span> <span class="n">item</span><span class="o">.</span><span class="n">sort</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+<span class="linenos">180</span>            <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+<span class="linenos">181</span>
+<span class="linenos">182</span>        <span class="k">return</span> <span class="n">term</span><span class="o">.</span><span class="n">let</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
+<span class="linenos">183</span>
+<span class="linenos">184</span>    <span class="k">return</span> <span class="n">bottom_up</span><span class="p">(</span><span class="n">_add_brackets</span><span class="p">,</span> <span class="n">term</span><span class="p">)</span></div>
+
+<span class="linenos">185</span>
+<span class="linenos">186</span>
+<span class="linenos">187</span><span class="k">def</span><span class="w"> </span><span class="nf">_with_bracket</span><span class="p">(</span><span class="n">definition</span><span class="p">:</span> <span class="n">KDefinition</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">KApply</span><span class="p">,</span> <span class="n">term</span><span class="p">:</span> <span class="n">KInner</span><span class="p">,</span> <span class="n">bracket_sort</span><span class="p">:</span> <span class="n">KSort</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KInner</span><span class="p">:</span>
+<span class="linenos">188</span>    <span class="k">if</span> <span class="ow">not</span> <span class="n">_requires_bracket</span><span class="p">(</span><span class="n">definition</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">term</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+<span class="linenos">189</span>        <span class="k">return</span> <span class="n">term</span>
+<span class="linenos">190</span>
+<span class="linenos">191</span>    <span class="n">bracket_prod</span> <span class="o">=</span> <span class="n">definition</span><span class="o">.</span><span class="n">brackets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">bracket_sort</span><span class="p">,</span> <span class="n">_DEFAULT_BRACKET</span><span class="p">)</span>
+<span class="linenos">192</span>    <span class="n">bracket_label</span> <span class="o">=</span> <span class="n">bracket_prod</span><span class="o">.</span><span class="n">att</span><span class="p">[</span><span class="n">Atts</span><span class="o">.</span><span class="n">BRACKET_LABEL</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+<span class="linenos">193</span>    <span class="k">return</span> <span class="n">KApply</span><span class="p">(</span><span class="n">bracket_label</span><span class="p">,</span> <span class="n">term</span><span class="p">)</span>
+<span class="linenos">194</span>
+<span class="linenos">195</span>
+<span class="linenos">196</span><span class="k">def</span><span class="w"> </span><span class="nf">_requires_bracket</span><span class="p">(</span><span class="n">definition</span><span class="p">:</span> <span class="n">KDefinition</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">KApply</span><span class="p">,</span> <span class="n">term</span><span class="p">:</span> <span class="n">KInner</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="linenos">197</span>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="p">(</span><span class="n">KToken</span><span class="p">,</span> <span class="n">KVariable</span><span class="p">,</span> <span class="n">KSequence</span><span class="p">)):</span>
+<span class="linenos">198</span>        <span class="k">return</span> <span class="kc">False</span>
+<span class="linenos">199</span>
+<span class="linenos">200</span>    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="n">KApply</span><span class="p">)</span>
+<span class="linenos">201</span>
+<span class="linenos">202</span>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">term</span><span class="o">.</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+<span class="linenos">203</span>        <span class="k">return</span> <span class="kc">False</span>
+<span class="linenos">204</span>
+<span class="linenos">205</span>    <span class="k">if</span> <span class="n">_between_terminals</span><span class="p">(</span><span class="n">definition</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+<span class="linenos">206</span>        <span class="k">return</span> <span class="kc">False</span>
+<span class="linenos">207</span>
+<span class="linenos">208</span>    <span class="k">if</span> <span class="n">_associativity_wrong</span><span class="p">(</span><span class="n">definition</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">term</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+<span class="linenos">209</span>        <span class="k">return</span> <span class="kc">True</span>
+<span class="linenos">210</span>
+<span class="linenos">211</span>    <span class="k">if</span> <span class="n">_priority_wrong</span><span class="p">(</span><span class="n">definition</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">term</span><span class="p">):</span>
+<span class="linenos">212</span>        <span class="k">return</span> <span class="kc">True</span>
+<span class="linenos">213</span>
+<span class="linenos">214</span>    <span class="k">return</span> <span class="kc">False</span>
+<span class="linenos">215</span>
+<span class="linenos">216</span>
+<span class="linenos">217</span><span class="k">def</span><span class="w"> </span><span class="nf">_between_terminals</span><span class="p">(</span><span class="n">definition</span><span class="p">:</span> <span class="n">KDefinition</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">KApply</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="linenos">218</span>    <span class="n">prod</span> <span class="o">=</span> <span class="n">definition</span><span class="o">.</span><span class="n">symbols</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+<span class="linenos">219</span>    <span class="k">if</span> <span class="n">index</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">prod</span><span class="o">.</span><span class="n">items</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]:</span>
+<span class="linenos">220</span>        <span class="k">return</span> <span class="kc">False</span>
+<span class="linenos">221</span>    <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">prod</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="n">index</span> <span class="o">+</span> <span class="n">offset</span><span class="p">],</span> <span class="n">KTerminal</span><span class="p">)</span> <span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="linenos">222</span>
+<span class="linenos">223</span>
+<span class="linenos">224</span><span class="k">def</span><span class="w"> </span><span class="nf">_associativity_wrong</span><span class="p">(</span><span class="n">definition</span><span class="p">:</span> <span class="n">KDefinition</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">KApply</span><span class="p">,</span> <span class="n">term</span><span class="p">:</span> <span class="n">KApply</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="linenos">225</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return whether `term` can appear as the `index`-th child of `parent` according to associativity rules.</span>
+<span class="linenos">226</span>
+<span class="linenos">227</span><span class="sd">    A left (right) associative symbol cannot appear as the rightmost (leftmost) child of a symbol with equal priority.</span>
+<span class="linenos">228</span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos">229</span>    <span class="n">parent_label</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">name</span>
+<span class="linenos">230</span>    <span class="n">term_label</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">name</span>
+<span class="linenos">231</span>    <span class="n">prod</span> <span class="o">=</span> <span class="n">definition</span><span class="o">.</span><span class="n">symbols</span><span class="p">[</span><span class="n">parent_label</span><span class="p">]</span>
+<span class="linenos">232</span>    <span class="k">if</span> <span class="n">index</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">term_label</span> <span class="ow">in</span> <span class="n">definition</span><span class="o">.</span><span class="n">right_assocs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">parent_label</span><span class="p">,</span> <span class="p">()):</span>
+<span class="linenos">233</span>        <span class="k">return</span> <span class="kc">True</span>
+<span class="linenos">234</span>    <span class="k">if</span> <span class="n">index</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">prod</span><span class="o">.</span><span class="n">items</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">term_label</span> <span class="ow">in</span> <span class="n">definition</span><span class="o">.</span><span class="n">left_assocs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">parent_label</span><span class="p">,</span> <span class="p">()):</span>
+<span class="linenos">235</span>        <span class="k">return</span> <span class="kc">True</span>
+<span class="linenos">236</span>    <span class="k">return</span> <span class="kc">False</span>
+<span class="linenos">237</span>
+<span class="linenos">238</span>
+<span class="linenos">239</span><span class="k">def</span><span class="w"> </span><span class="nf">_priority_wrong</span><span class="p">(</span><span class="n">definition</span><span class="p">:</span> <span class="n">KDefinition</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">KApply</span><span class="p">,</span> <span class="n">term</span><span class="p">:</span> <span class="n">KApply</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="linenos">240</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return whether `term` can appear as a child of `parent` according to priority rules.</span>
+<span class="linenos">241</span>
+<span class="linenos">242</span><span class="sd">    A symbol with a lesser priority cannot appear as the child of a symbol with greater priority.</span>
+<span class="linenos">243</span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos">244</span>    <span class="n">parent_label</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">name</span>
+<span class="linenos">245</span>    <span class="n">term_label</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">name</span>
+<span class="linenos">246</span>    <span class="k">return</span> <span class="n">term_label</span> <span class="ow">in</span> <span class="n">definition</span><span class="o">.</span><span class="n">priorities</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">parent_label</span><span class="p">,</span> <span class="p">())</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Runtime Verification, Inc.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

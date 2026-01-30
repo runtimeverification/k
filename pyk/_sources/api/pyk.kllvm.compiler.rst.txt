@@ -1,0 +1,7 @@
+pyk.kllvm.compiler module
+=========================
+
+.. automodule:: pyk.kllvm.compiler
+   :members:
+   :undoc-members:
+   :show-inheritance:

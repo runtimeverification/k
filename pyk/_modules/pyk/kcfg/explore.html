@@ -1,0 +1,405 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyk.kcfg.explore &mdash; pyk 7.1.313 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=9c1be6d9"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            pyk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">pyk</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pyk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pyk.kcfg.explore</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyk.kcfg.explore</h1><div class="highlight"><pre>
+<span></span><span class="linenos">  1</span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<span class="linenos">  2</span>
+<span class="linenos">  3</span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="linenos">  4</span><span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">cached_property</span>
+<span class="linenos">  5</span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="linenos">  6</span>
+<span class="linenos">  7</span><span class="kn">from</span><span class="w"> </span><span class="nn">..kast.inner</span><span class="w"> </span><span class="kn">import</span> <span class="n">KApply</span><span class="p">,</span> <span class="n">KVariable</span>
+<span class="linenos">  8</span><span class="kn">from</span><span class="w"> </span><span class="nn">..kast.manip</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+<span class="linenos">  9</span>    <span class="n">flatten_label</span><span class="p">,</span>
+<span class="linenos"> 10</span>    <span class="n">minimize_term</span><span class="p">,</span>
+<span class="linenos"> 11</span>    <span class="n">ml_pred_to_bool</span><span class="p">,</span>
+<span class="linenos"> 12</span>    <span class="n">no_cell_rewrite_to_dots</span><span class="p">,</span>
+<span class="linenos"> 13</span>    <span class="n">push_down_rewrites</span><span class="p">,</span>
+<span class="linenos"> 14</span>    <span class="n">replace_rewrites_with_implies</span><span class="p">,</span>
+<span class="linenos"> 15</span><span class="p">)</span>
+<span class="linenos"> 16</span><span class="kn">from</span><span class="w"> </span><span class="nn">..kast.prelude.ml</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_top</span><span class="p">,</span> <span class="n">mlAnd</span>
+<span class="linenos"> 17</span><span class="kn">from</span><span class="w"> </span><span class="nn">..kast.pretty</span><span class="w"> </span><span class="kn">import</span> <span class="n">PrettyPrinter</span>
+<span class="linenos"> 18</span><span class="kn">from</span><span class="w"> </span><span class="nn">..kore.rpc</span><span class="w"> </span><span class="kn">import</span> <span class="n">LogRewrite</span><span class="p">,</span> <span class="n">RewriteSuccess</span>
+<span class="linenos"> 19</span><span class="kn">from</span><span class="w"> </span><span class="nn">..utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">not_none</span><span class="p">,</span> <span class="n">shorten_hashes</span><span class="p">,</span> <span class="n">single</span><span class="p">,</span> <span class="n">unique</span>
+<span class="linenos"> 20</span><span class="kn">from</span><span class="w"> </span><span class="nn">.kcfg</span><span class="w"> </span><span class="kn">import</span> <span class="n">KCFG</span><span class="p">,</span> <span class="n">Abstract</span><span class="p">,</span> <span class="n">Branch</span><span class="p">,</span> <span class="n">NDBranch</span><span class="p">,</span> <span class="n">Step</span><span class="p">,</span> <span class="n">Stuck</span><span class="p">,</span> <span class="n">Vacuous</span>
+<span class="linenos"> 21</span><span class="kn">from</span><span class="w"> </span><span class="nn">.semantics</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultSemantics</span>
+<span class="linenos"> 22</span>
+<span class="linenos"> 23</span><span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+<span class="linenos"> 24</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterable</span>
+<span class="linenos"> 25</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Final</span>
+<span class="linenos"> 26</span>
+<span class="linenos"> 27</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">..cterm</span><span class="w"> </span><span class="kn">import</span> <span class="n">CTerm</span><span class="p">,</span> <span class="n">CTermSymbolic</span>
+<span class="linenos"> 28</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">..kast</span><span class="w"> </span><span class="kn">import</span> <span class="n">KInner</span>
+<span class="linenos"> 29</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">..kcfg.exploration</span><span class="w"> </span><span class="kn">import</span> <span class="n">KCFGExploration</span>
+<span class="linenos"> 30</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">..kore.rpc</span><span class="w"> </span><span class="kn">import</span> <span class="n">LogEntry</span>
+<span class="linenos"> 31</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">.kcfg</span><span class="w"> </span><span class="kn">import</span> <span class="n">KCFGExtendResult</span><span class="p">,</span> <span class="n">NodeIdLike</span>
+<span class="linenos"> 32</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">.semantics</span><span class="w"> </span><span class="kn">import</span> <span class="n">KCFGSemantics</span>
+<span class="linenos"> 33</span>
+<span class="linenos"> 34</span>
+<span class="linenos"> 35</span><span class="n">_LOGGER</span><span class="p">:</span> <span class="n">Final</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="linenos"> 36</span>
+<span class="linenos"> 37</span>
+<div class="viewcode-block" id="KCFGExplore">
+<a class="viewcode-back" href="../../../api/pyk.kcfg.explore.html#pyk.kcfg.explore.KCFGExplore">[docs]</a>
+<span class="linenos"> 38</span><span class="k">class</span><span class="w"> </span><span class="nc">KCFGExplore</span><span class="p">:</span>
+<span class="linenos"> 39</span>    <span class="n">cterm_symbolic</span><span class="p">:</span> <span class="n">CTermSymbolic</span>
+<span class="linenos"> 40</span>
+<span class="linenos"> 41</span>    <span class="n">kcfg_semantics</span><span class="p">:</span> <span class="n">KCFGSemantics</span>
+<span class="linenos"> 42</span>    <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>
+<span class="linenos"> 43</span>
+<span class="linenos"> 44</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="linenos"> 45</span>        <span class="bp">self</span><span class="p">,</span>
+<span class="linenos"> 46</span>        <span class="n">cterm_symbolic</span><span class="p">:</span> <span class="n">CTermSymbolic</span><span class="p">,</span>
+<span class="linenos"> 47</span>        <span class="o">*</span><span class="p">,</span>
+<span class="linenos"> 48</span>        <span class="n">kcfg_semantics</span><span class="p">:</span> <span class="n">KCFGSemantics</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="linenos"> 49</span>        <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="linenos"> 50</span>    <span class="p">):</span>
+<span class="linenos"> 51</span>        <span class="bp">self</span><span class="o">.</span><span class="n">cterm_symbolic</span> <span class="o">=</span> <span class="n">cterm_symbolic</span>
+<span class="linenos"> 52</span>        <span class="bp">self</span><span class="o">.</span><span class="n">kcfg_semantics</span> <span class="o">=</span> <span class="n">kcfg_semantics</span> <span class="k">if</span> <span class="n">kcfg_semantics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">DefaultSemantics</span><span class="p">()</span>
+<span class="linenos"> 53</span>        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="nb">id</span> <span class="k">if</span> <span class="nb">id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s1">&#39;NO ID&#39;</span>
+<span class="linenos"> 54</span>
+<span class="linenos"> 55</span>    <span class="nd">@cached_property</span>
+<span class="linenos"> 56</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_pretty_printer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrettyPrinter</span><span class="p">:</span>
+<span class="linenos"> 57</span>        <span class="k">return</span> <span class="n">PrettyPrinter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cterm_symbolic</span><span class="o">.</span><span class="n">_definition</span><span class="p">)</span>
+<span class="linenos"> 58</span>
+<div class="viewcode-block" id="KCFGExplore.pretty_print">
+<a class="viewcode-back" href="../../../api/pyk.kcfg.explore.html#pyk.kcfg.explore.KCFGExplore.pretty_print">[docs]</a>
+<span class="linenos"> 59</span>    <span class="k">def</span><span class="w"> </span><span class="nf">pretty_print</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kinner</span><span class="p">:</span> <span class="n">KInner</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos"> 60</span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pretty_printer</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">kinner</span><span class="p">)</span></div>
+
+<span class="linenos"> 61</span>
+<span class="linenos"> 62</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_extract_rule_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_logs</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">LogEntry</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="linenos"> 63</span>        <span class="n">_rule_lines</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos"> 64</span>        <span class="k">for</span> <span class="n">node_log</span> <span class="ow">in</span> <span class="n">_logs</span><span class="p">:</span>
+<span class="linenos"> 65</span>            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node_log</span><span class="p">,</span> <span class="n">LogRewrite</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node_log</span><span class="o">.</span><span class="n">result</span><span class="p">,</span> <span class="n">RewriteSuccess</span><span class="p">):</span>
+<span class="linenos"> 66</span>                <span class="k">if</span> <span class="n">node_log</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">rule_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cterm_symbolic</span><span class="o">.</span><span class="n">_definition</span><span class="o">.</span><span class="n">sentence_by_unique_id</span><span class="p">:</span>
+<span class="linenos"> 67</span>                    <span class="n">sent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cterm_symbolic</span><span class="o">.</span><span class="n">_definition</span><span class="o">.</span><span class="n">sentence_by_unique_id</span><span class="p">[</span><span class="n">node_log</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">rule_id</span><span class="p">]</span>
+<span class="linenos"> 68</span>                    <span class="n">_rule_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">sent</span><span class="o">.</span><span class="n">label</span><span class="si">}</span><span class="s1">:</span><span class="si">{</span><span class="n">sent</span><span class="o">.</span><span class="n">source</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos"> 69</span>                <span class="k">else</span><span class="p">:</span>
+<span class="linenos"> 70</span>                    <span class="k">if</span> <span class="n">node_log</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">rule_id</span> <span class="o">==</span> <span class="s1">&#39;UNKNOWN&#39;</span><span class="p">:</span>
+<span class="linenos"> 71</span>                        <span class="n">_LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown unique id attached to rule log entry: </span><span class="si">{</span><span class="n">node_log</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos"> 72</span>                    <span class="n">_rule_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">node_log</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">rule_id</span><span class="si">}</span><span class="s1">:UNKNOWN&#39;</span><span class="p">)</span>
+<span class="linenos"> 73</span>        <span class="k">return</span> <span class="n">_rule_lines</span>
+<span class="linenos"> 74</span>
+<div class="viewcode-block" id="KCFGExplore.implication_failure_reason">
+<a class="viewcode-back" href="../../../api/pyk.kcfg.explore.html#pyk.kcfg.explore.KCFGExplore.implication_failure_reason">[docs]</a>
+<span class="linenos"> 75</span>    <span class="k">def</span><span class="w"> </span><span class="nf">implication_failure_reason</span><span class="p">(</span>
+<span class="linenos"> 76</span>        <span class="bp">self</span><span class="p">,</span> <span class="n">antecedent</span><span class="p">:</span> <span class="n">CTerm</span><span class="p">,</span> <span class="n">consequent</span><span class="p">:</span> <span class="n">CTerm</span><span class="p">,</span> <span class="n">assume_defined</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="linenos"> 77</span>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="linenos"> 78</span>        <span class="k">def</span><span class="w"> </span><span class="nf">_is_cell_subst</span><span class="p">(</span><span class="n">csubst</span><span class="p">:</span> <span class="n">KInner</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="linenos"> 79</span>            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">csubst</span><span class="p">)</span> <span class="ow">is</span> <span class="n">KApply</span> <span class="ow">and</span> <span class="n">csubst</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;_==K_&#39;</span><span class="p">:</span>
+<span class="linenos"> 80</span>                <span class="n">csubst_arg</span> <span class="o">=</span> <span class="n">csubst</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="linenos"> 81</span>                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">csubst_arg</span><span class="p">)</span> <span class="ow">is</span> <span class="n">KVariable</span> <span class="ow">and</span> <span class="n">csubst_arg</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;_CELL&#39;</span><span class="p">):</span>
+<span class="linenos"> 82</span>                    <span class="k">return</span> <span class="kc">True</span>
+<span class="linenos"> 83</span>            <span class="k">return</span> <span class="kc">False</span>
+<span class="linenos"> 84</span>
+<span class="linenos"> 85</span>        <span class="k">def</span><span class="w"> </span><span class="nf">_is_negative_cell_subst</span><span class="p">(</span><span class="n">constraint</span><span class="p">:</span> <span class="n">KInner</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="linenos"> 86</span>            <span class="n">constraint_bool</span> <span class="o">=</span> <span class="n">ml_pred_to_bool</span><span class="p">(</span><span class="n">constraint</span><span class="p">)</span>
+<span class="linenos"> 87</span>            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">constraint_bool</span><span class="p">)</span> <span class="ow">is</span> <span class="n">KApply</span> <span class="ow">and</span> <span class="n">constraint_bool</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;notBool_&#39;</span><span class="p">:</span>
+<span class="linenos"> 88</span>                <span class="n">negative_constraint</span> <span class="o">=</span> <span class="n">constraint_bool</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="linenos"> 89</span>                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">negative_constraint</span><span class="p">)</span> <span class="ow">is</span> <span class="n">KApply</span> <span class="ow">and</span> <span class="n">negative_constraint</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;_andBool_&#39;</span><span class="p">:</span>
+<span class="linenos"> 90</span>                    <span class="n">constraints</span> <span class="o">=</span> <span class="n">flatten_label</span><span class="p">(</span><span class="s1">&#39;_andBool_&#39;</span><span class="p">,</span> <span class="n">negative_constraint</span><span class="p">)</span>
+<span class="linenos"> 91</span>                    <span class="n">cell_constraints</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="n">_is_cell_subst</span><span class="p">,</span> <span class="n">constraints</span><span class="p">))</span>
+<span class="linenos"> 92</span>                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cell_constraints</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+<span class="linenos"> 93</span>                        <span class="k">return</span> <span class="kc">True</span>
+<span class="linenos"> 94</span>            <span class="k">return</span> <span class="kc">False</span>
+<span class="linenos"> 95</span>
+<span class="linenos"> 96</span>        <span class="n">cterm_implies</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cterm_symbolic</span><span class="o">.</span><span class="n">implies</span><span class="p">(</span>
+<span class="linenos"> 97</span>            <span class="n">antecedent</span><span class="p">,</span> <span class="n">consequent</span><span class="p">,</span> <span class="n">failure_reason</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">assume_defined</span><span class="o">=</span><span class="n">assume_defined</span>
+<span class="linenos"> 98</span>        <span class="p">)</span>
+<span class="linenos"> 99</span>        <span class="k">if</span> <span class="n">cterm_implies</span><span class="o">.</span><span class="n">csubst</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">100</span>            <span class="k">return</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+<span class="linenos">101</span>
+<span class="linenos">102</span>        <span class="n">failing_cells_strs</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">103</span>        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">failing_cell</span> <span class="ow">in</span> <span class="n">cterm_implies</span><span class="o">.</span><span class="n">failing_cells</span><span class="p">:</span>
+<span class="linenos">104</span>            <span class="n">failing_cell</span> <span class="o">=</span> <span class="n">push_down_rewrites</span><span class="p">(</span><span class="n">failing_cell</span><span class="p">)</span>
+<span class="linenos">105</span>            <span class="n">failing_cell</span> <span class="o">=</span> <span class="n">no_cell_rewrite_to_dots</span><span class="p">(</span><span class="n">failing_cell</span><span class="p">)</span>
+<span class="linenos">106</span>            <span class="n">failing_cell</span> <span class="o">=</span> <span class="n">replace_rewrites_with_implies</span><span class="p">(</span><span class="n">failing_cell</span><span class="p">)</span>
+<span class="linenos">107</span>            <span class="n">failing_cells_strs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pretty_print</span><span class="p">(</span><span class="n">minimize_term</span><span class="p">(</span><span class="n">failing_cell</span><span class="p">))</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos">108</span>
+<span class="linenos">109</span>        <span class="n">ret_str</span> <span class="o">=</span> <span class="s1">&#39;Matching failed.&#39;</span>
+<span class="linenos">110</span>        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">failing_cells_strs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+<span class="linenos">111</span>            <span class="n">failing_cells_str</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">failing_cells_strs</span><span class="p">)</span>
+<span class="linenos">112</span>            <span class="n">ret_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ret_str</span><span class="si">}</span><span class="se">\n</span><span class="s1">The following cells failed matching individually (antecedent #Implies consequent):</span><span class="se">\n</span><span class="si">{</span><span class="n">failing_cells_str</span><span class="si">}</span><span class="s1">&#39;</span>
+<span class="linenos">113</span>
+<span class="linenos">114</span>        <span class="k">if</span> <span class="n">cterm_implies</span><span class="o">.</span><span class="n">remaining_implication</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">115</span>            <span class="n">ret_str</span> <span class="o">=</span> <span class="p">(</span>
+<span class="linenos">116</span>                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ret_str</span><span class="si">}</span><span class="se">\n</span><span class="s1">The remaining implication is:</span><span class="se">\n</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pretty_print</span><span class="p">(</span><span class="n">cterm_implies</span><span class="o">.</span><span class="n">remaining_implication</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
+<span class="linenos">117</span>            <span class="p">)</span>
+<span class="linenos">118</span>
+<span class="linenos">119</span>            <span class="k">if</span> <span class="n">cterm_implies</span><span class="o">.</span><span class="n">csubst</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_top</span><span class="p">(</span><span class="n">cterm_implies</span><span class="o">.</span><span class="n">remaining_implication</span><span class="p">):</span>
+<span class="linenos">120</span>                <span class="n">negative_cell_constraints</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="n">_is_negative_cell_subst</span><span class="p">,</span> <span class="n">antecedent</span><span class="o">.</span><span class="n">constraints</span><span class="p">))</span>
+<span class="linenos">121</span>
+<span class="linenos">122</span>                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">negative_cell_constraints</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+<span class="linenos">123</span>                    <span class="n">negative_cell_constraints_str</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pretty_print</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span> <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">negative_cell_constraints</span><span class="p">)</span>
+<span class="linenos">124</span>                    <span class="n">ret_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ret_str</span><span class="si">}</span><span class="se">\n</span><span class="s1">Negated cell substitutions found (consider using _ =&gt; ?_):</span><span class="se">\n</span><span class="si">{</span><span class="n">negative_cell_constraints_str</span><span class="si">}</span><span class="s1">&#39;</span>
+<span class="linenos">125</span>
+<span class="linenos">126</span>        <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">ret_str</span><span class="p">)</span></div>
+
+<span class="linenos">127</span>
+<div class="viewcode-block" id="KCFGExplore.simplify">
+<a class="viewcode-back" href="../../../api/pyk.kcfg.explore.html#pyk.kcfg.explore.KCFGExplore.simplify">[docs]</a>
+<span class="linenos">128</span>    <span class="k">def</span><span class="w"> </span><span class="nf">simplify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cfg</span><span class="p">:</span> <span class="n">KCFG</span><span class="p">,</span> <span class="n">logs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">LogEntry</span><span class="p">,</span> <span class="o">...</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">129</span>        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">cfg</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
+<span class="linenos">130</span>            <span class="n">_LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Simplifying node </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">shorten_hashes</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos">131</span>            <span class="n">new_term</span><span class="p">,</span> <span class="n">next_node_logs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cterm_symbolic</span><span class="o">.</span><span class="n">simplify</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">cterm</span><span class="p">)</span>
+<span class="linenos">132</span>            <span class="k">if</span> <span class="n">new_term</span> <span class="o">!=</span> <span class="n">node</span><span class="o">.</span><span class="n">cterm</span><span class="p">:</span>
+<span class="linenos">133</span>                <span class="n">cfg</span><span class="o">.</span><span class="n">let_node</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">cterm</span><span class="o">=</span><span class="n">new_term</span><span class="p">)</span>
+<span class="linenos">134</span>                <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">id</span> <span class="ow">in</span> <span class="n">logs</span><span class="p">:</span>
+<span class="linenos">135</span>                    <span class="n">logs</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">+=</span> <span class="n">next_node_logs</span>
+<span class="linenos">136</span>                <span class="k">else</span><span class="p">:</span>
+<span class="linenos">137</span>                    <span class="n">logs</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">next_node_logs</span></div>
+
+<span class="linenos">138</span>
+<div class="viewcode-block" id="KCFGExplore.step">
+<a class="viewcode-back" href="../../../api/pyk.kcfg.explore.html#pyk.kcfg.explore.KCFGExplore.step">[docs]</a>
+<span class="linenos">139</span>    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span>
+<span class="linenos">140</span>        <span class="bp">self</span><span class="p">,</span>
+<span class="linenos">141</span>        <span class="n">cfg</span><span class="p">:</span> <span class="n">KCFG</span><span class="p">,</span>
+<span class="linenos">142</span>        <span class="n">node_id</span><span class="p">:</span> <span class="n">NodeIdLike</span><span class="p">,</span>
+<span class="linenos">143</span>        <span class="n">logs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">LogEntry</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>
+<span class="linenos">144</span>        <span class="n">depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+<span class="linenos">145</span>        <span class="n">module_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="linenos">146</span>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="linenos">147</span>        <span class="k">if</span> <span class="n">depth</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+<span class="linenos">148</span>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Expected positive depth, got: </span><span class="si">{</span><span class="n">depth</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos">149</span>        <span class="n">node</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">node_id</span><span class="p">)</span>
+<span class="linenos">150</span>        <span class="n">successors</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">successors</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
+<span class="linenos">151</span>        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">successors</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">successors</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">is</span> <span class="n">KCFG</span><span class="o">.</span><span class="n">Split</span><span class="p">:</span>
+<span class="linenos">152</span>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Cannot take step from split node </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">shorten_hashes</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos">153</span>        <span class="n">_LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Taking </span><span class="si">{</span><span class="n">depth</span><span class="si">}</span><span class="s1"> steps from node </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">shorten_hashes</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos">154</span>        <span class="n">exec_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cterm_symbolic</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">cterm</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="n">depth</span><span class="p">,</span> <span class="n">module_name</span><span class="o">=</span><span class="n">module_name</span><span class="p">)</span>
+<span class="linenos">155</span>        <span class="k">if</span> <span class="n">exec_res</span><span class="o">.</span><span class="n">depth</span> <span class="o">!=</span> <span class="n">depth</span><span class="p">:</span>
+<span class="linenos">156</span>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unable to take </span><span class="si">{</span><span class="n">depth</span><span class="si">}</span><span class="s1"> steps from node, got </span><span class="si">{</span><span class="n">exec_res</span><span class="o">.</span><span class="n">depth</span><span class="si">}</span><span class="s1"> steps </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos">157</span>        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">exec_res</span><span class="o">.</span><span class="n">next_states</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+<span class="linenos">158</span>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Found branch within </span><span class="si">{</span><span class="n">depth</span><span class="si">}</span><span class="s1"> steps </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos">159</span>        <span class="n">new_node</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">create_node</span><span class="p">(</span><span class="n">exec_res</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+<span class="linenos">160</span>        <span class="n">_LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Found new node at depth </span><span class="si">{</span><span class="n">depth</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">shorten_hashes</span><span class="p">((</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">new_node</span><span class="o">.</span><span class="n">id</span><span class="p">))</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos">161</span>        <span class="n">logs</span><span class="p">[</span><span class="n">new_node</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">exec_res</span><span class="o">.</span><span class="n">logs</span>
+<span class="linenos">162</span>        <span class="n">out_edges</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">source_id</span><span class="o">=</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+<span class="linenos">163</span>        <span class="n">rule_logs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_rule_labels</span><span class="p">(</span><span class="n">exec_res</span><span class="o">.</span><span class="n">logs</span><span class="p">)</span>
+<span class="linenos">164</span>        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">out_edges</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+<span class="linenos">165</span>            <span class="n">cfg</span><span class="o">.</span><span class="n">create_edge</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">new_node</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="n">depth</span><span class="p">,</span> <span class="n">rules</span><span class="o">=</span><span class="n">rule_logs</span><span class="p">)</span>
+<span class="linenos">166</span>        <span class="k">else</span><span class="p">:</span>
+<span class="linenos">167</span>            <span class="n">edge</span> <span class="o">=</span> <span class="n">out_edges</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="linenos">168</span>            <span class="k">if</span> <span class="n">depth</span> <span class="o">&gt;</span> <span class="n">edge</span><span class="o">.</span><span class="n">depth</span><span class="p">:</span>
+<span class="linenos">169</span>                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+<span class="linenos">170</span>                    <span class="sa">f</span><span class="s1">&#39;Step depth </span><span class="si">{</span><span class="n">depth</span><span class="si">}</span><span class="s1"> greater than original edge depth </span><span class="si">{</span><span class="n">edge</span><span class="o">.</span><span class="n">depth</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">shorten_hashes</span><span class="p">((</span><span class="n">edge</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">edge</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">id</span><span class="p">))</span><span class="si">}</span><span class="s1">&#39;</span>
+<span class="linenos">171</span>                <span class="p">)</span>
+<span class="linenos">172</span>            <span class="n">cfg</span><span class="o">.</span><span class="n">remove_edge</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">edge</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+<span class="linenos">173</span>            <span class="n">cfg</span><span class="o">.</span><span class="n">create_edge</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">new_node</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="n">depth</span><span class="p">,</span> <span class="n">rules</span><span class="o">=</span><span class="n">rule_logs</span><span class="p">)</span>
+<span class="linenos">174</span>            <span class="n">cfg</span><span class="o">.</span><span class="n">create_edge</span><span class="p">(</span><span class="n">new_node</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">edge</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">depth</span> <span class="o">-</span> <span class="n">depth</span><span class="p">),</span> <span class="n">rules</span><span class="o">=</span><span class="n">edge</span><span class="o">.</span><span class="n">rules</span><span class="p">[</span><span class="n">depth</span><span class="p">:])</span>
+<span class="linenos">175</span>        <span class="k">return</span> <span class="n">new_node</span><span class="o">.</span><span class="n">id</span></div>
+
+<span class="linenos">176</span>
+<div class="viewcode-block" id="KCFGExplore.section_edge">
+<a class="viewcode-back" href="../../../api/pyk.kcfg.explore.html#pyk.kcfg.explore.KCFGExplore.section_edge">[docs]</a>
+<span class="linenos">177</span>    <span class="k">def</span><span class="w"> </span><span class="nf">section_edge</span><span class="p">(</span>
+<span class="linenos">178</span>        <span class="bp">self</span><span class="p">,</span>
+<span class="linenos">179</span>        <span class="n">cfg</span><span class="p">:</span> <span class="n">KCFG</span><span class="p">,</span>
+<span class="linenos">180</span>        <span class="n">source_id</span><span class="p">:</span> <span class="n">NodeIdLike</span><span class="p">,</span>
+<span class="linenos">181</span>        <span class="n">target_id</span><span class="p">:</span> <span class="n">NodeIdLike</span><span class="p">,</span>
+<span class="linenos">182</span>        <span class="n">logs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">LogEntry</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>
+<span class="linenos">183</span>        <span class="n">sections</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+<span class="linenos">184</span>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<span class="linenos">185</span>        <span class="k">if</span> <span class="n">sections</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+<span class="linenos">186</span>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Cannot section an edge less than twice </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">sections</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos">187</span>        <span class="n">edge</span> <span class="o">=</span> <span class="n">single</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">source_id</span><span class="o">=</span><span class="n">source_id</span><span class="p">,</span> <span class="n">target_id</span><span class="o">=</span><span class="n">target_id</span><span class="p">))</span>
+<span class="linenos">188</span>        <span class="n">section_depth</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">depth</span> <span class="o">/</span> <span class="n">sections</span><span class="p">)</span>
+<span class="linenos">189</span>        <span class="k">if</span> <span class="n">section_depth</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+<span class="linenos">190</span>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Too many sections, results in 0-length section </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">sections</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos">191</span>        <span class="n">orig_depth</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">depth</span>
+<span class="linenos">192</span>        <span class="n">new_depth</span> <span class="o">=</span> <span class="n">section_depth</span>
+<span class="linenos">193</span>        <span class="n">new_nodes</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">194</span>        <span class="n">curr_node_id</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">id</span>
+<span class="linenos">195</span>        <span class="k">while</span> <span class="n">new_depth</span> <span class="o">&lt;</span> <span class="n">orig_depth</span><span class="p">:</span>
+<span class="linenos">196</span>            <span class="n">curr_node_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">curr_node_id</span><span class="p">,</span> <span class="n">logs</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="n">section_depth</span><span class="p">)</span>
+<span class="linenos">197</span>            <span class="n">new_nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">curr_node_id</span><span class="p">)</span>
+<span class="linenos">198</span>            <span class="n">new_depth</span> <span class="o">+=</span> <span class="n">section_depth</span>
+<span class="linenos">199</span>        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">new_nodes</span><span class="p">)</span></div>
+
+<span class="linenos">200</span>
+<div class="viewcode-block" id="KCFGExplore.check_extendable">
+<a class="viewcode-back" href="../../../api/pyk.kcfg.explore.html#pyk.kcfg.explore.KCFGExplore.check_extendable">[docs]</a>
+<span class="linenos">201</span>    <span class="k">def</span><span class="w"> </span><span class="nf">check_extendable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcfg_exploration</span><span class="p">:</span> <span class="n">KCFGExploration</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">KCFG</span><span class="o">.</span><span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">202</span>        <span class="n">kcfg</span><span class="p">:</span> <span class="n">KCFG</span> <span class="o">=</span> <span class="n">kcfg_exploration</span><span class="o">.</span><span class="n">kcfg</span>
+<span class="linenos">203</span>        <span class="k">if</span> <span class="ow">not</span> <span class="n">kcfg</span><span class="o">.</span><span class="n">is_leaf</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">):</span>
+<span class="linenos">204</span>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Cannot extend non-leaf node </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos">205</span>        <span class="k">if</span> <span class="n">kcfg</span><span class="o">.</span><span class="n">is_stuck</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">):</span>
+<span class="linenos">206</span>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Cannot extend stuck node </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos">207</span>        <span class="k">if</span> <span class="n">kcfg</span><span class="o">.</span><span class="n">is_vacuous</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">):</span>
+<span class="linenos">208</span>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Cannot extend vacuous node </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos">209</span>        <span class="k">if</span> <span class="n">kcfg_exploration</span><span class="o">.</span><span class="n">is_terminal</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">):</span>
+<span class="linenos">210</span>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Cannot extend terminal node </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+<span class="linenos">211</span>
+<div class="viewcode-block" id="KCFGExplore.extend_cterm">
+<a class="viewcode-back" href="../../../api/pyk.kcfg.explore.html#pyk.kcfg.explore.KCFGExplore.extend_cterm">[docs]</a>
+<span class="linenos">212</span>    <span class="k">def</span><span class="w"> </span><span class="nf">extend_cterm</span><span class="p">(</span>
+<span class="linenos">213</span>        <span class="bp">self</span><span class="p">,</span>
+<span class="linenos">214</span>        <span class="n">_cterm</span><span class="p">:</span> <span class="n">CTerm</span><span class="p">,</span>
+<span class="linenos">215</span>        <span class="n">node_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<span class="linenos">216</span>        <span class="o">*</span><span class="p">,</span>
+<span class="linenos">217</span>        <span class="n">execute_depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="linenos">218</span>        <span class="n">cut_point_rules</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
+<span class="linenos">219</span>        <span class="n">terminal_rules</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
+<span class="linenos">220</span>        <span class="n">module_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="linenos">221</span>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">KCFGExtendResult</span><span class="p">]:</span>
+<span class="linenos">222</span>
+<span class="linenos">223</span>        <span class="n">custom_step_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcfg_semantics</span><span class="o">.</span><span class="n">custom_step</span><span class="p">(</span><span class="n">_cterm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cterm_symbolic</span><span class="p">)</span>
+<span class="linenos">224</span>        <span class="k">if</span> <span class="n">custom_step_result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">225</span>            <span class="k">return</span> <span class="p">[</span><span class="n">custom_step_result</span><span class="p">]</span>
+<span class="linenos">226</span>
+<span class="linenos">227</span>        <span class="n">abstract_cterm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcfg_semantics</span><span class="o">.</span><span class="n">abstract_node</span><span class="p">(</span><span class="n">_cterm</span><span class="p">)</span>
+<span class="linenos">228</span>        <span class="k">if</span> <span class="n">_cterm</span> <span class="o">!=</span> <span class="n">abstract_cterm</span><span class="p">:</span>
+<span class="linenos">229</span>            <span class="k">return</span> <span class="p">[</span><span class="n">Abstract</span><span class="p">(</span><span class="n">abstract_cterm</span><span class="p">)]</span>
+<span class="linenos">230</span>
+<span class="linenos">231</span>        <span class="n">cterm</span><span class="p">,</span> <span class="n">next_states</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">vacuous</span><span class="p">,</span> <span class="n">next_node_logs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cterm_symbolic</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+<span class="linenos">232</span>            <span class="n">_cterm</span><span class="p">,</span>
+<span class="linenos">233</span>            <span class="n">depth</span><span class="o">=</span><span class="n">execute_depth</span><span class="p">,</span>
+<span class="linenos">234</span>            <span class="n">cut_point_rules</span><span class="o">=</span><span class="n">cut_point_rules</span><span class="p">,</span>
+<span class="linenos">235</span>            <span class="n">terminal_rules</span><span class="o">=</span><span class="n">terminal_rules</span><span class="p">,</span>
+<span class="linenos">236</span>            <span class="n">module_name</span><span class="o">=</span><span class="n">module_name</span><span class="p">,</span>
+<span class="linenos">237</span>        <span class="p">)</span>
+<span class="linenos">238</span>
+<span class="linenos">239</span>        <span class="n">extend_results</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">KCFGExtendResult</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">240</span>
+<span class="linenos">241</span>        <span class="c1"># Basic block</span>
+<span class="linenos">242</span>        <span class="k">if</span> <span class="n">depth</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+<span class="linenos">243</span>            <span class="n">extend_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Step</span><span class="p">(</span><span class="n">cterm</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">next_node_logs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_rule_labels</span><span class="p">(</span><span class="n">next_node_logs</span><span class="p">)))</span>
+<span class="linenos">244</span>
+<span class="linenos">245</span>        <span class="c1"># Stuck or vacuous</span>
+<span class="linenos">246</span>        <span class="k">if</span> <span class="ow">not</span> <span class="n">next_states</span><span class="p">:</span>
+<span class="linenos">247</span>            <span class="k">if</span> <span class="n">vacuous</span><span class="p">:</span>
+<span class="linenos">248</span>                <span class="n">extend_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Vacuous</span><span class="p">())</span>
+<span class="linenos">249</span>            <span class="k">elif</span> <span class="n">depth</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+<span class="linenos">250</span>                <span class="n">extend_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Stuck</span><span class="p">())</span>
+<span class="linenos">251</span>        <span class="c1"># Cut rule</span>
+<span class="linenos">252</span>        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">next_states</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+<span class="linenos">253</span>            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcfg_semantics</span><span class="o">.</span><span class="n">can_make_custom_step</span><span class="p">(</span><span class="n">cterm</span><span class="p">):</span>
+<span class="linenos">254</span>                <span class="p">(</span><span class="n">next_node_logs</span><span class="p">,</span> <span class="n">rules</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span>
+<span class="linenos">255</span>                    <span class="p">((),</span> <span class="p">[])</span> <span class="k">if</span> <span class="n">extend_results</span> <span class="k">else</span> <span class="p">(</span><span class="n">next_node_logs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_rule_labels</span><span class="p">(</span><span class="n">next_node_logs</span><span class="p">))</span>
+<span class="linenos">256</span>                <span class="p">)</span>
+<span class="linenos">257</span>                <span class="n">extend_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Step</span><span class="p">(</span><span class="n">next_states</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">next_node_logs</span><span class="p">,</span> <span class="n">rules</span><span class="p">,</span> <span class="n">cut</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="s1">&#39;cut-rule&#39;</span><span class="p">))</span>
+<span class="linenos">258</span>        <span class="c1"># Branch</span>
+<span class="linenos">259</span>        <span class="k">elif</span> <span class="nb">all</span><span class="p">(</span><span class="n">branch_constraint</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">branch_constraint</span> <span class="ow">in</span> <span class="n">next_states</span><span class="p">):</span>
+<span class="linenos">260</span>            <span class="n">branch_preds</span> <span class="o">=</span> <span class="p">[</span><span class="n">flatten_label</span><span class="p">(</span><span class="s1">&#39;#And&#39;</span><span class="p">,</span> <span class="n">not_none</span><span class="p">(</span><span class="n">rule_predicate</span><span class="p">))</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">rule_predicate</span> <span class="ow">in</span> <span class="n">next_states</span><span class="p">]</span>
+<span class="linenos">261</span>            <span class="n">common_preds</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+<span class="linenos">262</span>                <span class="n">unique</span><span class="p">(</span>
+<span class="linenos">263</span>                    <span class="n">pred</span>
+<span class="linenos">264</span>                    <span class="k">for</span> <span class="n">branch_pred</span> <span class="ow">in</span> <span class="n">branch_preds</span>
+<span class="linenos">265</span>                    <span class="k">for</span> <span class="n">pred</span> <span class="ow">in</span> <span class="n">branch_pred</span>
+<span class="linenos">266</span>                    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">pred</span> <span class="ow">in</span> <span class="n">bp</span> <span class="k">for</span> <span class="n">bp</span> <span class="ow">in</span> <span class="n">branch_preds</span><span class="p">)</span>
+<span class="linenos">267</span>                <span class="p">)</span>
+<span class="linenos">268</span>            <span class="p">)</span>
+<span class="linenos">269</span>            <span class="n">branches</span> <span class="o">=</span> <span class="p">[</span><span class="n">mlAnd</span><span class="p">(</span><span class="n">pred</span> <span class="k">for</span> <span class="n">pred</span> <span class="ow">in</span> <span class="n">branch_pred</span> <span class="k">if</span> <span class="n">pred</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">common_preds</span><span class="p">)</span> <span class="k">for</span> <span class="n">branch_pred</span> <span class="ow">in</span> <span class="n">branch_preds</span><span class="p">]</span>
+<span class="linenos">270</span>            <span class="n">info</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pretty_print</span><span class="p">(</span><span class="n">ml_pred_to_bool</span><span class="p">(</span><span class="n">bc</span><span class="p">))</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">bc</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">branches</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
+<span class="linenos">271</span>            <span class="n">extend_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Branch</span><span class="p">(</span><span class="n">branches</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="n">info</span><span class="p">))</span>
+<span class="linenos">272</span>        <span class="k">else</span><span class="p">:</span>
+<span class="linenos">273</span>            <span class="c1"># NDBranch</span>
+<span class="linenos">274</span>            <span class="n">next_cterms</span> <span class="o">=</span> <span class="p">[</span><span class="n">cterm</span> <span class="k">for</span> <span class="n">cterm</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">next_states</span><span class="p">]</span>
+<span class="linenos">275</span>            <span class="p">(</span><span class="n">next_node_logs</span><span class="p">,</span> <span class="n">rules</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span>
+<span class="linenos">276</span>                <span class="p">((),</span> <span class="p">[])</span> <span class="k">if</span> <span class="n">extend_results</span> <span class="k">else</span> <span class="p">(</span><span class="n">next_node_logs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_rule_labels</span><span class="p">(</span><span class="n">next_node_logs</span><span class="p">))</span>
+<span class="linenos">277</span>            <span class="p">)</span>
+<span class="linenos">278</span>            <span class="n">extend_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">NDBranch</span><span class="p">(</span><span class="n">next_cterms</span><span class="p">,</span> <span class="n">next_node_logs</span><span class="p">,</span> <span class="n">rules</span><span class="p">))</span>
+<span class="linenos">279</span>
+<span class="linenos">280</span>        <span class="k">return</span> <span class="n">extend_results</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Runtime Verification, Inc.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

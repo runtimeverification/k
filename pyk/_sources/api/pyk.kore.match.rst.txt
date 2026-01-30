@@ -1,0 +1,7 @@
+pyk.kore.match module
+=====================
+
+.. automodule:: pyk.kore.match
+   :members:
+   :undoc-members:
+   :show-inheritance:
