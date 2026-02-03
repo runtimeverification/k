@@ -1145,7 +1145,14 @@ class KoreServer(ContextManager['KoreServer']):
         cli_args = self._cli_args()
 
         new_env = os.environ.copy()
-        new_env['GHCRTS'] = f'-N{self._haskell_threads}'
+        new_env['GHCRTS'] = ' '.join(
+            part
+            for part in [
+                f'-N{self._haskell_threads}',
+                new_env.get('GHCRTS'),
+            ]
+            if part
+        )
 
         _LOGGER.info(f'Starting KoreServer: {" ".join(cli_args)}')
         self._proc, self._stdout_reader, self._stderr_reader = self._create_proc(cli_args, new_env)
