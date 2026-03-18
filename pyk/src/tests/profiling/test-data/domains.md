@@ -1449,7 +1449,7 @@ The syntax of ordinary floating-point values in K consists of an optional sign
 followed by an optional fractional part. Either the integer part or the 
 fractional part must be specified. The mantissa is followed by an optional
 exponent part, which consists of an `e` or `E`, an optional sign (+ or -), 
-and an integer. The expoennt is followed by an optional suffix, which can be
+and an integer. The exponent is followed by an optional suffix, which can be
 either `f`, `F`, `d`, `D`, or `pNxM` where `N` and `M` are positive integers.
 `p` and `x` can be either upper or lowercase.
 
