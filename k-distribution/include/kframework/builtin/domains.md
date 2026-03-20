@@ -1628,7 +1628,7 @@ You can:
 
 ### Floating-point comparisons
 
-Compute whether a float is less than or equasl to, less than, greater than or
+Compute whether a float is less than or equals to, less than, greater than or
 equal to, greater than, equal, or unequal to another float. Note that
 `X ==Float Y` and `X ==K Y` might yield different values. The latter should be
 used in cases where you want to compare whether two values of sort `Float`
