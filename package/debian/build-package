@@ -19,4 +19,16 @@ mv package/debian/${subdir}/rules.${base_distro}    debian/rules
 
 dpkg-buildpackage
 
-mv ../${subdir}_$(cat package/version)_amd64.deb ${pkg_name}
+# The .deb filename uses the Debian package version from debian/changelog, which can
+# differ from package/version; glob the artifact dpkg actually produced.
+shopt -s nullglob
+matches=(../"${subdir}"_*_amd64.deb)
+if [ "${#matches[@]}" -eq 0 ]; then
+  echo "error: no ../${subdir}_*_amd64.deb after dpkg-buildpackage" >&2
+  exit 1
+fi
+if [ "${#matches[@]}" -gt 1 ]; then
+  echo "error: expected one ../${subdir}_*_amd64.deb, got: ${matches[*]}" >&2
+  exit 1
+fi
+mv "${matches[0]}" "${pkg_name}"
