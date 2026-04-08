@@ -71,7 +71,7 @@ class ImpSemantics(DefaultSemantics):
     def can_make_custom_step(self, c: CTerm) -> bool:
         return False
 
-    def custom_step(self, c: CTerm, cs: CTermSymbolic) -> KCFGExtendResult | None:
+    def custom_step(self, c: CTerm, cs: CTermSymbolic, node_id: int) -> KCFGExtendResult | None:
         return None
 
 
