@@ -35,9 +35,18 @@ class KCFGSemantics(ABC):
     """Check whether or not the semantics can make a custom step from a given ``CTerm``."""
 
     @abstractmethod
-    def custom_step(self, c: CTerm, cs: CTermSymbolic) -> KCFGExtendResult | None: ...
+    def custom_step(self, c: CTerm, cs: CTermSymbolic, node_id: int) -> KCFGExtendResult | None: ...
 
-    """Implement a custom semantic step."""
+    """Implement a custom semantic step.
+    
+    Args:
+        c: Current constrained term representing the state.
+        cs: ``CTermSymbolic`` for computing the custom step result.
+        node_id: Current node id.
+    
+    Returns:
+        The ``KCFGExtendResult`` produced by this custom step if this custom step can produce one, ``None`` otherwise.
+    """
 
     @abstractmethod
     def is_mergeable(self, c1: CTerm, c2: CTerm) -> bool: ...
@@ -61,7 +70,7 @@ class DefaultSemantics(KCFGSemantics):
     def can_make_custom_step(self, c: CTerm) -> bool:
         return False
 
-    def custom_step(self, c: CTerm, cs: CTermSymbolic) -> KCFGExtendResult | None:
+    def custom_step(self, c: CTerm, cs: CTermSymbolic, node_id: int) -> KCFGExtendResult | None:
         return None
 
     def is_mergeable(self, c1: CTerm, c2: CTerm) -> bool:
