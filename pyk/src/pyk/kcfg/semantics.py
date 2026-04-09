@@ -37,7 +37,16 @@ class KCFGSemantics(ABC):
     @abstractmethod
     def custom_step(self, c: CTerm, cs: CTermSymbolic, node_id: int) -> KCFGExtendResult | None: ...
 
-    """Implement a custom semantic step."""
+    """Implement a custom semantic step.
+    
+    Args:
+        c: Current configuration term representing the EVM state.
+        cs: Symbolic configuration term.
+        node_id: Current node id.
+    
+    Returns:
+        The KCFGExtendResult produced by this custom step if this custom step can produce one, otherwise returns None, 
+    """
 
     @abstractmethod
     def is_mergeable(self, c1: CTerm, c2: CTerm) -> bool: ...
