@@ -62,7 +62,6 @@ dev = [
     "pyupgrade",
     "types-psutil>=5.9.5.10,<6",
     "types-requests>=2.33.0.20260408",
-
 ]
 
 [tool.hatch.metadata]
