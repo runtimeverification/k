@@ -40,12 +40,12 @@ class KCFGSemantics(ABC):
     """Implement a custom semantic step.
     
     Args:
-        c: Current configuration term representing the EVM state.
-        cs: Symbolic configuration term.
+        c: Current constrained term representing the state.
+        cs: ``CTermSymbolic`` for computing the custom step result.
         node_id: Current node id.
     
     Returns:
-        The KCFGExtendResult produced by this custom step if this custom step can produce one, otherwise returns None, 
+        The ``KCFGExtendResult`` produced by this custom step if this custom step can produce one, ``None`` otherwise.
     """
 
     @abstractmethod
