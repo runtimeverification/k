@@ -72,7 +72,7 @@ def emit_event(event: str, properties: dict[str, Any] | None = None) -> None:
         config.write()
         print(TELEMETRY_MESSAGE)
     except ValueError as e:
-        _LOGGER.warning(e)
+        _LOGGER.warning(f'Telemetry config is invalid: {KPROFILE_CONFIG_FILE}', exc_info=e)
         return
 
     if not config.consent:
