@@ -7,7 +7,7 @@ from ..kcfg.show import KCFGShow, NodePrinter
 from ..utils import ensure_dir_path
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
+    from collections.abc import Iterable, Iterator
     from pathlib import Path
     from typing import Final
 
@@ -86,6 +86,26 @@ class APRProofShow:
             module_name=f'SUMMARY-{proof.id.upper().replace("_", "-")}',
         )
         return res_lines
+
+    def show_iter(
+        self,
+        proof: APRProof,
+        nodes: Iterable[NodeIdLike] = (),
+        node_deltas: Iterable[tuple[NodeIdLike, NodeIdLike]] = (),
+        to_module: bool = False,
+        minimize: bool = True,
+        omit_cells: Iterable[str] = (),
+    ) -> Iterator[str]:
+        """Yield proof show output line-by-line, avoiding memory accumulation."""
+        yield from self.kcfg_show.show_iter(
+            proof.kcfg,
+            nodes=nodes,
+            node_deltas=node_deltas,
+            to_module=to_module,
+            minimize=minimize,
+            omit_cells=omit_cells,
+            module_name=f'SUMMARY-{proof.id.upper().replace("_", "-")}',
+        )
 
     def dot(self, proof: APRProof) -> Digraph:
         graph = self.kcfg_show.dot(proof.kcfg)
