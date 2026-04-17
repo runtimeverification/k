@@ -76,16 +76,14 @@ class APRProofShow:
         minimize: bool = True,
         omit_cells: Iterable[str] = (),
     ) -> list[str]:
-        res_lines = self.kcfg_show.show(
-            proof.kcfg,
+        return list(self.show_iter(
+            proof,
             nodes=nodes,
             node_deltas=node_deltas,
             to_module=to_module,
             minimize=minimize,
             omit_cells=omit_cells,
-            module_name=f'SUMMARY-{proof.id.upper().replace("_", "-")}',
-        )
-        return res_lines
+        ))
 
     def show_iter(
         self,

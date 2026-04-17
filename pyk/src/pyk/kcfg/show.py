@@ -325,48 +325,15 @@ class KCFGShow:
         omit_cells: Iterable[str] = (),
         module_name: str | None = None,
     ) -> list[str]:
-        res_lines: list[str] = []
-        res_lines += self.pretty(cfg, minimize=minimize)
-
-        nodes_printed = False
-
-        for node_id in nodes:
-            nodes_printed = True
-            kast = cfg.node(node_id).cterm.kast
-            kast = KCFGShow.hide_cells(kast, omit_cells)
-            if minimize:
-                kast = minimize_term(kast)
-            res_lines.append('')
-            res_lines.append('')
-            res_lines.append(f'Node {node_id}:')
-            res_lines.append('')
-            res_lines.append(self.pretty_printer.print(kast))
-            res_lines.append('')
-
-        for node_id_1, node_id_2 in node_deltas:
-            nodes_printed = True
-            config_1 = KCFGShow.simplify_config(cfg.node(node_id_1).cterm.config, omit_cells)
-            config_2 = KCFGShow.simplify_config(cfg.node(node_id_2).cterm.config, omit_cells)
-            config_delta = push_down_rewrites(KRewrite(config_1, config_2))
-            if minimize:
-                config_delta = minimize_term(config_delta)
-            res_lines.append('')
-            res_lines.append('')
-            res_lines.append(f'State Delta {node_id_1} => {node_id_2}:')
-            res_lines.append('')
-            res_lines.append(self.pretty_printer.print(config_delta))
-            res_lines.append('')
-
-        if not (nodes_printed):
-            res_lines.append('')
-        res_lines.append('')
-        res_lines.append('')
-
-        if to_module:
-            module = self.to_module(cfg, module_name, omit_cells=omit_cells)
-            res_lines.append(self.pretty_printer.print(module))
-
-        return res_lines
+        return list(self.show_iter(
+            cfg,
+            nodes=nodes,
+            node_deltas=node_deltas,
+            to_module=to_module,
+            minimize=minimize,
+            omit_cells=omit_cells,
+            module_name=module_name,
+        ))
 
     def show_iter(
         self,
