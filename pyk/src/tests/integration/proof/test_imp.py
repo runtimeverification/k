@@ -20,7 +20,7 @@ from pyk.kcfg.show import KCFGShow
 from pyk.proof import APRProver, ProofStatus
 from pyk.proof.proof import parallel_advance_proof
 from pyk.proof.reachability import APRFailureInfo, APRProof
-from pyk.proof.show import APRProofNodePrinter
+from pyk.proof.show import APRProofNodePrinter, APRProofShow
 from pyk.testing import KCFGExploreTest, KProveTest, ParallelTest
 from pyk.utils import single
 
@@ -951,6 +951,11 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         cfg_lines = kcfg_show.show(proof.kcfg)
         _LOGGER.info('\n'.join(cfg_lines))
 
+        # Verify show_iter_from_disk produces identical output
+        apr_show = APRProofShow(kprove.definition, node_printer=kcfg_show.node_printer)
+        disk_lines = list(apr_show.show_iter_from_disk(proof_dir, proof.id))
+        assert cfg_lines == disk_lines, 'show_iter_from_disk output differs from show'
+
         assert proof.status == proof_status
         assert leaf_number(proof) == expected_leaf_number
 
@@ -1004,6 +1009,11 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         )
         cfg_lines = kcfg_show.show(proof.kcfg)
         _LOGGER.info('\n'.join(cfg_lines))
+
+        # Verify show_iter_from_disk produces identical output
+        apr_show = APRProofShow(kprove.definition, node_printer=kcfg_show.node_printer)
+        disk_lines = list(apr_show.show_iter_from_disk(proof_dir, proof.id))
+        assert cfg_lines == disk_lines, 'show_iter_from_disk output differs from show'
 
         assert proof.status == proof_status
         assert len(proof.kcfg._nodes) == expected_nodes
@@ -1563,6 +1573,11 @@ class TestImpParallelProof(ParallelTest, KProveTest):
         )
         cfg_lines = kcfg_show.show(proof.kcfg)
         _LOGGER.info('\n'.join(cfg_lines))
+
+        # Verify show_iter_from_disk produces identical output
+        apr_show = APRProofShow(kprove.definition, node_printer=kcfg_show.node_printer)
+        disk_lines = list(apr_show.show_iter_from_disk(proof_dir, proof.id))
+        assert cfg_lines == disk_lines, 'show_iter_from_disk output differs from show'
 
         assert proof.status == proof_status
         assert leaf_number(proof) == expected_leaf_number
