@@ -106,6 +106,30 @@ class KCFGStore:
 
         return dct
 
+    def read_cfg_data_lazy(self) -> dict[str, Any]:
+        """Read kcfg.json without loading node CTerms.
+
+        Node entries contain id, attrs, and the path to load the CTerm from,
+        but no 'cterm' key. Cover CSubsts are left as raw dicts.
+        """
+        dct = json.loads(self.kcfg_json_path.read_text())
+
+        new_nodes = []
+        for node_id in dct.get('nodes') or []:
+            attrs = []
+            if node_id in dct['vacuous']:
+                attrs.append(KCFGNodeAttr.VACUOUS.value)
+            if node_id in dct['stuck']:
+                attrs.append(KCFGNodeAttr.STUCK.value)
+            new_nodes.append({'id': node_id, 'node_path': str(self.kcfg_node_path(node_id)), 'attrs': attrs})
+
+        dct['nodes'] = new_nodes
+
+        del dct['vacuous']
+        del dct['stuck']
+
+        return dct
+
     def read_node_data(self, node_id: int) -> dict[str, Any]:
         return json.loads(self.kcfg_node_path(node_id).read_text())
 
@@ -664,14 +688,28 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         return {k: v for k, v in res.items() if v}
 
     @staticmethod
-    def from_dict(dct: Mapping[str, Any], optimize_memory: bool = True) -> KCFG:
-        cfg = KCFG(optimize_memory=optimize_memory)
+    def from_dict(dct: Mapping[str, Any], optimize_memory: bool = True, lazy: bool = False) -> KCFG:
+        cfg = KCFG(optimize_memory=(optimize_memory and not lazy))
 
-        for node_dict in dct.get('nodes') or []:
-            node = KCFG.Node.from_dict(node_dict)
-            cfg.add_node(node)
+        if lazy:
+            from pathlib import Path
 
-        max_id = max([node.id for node in cfg.nodes], default=0)
+            from .lazy import LazyCSubst, LazyNode
+
+            for node_dict in dct.get('nodes') or []:
+                node = LazyNode(
+                    node_dict['id'],
+                    frozenset(NodeAttr(a) for a in node_dict.get('attrs', [])),
+                    Path(node_dict['node_path']),
+                )
+                cfg._nodes[node.id] = node  # type: ignore[assignment]
+                cfg._node_id = max(cfg._node_id, node.id + 1)
+        else:
+            for node_dict in dct.get('nodes') or []:
+                node = KCFG.Node.from_dict(node_dict)
+                cfg.add_node(node)
+
+        max_id = max(cfg._nodes.keys(), default=0)
         cfg._node_id = dct.get('next', max_id + 1)
 
         for edge_dict in dct.get('edges') or []:
@@ -683,7 +721,12 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             cfg.add_successor(merged_edge)
 
         for cover_dict in dct.get('covers') or []:
-            cover = KCFG.Cover.from_dict(cover_dict, cfg._nodes)
+            if lazy:
+                src = cfg._nodes[cover_dict['source']]
+                tgt = cfg._nodes[cover_dict['target']]
+                cover = KCFG.Cover(src, tgt, LazyCSubst(cover_dict['csubst']))  # type: ignore[arg-type]
+            else:
+                cover = KCFG.Cover.from_dict(cover_dict, cfg._nodes)
             cfg.add_successor(cover)
 
         for split_dict in dct.get('splits') or []:
@@ -1298,6 +1341,13 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
     def read_cfg_data(cfg_dir: Path) -> KCFG:
         store = KCFGStore(cfg_dir)
         cfg = KCFG.from_dict(store.read_cfg_data())
+        cfg._kcfg_store = store
+        return cfg
+
+    @staticmethod
+    def read_cfg_data_lazy(cfg_dir: Path) -> KCFG:
+        store = KCFGStore(cfg_dir)
+        cfg = KCFG.from_dict(store.read_cfg_data_lazy(), lazy=True)
         cfg._kcfg_store = store
         return cfg
 

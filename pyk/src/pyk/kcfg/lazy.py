@@ -13,7 +13,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ..cterm import CSubst, CTerm
     from ..kast.inner import KInner
-    from .kcfg import NodeAttr
 
 
 class LazyNode:
@@ -128,7 +127,6 @@ class LazyCSubst:
             from ..cterm import CSubst
 
             self._csubst = CSubst.from_dict(self._raw)
-            self._raw = None  # Release raw dict
         return self._csubst
 
     @property

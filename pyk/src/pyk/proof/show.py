@@ -119,13 +119,13 @@ class APRProofShow:
         import json
 
         from ..kcfg.lazy import APRProofStub
-        from ..kcfg.lazy_load import read_cfg_lazy
+        from ..kcfg.kcfg import KCFG
 
         proof_subdir = proof_dir / proof_id
         cfg_dir = proof_subdir / 'kcfg'
 
         # Load KCFG with lazy stubs
-        kcfg = read_cfg_lazy(cfg_dir)
+        kcfg = KCFG.read_cfg_data_lazy(cfg_dir)
 
         # If the node_printer is proof-aware, swap in a lightweight stub
         _original_proof = getattr(self.kcfg_show.node_printer, 'proof', None)
