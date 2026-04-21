@@ -76,14 +76,16 @@ class APRProofShow:
         minimize: bool = True,
         omit_cells: Iterable[str] = (),
     ) -> list[str]:
-        return list(self.show_iter(
-            proof,
-            nodes=nodes,
-            node_deltas=node_deltas,
-            to_module=to_module,
-            minimize=minimize,
-            omit_cells=omit_cells,
-        ))
+        return list(
+            self.show_iter(
+                proof,
+                nodes=nodes,
+                node_deltas=node_deltas,
+                to_module=to_module,
+                minimize=minimize,
+                omit_cells=omit_cells,
+            )
+        )
 
     def show_iter(
         self,
@@ -118,8 +120,8 @@ class APRProofShow:
         """
         import json
 
-        from ..kcfg.lazy import APRProofStub
         from ..kcfg.kcfg import KCFG
+        from ..kcfg.lazy import APRProofStub
 
         proof_subdir = proof_dir / proof_id
         cfg_dir = proof_subdir / 'kcfg'

@@ -325,15 +325,17 @@ class KCFGShow:
         omit_cells: Iterable[str] = (),
         module_name: str | None = None,
     ) -> list[str]:
-        return list(self.show_iter(
-            cfg,
-            nodes=nodes,
-            node_deltas=node_deltas,
-            to_module=to_module,
-            minimize=minimize,
-            omit_cells=omit_cells,
-            module_name=module_name,
-        ))
+        return list(
+            self.show_iter(
+                cfg,
+                nodes=nodes,
+                node_deltas=node_deltas,
+                to_module=to_module,
+                minimize=minimize,
+                omit_cells=omit_cells,
+                module_name=module_name,
+            )
+        )
 
     def show_iter(
         self,

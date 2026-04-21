@@ -7,12 +7,15 @@ These stubs duck-type the real KCFG classes, deferring heavy data loading
 from __future__ import annotations
 
 import json
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from pathlib import Path
+    from typing import Any
+
     from ..cterm import CSubst, CTerm
     from ..kast.inner import KInner
+    from .kcfg import KCFG
 
 
 class LazyNode:
@@ -69,7 +72,7 @@ class APRProofStub:
     Uses proof.json metadata + the KCFG for graph queries.
     """
 
-    def __init__(self, proof_dict: dict, kcfg: object) -> None:
+    def __init__(self, proof_dict: dict[str, Any], kcfg: KCFG) -> None:
         self.init = int(proof_dict['init'])
         self.target = int(proof_dict['target'])
         self._terminal_ids = set(proof_dict.get('terminal') or [])
@@ -115,11 +118,11 @@ class APRProofStub:
 class LazyCSubst:
     """Duck-types CSubst. Loads from a JSON dict on first access."""
 
-    _raw: dict | None
+    _raw: dict[str, Any]
     _csubst: CSubst | None
 
-    def __init__(self, raw_dict: dict) -> None:
-        self._raw = raw_dict
+    def __init__(self, raw_dict: dict[str, Any]) -> None:
+        self._raw: dict[str, Any] = raw_dict
         self._csubst = None
 
     def _load(self) -> CSubst:
@@ -137,7 +140,7 @@ class LazyCSubst:
     def subst(self) -> object:
         return self._load().subst
 
-    def pred(self, *args, **kwargs) -> KInner:
+    def pred(self, *args: Any, **kwargs: Any) -> KInner:
         return self._load().pred(*args, **kwargs)
 
     def to_dict(self) -> dict:

@@ -697,13 +697,13 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             from .lazy import LazyCSubst, LazyNode
 
             for node_dict in dct.get('nodes') or []:
-                node = LazyNode(
+                lazy_node = LazyNode(
                     node_dict['id'],
                     frozenset(NodeAttr(a) for a in node_dict.get('attrs', [])),
                     Path(node_dict['node_path']),
                 )
-                cfg._nodes[node.id] = node  # type: ignore[assignment]
-                cfg._node_id = max(cfg._node_id, node.id + 1)
+                cfg._nodes[lazy_node.id] = lazy_node  # type: ignore[assignment]
+                cfg._node_id = max(cfg._node_id, lazy_node.id + 1)
         else:
             for node_dict in dct.get('nodes') or []:
                 node = KCFG.Node.from_dict(node_dict)
