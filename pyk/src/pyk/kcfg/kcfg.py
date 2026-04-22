@@ -99,7 +99,14 @@ class KCFGStore:
                 attrs.append(KCFGNodeAttr.VACUOUS.value)
             if node['id'] in dct['stuck']:
                 attrs.append(KCFGNodeAttr.STUCK.value)
-            new_nodes.append({'id': node['id'], 'cterm': node['cterm'], 'attrs': attrs})
+            new_nodes.append(
+                {
+                    'id': node['id'],
+                    'cterm': node['cterm'],
+                    'attrs': attrs,
+                    'node_path': str(self.kcfg_node_path(node['id'])),
+                }
+            )
 
         dct['nodes'] = new_nodes
 
@@ -173,7 +180,12 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
 
         @staticmethod
         def from_dict(dct: dict[str, Any]) -> KCFG.Node:
-            return KCFG.Node(dct['id'], CTerm.from_dict(dct['cterm']), [NodeAttr(attr) for attr in dct['attrs']])
+            from pathlib import Path
+
+            node_path = Path(dct['node_path']) if 'node_path' in dct else None
+            return KCFG.Node(
+                dct['id'], CTerm.from_dict(dct['cterm']), [NodeAttr(attr) for attr in dct['attrs']], node_path=node_path
+            )
 
         def add_attr(self, attr: NodeAttr) -> KCFG.Node:
             return KCFG.Node(self.id, self.cterm, list(self.attrs) + [attr])
@@ -1390,9 +1402,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         self._created_nodes.clear()
 
     @staticmethod
-    def read_cfg_data(cfg_dir: Path) -> KCFG:
+    def read_cfg_data(cfg_dir: Path, auto_evict: bool = False) -> KCFG:
         store = KCFGStore(cfg_dir)
-        cfg = KCFG.from_dict(store.read_cfg_data())
+        cfg = KCFG.from_dict(store.read_cfg_data(), auto_evict=auto_evict)
         cfg._kcfg_store = store
         return cfg
 

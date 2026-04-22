@@ -485,7 +485,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
 
         for label in spec_labels:
             if proof_dir is not None and Proof.proof_data_exists(label, proof_dir):
-                apr_proof = APRProof.read_proof_data(proof_dir, label)
+                apr_proof = APRProof.read_proof_data(proof_dir, label, auto_evict=auto_evict)
             else:
                 _LOGGER.info(f'Building APRProof for claim: {label}')
                 claim = claim_index[label]
@@ -578,12 +578,12 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         return f'{self.id}.node-infeasible-{node_id}'
 
     @staticmethod
-    def read_proof_data(proof_dir: Path, id: str) -> APRProof:
+    def read_proof_data(proof_dir: Path, id: str, auto_evict: bool = False) -> APRProof:
         proof_subdir = proof_dir / id
         proof_json = proof_subdir / 'proof.json'
         proof_dict = json.loads(proof_json.read_text())
         cfg_dir = proof_subdir / 'kcfg'
-        kcfg = KCFG.read_cfg_data(cfg_dir)
+        kcfg = KCFG.read_cfg_data(cfg_dir, auto_evict=auto_evict)
         init = int(proof_dict['init'])
         target = int(proof_dict['target'])
         bounded = proof_dict['bounded']

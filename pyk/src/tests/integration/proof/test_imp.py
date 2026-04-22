@@ -1350,6 +1350,47 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         assert proof_base.status == proof_evict.status
         assert proof_base.dict == proof_evict.dict
 
+    def test_apr_prove_auto_evict_resume(
+        self,
+        kprove: KProve,
+        kcfg_explore: KCFGExplore,
+        tmp_path_factory: TempPathFactory,
+    ) -> None:
+        claim = single(
+            kprove.get_claims(
+                Path(K_FILES / 'imp-simple-spec.k'),
+                spec_module_name='IMP-SIMPLE-SPEC',
+                claim_labels=['IMP-SIMPLE-SPEC.addition-2'],
+            )
+        )
+
+        # Run baseline to completion
+        proof_dir_base = tmp_path_factory.mktemp('apr_auto_evict_resume_base')
+        proof_base = APRProof.from_claim(kprove.definition, claim, logs={}, proof_dir=proof_dir_base)
+        kcfg_explore.simplify(proof_base.kcfg, {})
+        prover_base = APRProver(kcfg_explore=kcfg_explore, execute_depth=1)
+        prover_base.advance_proof(proof_base)
+
+        # Run partial proof (1 iteration), save to disk
+        proof_dir_resume = tmp_path_factory.mktemp('apr_auto_evict_resume')
+        proof_partial = APRProof.from_claim(kprove.definition, claim, logs={}, proof_dir=proof_dir_resume)
+        kcfg_explore.simplify(proof_partial.kcfg, {})
+        prover_partial = APRProver(kcfg_explore=kcfg_explore, execute_depth=1)
+        prover_partial.advance_proof(proof_partial, max_iterations=1)
+        proof_partial.write_proof_data()
+
+        # Resume from disk with auto_evict=True
+        proof_resumed = APRProof.read_proof_data(proof_dir_resume, proof_partial.id, auto_evict=True)
+        prover_resumed = APRProver(kcfg_explore=kcfg_explore, execute_depth=1)
+        prover_resumed.advance_proof(proof_resumed)
+
+        # Verify eviction actually happened
+        evicted = [n for n in proof_resumed.kcfg.nodes if n._cterm is None]
+        assert len(evicted) > 0, 'Expected at least one evicted node'
+
+        assert proof_base.status == proof_resumed.status
+        assert proof_base.dict == proof_resumed.dict
+
     def test_fail_fast(
         self,
         kprove: KProve,
