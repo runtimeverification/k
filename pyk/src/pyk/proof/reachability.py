@@ -422,11 +422,12 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         logs: dict[int, tuple[LogEntry, ...]],
         proof_dir: Path | None = None,
         bmc_depth: int | None = None,
+        auto_evict: bool = False,
         **kwargs: Any,
     ) -> APRProof:
         kcfg_dir = proof_dir / claim.label / 'kcfg' if proof_dir is not None else None
 
-        kcfg, init_node, target_node = KCFG.from_claim(defn, claim, cfg_dir=kcfg_dir)
+        kcfg, init_node, target_node = KCFG.from_claim(defn, claim, cfg_dir=kcfg_dir, auto_evict=auto_evict)
         return APRProof(
             claim.label,
             kcfg,
@@ -475,6 +476,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         logs: dict[int, tuple[LogEntry, ...]],
         proof_dir: Path | None = None,
         spec_labels: Iterable[str] | None = None,
+        auto_evict: bool = False,
     ) -> list[APRProof]:
         claim_index = ClaimIndex.from_module_list(spec_modules)
         spec_labels = claim_index.labels(include=spec_labels, with_depends=True, ordered=True)
@@ -492,6 +494,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
                     claim,
                     logs=logs,
                     proof_dir=proof_dir,
+                    auto_evict=auto_evict,
                 )
                 apr_proof.write_proof_data()
             res.append(apr_proof)

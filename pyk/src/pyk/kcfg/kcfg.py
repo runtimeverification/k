@@ -507,8 +507,11 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
 
     _kcfg_store: KCFGStore | None
 
-    def __init__(self, cfg_dir: Path | None = None, optimize_memory: bool = True) -> None:
+    _auto_evict: bool
+
+    def __init__(self, cfg_dir: Path | None = None, optimize_memory: bool = True, auto_evict: bool = False) -> None:
         self._node_id = 1
+        self._auto_evict = auto_evict
         if optimize_memory:
             from .store import OptimizedNodeStore
 
@@ -587,9 +590,13 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
 
     @staticmethod
     def from_claim(
-        defn: KDefinition, claim: KClaim, cfg_dir: Path | None = None, optimize_memory: bool = True
+        defn: KDefinition,
+        claim: KClaim,
+        cfg_dir: Path | None = None,
+        optimize_memory: bool = True,
+        auto_evict: bool = False,
     ) -> tuple[KCFG, NodeIdLike, NodeIdLike]:
-        cfg = KCFG(cfg_dir=cfg_dir, optimize_memory=optimize_memory)
+        cfg = KCFG(cfg_dir=cfg_dir, optimize_memory=optimize_memory, auto_evict=auto_evict)
         claim_body = claim.body
         claim_body = defn.instantiate_cell_vars(claim_body)
         claim_body = rename_generated_vars(claim_body)
@@ -730,8 +737,10 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         return {k: v for k, v in res.items() if v}
 
     @staticmethod
-    def from_dict(dct: Mapping[str, Any], optimize_memory: bool = True, lazy: bool = False) -> KCFG:
-        cfg = KCFG(optimize_memory=(optimize_memory and not lazy))
+    def from_dict(
+        dct: Mapping[str, Any], optimize_memory: bool = True, lazy: bool = False, auto_evict: bool = False
+    ) -> KCFG:
+        cfg = KCFG(optimize_memory=(optimize_memory and not lazy), auto_evict=auto_evict)
 
         if lazy:
             from pathlib import Path
@@ -991,6 +1000,8 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
                 self._splits[succ.source.id] = succ
             elif type(succ) is KCFG.NDBranch:
                 self._ndbranches[succ.source.id] = succ
+        if self._auto_evict:
+            succ.source.evict()
 
     def edge(self, source_id: NodeIdLike, target_id: NodeIdLike) -> Edge | None:
         source_id = self._resolve(source_id)

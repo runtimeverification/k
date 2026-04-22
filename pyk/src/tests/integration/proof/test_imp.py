@@ -1315,6 +1315,41 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         assert proof.dict == proof_from_disk.dict
         assert proof.kcfg.nodes == proof_from_disk.kcfg.nodes
 
+    def test_apr_prove_auto_evict(
+        self,
+        kprove: KProve,
+        kcfg_explore: KCFGExplore,
+        tmp_path_factory: TempPathFactory,
+    ) -> None:
+        claim = single(
+            kprove.get_claims(
+                Path(K_FILES / 'imp-simple-spec.k'),
+                spec_module_name='IMP-SIMPLE-SPEC',
+                claim_labels=['IMP-SIMPLE-SPEC.addition-1'],
+            )
+        )
+
+        # Run without auto_evict
+        proof_dir_base = tmp_path_factory.mktemp('apr_auto_evict_base')
+        proof_base = APRProof.from_claim(kprove.definition, claim, logs={}, proof_dir=proof_dir_base)
+        kcfg_explore.simplify(proof_base.kcfg, {})
+        prover_base = APRProver(kcfg_explore=kcfg_explore, execute_depth=1)
+        prover_base.advance_proof(proof_base)
+
+        # Run with auto_evict
+        proof_dir_evict = tmp_path_factory.mktemp('apr_auto_evict_evict')
+        proof_evict = APRProof.from_claim(kprove.definition, claim, logs={}, proof_dir=proof_dir_evict, auto_evict=True)
+        kcfg_explore.simplify(proof_evict.kcfg, {})
+        prover_evict = APRProver(kcfg_explore=kcfg_explore, execute_depth=1)
+        prover_evict.advance_proof(proof_evict)
+
+        # Verify eviction actually happened
+        evicted = [n for n in proof_evict.kcfg.nodes if n._cterm is None]
+        assert len(evicted) > 0, 'Expected at least one evicted node'
+
+        assert proof_base.status == proof_evict.status
+        assert proof_base.dict == proof_evict.dict
+
     def test_fail_fast(
         self,
         kprove: KProve,
