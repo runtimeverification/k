@@ -136,16 +136,35 @@ class KCFGStore:
 
 class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
     @final
-    @dataclass(frozen=True, order=True)
     class Node:
         id: int
-        cterm: CTerm
+        _cterm: CTerm | None
+        _node_path: Path | None
         attrs: frozenset[NodeAttr]
 
-        def __init__(self, id: int, cterm: CTerm, attrs: Iterable[NodeAttr] = ()) -> None:
-            object.__setattr__(self, 'id', id)
-            object.__setattr__(self, 'cterm', cterm)
-            object.__setattr__(self, 'attrs', frozenset(attrs))
+        def __init__(
+            self, id: int, cterm: CTerm | None = None, attrs: Iterable[NodeAttr] = (), node_path: Path | None = None
+        ) -> None:
+            self.id = id
+            self._cterm = cterm
+            self._node_path = node_path
+            self.attrs = frozenset(attrs)
+
+        @property
+        def cterm(self) -> CTerm:
+            if self._cterm is None:
+                if self._node_path is None:
+                    raise ValueError(f'Node {self.id} has no CTerm and no path to load from')
+                import json
+
+                node_dict = json.loads(self._node_path.read_text())
+                self._cterm = CTerm.from_dict(node_dict['cterm'])
+            return self._cterm
+
+        def evict(self) -> None:
+            """Release the loaded CTerm from memory. Reloads from disk on next .cterm access."""
+            if self._node_path is not None:
+                self._cterm = None
 
         def to_dict(self) -> dict[str, Any]:
             return {'id': self.id, 'cterm': self.cterm.to_dict(), 'attrs': [attr.value for attr in self.attrs]}
@@ -173,6 +192,27 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         @property
         def free_vars(self) -> frozenset[str]:
             return frozenset(self.cterm.free_vars)
+
+        def __eq__(self, other: object) -> bool:
+            if not isinstance(other, KCFG.Node):
+                return NotImplemented
+            return self.id == other.id
+
+        def __hash__(self) -> int:
+            return hash(self.id)
+
+        def __lt__(self, other: object) -> bool:
+            if not isinstance(other, KCFG.Node):
+                return NotImplemented
+            return self.id < other.id
+
+        def __le__(self, other: object) -> bool:
+            if not isinstance(other, KCFG.Node):
+                return NotImplemented
+            return self.id <= other.id
+
+        def __repr__(self) -> str:
+            return f'Node(id={self.id}, attrs={self.attrs})'
 
     class Successor(ABC):
         source: KCFG.Node
@@ -694,16 +734,15 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         if lazy:
             from pathlib import Path
 
-            from .lazy import LazyCSubst, LazyNode
+            from .lazy import LazyCSubst
 
             for node_dict in dct.get('nodes') or []:
-                lazy_node = LazyNode(
-                    node_dict['id'],
-                    frozenset(NodeAttr(a) for a in node_dict.get('attrs', [])),
-                    Path(node_dict['node_path']),
+                node = KCFG.Node(
+                    id=node_dict['id'],
+                    attrs=[NodeAttr(a) for a in node_dict.get('attrs', [])],
+                    node_path=Path(node_dict['node_path']),
                 )
-                cfg._nodes[lazy_node.id] = lazy_node  # type: ignore[assignment]
-                cfg._node_id = max(cfg._node_id, lazy_node.id + 1)
+                cfg.add_node(node)
         else:
             for node_dict in dct.get('nodes') or []:
                 node = KCFG.Node.from_dict(node_dict)

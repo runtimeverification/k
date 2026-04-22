@@ -1,68 +1,19 @@
-"""Lazy loading stubs for memory-efficient proof display.
+"""Stubs for memory-efficient proof display.
 
-These stubs duck-type the real KCFG classes, deferring heavy data loading
-(node CTerms, cover/split CSubsts) until actually accessed for printing.
+LazyCSubst defers CSubst parsing until accessed.
+APRProofStub answers proof-level queries from proof.json metadata.
 """
 
 from __future__ import annotations
 
-import json
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from pathlib import Path
     from typing import Any
 
-    from ..cterm import CSubst, CTerm
+    from ..cterm import CSubst
     from ..kast.inner import KInner
     from .kcfg import KCFG
-
-
-class LazyNode:
-    """Duck-types KCFG.Node. Loads CTerm from disk on first .cterm access."""
-
-    id: int
-    attrs: frozenset
-    _node_path: Path
-    _cterm: CTerm | None
-
-    def __init__(self, id: int, attrs: frozenset, node_path: Path) -> None:
-        self.id = id
-        self.attrs = attrs
-        self._node_path = node_path
-        self._cterm = None
-
-    @property
-    def cterm(self) -> CTerm:
-        if self._cterm is None:
-            from ..cterm import CTerm
-
-            node_dict = json.loads(self._node_path.read_text())
-            self._cterm = CTerm.from_dict(node_dict['cterm'])
-        return self._cterm
-
-    def evict(self) -> None:
-        """Release the loaded CTerm from memory."""
-        self._cterm = None
-
-    def __eq__(self, other: object) -> bool:
-        if isinstance(other, LazyNode):
-            return self.id == other.id
-        # Also compare with real KCFG.Node
-        return hasattr(other, 'id') and self.id == other.id
-
-    def __hash__(self) -> int:
-        return hash(self.id)
-
-    def __lt__(self, other: object) -> bool:
-        if hasattr(other, 'id'):
-            return self.id < other.id
-        return NotImplemented
-
-    def __le__(self, other: object) -> bool:
-        if hasattr(other, 'id'):
-            return self.id <= other.id
-        return NotImplemented
 
 
 class APRProofStub:
