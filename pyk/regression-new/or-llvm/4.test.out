@@ -1,8 +1,12 @@
 <generatedTop>
   <k>
-    2 ~> test ( foo ~> .K ) ~> .K
+    2
+    ~> test ( foo ~> .K )
   </k>
   <c>
     0
   </c>
+  <generatedCounter>
+    0
+  </generatedCounter>
 </generatedTop>
