@@ -11,4 +11,7 @@
   <stuff>
     false
   </stuff>
+  <generatedCounter>
+    0
+  </generatedCounter>
 </generatedTop>
