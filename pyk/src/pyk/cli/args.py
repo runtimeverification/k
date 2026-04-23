@@ -208,6 +208,7 @@ class KompileOptions(Options):
     bison_lists: bool
     no_exc_wrap: bool
     outer_parsed_json: bool
+    top_cell: str | None
     ignore_warnings: list[str]
 
     @staticmethod
@@ -235,6 +236,7 @@ class KompileOptions(Options):
             'bison_lists': False,
             'no_exc_wrap': False,
             'outer_parsed_json': False,
+            'top_cell': None,
             'ignore_warnings': [],
         }
 
@@ -499,6 +501,7 @@ class KCLIArgs:
         args.add_argument(
             '--ignore-warnings', '-Wno', dest='ignore_warnings', action='append', help='Ignore provided warnings'
         )
+        args.add_argument('--top-cell', dest='top_cell', default=None, help='Set the top cell for the definition.')
         return args
 
     @cached_property
