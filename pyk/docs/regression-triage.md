@@ -94,17 +94,18 @@ or map the common ones explicitly.
 
 **Fix**: Add these as pass-through or explicit options in `pyk kompile`.
 
-## Category G — `<generatedCounter>` cell shown in output (≈6+ tests)
+## Category G — `<generatedCounter>` / `<generatedTop>` cells in output (≈6+ tests)
 
-Java `krun` strips the synthetic `<generatedCounter>` cell from output.
-`pyk run` (`KRun.pretty_print`) does not strip it.
-Tests whose K definitions use `generatedCounter` produce output that differs from baseline.
+Java `krun` strips the synthetic `<generatedCounter>` and `<generatedTop>` cells from output.
+`pyk run` intentionally retains them — this is a design decision in the pyk rewrite.
+Tests whose K definitions use these cells produce output that differs from the Java-generated baselines.
 
 Observed in: `context-alias`, `issue-1263`, `issue-1528`, `or-llvm`, `rand`, `rangemap-tests-llvm`
 (possibly more — not all tests were run).
 
-**Fix**: Strip `<generatedCounter>` from `KRun.pretty_print` output, matching Java `krun` behaviour.
-Then regenerate `.out` baselines with `make update-results`.
+**Fix**: Run `make update-results` in each affected test directory to regenerate `.out` baselines
+to match pyk's output (which includes these cells).
+Do not strip these cells from `pyk run` output — that is intentional behaviour.
 
 ## Category H — Output format differences
 
