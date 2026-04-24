@@ -212,19 +212,22 @@ def _parse_special_att_value(key: AttKey, value: Any) -> tuple[tuple[Sort, ...],
 
 def sort_decl_to_kore(syntax_sort: KSyntaxSort) -> SortDecl:
     name = _sort_name(syntax_sort.sort.name)
+    # Kore sort declarations use canonical indexed sort variable names (SortS0, SortS1, ...)
+    sort_vars = tuple(SortVar(f'SortS{i}') for i in range(len(syntax_sort.sort.params)))
     attrs = atts_to_kore(syntax_sort.att)
     hooked = Atts.HOOK in syntax_sort.att
-    return SortDecl(name, (), attrs=attrs, hooked=hooked)
+    return SortDecl(name, sort_vars, attrs=attrs, hooked=hooked)
 
 
 def sort_to_kore(sort: KSort, production: KProduction | None = None) -> Sort:
     if production and sort in production.params:
         return _sort_var(sort)
-    return _sort_app(sort)
+    return _sort_app(sort, production)
 
 
-def _sort_app(sort: KSort) -> SortApp:
-    return SortApp(_sort_name(sort.name))
+def _sort_app(sort: KSort, production: KProduction | None = None) -> SortApp:
+    sort_args = tuple(sort_to_kore(p, production) for p in sort.params)
+    return SortApp(_sort_name(sort.name), sort_args)
 
 
 def _sort_var(sort: KSort) -> SortVar:
@@ -638,6 +641,10 @@ def _no_junk_axioms(defn: KDefinition) -> list[Axiom]:
     res: list[Axiom] = []
     prods = prods_by_sort()
     for syntax_sort in module.syntax_sorts:
+        # Parameterized sorts (e.g. MInt{Width}) have sort-variable parameters;
+        # Java does not generate no-junk axioms for them.
+        if syntax_sort.sort.params:
+            continue
         no_junk = no_junk_for(syntax_sort, prods.get(syntax_sort.sort, []))
         axiom = no_junk.axiom()
         if axiom:
