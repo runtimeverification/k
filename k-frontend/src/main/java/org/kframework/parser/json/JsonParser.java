@@ -42,7 +42,6 @@ import org.kframework.kore.K;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.KORE;
 import org.kframework.kore.Sort;
-import org.kframework.parser.outer.Outer;
 import org.kframework.parser.outer.ParseRegex;
 import org.kframework.unparser.ToJson;
 import org.kframework.utils.errorsystem.KEMException;
