@@ -1042,6 +1042,11 @@ class AddImpureAtts(SingleModulePass):
         # KLabel (e.g. ite{K}) which doesn't match the parametric attributesFor() entry
         # (ite{SortSort}), so polymorphic function rules are silently skipped in Java's
         # dependency graph.
+        poly_labels = {
+            prod.klabel.name
+            for prod in module.productions
+            if prod.klabel and prod.klabel.params and Atts.FUNCTION in prod.att
+        }
         function_labels = {
             prod.klabel.name
             for prod in module.productions
@@ -1054,7 +1059,13 @@ class AddImpureAtts(SingleModulePass):
 
             match rule.body:
                 case KRewrite(KApply(KLabel(label)), rhs):
-                    if label in function_labels:
+                    if label in poly_labels:
+                        _LOGGER.warning(
+                            'Skipping rules for polymorphic function %s in impurity analysis'
+                            ' — Java also skips these due to sort-parameter mismatch in rulesFor()',
+                            label,
+                        )
+                    elif label in function_labels:
                         rhs_labels = AddImpureAtts._labels(rhs)
                         for called in rhs_labels:
                             res.setdefault(called, set()).add(label)
