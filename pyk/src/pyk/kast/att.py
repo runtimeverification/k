@@ -273,6 +273,8 @@ _PATH: Final = PathType()
 class AttKey(Generic[T]):
     name: str
     type: AttType[T] = field(compare=False, repr=False, kw_only=True)
+    # Mirrors Java's KeyRange.FrontendOnly: consumed before Kore emission, must not appear in .kore files.
+    frontend_only: bool = field(default=False, compare=False, repr=False, kw_only=True)
 
     def __call__(self, value: T) -> AttEntry[T]:
         return AttEntry(self, value)
@@ -316,6 +318,7 @@ class Atts:
     GROUP: Final = AttKey('group', type=_STR)
     HAS_DOMAIN_VALUES: Final = AttKey('hasDomainValues', type=_NONE)
     HOOK: Final = AttKey('hook', type=_ANY)
+    HYBRID: Final = AttKey('hybrid', type=OptionalType(_STR), frontend_only=True)
     IDEM: Final = AttKey('idem', type=_NONE)
     IMPURE: Final = AttKey('impure', type=_NONE)
     INDEX: Final = AttKey('index', type=_INT)
@@ -338,12 +341,14 @@ class Atts:
     PRIVATE: Final = AttKey('private', type=_NONE)
     PRODUCTION: Final = AttKey('org.kframework.definition.Production', type=_ANY)
     PROJECTION: Final = AttKey('projection', type=_NONE)
+    PUBLIC: Final = AttKey('public', type=_NONE, frontend_only=True)
     RIGHT: Final = AttKey('right', type=_ANY)  # RIGHT and RIGHT_INTERNAL on the Frontend
     RETURNS_UNIT: Final = AttKey('returnsUnit', type=_NONE)
     SIMPLIFICATION: Final = AttKey('simplification', type=_ANY)
     SEQSTRICT: Final = AttKey('seqstrict', type=_ANY)
     SORT: Final = AttKey('org.kframework.kore.Sort', type=_ANY)
     SOURCE: Final = AttKey('org.kframework.attributes.Source', type=_PATH)
+    STREAM: Final = AttKey('stream', type=OptionalType(_STR), frontend_only=True)
     SMTLEMMA: Final = AttKey('smt-lemma', type=_NONE)
     STRICT: Final = AttKey('strict', type=_ANY)
     SYMBOL: Final = AttKey('symbol', type=_STR)
@@ -358,6 +363,7 @@ class Atts:
     UNIT: Final = AttKey('unit', type=_STR)
     UNIQUE_ID: Final = AttKey('UNIQUE_ID', type=_ANY)
     UNPARSE_AVOID: Final = AttKey('unparseAvoid', type=_NONE)
+    UNUSED: Final = AttKey('unused', type=_NONE, frontend_only=True)
     UPDATE: Final = AttKey('update', type=_ANY)
     USER_LIST: Final = AttKey('userList', type=_ANY)
     WRAP_ELEMENT: Final = AttKey('wrapElement', type=_ANY)
