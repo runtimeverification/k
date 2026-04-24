@@ -1037,7 +1037,16 @@ class AddImpureAtts(SingleModulePass):
 
     @staticmethod
     def _callers(module: KFlatModule) -> dict[str, set[str]]:
-        function_labels = {prod.klabel.name for prod in module.productions if prod.klabel and Atts.FUNCTION in prod.att}
+        # Exclude polymorphic productions (klabel.params non-empty). Java's
+        # ComputeTransitiveFunctionDependencies groups rules by their post-sort-injection
+        # KLabel (e.g. ite{K}) which doesn't match the parametric attributesFor() entry
+        # (ite{SortSort}), so polymorphic function rules are silently skipped in Java's
+        # dependency graph.
+        function_labels = {
+            prod.klabel.name
+            for prod in module.productions
+            if prod.klabel and not prod.klabel.params and Atts.FUNCTION in prod.att
+        }
 
         res: dict[str, set[str]] = {}
         for rule in module.rules:
