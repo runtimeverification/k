@@ -49,7 +49,16 @@ No explicit build step is needed before running lint or tests — the make targe
 
 ## Lint
 
-Python only (there is no lint target for Java):
+### Java
+
+```
+mvn spotless:apply
+```
+
+This auto-formats all Java/Scala sources (Google Java Format + Scalafmt).
+Run it after every Java change; commits must pass `mvn spotless:check`.
+
+### Python
 
 ```
 make -C pyk check
