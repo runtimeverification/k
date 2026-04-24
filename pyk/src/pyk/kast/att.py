@@ -103,21 +103,7 @@ class AnyType(AttType[Any]):
         if isinstance(obj, list):
             return tuple(AnyType._freeze(v) for v in obj)
         if isinstance(obj, dict):
-            frozen = FrozenDict((k, AnyType._freeze(v)) for (k, v) in obj.items())
-            if frozen.get('node') == 'KSort':
-                name = frozen.get('name', '')
-                params = frozen.get('params', ())
-                # Backward compat: v3 format encoded sort params in the name string
-                if not params and isinstance(name, str) and '{' in name:
-                    base, _, rest = name.partition('{')
-                    parsed_params = tuple(
-                        FrozenDict({'node': 'KSort', 'name': p.strip(), 'params': ()})
-                        for p in rest.rstrip('}').split(',')
-                    )
-                    frozen = FrozenDict({'node': 'KSort', 'name': base, 'params': parsed_params})
-                elif 'params' not in frozen:
-                    frozen = FrozenDict({**frozen, 'params': ()})
-            return frozen
+            return FrozenDict((k, AnyType._freeze(v)) for (k, v) in obj.items())
         return obj
 
     @staticmethod

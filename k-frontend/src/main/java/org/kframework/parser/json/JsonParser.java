@@ -290,13 +290,8 @@ public class JsonParser {
           "Unexpected node found in KAST Json term: " + data.getString("node"));
     String name = data.getString("name");
     List<Sort> params = new ArrayList<>();
-    if (data.containsKey("params")) {
-      for (JsonValue p : data.getJsonArray("params")) {
-        params.add(toSort((JsonObject) p));
-      }
-    } else {
-      // Legacy v3 format: parse params from encoded name (e.g. "MInt{Width}")
-      return Outer.parseSort(name);
+    for (JsonValue p : data.getJsonArray("params")) {
+      params.add(toSort((JsonObject) p));
     }
     return Sort(name, params);
   }

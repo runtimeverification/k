@@ -38,15 +38,10 @@ class KSort(KAst):
 
     @staticmethod
     def from_dict(d: Mapping[str, Any]) -> KSort:
-        name = d['name']
-        raw_params = d.get('params', ())
-        params = tuple(KSort.from_dict(p) for p in raw_params)
-        # Backward compat: v3 format encoded sort params in the name string, e.g. "MInt{Width}"
-        if not params and '{' in name:
-            base, _, rest = name.partition('{')
-            params = tuple(KSort(p.strip()) for p in rest.rstrip('}').split(','))
-            name = base
-        return KSort(name=name, params=params)
+        return KSort(
+            name=d['name'],
+            params=(KSort.from_dict(p) for p in d.get('params', ())),
+        )
 
     def to_dict(self) -> dict[str, Any]:
         return {'node': 'KSort', 'name': self.name, 'params': [p.to_dict() for p in self.params]}
