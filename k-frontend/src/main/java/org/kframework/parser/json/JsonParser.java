@@ -288,7 +288,17 @@ public class JsonParser {
     if (!data.getString("node").equals(KSORT))
       throw KEMException.criticalError(
           "Unexpected node found in KAST Json term: " + data.getString("node"));
-    return Outer.parseSort(data.getString("name"));
+    String name = data.getString("name");
+    List<Sort> params = new ArrayList<>();
+    if (data.containsKey("params")) {
+      for (JsonValue p : data.getJsonArray("params")) {
+        params.add(toSort((JsonObject) p));
+      }
+    } else {
+      // Legacy v3 format: parse params from encoded name (e.g. "MInt{Width}")
+      return Outer.parseSort(name);
+    }
+    return Sort(name, params);
   }
 
   private static ProductionItem toProductionItem(JsonObject data) {

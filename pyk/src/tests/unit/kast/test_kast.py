@@ -28,7 +28,7 @@ KVARIABLE_TEST_DATA: Final = (
         {
             'node': 'KVariable',
             'name': 'Foo',
-            'sort': {'node': 'KSort', 'name': 'Int'},
+            'sort': {'node': 'KSort', 'name': 'Int', 'params': []},
         },
     ),
 )

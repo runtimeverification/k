@@ -27,25 +27,34 @@ _LOGGER: Final = logging.getLogger(__name__)
 @final
 @dataclass(frozen=True)
 class KSort(KAst):
-    """Store a simple sort name."""
+    """Represent a K sort, optionally applied to sort parameters."""
 
     name: str
+    params: tuple[KSort, ...]
 
-    def __init__(self, name: str):
-        """Construct a new sort given the name."""
+    def __init__(self, name: str, params: Iterable[KSort] = ()):
         object.__setattr__(self, 'name', name)
+        object.__setattr__(self, 'params', tuple(params))
 
     @staticmethod
     def from_dict(d: Mapping[str, Any]) -> KSort:
-        return KSort(name=d['name'])
+        name = d['name']
+        raw_params = d.get('params', ())
+        params = tuple(KSort.from_dict(p) for p in raw_params)
+        # Backward compat: v3 format encoded sort params in the name string, e.g. "MInt{Width}"
+        if not params and '{' in name:
+            base, _, rest = name.partition('{')
+            params = tuple(KSort(p.strip()) for p in rest.rstrip('}').split(','))
+            name = base
+        return KSort(name=name, params=params)
 
     def to_dict(self) -> dict[str, Any]:
-        return {'node': 'KSort', 'name': self.name}
+        return {'node': 'KSort', 'name': self.name, 'params': [p.to_dict() for p in self.params]}
 
-    def let(self, *, name: str | None = None) -> KSort:
-        """Return a new `KSort` with the name potentially updated."""
+    def let(self, *, name: str | None = None, params: Iterable[KSort] | None = None) -> KSort:
         name = name if name is not None else self.name
-        return KSort(name=name)
+        params = params if params is not None else self.params
+        return KSort(name=name, params=params)
 
 
 @final
