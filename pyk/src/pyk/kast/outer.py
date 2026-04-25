@@ -17,6 +17,7 @@ from ..utils import FrozenDict, POSet, filter_none, not_none, single, unique
 from .att import EMPTY_ATT, Atts, Format, KAst, KAtt, WithKAtt
 from .inner import (
     KApply,
+    KAs,
     KInner,
     KLabel,
     KRewrite,
@@ -1327,6 +1328,8 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         match kast:
             case KToken(_, sort) | KVariable(_, sort):
                 return sort
+            case KAs(alias=KVariable(sort=sort)):
+                return sort
             case KRewrite(lhs, rhs):
                 lhs_sort = self.sort(lhs)
                 rhs_sort = self.sort(rhs)
@@ -1336,8 +1339,11 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
             case KSequence(_):
                 return KSort('K')
             case KApply(label, _):
-                sort, _ = self.resolve_sorts(label)
-                return sort
+                try:
+                    sort, _ = self.resolve_sorts(label)
+                    return sort
+                except (KeyError, ValueError):
+                    return None
             case _:
                 return None
 
@@ -1354,7 +1360,13 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         sorts = dict(zip(prod.params, label.params, strict=True))
 
         def resolve(sort: KSort) -> KSort:
-            return sorts.get(sort, sort)
+            # Direct match: sort IS one of the sort parameters.
+            if sort in sorts:
+                return sorts[sort]
+            # Recursive substitution: sort params may appear nested (e.g. MInt{Width} → MInt{8}).
+            if sort.params:
+                return KSort(sort.name, tuple(resolve(p) for p in sort.params))
+            return sort
 
         return resolve(prod.sort), tuple(resolve(sort) for sort in prod.argument_sorts)
 
