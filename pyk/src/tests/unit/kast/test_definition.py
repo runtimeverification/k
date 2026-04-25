@@ -4,19 +4,21 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from pyk.kast.inner import KApply, KAs, KLabel, KSort, KVariable
+from pyk.kast.inner import KApply, KAs, KLabel, KSequence, KSort, KToken, KVariable
 from pyk.kast.outer import KDefinition, KFlatModule, KNonTerminal, KProduction, KTerminal
 
 if TYPE_CHECKING:
     from typing import Final
 
+    from pyk.kast.inner import KInner
+
 
 # ---------------------------------------------------------------------------
 # Minimal test definition
 #
-# bar: syntax N    ::= bar(N)        [function]  -- result sort is the param directly
-# foo: syntax MInt{N} ::= foo(MInt{N}) [function]  -- result/arg sorts nest the param
-# #Equals: syntax S2 ::= #Equals{S1,S2}(S1, S1)   -- ML pred with context-dependent result sort
+# bar: syntax N       ::= bar(N)        -- result sort is the param directly
+# foo: syntax MInt{N} ::= foo(MInt{N})  -- result/arg sorts nest the param
+# #Equals: syntax S2  ::= #Equals{S1,S2}(S1, S1)  -- ML pred, result sort context-dependent
 # ---------------------------------------------------------------------------
 
 INT: Final = KSort('Int')
@@ -55,116 +57,103 @@ DEFN: Final = KDefinition(
 
 
 # ---------------------------------------------------------------------------
-# KDefinition.sort — adjacent tests (pass at HEAD)
+# KDefinition.sort
 # ---------------------------------------------------------------------------
 
-
-def test_sort_kvariable() -> None:
-    """sort() returns the explicit sort annotation on a KVariable."""
-    assert DEFN.sort(KVariable('X', sort=INT)) == INT
-
-
-def test_sort_kapply_direct_result() -> None:
-    """sort() for an application whose result sort is the param directly (bar{Int})."""
-    term = KApply(KLabel('bar', [INT]), [KVariable('X', sort=INT)])
-    assert DEFN.sort(term) == INT
-
-
-# ---------------------------------------------------------------------------
-# KDefinition.resolve_sorts — adjacent tests (pass at HEAD)
-# ---------------------------------------------------------------------------
-
-
-def test_resolve_sorts_direct() -> None:
-    """resolve_sorts handles direct param substitution N → Int."""
-    result_sort, arg_sorts = DEFN.resolve_sorts(KLabel('bar', [INT]))
-    assert result_sort == INT
-    assert arg_sorts == (INT,)
+SORT_DATA: Final = (
+    # Basic leaf terms
+    ('ktoken', KToken('42', INT), INT),
+    ('kvariable_with_sort', KVariable('X', sort=INT), INT),
+    ('ksequence', KSequence([]), KSort('K')),
+    # KApply: result sort substituted directly from param
+    ('kapply_direct_result', KApply(KLabel('bar', [INT]), [KVariable('X', sort=INT)]), INT),
+    # KApply: result sort nests the param (MInt{N} with N→Int → MInt{Int})
+    ('kapply_nested_result', KApply(KLabel('foo', [INT]), [KVariable('X', sort=MINT_INT)]), MINT_INT),
+    # KApply with unfilled sort params: sort() returns None rather than raising
+    ('kapply_unfilled_params', KApply(KLabel('foo'), [KVariable('X', sort=MINT_INT)]), None),
+    # KApply with unknown label: KeyError from symbols lookup → None
+    ('kapply_unknown_label', KApply(KLabel('nonexistent'), []), None),
+    # KAs: sort of the alias variable
+    ('kas_sorted_alias', KAs(KVariable('X', sort=MINT_INT), KVariable('Y', sort=MINT_INT)), MINT_INT),
+    # KAs whose alias has no sort annotation: returns None
+    ('kas_unsorted_alias', KAs(KVariable('X', sort=MINT_INT), KVariable('Y')), None),
+)
 
 
-# ---------------------------------------------------------------------------
-# KDefinition.add_sort_params — adjacent tests (pass at HEAD)
-# ---------------------------------------------------------------------------
-
-
-def test_add_sort_params_already_filled() -> None:
-    """add_sort_params leaves a label alone when its params are already filled."""
-    term = KApply(KLabel('bar', [INT]), [KVariable('X', sort=INT)])
-    assert DEFN.add_sort_params(term) == term
-
-
-def test_add_sort_params_direct_param() -> None:
-    """add_sort_params fills a direct sort param by inspecting the argument sort."""
-    term = KApply(KLabel('bar'), [KVariable('X', sort=INT)])
-    expected = KApply(KLabel('bar', [INT]), [KVariable('X', sort=INT)])
-    assert DEFN.add_sort_params(term) == expected
+@pytest.mark.parametrize(
+    'test_id,term,expected',
+    SORT_DATA,
+    ids=[test_id for test_id, *_ in SORT_DATA],
+)
+def test_sort(test_id: str, term: KInner, expected: KSort | None) -> None:
+    assert DEFN.sort(term) == expected
 
 
 # ---------------------------------------------------------------------------
-# KDefinition.sort — new-feature tests (fail at HEAD before the fix)
+# KDefinition.resolve_sorts
 # ---------------------------------------------------------------------------
 
-
-def test_sort_kapply_unfilled_params_returns_none() -> None:
-    """sort() returns None (not raises) when the KApply label has unfilled sort params."""
-    # When label has no params but the production requires them, old code raises ValueError
-    # from resolve_sorts(); new code catches it and returns None instead.
-    term = KApply(KLabel('foo'), [KVariable('X', sort=MINT_INT)])
-    assert DEFN.sort(term) is None
-
-
-def test_sort_kapply_nested_result_sort() -> None:
-    """sort() resolves a result sort that nests the sort param (MInt{N} → MInt{Int})."""
-    # Old code: resolve_sorts returns MInt{N} because sorts.get(MInt{N}, MInt{N}) leaves
-    # the nested param unsubstituted.  New code recurses into the param tuple.
-    term = KApply(KLabel('foo', [INT]), [KVariable('X', sort=MINT_INT)])
-    assert DEFN.sort(term) == MINT_INT
+RESOLVE_SORTS_DATA: Final = (
+    # Direct substitution: result sort IS the param (N → Int)
+    ('direct_bar', KLabel('bar', [INT]), INT, (INT,)),
+    # Recursive substitution: result/arg sort nests the param (MInt{N} with N → Int → MInt{Int})
+    ('nested_foo', KLabel('foo', [INT]), MINT_INT, (MINT_INT,)),
+)
 
 
-def test_sort_kas() -> None:
-    """sort() returns the sort of the alias variable in a KAs pattern."""
-    # Old code has no KAs case and falls through to case _: return None.
-    alias = KVariable('Y', sort=MINT_INT)
-    term = KAs(pattern=KVariable('X', sort=MINT_INT), alias=alias)
-    assert DEFN.sort(term) == MINT_INT
+@pytest.mark.parametrize(
+    'test_id,label,expected_result,expected_args',
+    RESOLVE_SORTS_DATA,
+    ids=[test_id for test_id, *_ in RESOLVE_SORTS_DATA],
+)
+def test_resolve_sorts(test_id: str, label: KLabel, expected_result: KSort, expected_args: tuple[KSort, ...]) -> None:
+    result, args = DEFN.resolve_sorts(label)
+    assert result == expected_result
+    assert args == expected_args
 
 
 # ---------------------------------------------------------------------------
-# KDefinition.resolve_sorts — new-feature tests (fail at HEAD before the fix)
+# KDefinition.add_sort_params
 # ---------------------------------------------------------------------------
 
+ADD_SORT_PARAMS_DATA: Final = (
+    # Label already has params filled: leave unchanged
+    (
+        'already_filled',
+        KApply(KLabel('bar', [INT]), [KVariable('X', sort=INT)]),
+        KApply(KLabel('bar', [INT]), [KVariable('X', sort=INT)]),
+    ),
+    # Direct sort param: psort IS the param (N ~ Int → N=Int)
+    (
+        'direct_param',
+        KApply(KLabel('bar'), [KVariable('X', sort=INT)]),
+        KApply(KLabel('bar', [INT]), [KVariable('X', sort=INT)]),
+    ),
+    # Nested sort param: psort = MInt{N}, asort = MInt{Int} → N=Int via unification
+    (
+        'nested_param',
+        KApply(KLabel('foo'), [KVariable('X', sort=MINT_INT)]),
+        KApply(KLabel('foo', [INT]), [KVariable('X', sort=MINT_INT)]),
+    ),
+    # ML pred: S1 inferred from args, S2 (result sort) filled with #SortParam sentinel
+    (
+        'ml_pred_sentinel',
+        KApply('#Equals', [KVariable('X', sort=INT), KVariable('Y', sort=INT)]),
+        KApply(KLabel('#Equals', [INT, SORT_PARAM]), [KVariable('X', sort=INT), KVariable('Y', sort=INT)]),
+    ),
+    # Unsortable argument (no sort annotation): cannot fill params, term returned unchanged
+    (
+        'unsortable_arg_unchanged',
+        KApply(KLabel('foo'), [KVariable('X')]),
+        KApply(KLabel('foo'), [KVariable('X')]),
+    ),
+)
 
-def test_resolve_sorts_nested() -> None:
-    """resolve_sorts recursively substitutes params nested inside compound sorts."""
-    # foo has param N, result sort MInt{N}, arg sort MInt{N}.
-    # With N → Int, both should resolve to MInt{Int}.
-    # Old code: sorts.get(MInt{N}, MInt{N}) → MInt{N} unchanged (N is the key, not MInt{N}).
-    result_sort, arg_sorts = DEFN.resolve_sorts(KLabel('foo', [INT]))
-    assert result_sort == MINT_INT
-    assert arg_sorts == (MINT_INT,)
 
-
-# ---------------------------------------------------------------------------
-# KDefinition.add_sort_params — new-feature tests (fail at HEAD before the fix)
-# ---------------------------------------------------------------------------
-
-
-def test_add_sort_params_nested_param() -> None:
-    """add_sort_params fills a param that appears nested inside the argument sort."""
-    # foo has param N and arg sort MInt{N}.  Given arg KVariable('X', sort=MInt{Int}),
-    # the unifier extracts N → Int from the match MInt{N} ~ MInt{Int}.
-    # Old code only handled the case psort IS the param (direct); it left nested cases unfilled.
-    term = KApply(KLabel('foo'), [KVariable('X', sort=MINT_INT)])
-    expected = KApply(KLabel('foo', [INT]), [KVariable('X', sort=MINT_INT)])
-    assert DEFN.add_sort_params(term) == expected
-
-
-def test_add_sort_params_ml_pred_sentinel() -> None:
-    """add_sort_params fills the context-dependent result sort of an ML predicate with a sentinel."""
-    # #Equals has params [S1, S2] where S2 is the axiom result sort (context-dependent).
-    # Given args of sort Int, S1 → Int is inferable but S2 is not — so S2 gets the
-    # sentinel KSort('#SortParam') so that krule_to_kore can introduce sort variable Q0.
-    # Old code: no ML pred special case, returns the term unchanged (no params filled).
-    term = KApply('#Equals', [KVariable('X', sort=INT), KVariable('Y', sort=INT)])
-    expected = KApply(KLabel('#Equals', [INT, SORT_PARAM]), [KVariable('X', sort=INT), KVariable('Y', sort=INT)])
+@pytest.mark.parametrize(
+    'test_id,term,expected',
+    ADD_SORT_PARAMS_DATA,
+    ids=[test_id for test_id, *_ in ADD_SORT_PARAMS_DATA],
+)
+def test_add_sort_params(test_id: str, term: KInner, expected: KInner) -> None:
     assert DEFN.add_sort_params(term) == expected
