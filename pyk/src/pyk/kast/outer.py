@@ -1585,15 +1585,35 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         # syntax AccountCellMap [cellCollection, hook(MAP.Map)]
         # syntax AccountCellMap ::= AccountCellMap AccountCellMap [assoc, avoid, cellCollection, comm, element(AccountCellMapItem), function, hook(MAP.concat), unit(.AccountCellMap), wrapElement(<account>)]
 
-        cell_wrappers = {}
+        # Maps cell label -> (element_constructor, cell_map_sort).
+        # Wrapping is correct only when the parent production expects the cell MAP sort (e.g.
+        # EntryCellMap), not when it expects the individual cell element sort (e.g. EntryCell).
+        # For example, EntryCellMapKey(<entry>(...)) takes EntryCell — the <entry> must NOT be
+        # wrapped, whereas _EntryCellMap_(<entry>(...), ...) expects EntryCellMap — wrapping is needed.
+        cell_wrappers: dict[str, tuple[str, KSort]] = {}
         for ccp in self.cell_collection_productions:
             if Atts.ELEMENT in ccp.att and Atts.WRAP_ELEMENT in ccp.att:
-                cell_wrappers[ccp.att[Atts.WRAP_ELEMENT]] = ccp.att[Atts.ELEMENT]
+                cell_label = ccp.att[Atts.WRAP_ELEMENT]
+                element_ctor = ccp.att[Atts.ELEMENT]
+                if element_ctor in self.symbols:
+                    cell_wrappers[cell_label] = (element_ctor, self.symbols[element_ctor].sort)
 
         def _wrap_elements(_k: KInner) -> KInner:
-            if type(_k) is KApply and _k.label.name in cell_wrappers:
-                return KApply(cell_wrappers[_k.label.name], [_k.args[0], _k])
-            return _k
+            if not isinstance(_k, KApply) or _k.label.name not in self.symbols:
+                return _k
+            prod = self.symbols[_k.label.name]
+            arg_sorts = prod.argument_sorts
+            if not arg_sorts or len(arg_sorts) != _k.arity:
+                return _k
+            new_args: list[KInner] = list(_k.args)
+            changed = False
+            for i, (arg_sort, arg) in enumerate(zip(arg_sorts, _k.args, strict=True)):
+                if isinstance(arg, KApply) and arg.label.name in cell_wrappers:
+                    element_ctor, cell_map_sort = cell_wrappers[arg.label.name]
+                    if arg_sort == cell_map_sort:
+                        new_args[i] = KApply(element_ctor, [arg.args[0], arg])
+                        changed = True
+            return _k.let(args=new_args) if changed else _k
 
         # To ensure we don't get duplicate wrappers.
         _kast = self.remove_cell_map_items(kast)
