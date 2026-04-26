@@ -36,7 +36,7 @@ class KDistribution:
 
     @staticmethod
     def _which_kompile() -> Path | None:
-        proc_res = run_process_2(['which', 'kompile'])
+        proc_res = run_process_2(['which', 'kompile'], check=False)
         if proc_res.returncode:
             return None
         res = Path(proc_res.stdout.rstrip())
