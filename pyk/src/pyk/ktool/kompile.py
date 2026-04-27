@@ -543,6 +543,7 @@ class KompileArgs:
     coverage: bool
     bison_lists: bool
     outer_parsed_json: bool
+    top_cell: str | None
 
     def __init__(
         self,
@@ -562,6 +563,7 @@ class KompileArgs:
         coverage: bool = False,
         bison_lists: bool = False,
         outer_parsed_json: bool = False,
+        top_cell: str | None = None,
     ):
         main_file = Path(main_file)
         include_dirs = tuple(sorted(Path(include_dir) for include_dir in include_dirs))
@@ -582,6 +584,7 @@ class KompileArgs:
         object.__setattr__(self, 'coverage', coverage)
         object.__setattr__(self, 'bison_lists', bison_lists)
         object.__setattr__(self, 'outer_parsed_json', outer_parsed_json)
+        object.__setattr__(self, 'top_cell', top_cell)
 
     def args(self) -> list[str]:
         args = [str(self.main_file)]
@@ -627,6 +630,9 @@ class KompileArgs:
 
         if self.outer_parsed_json:
             args += ['--outer-parsed-json']
+
+        if self.top_cell:
+            args += ['--top-cell', self.top_cell]
 
         return args
 
