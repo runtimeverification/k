@@ -42,7 +42,6 @@ import org.kframework.kore.K;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.KORE;
 import org.kframework.kore.Sort;
-import org.kframework.parser.outer.Outer;
 import org.kframework.parser.outer.ParseRegex;
 import org.kframework.unparser.ToJson;
 import org.kframework.utils.errorsystem.KEMException;
@@ -288,7 +287,12 @@ public class JsonParser {
     if (!data.getString("node").equals(KSORT))
       throw KEMException.criticalError(
           "Unexpected node found in KAST Json term: " + data.getString("node"));
-    return Outer.parseSort(data.getString("name"));
+    String name = data.getString("name");
+    List<Sort> params = new ArrayList<>();
+    for (JsonValue p : data.getJsonArray("params")) {
+      params.add(toSort((JsonObject) p));
+    }
+    return Sort(name, params);
   }
 
   private static ProductionItem toProductionItem(JsonObject data) {
