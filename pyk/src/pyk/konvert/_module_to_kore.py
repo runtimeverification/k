@@ -212,8 +212,11 @@ def _parse_special_att_value(key: AttKey, value: Any) -> tuple[tuple[Sort, ...],
 
 def sort_decl_to_kore(syntax_sort: KSyntaxSort) -> SortDecl:
     name = _sort_name(syntax_sort.sort.name)
-    # Kore sort declarations use canonical indexed sort variable names (SortS0, SortS1, ...)
-    sort_vars = tuple(SortVar(f'SortS{i}') for i in range(len(syntax_sort.sort.params)))
+    # Preserve the sort variable names from KAST (e.g. SortWidth for MInt{Width}).
+    # NOTE: Java's Kore backend diverges here — it emits canonical indexed names
+    # (SortS0, SortS1, …) in sort declarations while using the original names in
+    # production symbols. We use the original names throughout for consistency.
+    sort_vars = tuple(_sort_var(p) for p in syntax_sort.sort.params)
     attrs = atts_to_kore(syntax_sort.att)
     hooked = Atts.HOOK in syntax_sort.att
     return SortDecl(name, sort_vars, attrs=attrs, hooked=hooked)
