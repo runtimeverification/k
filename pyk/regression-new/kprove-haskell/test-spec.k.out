@@ -16,7 +16,7 @@ Subproofs: 0
 │     <generatedTop>
 │       <k>
 │         doIt ( 3 )
-│         ~> K_CELL_fc656f08:K
+│         ~> K_CELL_f6d31965:K
 │       </k>
 │       <counter>
 │         COUNTER_CELL
@@ -25,7 +25,7 @@ Subproofs: 0
 │         SUM_CELL
 │       </sum>
 │       <generatedCounter>
-│         GENERATEDCOUNTER_CELL_c84b0b5f:Int
+│         GENERATEDCOUNTER_CELL_ae2db996:Int
 │       </generatedCounter>
 │     </generatedTop>
 │
@@ -34,7 +34,7 @@ Subproofs: 0
 │     <generatedTop>
 │       <k>
 │         doIt ( 0 )
-│         ~> K_CELL_fc656f08:K
+│         ~> K_CELL_f6d31965:K
 │       </k>
 │       <counter>
 │         COUNTER_CELL:Int
@@ -43,18 +43,18 @@ Subproofs: 0
 │         SUM_CELL:Int
 │       </sum>
 │       <generatedCounter>
-│         GENERATEDCOUNTER_CELL_c84b0b5f:Int
+│         GENERATEDCOUNTER_CELL_ae2db996:Int
 │       </generatedCounter>
 │     </generatedTop>
 │
 ┊  constraint: true
 ┊  subst:
-┊      GENERATEDCOUNTER_CELL_6de8d71b <- GENERATEDCOUNTER_CELL_c84b0b5f:Int
+┊      GENERATEDCOUNTER_CELL_73eeffd3 <- GENERATEDCOUNTER_CELL_ae2db996:Int
 └─ 2 (leaf, target)
       <generatedTop>
         <k>
           doIt ( 0 )
-          ~> K_CELL_fc656f08:K
+          ~> K_CELL_f6d31965:K
         </k>
         <counter>
           COUNTER_CELL
@@ -63,7 +63,7 @@ Subproofs: 0
           SUM_CELL
         </sum>
         <generatedCounter>
-          GENERATEDCOUNTER_CELL_6de8d71b:Int
+          GENERATEDCOUNTER_CELL_73eeffd3:Int
         </generatedCounter>
       </generatedTop>
 
