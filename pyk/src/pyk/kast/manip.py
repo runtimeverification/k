@@ -500,8 +500,8 @@ def on_attributes(kast: W, f: Callable[[KAtt], KAtt]) -> W:
         return kast.let(sentences=sentences)  # type: ignore
 
     if type(kast) is KDefinition:
-        modules = (module.map_att(f) for module in kast.modules)
-        return kast.let(modules=modules)  # type: ignore
+        all_modules = (on_attributes(module, f) for module in kast.all_modules)
+        return kast.let(all_modules=all_modules)  # type: ignore
 
     return kast
 

@@ -638,3 +638,30 @@ def test_defunctionalize(input: KInner, expected_output: KInner, expected_constr
     # Then
     assert actual_output == expected_output
     assert actual_constraints == expected_constraints
+
+
+def test_on_attributes_recurses_into_kdefinition_sentences() -> None:
+    """on_attributes applied to a KDefinition must transform sentence-level atts.
+
+    The bug being guarded: the old code called module.map_att(f) (which only maps
+    the module's own att, not its sentences) and used kast.let(modules=...) (wrong
+    keyword — KDefinition uses all_modules=).  The fix uses on_attributes(module, f)
+    recursively so that every sentence att inside every module is transformed.
+    """
+    from pyk.kast.manip import on_attributes
+    from pyk.kast.outer import KBubble
+
+    rule_with_label = KBubble(
+        sentence_type='rule',
+        contents='X => Y',
+        att=KAtt.from_dict({'att': {'label': 'myLabel'}}),
+    )
+    module = KFlatModule('TEST', sentences=(rule_with_label,))
+    defn = KDefinition('TEST', all_modules=(module,))
+
+    result = on_attributes(defn, lambda att: EMPTY_ATT)
+
+    assert isinstance(result, KDefinition)
+    result_rule = result.all_modules[0].sentences[0]
+    assert isinstance(result_rule, KBubble)
+    assert result_rule.att == EMPTY_ATT
