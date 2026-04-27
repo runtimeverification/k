@@ -237,10 +237,13 @@ class OuterParser:
         args: list[str] = []
         if self._la.type is TokenType.LBRACE:
             self._consume()
-            args.append(self._match(TokenType.ID_UPPER))
+            # Args may be type-variable names (ID_UPPER) or numeric literals (NAT),
+            # e.g. syntax MInt{8}.  Store NAT as its string text so that _ast_to_kast
+            # can turn it into KSort('8') matching Java's compiled.json.
+            args.append(self._consume() if self._la.type is TokenType.NAT else self._match(TokenType.ID_UPPER))
             while self._la.type is TokenType.COMMA:
                 self._consume()
-                args.append(self._match(TokenType.ID_UPPER))
+                args.append(self._consume() if self._la.type is TokenType.NAT else self._match(TokenType.ID_UPPER))
             self._match(TokenType.RBRACE)
 
         return SortDecl(name, params, args)

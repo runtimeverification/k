@@ -76,6 +76,9 @@ SENTENCE_TEST_DATA: Final = (
     ('syntax Foo{Bar}', SyntaxDecl(SortDecl('Foo', args=('Bar',)))),
     ('syntax Foo{Bar, Baz}', SyntaxDecl(SortDecl('Foo', args=('Bar', 'Baz')))),
     ('syntax {Bar} Foo{Baz}', SyntaxDecl(SortDecl('Foo', params=('Bar',), args=('Baz',)))),
+    # Numeric (NAT) sort arguments, e.g. syntax MInt{8}
+    ('syntax MInt{8}', SyntaxDecl(SortDecl('MInt', args=('8',)))),
+    ('syntax MInt{8, 16}', SyntaxDecl(SortDecl('MInt', args=('8', '16')))),
     ('syntax Foo [bar]', SyntaxDecl(SortDecl('Foo'), att=Att((('bar', ''),)))),
     ('syntax Foo [bar, baz]', SyntaxDecl(SortDecl('Foo'), att=Att((('bar', ''), ('baz', ''))))),
     (
