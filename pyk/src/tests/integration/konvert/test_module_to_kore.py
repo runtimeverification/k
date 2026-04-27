@@ -8,7 +8,7 @@ from pyk.kast.outer import read_kast_definition
 from pyk.konvert import module_to_kore
 from pyk.kore.parser import KoreParser
 from pyk.kore.rule import Rule
-from pyk.kore.syntax import Axiom, SortDecl, Symbol, SymbolDecl
+from pyk.kore.syntax import Axiom, SortDecl, SortVar, Symbol, SymbolDecl
 from pyk.ktool.kompile import DefinitionInfo
 
 from ..utils import TEST_DATA_DIR
@@ -68,6 +68,13 @@ def test_module_to_kore(kast_defn: KDefinition, kore_module: Module) -> None:
     actual = module_to_kore(kast_defn)
     actual = discard_symbol_attrs(actual, IGNORED_SYMBOL_ATTRS)
 
+    # Normalize sort-declaration variable names to canonical SortS{i} form on both
+    # sides before comparing.  pyk preserves the original K source names (e.g.
+    # SortWidth for MInt{Width}), while the Java backend emits SortS0, SortS1, …;
+    # the names are locally bound in declarations so only arity matters.
+    expected = canonicalize_sort_decl_vars(expected)
+    actual = canonicalize_sort_decl_vars(actual)
+
     # Then
 
     # Check module name and attributes
@@ -83,6 +90,19 @@ def discard_symbol_attrs(module: Module, attrs: Container[str]) -> Module:
         if not isinstance(sentence, SymbolDecl):
             return sentence
         return sentence.let(attrs=tuple(attr for attr in sentence.attrs if attr.symbol not in attrs))
+
+    return module.let(sentences=tuple(update(sentence) for sentence in module.sentences))
+
+
+def canonicalize_sort_decl_vars(module: Module) -> Module:
+    # Sort-declaration variable names are locally bound; replace them with
+    # canonical SortS{i} names so that pyk's preserved source names (e.g.
+    # SortWidth) compare equal to Java's generated names (SortS0).
+    def update(sentence: Sentence) -> Sentence:
+        if not isinstance(sentence, SortDecl):
+            return sentence
+        canonical = tuple(SortVar(f'SortS{i}') for i in range(len(sentence.vars)))
+        return sentence.let(vars=canonical)
 
     return module.let(sentences=tuple(update(sentence) for sentence in module.sentences))
 
