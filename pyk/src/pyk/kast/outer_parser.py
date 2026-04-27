@@ -361,9 +361,14 @@ class OuterParser:
         else:
             label = ''
 
+        bubble_loc = self._la.loc
         bubble = self._match(TokenType.BUBBLE)
         att = self._maybe_att()
-        return cls(bubble, label, att)
+        # Only record source + location when we have a source path: the location is the
+        # (line, col) of the bubble content start in the original file, used by Java's
+        # inner parser as contentStartLine/contentStartColumn for error reporting.
+        location = (bubble_loc.line, bubble_loc.col, bubble_loc.line, bubble_loc.col) if self._source else None
+        return cls(bubble, label, att, source=self._source, location=location)
 
     def _maybe_att(self) -> Att:
         items: list[tuple[str, str]] = []
