@@ -1573,6 +1573,18 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
                     # inferred from arguments.  Fill it with the sentinel so that krule_to_kore can
                     # introduce a universally-quantified sort variable for the axiom.
                     if _k.label.name in _ML_PRED_LABELS:
+                        unbound = [p for p in prod.params if p not in sort_dict]
+                        # The single sentinel KSort('#SortParam') is only unambiguous when at most
+                        # one parameter is unresolvable bottom-up.  All current ML predicates
+                        # (#Equals, #Ceil, #Floor, #In) have exactly two sort params {Sort1,
+                        # Sort2}: Sort1 is always determined by the arguments, Sort2 (the result
+                        # sort) is the one remaining unbound param.  If this assertion ever fires,
+                        # the sentinel scheme needs to be replaced with unique fresh params, as
+                        # Java does with #SortParam{Q0}, #SortParam{Q1}, ....
+                        assert len(unbound) <= 1, (
+                            f'Expected at most one unbound sort parameter for {_k.label.name!r}, '
+                            f'got {len(unbound)}: {unbound}'
+                        )
                         filled = {p: sort_dict.get(p, _ML_PRED_RESULT_SORT_PARAM) for p in prod.params}
                         return _k.let(label=KLabel(_k.label.name, [filled[p] for p in prod.params]))
             return _k
