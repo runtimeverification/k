@@ -772,6 +772,7 @@ def simplified_module(definition: KDefinition, module_name: str | None = None) -
             ],
         ),
         DiscardHookAtts(),
+        DiscardPolymorphicSentences(),
         AddImpureAtts(),
         AddSymbolAtts(Atts.MACRO(None), _is_macro),
         AddSymbolAtts(Atts.FUNCTIONAL(None), _is_functional),
@@ -1037,21 +1038,7 @@ class AddImpureAtts(SingleModulePass):
 
     @staticmethod
     def _callers(module: KFlatModule) -> dict[str, set[str]]:
-        # Exclude polymorphic productions (klabel.params non-empty). Java's
-        # ComputeTransitiveFunctionDependencies groups rules by their post-sort-injection
-        # KLabel (e.g. ite{K}) which doesn't match the parametric attributesFor() entry
-        # (ite{SortSort}), so polymorphic function rules are silently skipped in Java's
-        # dependency graph.
-        poly_labels = {
-            prod.klabel.name
-            for prod in module.productions
-            if prod.klabel and prod.klabel.params and Atts.FUNCTION in prod.att
-        }
-        function_labels = {
-            prod.klabel.name
-            for prod in module.productions
-            if prod.klabel and not prod.klabel.params and Atts.FUNCTION in prod.att
-        }
+        function_labels = {prod.klabel.name for prod in module.productions if prod.klabel and Atts.FUNCTION in prod.att}
 
         res: dict[str, set[str]] = {}
         for rule in module.rules:
@@ -1059,13 +1046,7 @@ class AddImpureAtts(SingleModulePass):
 
             match rule.body:
                 case KRewrite(KApply(KLabel(label)), rhs):
-                    if label in poly_labels:
-                        _LOGGER.warning(
-                            'Skipping rules for polymorphic function %s in impurity analysis'
-                            ' — Java also skips these due to sort-parameter mismatch in rulesFor()',
-                            label,
-                        )
-                    elif label in function_labels:
+                    if label in function_labels:
                         rhs_labels = AddImpureAtts._labels(rhs)
                         for called in rhs_labels:
                             res.setdefault(called, set()).add(label)
@@ -1275,6 +1256,42 @@ class DiscardSymbolAtts(SingleModulePass):
             return production
 
         return production.let(att=production.att.discard(self.keys))
+
+
+@dataclass
+class DiscardPolymorphicSentences(SingleModulePass):
+    """Java compatibility: remove rules for polymorphic function labels.
+
+    Java's ComputeTransitiveFunctionDependencies looks up rules by the
+    post-sort-injection KLabel (e.g. ite{K}), but the production's
+    attributesFor() key is the parametric form (e.g. ite{SortSort}), so no
+    rules are ever found and impurity does not propagate through polymorphic
+    functions. Removing those rules here mirrors that behaviour and avoids
+    special-casing the quirk in every downstream pass.
+
+    Remove this pass (and re-enable the rules) once Java correctly handles
+    polymorphic function rules in its dependency analysis.
+    """
+
+    def _transform_module(self, module: KFlatModule) -> KFlatModule:
+        poly_labels = {
+            prod.klabel.name
+            for prod in module.productions
+            if prod.klabel and prod.klabel.params and Atts.FUNCTION in prod.att
+        }
+        if not poly_labels:
+            return module
+        return module.let(sentences=(sent for sent in module.sentences if not self._is_poly_rule(sent, poly_labels)))
+
+    @staticmethod
+    def _is_poly_rule(sentence: object, poly_labels: set[str]) -> bool:
+        if not isinstance(sentence, KRule):
+            return False
+        match sentence.body:
+            case KRewrite(KApply(KLabel(label)), _):
+                return label in poly_labels
+            case _:
+                return False
 
 
 # -----------------
