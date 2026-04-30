@@ -1590,7 +1590,7 @@ You can:
 * Compute the natural logarithm `logFloat` of a float.
 * Compute the sine `sinFloat` of a float.
 * Compute the cosine `cosFloat` of a float.
-* Compute the tangent `tanFlooat` of a float.
+* Compute the tangent `tanFloat` of a float.
 * Compute the arcsine `asinFloat` of a float.
 * Compute the arccosine `acosFloat` of a float.
 * Compute the arctangent `atanFloat` of a float.
