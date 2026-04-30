@@ -2,6 +2,7 @@
   <k>
     bar ( 0 , 0 )
     ~> bar ( 0 , 0 )
+    ~> .K
   </k>
   <generatedCounter>
     1

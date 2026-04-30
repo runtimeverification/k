@@ -21,6 +21,7 @@ Failing nodes:
     The following cells failed matching individually (antecedent #Implies consequent):
     K_CELL: doIt ( -3 #Implies 0 )
     ~> K_CELL_f6d31965:K
+    ~> .K
   Path condition:
     #Top
   Failed to generate a model.
@@ -32,6 +33,7 @@ Join the Runtime Verification Discord server for support: https://discord.gg/Cur
 │       <k>
 │         doIt ( -3 )
 │         ~> K_CELL_f6d31965:K
+│         ~> .K
 │       </k>
 │       <counter>
 │         COUNTER_CELL
@@ -49,6 +51,7 @@ Join the Runtime Verification Discord server for support: https://discord.gg/Cur
 │       <k>
 │         doIt ( 0 )
 │         ~> K_CELL_f6d31965:K
+│         ~> .K
 │       </k>
 │       <counter>
 │         COUNTER_CELL

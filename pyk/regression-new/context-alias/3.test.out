@@ -2,6 +2,7 @@
   <k>
     x = 1 + 1
     ~> #freezer_;_TEST_Stmt_Expr0_ ( )
+    ~> .K
   </k>
   <shouldHeat>
     false
