@@ -940,7 +940,7 @@ The list with zero elements is represented by `.List`.
 
 ### List elements
 
-An element of a `List` is constucted via the `ListItem` operator.
+An element of a `List` is constructed via the `ListItem` operator.
 
 ```k
   syntax List ::= ListItem(KItem)             [function, total, hook(LIST.element), symbol(ListItem), smtlib(smt_seq_elem)]
