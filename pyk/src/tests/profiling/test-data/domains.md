@@ -714,7 +714,7 @@ side and all variables are bound, it is O(N*log(M)) where M is the size of the
 set it is matching and N is the number of elements being matched. When it
 appears on the left hand side containing variables not bound elsewhere in the
 term, it is O(N^K) where N is the size of the set it is matching and K is the
-number of unbound keys being mached. In other words, one unbound variable is
+number of unbound keys being matched. In other words, one unbound variable is
 linear, two is quadratic, three is cubic, etc.
 
 ```k
