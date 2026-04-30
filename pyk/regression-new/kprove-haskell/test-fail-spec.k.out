@@ -20,7 +20,7 @@ Failing nodes:
     Matching failed.
     The following cells failed matching individually (antecedent #Implies consequent):
     K_CELL: doIt ( -3 #Implies 0 )
-    ~> K_CELL_fc656f08:K
+    ~> K_CELL_f6d31965:K
   Path condition:
     #Top
   Failed to generate a model.
@@ -31,7 +31,7 @@ Join the Runtime Verification Discord server for support: https://discord.gg/Cur
 │     <generatedTop>
 │       <k>
 │         doIt ( -3 )
-│         ~> K_CELL_fc656f08:K
+│         ~> K_CELL_f6d31965:K
 │       </k>
 │       <counter>
 │         COUNTER_CELL
@@ -40,7 +40,7 @@ Join the Runtime Verification Discord server for support: https://discord.gg/Cur
 │         SUM_CELL
 │       </sum>
 │       <generatedCounter>
-│         GENERATEDCOUNTER_CELL_c84b0b5f:Int
+│         GENERATEDCOUNTER_CELL_ae2db996:Int
 │       </generatedCounter>
 │     </generatedTop>
 
@@ -48,7 +48,7 @@ Join the Runtime Verification Discord server for support: https://discord.gg/Cur
 │     <generatedTop>
 │       <k>
 │         doIt ( 0 )
-│         ~> K_CELL_fc656f08:K
+│         ~> K_CELL_f6d31965:K
 │       </k>
 │       <counter>
 │         COUNTER_CELL
@@ -57,7 +57,7 @@ Join the Runtime Verification Discord server for support: https://discord.gg/Cur
 │         SUM_CELL
 │       </sum>
 │       <generatedCounter>
-│         GENERATEDCOUNTER_CELL_6de8d71b:Int
+│         GENERATEDCOUNTER_CELL_73eeffd3:Int
 │       </generatedCounter>
 │     </generatedTop>
 

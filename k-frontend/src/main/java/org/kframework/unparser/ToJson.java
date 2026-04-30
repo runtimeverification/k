@@ -53,7 +53,7 @@ import scala.collection.Set;
 /** Writes a KAST term to the KAST Json format. */
 public class ToJson {
 
-  public static final int version = 3;
+  public static final int version = 4;
 
   ///////////////////////////////
   // ToJson Definition Objects //
@@ -381,11 +381,11 @@ public class ToJson {
 
   public static JsonStructure toJson(Sort sort) {
     JsonObjectBuilder jsort = factory.createObjectBuilder();
-
     jsort.add("node", JsonParser.KSORT);
-    // store sort and its parameters as a flat string
-    jsort.add("name", sort.toString());
-
+    jsort.add("name", sort.name());
+    JsonArrayBuilder jparams = factory.createArrayBuilder();
+    JavaConverters.seqAsJavaList(sort.params()).forEach(p -> jparams.add(toJson(p)));
+    jsort.add("params", jparams.build());
     return jsort.build();
   }
 

@@ -84,6 +84,8 @@ jobs:
         env:
           CACHIX_AUTH_TOKEN: '${{ secrets.CACHIX_PRIVATE_KFB_TOKEN }}'
           GC_DONT_GC: '1'
+          OWNER_REPO: ${{ github.repository }}
+          REV: ${{ github.sha }}
         with:
           packages: jq
           script: |
@@ -92,9 +94,12 @@ jobs:
             
             # Publish all three package variants using kup publish
             # Using public macOS runner has proven reliable for large file uploads
-            kup publish --verbose k-framework-binary .#k --keep-days 180
-            kup publish --verbose k-framework-binary .#k.openssl.secp256k1 --keep-days 180
-            kup publish --verbose k-framework-binary .#k.openssl.procps.secp256k1 --keep-days 180
+            kup publish --verbose k-framework-binary .#k --keep-days 180 || true
+            kup publish --verbose k-framework-binary .#k.openssl.secp256k1 --keep-days 180 || true
+            kup publish --verbose k-framework-binary .#k.openssl.procps.secp256k1 --keep-days 180 || true
+
+            # kup/cachix pin visibility can be flaky; verify pins and narinfo via public API
+            bash .github/scripts/check-cachix-pin.sh
 
   cachix-release-dependencies:
     name: 'k-framework cachix release'
