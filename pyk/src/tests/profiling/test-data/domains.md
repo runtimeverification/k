@@ -1283,7 +1283,7 @@ is `#False`.
 ### Bit slicing
 
 You can compute the value of a range of bits in the twos-complement
-representation of an integer, as interpeted either unsigned or signed, of an
+representation of an integer, as interpreted either unsigned or signed, of an
 integer. `index` is offset from 0 and `length` is the number of bits, starting
 with `index`, that should be read. The number is assumed to be represented
 in little endian notation with each byte going from least significant to
