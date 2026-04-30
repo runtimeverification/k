@@ -1481,7 +1481,7 @@ power of the exponent, which is interpreted as an integer, and defaults to
 zero if it is not present. Finally, it is rounded to the nearest possible
 value in a floating-point type represented like an IEEE754 floating-point type,
 with the number of bits of precision and exponent specified by the suffix.
-A suffix of `f` or `f` represents the IEEE `binary32` format. A suffix of `d`
+A suffix of `f` or `F` represents the IEEE `binary32` format. A suffix of `d`
 or `D`, or no suffix, represents the IEEE `binary64` format. A suffix of
 `pNxM` (either upper or lowercase) specifies exactly `N` bits of precision and
 `M` bits of exponent. The number of bits of precision is assumed to include
