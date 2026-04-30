@@ -204,7 +204,7 @@ class PrettyPrinter:
         if ksequence.items[-1] == KToken('...', KSort('K')):
             unparsed_k_seq = unparsed_k_seq + '\n' + self._print_kinner(KToken('...', KSort('K')))
         else:
-            unparsed_k_seq = unparsed_k_seq + '\n~> ' + self._print_kinner(ksequence.items[-1])
+            unparsed_k_seq = unparsed_k_seq + '\n~> ' + self._print_kinner(ksequence.items[-1]) + '\n~> .K'
         return unparsed_k_seq
 
     def _print_kterminal(self, kterminal: KTerminal) -> str:

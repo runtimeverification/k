@@ -17,6 +17,7 @@ Subproofs: 0
 │       <k>
 │         doIt ( 3 )
 │         ~> K_CELL_f6d31965:K
+│         ~> .K
 │       </k>
 │       <counter>
 │         COUNTER_CELL
@@ -35,6 +36,7 @@ Subproofs: 0
 │       <k>
 │         doIt ( 0 )
 │         ~> K_CELL_f6d31965:K
+│         ~> .K
 │       </k>
 │       <counter>
 │         COUNTER_CELL:Int
@@ -55,6 +57,7 @@ Subproofs: 0
         <k>
           doIt ( 0 )
           ~> K_CELL_f6d31965:K
+          ~> .K
         </k>
         <counter>
           COUNTER_CELL

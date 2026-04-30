@@ -1,7 +1,8 @@
 # pyk/regression-new — Skipped Test Triage
 
-This document categorises the 113 skipped tests in `pyk/regression-new/skipped` by root cause,
+This document categorises the skipped tests in `pyk/regression-new/skipped` by root cause,
 lists the tests in each category, and identifies quick-win opportunities.
+105 tests remain skipped as of the last update (originally 113; 8 un-skipped so far).
 
 ## Category A — Haskell backend (≈39 tests)
 
@@ -85,27 +86,26 @@ or map the common ones explicitly.
 
 ## Category F — Missing `pyk kompile` flags
 
-`pyk kompile` doesn't expose all Java `kompile` flags:
+`pyk kompile` doesn't expose all Java `kompile` flags.
+The remaining blockers (after the flags below were addressed) have secondary blockers in other categories:
 
-- `--top-cell`: `issue-2075-2`
-- `--profile-rule-parsing`: `profile` (also haskell)
-- `--llvm-proof-hint-instrumentation`: `proof-instrumentation` (also bison)
-- `--llvm-kompile-type library`: `llvm-kompile-type`
+- `--profile-rule-parsing`: `profile` — also Haskell backend (Category A); adding the flag won't unblock the test
+- `--llvm-proof-hint-instrumentation`: flag **exists**; `proof-instrumentation` also needs `--gen-glr-bison-parser` (Category B)
+- `--llvm-kompile-type library`: flag **exists**; `llvm-kompile-type` depends on `imp-llvm`, blocked by missing `pyk run --profile` (Category E)
 
-**Fix**: Add these as pass-through or explicit options in `pyk kompile`.
+**Resolved**: `--top-cell` added; `issue-2075-2` un-skipped.
 
-## Category G — `<generatedCounter>` / `<generatedTop>` cells in output (≈6+ tests)
+## Category G — `<generatedCounter>` / `<generatedTop>` cells in output ✓ RESOLVED
 
 Java `krun` strips the synthetic `<generatedCounter>` and `<generatedTop>` cells from output.
 `pyk run` intentionally retains them — this is a design decision in the pyk rewrite.
-Tests whose K definitions use these cells produce output that differs from the Java-generated baselines.
+All affected tests have been updated with `make update-results` and un-skipped.
 
-Observed in: `context-alias`, `issue-1263`, `issue-1528`, `or-llvm`, `rand`, `rangemap-tests-llvm`
-(possibly more — not all tests were run).
+The baseline updates also captured two other pyk formatting differences:
+- K-sequence `~>` items each on their own line (Java collapses to a single line)
+- List/Map collection items inline space-separated (Java puts each on its own line)
 
-**Fix**: Run `make update-results` in each affected test directory to regenerate `.out` baselines
-to match pyk's output (which includes these cells).
-Do not strip these cells from `pyk run` output — that is intentional behaviour.
+**Resolved**: `context-alias`, `issue-1263`, `issue-1528`, `or-llvm`, `rand`, `rangemap-tests-llvm` un-skipped.
 
 ## Category H — Output format differences
 
@@ -114,11 +114,12 @@ These are likely fixable by running `make update-results` after verifying the ac
 is correct.
 
 Observed patterns:
-- Inline collection items vs. one-per-line (e.g. `rand`: `ListItem(1) ListItem(2)` vs.
-  `ListItem(1)\nListItem(2)`)
 - Different argument ordering in error messages (e.g. `checks`)
 - Extra `[ERROR] Running process failed...` line in `pyk kompile` failure messages
   (e.g. `nonexhaustive`) — not emitted by Java `kompile`
+
+Note: collection item formatting (inline vs. one-per-line) and K-sequence `~>` formatting
+were previously listed here but were addressed as part of Category G.
 
 ## Category I — Special tool dependencies
 
@@ -141,26 +142,28 @@ These look like standard LLVM tests with no obviously missing features but have 
 run yet:
 
 ```
-configuration-formatting (output format diff — generatedTop)
-doubleinj (needs -c flag in pyk run)
+configuration-formatting (output format diff — generatedTop/generatedCounter; run update-results)
+doubleinj (needs -c flag in pyk run, Category E)
 issue-1098 (no special flags — needs running)
-issue-2273 (kast, needs pyk parse)
-pattern-macro (output format diff — generatedTop)
+pattern-macro (output format diff — generatedTop/generatedCounter; run update-results)
 pattern-macro-productions (similar)
 ```
 
+Note: `issue-2273` (kast, needs `pyk parse`) moved to Category D.
+
 ## Summary Table
 
-| Category | Count | Fix complexity |
-|----------|-------|---------------|
-| A — Haskell backend | ~39 | High (needs Haskell) |
-| B — GLR/Bison | ~16 | High (needs C bison) |
-| C — kore backend | 4 | Medium |
-| D — `pyk parse` missing | ~10 | Medium (add CLI command) |
-| E — Missing `pyk run` flags | ~8 | Low–Medium (pass-through flags) |
-| F — Missing `pyk kompile` flags | ~4 | Low (add flags) |
-| G — `<generatedCounter>` stripping | ~6+ | Low (strip in pretty_print) |
-| H — Output format differences | ~5 | Low (update-results) |
-| I — Special tool deps | ~15 | Varies |
+| Category | Count | Status | Fix complexity |
+|----------|-------|--------|---------------|
+| A — Haskell backend | ~39 | open | High (needs Haskell) |
+| B — GLR/Bison | ~16 | open | High (needs C bison) |
+| C — kore backend | 4 | open | Medium |
+| D — `pyk parse` missing | ~10 | open | Medium (add CLI command) |
+| E — Missing `pyk run` flags | ~8 | open | Low–Medium (pass-through flags) |
+| F — Missing `pyk kompile` flags | 3 remaining | partial | Low (secondary blockers in A/B/E) |
+| G — `<generatedCounter>` / formatting | 6 | **resolved** | — |
+| H — Output format differences | ~3 | open | Low (update-results) |
+| I — Special tool deps | ~15 | open | Varies |
+| J — Quick wins | ~5 | open | Low |
 
-**Recommended priority**: G → E → D → F → H, then revisit per-test
+**Recommended priority**: J (configuration-formatting, pattern-macro) → E → D → H, then revisit per-test
