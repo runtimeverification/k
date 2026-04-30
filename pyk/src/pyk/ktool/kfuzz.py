@@ -176,12 +176,6 @@ def fuzz(
         raise RuntimeError('Must pass one of check_func or check_exit_code, and not both!')
 
     def test(subst_case: Mapping[EVar, Pattern]) -> None:
-        def sub(p: Pattern) -> Pattern:
-            if isinstance(p, EVar) and p in subst_case:
-                return subst_case[p]
-            else:
-                return p
-
         handler.handle_test(subst_case)
         test_pattern = subst_func(template, subst_case)
         res = llvm_interpret_raw(definition_dir, test_pattern.text, check=False)
