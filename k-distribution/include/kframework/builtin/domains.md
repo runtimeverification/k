@@ -960,7 +960,7 @@ An element can be added to the front of a `List` using the `pushList` operator.
 You can get an element of a list by its integer offset in O(log(N)) time, or
 effectively constant. Positive `Int` indices are 0-indexed from the beginning of the
 list, and negative indices are -1-indexed from the end of the list. In other
-words, 0 is the first element and -1 is the last element. The indice can also be
+words, 0 is the first element and -1 is the last element. The index can also be
 `MInt`, which is interprested as an unsigned integer, and therefore, don't support
 negative indices feature. Currently, only 64-bit and 256-bit `MInt` types are supported.
 
