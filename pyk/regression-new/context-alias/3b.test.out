@@ -1,6 +1,8 @@
 <generatedTop>
   <k>
-    ( x = 1 ) + 1 ~> #freezer_;_TEST_Stmt_Expr0_ ( ) ~> .K
+    x = 1 + 1
+    ~> #freezer_;_TEST_Stmt_Expr0_ ( )
+    ~> .K
   </k>
   <shouldHeat>
     false
@@ -11,4 +13,7 @@
   <stuff>
     false
   </stuff>
+  <generatedCounter>
+    0
+  </generatedCounter>
 </generatedTop>
