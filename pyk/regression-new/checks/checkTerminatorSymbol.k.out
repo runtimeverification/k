@@ -10,4 +10,4 @@
 	  .	                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Had 2 structural errors.
 [ERROR] Running process failed with returncode 113:
-    kompile checkTerminatorSymbol.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition checkTerminatorSymbol-kompiled --type-inference-mode checked
+    kompile checkTerminatorSymbol.k --md-selector k --emit-json --backend llvm --output-definition checkTerminatorSymbol-kompiled --type-inference-mode checked --warnings none --no-exc-wrap
