@@ -4,7 +4,6 @@ bison-parser-library
 boundary-cells-opt
 cell-sort-haskell
 checkClaimError
-checks
 concrete-function
 concrete-function-cache
 concrete-haskell
