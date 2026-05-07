@@ -9,7 +9,6 @@ concrete-function
 concrete-function-cache
 concrete-haskell
 configuration-formatting
-context-alias
 context-alias-2
 context-labels
 domains-lemmas-no-smt
@@ -33,10 +32,8 @@ issue-1098
 issue-1145
 issue-1169
 issue-1175
-issue-1263
 issue-1436
 issue-1489-claimLoc
-issue-1528
 issue-1602
 issue-1676-koreBytes
 issue-1682-korePrettyPrint
@@ -85,7 +82,6 @@ non-executable
 nonexhaustive
 no-pattern
 or-haskell
-or-llvm
 parse-c
 parseNonPgm
 pattern-macro
@@ -98,8 +94,6 @@ profile
 proof-instrumentation
 proof-tests
 quadratic-poly-unparsing
-rand
-rangemap-tests-llvm
 rat
 search-bound
 set-symbolic-tests
