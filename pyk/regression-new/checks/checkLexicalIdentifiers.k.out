@@ -1,0 +1,36 @@
+[Error] Outer Parser: Circular dependency between lexical identifiers: [Foo1, Foo2, Foo3, Foo4]
+	Source(checkLexicalIdentifiers.k)
+	Location(2,1,2,32)
+	2 |	syntax lexical Foo1 = r"{Foo2}"
+	  .	^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Outer Parser: Circular dependency between lexical identifiers: [Cycle]
+	Source(checkLexicalIdentifiers.k)
+	Location(6,1,6,34)
+	6 |	syntax lexical Cycle = r"{Cycle}"
+	  .	^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Outer Parser: Circular dependency between lexical identifiers: [Bar1]
+	Source(checkLexicalIdentifiers.k)
+	Location(7,1,7,39)
+	7 |	syntax lexical Bar1 = r"{Bar1} {Foo1}"
+	  .	^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Outer Parser: Unrecognized lexical identifiers in regular expression: [NotReal]
+	Source(checkLexicalIdentifiers.k)
+	Location(8,1,8,34)
+	8 |	syntax lexical Bad = r"{NotReal}"
+	  .	^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Outer Parser: Unrecognized lexical identifiers in regular expression: [Bad1]
+	Source(checkLexicalIdentifiers.k)
+	Location(10,17,10,26)
+	10 |	syntax Bad2 ::= r"{Bad1}"
+	   .	                ^~~~~~~~~
+[Error] Outer Parser: Named lexical syntax cannot contain line anchors.
+	Source(checkLexicalIdentifiers.k)
+	Location(11,1,11,37)
+	11 |	syntax lexical StartAnchor = r"^foo"
+	   .	^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Outer Parser: Named lexical syntax cannot contain line anchors.
+	Source(checkLexicalIdentifiers.k)
+	Location(12,1,12,35)
+	12 |	syntax lexical EndAnchor = r"foo$"
+	   .	^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Had 7 parsing errors.
