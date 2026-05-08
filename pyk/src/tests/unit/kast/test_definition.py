@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING
 
 import pytest
@@ -70,6 +71,16 @@ _EQUALS3_PROD: Final = KProduction(
     klabel='#Equals',
 )
 
+# User-defined label where S2 does not appear in any argument sort, so it remains
+# unbound after argument processing.  add_sort_params must emit a warning and
+# return the term unchanged (best-effort).
+_PAIR_PROD: Final = KProduction(
+    sort=KSort('Pair', (S1, S2)),
+    items=[KTerminal('pair'), KTerminal('('), KNonTerminal(S1), KTerminal(')')],
+    params=[S1, S2],
+    klabel='pair',
+)
+
 _ACCT_MAP_CONCAT: Final = KProduction(
     sort=ACCOUNT_CELL_MAP,
     items=[KNonTerminal(ACCOUNT_CELL_MAP), KNonTerminal(ACCOUNT_CELL_MAP)],
@@ -120,6 +131,9 @@ DEFN: Final = KDefinition(
 
 # Definition used only to verify the multi-unbound-param guard in add_sort_params.
 DEFN3: Final = KDefinition('TEST3', [KFlatModule('TEST3', [_EQUALS3_PROD])])
+
+# Definition used only to verify the unresolvable-user-label warning path.
+DEFN_PAIR: Final = KDefinition('TEST_PAIR', [KFlatModule('TEST_PAIR', [_PAIR_PROD])])
 
 
 # ---------------------------------------------------------------------------
@@ -231,6 +245,16 @@ def test_add_sort_params_multi_unbound_raises() -> None:
     term = KApply('#Equals', [KVariable('X', sort=INT), KVariable('Y', sort=INT)])
     with pytest.raises(NotImplementedError, match='2 unbound sort parameters'):
         DEFN3.add_sort_params(term)
+
+
+def test_add_sort_params_user_label_unresolvable_warns(caplog: pytest.LogCaptureFixture) -> None:
+    # pair(S1, S2) has S2 absent from arguments — S2 is unbound after inference.
+    # add_sort_params emits a warning and returns the term unchanged (best-effort).
+    term = KApply(KLabel('pair'), [KVariable('X', sort=INT)])
+    with caplog.at_level(logging.WARNING):
+        result = DEFN_PAIR.add_sort_params(term)
+    assert result == term
+    assert any('could not infer sort params' in record.message for record in caplog.records)
 
 
 # ---------------------------------------------------------------------------

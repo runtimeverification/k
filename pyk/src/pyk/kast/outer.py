@@ -1593,6 +1593,10 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
                             )
                         filled = {p: sort_dict.get(p, _ML_PRED_RESULT_SORT_PARAM) for p in prod.params}
                         return _k.let(label=KLabel(_k.label.name, [filled[p] for p in prod.params]))
+                    unbound = [p for p in prod.params if p not in sort_dict]
+                    _LOGGER.warning(
+                        f'Failed to add sort parameter, could not infer sort params from arguments: {(prod, unbound)}'
+                    )
             return _k
 
         return bottom_up(_add_sort_params, kast)
