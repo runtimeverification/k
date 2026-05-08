@@ -80,9 +80,7 @@ mutable-bytes
 non-executable
 nonexhaustive
 no-pattern
-or-haskell
 parse-c
-parseNonPgm
 pattern-macro
 pattern-macro-productions
 pedanticAttributes
