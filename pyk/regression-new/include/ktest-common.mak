@@ -12,7 +12,7 @@ KOMPILE=$(UV_RUN) pyk kompile
 # and krun
 KRUN=$(UV_RUN) pyk krun
 # and kdep
-KDEP=$(UV_RUN) pyk kdep
+KDEP=${K_BIN}/kdep
 # and kprove
 KPROVE=$(UV_RUN) pyk kprove
 # and kast
