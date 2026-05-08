@@ -16,7 +16,7 @@ from ..utils import TEST_DATA_DIR
 if TYPE_CHECKING:
     from collections.abc import Container
     from pathlib import Path
-    from typing import Final
+    from typing import Any, Final
 
     from pytest import FixtureRequest
 
@@ -25,7 +25,14 @@ if TYPE_CHECKING:
     from pyk.testing import Kompiler
 
 
-DEFINITION_FILES: Final = tuple((TEST_DATA_DIR / 'module-to-kore').glob('*.k'))
+MODULE_TO_KORE_DIR: Final = TEST_DATA_DIR / 'module-to-kore'
+
+# Extra kompile kwargs for files that need non-default options.
+EXTRA_KOMPILE_ARGS: Final[dict[str, dict[str, Any]]] = {
+    'coverage.k': {'coverage': True},
+}
+
+DEFINITION_FILES: Final = tuple(MODULE_TO_KORE_DIR.glob('*.k'))
 
 
 @pytest.fixture(
@@ -33,7 +40,9 @@ DEFINITION_FILES: Final = tuple((TEST_DATA_DIR / 'module-to-kore').glob('*.k'))
     ids=[file.name for file in DEFINITION_FILES],
 )
 def definition_dir(request: FixtureRequest, kompile: Kompiler) -> Path:
-    return kompile(main_file=request.param)
+    path: Path = request.param
+    extra = EXTRA_KOMPILE_ARGS.get(path.name, {})
+    return kompile(main_file=path, **extra)
 
 
 @pytest.fixture
