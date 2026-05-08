@@ -95,6 +95,7 @@ proof-tests
 quadratic-poly-unparsing
 rat
 regex-prec
+regex-unicode
 search-bound
 set-symbolic-tests
 set_unification
