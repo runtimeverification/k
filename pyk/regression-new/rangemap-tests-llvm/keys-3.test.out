@@ -1,5 +1,8 @@
-<k>
-  SetItem ( [ 0 , 2 ) )
-  SetItem ( [ 3 , 8 ) )
-  SetItem ( [ 9 , 12 ) ) ~> .K
-</k>
+<generatedTop>
+  <k>
+    SetItem ( [ 3 , 8 ) ) SetItem ( [ 9 , 12 ) ) SetItem ( [ 0 , 2 ) ) ~> .K
+  </k>
+  <generatedCounter>
+    0
+  </generatedCounter>
+</generatedTop>

@@ -17,6 +17,7 @@ Subproofs: 0
 │       <k>
 │         addCounter ( N:Int )
 │         ~> K_CELL_f6d31965:K
+│         ~> .K
 │       </k>
 │       <counter>
 │         C:Int
@@ -40,6 +41,7 @@ Subproofs: 0
 ┃  │       <k>
 ┃  │         addCounter ( N:Int )
 ┃  │         ~> K_CELL_f6d31965:K
+┃  │         ~> .K
 ┃  │       </k>
 ┃  │       <counter>
 ┃  │         C:Int
@@ -60,6 +62,7 @@ Subproofs: 0
 ┃  │       <k>
 ┃  │         addCounter ( N:Int +Int -1 )
 ┃  │         ~> K_CELL_f6d31965:K
+┃  │         ~> .K
 ┃  │       </k>
 ┃  │       <counter>
 ┃  │         C:Int +Int 1
@@ -126,6 +129,7 @@ Subproofs: 0
    │       <k>
    │         addCounter ( N:Int )
    │         ~> K_CELL_f6d31965:K
+   │         ~> .K
    │       </k>
    │       <counter>
    │         C:Int
