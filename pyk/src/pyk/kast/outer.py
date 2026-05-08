@@ -1578,13 +1578,19 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
                         # one parameter is unresolvable bottom-up.  All current ML predicates
                         # (#Equals, #Ceil, #Floor, #In) have exactly two sort params {Sort1,
                         # Sort2}: Sort1 is always determined by the arguments, Sort2 (the result
-                        # sort) is the one remaining unbound param.  If this assertion ever fires,
-                        # the sentinel scheme needs to be replaced with unique fresh params, as
-                        # Java does with #SortParam{Q0}, #SortParam{Q1}, ....
-                        assert len(unbound) <= 1, (
-                            f'Expected at most one unbound sort parameter for {_k.label.name!r}, '
-                            f'got {len(unbound)}: {unbound}'
-                        )
+                        # sort) is the one remaining unbound param.  If more than one param is
+                        # unbound, the sentinel scheme must be replaced with unique fresh params
+                        # (e.g. KSort('#SortParam', (KSort('Q0'),)), KSort('#SortParam', (KSort('Q1'),)), ...)
+                        # analogously to how Java's AddSortInjections generates #SortParam{Q0},
+                        # #SortParam{Q1}, etc.  _ksort_to_kore would also need updating to emit
+                        # these as sort variables rather than sort applications.
+                        if len(unbound) > 1:
+                            raise NotImplementedError(
+                                f'ML predicate {_k.label.name!r} has {len(unbound)} unbound sort parameters '
+                                f'({unbound}); the single-sentinel scheme only handles at most one. '
+                                f'Implement unique fresh sentinels analogous to Java #SortParam{{Q0}}, '
+                                f'#SortParam{{Q1}}, ... and update _ksort_to_kore to emit them as sort variables.'
+                            )
                         filled = {p: sort_dict.get(p, _ML_PRED_RESULT_SORT_PARAM) for p in prod.params}
                         return _k.let(label=KLabel(_k.label.name, [filled[p] for p in prod.params]))
             return _k

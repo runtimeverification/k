@@ -32,6 +32,7 @@ INT: Final = KSort('Int')
 N: Final = KSort('N')
 S1: Final = KSort('S1')
 S2: Final = KSort('S2')
+S3: Final = KSort('S3')
 MINT_N: Final = KSort('MInt', (N,))
 MINT_INT: Final = KSort('MInt', (INT,))
 SORT_PARAM: Final = KSort('#SortParam')
@@ -56,6 +57,16 @@ _EQUALS_PROD: Final = KProduction(
     sort=S2,
     items=[KNonTerminal(S1), KNonTerminal(S1)],
     params=[S1, S2],
+    klabel='#Equals',
+)
+
+# Hypothetical 3-param #Equals to test the multi-unbound-param guard.
+# S1 is inferred from arguments; S2 and S3 are both unbound, which the single-sentinel
+# scheme cannot handle — add_sort_params must raise NotImplementedError.
+_EQUALS3_PROD: Final = KProduction(
+    sort=S2,
+    items=[KNonTerminal(S1), KNonTerminal(S1)],
+    params=[S1, S2, S3],
     klabel='#Equals',
 )
 
@@ -106,6 +117,9 @@ DEFN: Final = KDefinition(
         )
     ],
 )
+
+# Definition used only to verify the multi-unbound-param guard in add_sort_params.
+DEFN3: Final = KDefinition('TEST3', [KFlatModule('TEST3', [_EQUALS3_PROD])])
 
 
 # ---------------------------------------------------------------------------
@@ -209,6 +223,14 @@ ADD_SORT_PARAMS_DATA: Final = (
 )
 def test_add_sort_params(test_id: str, term: KInner, expected: KInner) -> None:
     assert DEFN.add_sort_params(term) == expected
+
+
+def test_add_sort_params_multi_unbound_raises() -> None:
+    # #Equals with 3 sort params: S1 is inferred from arguments, S2 and S3 are both unbound.
+    # The single-sentinel scheme cannot distinguish them, so NotImplementedError must be raised.
+    term = KApply('#Equals', [KVariable('X', sort=INT), KVariable('Y', sort=INT)])
+    with pytest.raises(NotImplementedError, match='2 unbound sort parameters'):
+        DEFN3.add_sort_params(term)
 
 
 # ---------------------------------------------------------------------------
