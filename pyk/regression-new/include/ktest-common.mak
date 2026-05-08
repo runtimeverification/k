@@ -14,17 +14,17 @@ KRUN=$(UV_RUN) pyk run
 # and kdep
 KDEP=${K_BIN}/kdep
 # and kprove
-KPROVE=$(UV_RUN) pyk kprove
+KPROVE=$(UV_RUN) pyk prove
 # and kast
-KAST=$(UV_RUN) pyk kast
+KAST=$(UV_RUN) pyk parse
 # and kparse
-KPARSE=$(UV_RUN) pyk kparse
+KPARSE=$(UV_RUN) pyk parse
 # and kserver
 KSERVER=$(UV_RUN) pyk kserver
 # and ksearch
 KSEARCH:=$(KRUN) --search-all
 # and kprint
-KPRINT=$(UV_RUN) pyk kprint
+KPRINT=$(UV_RUN) pyk parse
 # and llvm-krun
 LLVM_KRUN=$(UV_RUN) pyk llvm-krun
 
@@ -34,7 +34,7 @@ REMOVE_PATHS=| sed 's!\('`pwd`'\)/\(\./\)\{0,2\}!!g' | sed 's!\('${BUILTIN_DIR}'
 VERBOSITY?=
 
 KOMPILE_FLAGS+=--no-exc-wrap --type-inference-mode checked $(VERBOSITY)
-KPROVE_FLAGS+=--no-exc-wrap --type-inference-mode checked --failure-info $(VERBOSITY)
+KPROVE_FLAGS+=--type-inference-mode checked --failure-info $(VERBOSITY)
 KRUN_FLAGS+=$(VERBOSITY)
 KAST_FLAGS+=$(VERBOSITY)
 
