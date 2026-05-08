@@ -307,7 +307,7 @@ module IELE-COMMON
   syntax ContractDeclaration  ::=
     "external" "contract" IeleName
   syntax GlobalDefinition  ::=
-    GlobalName "=" IntConstant [symbol(globalDefinition)]
+    GlobalName "=" IntConstant [klabel(globalDefinition)]
   syntax FunctionSignature  ::=
     GlobalName "(" FunctionParameters ")"
   syntax FunctionParameters  ::=
