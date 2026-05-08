@@ -4,7 +4,7 @@ MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 ROOT=$(abspath $(MAKEFILE_PATH)/../..)
 UV_RUN?=uv --project $(ROOT) run --
 # path to builtin include directory
-BUILTIN_DIR=$(abspath $(MAKEFILE_PATH)/../../../k-distribution/target/release/k/include/kframework/builtin)
+BUILTIN_DIR=$(abspath $(shell dirname $(shell which kompile))/../include/kframework/builtin)
 # path to binary directory of this distribution
 K_BIN=$(abspath $(MAKEFILE_PATH)/../../bin)
 # path to the kompile binary of this distribuition
