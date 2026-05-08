@@ -9,3 +9,5 @@
 	10 |	  syntax Foo1 ::= "foo" Foo1 Foo1 [overload(foo), unused]
 	   .	                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Had 2 errors after compilation.
+[ERROR] Running process failed with returncode 113:
+    kompile nonUniqueOverload.k --md-selector k --emit-json --backend haskell --output-definition nonUniqueOverload-kompiled --type-inference-mode checked --warnings all --warnings-to-errors --no-exc-wrap

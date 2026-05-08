@@ -1,3 +1,8 @@
-<k>
-  aaaa ~> .K
-</k>
+<generatedTop>
+  <k>
+    aaaa ~> .K
+  </k>
+  <generatedCounter>
+    0
+  </generatedCounter>
+</generatedTop>

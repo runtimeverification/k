@@ -9,3 +9,5 @@
 	12 |	  syntax Exps  ::= Exp  [overload(arg)]
 	   .	                   ^~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Had 2 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile checkNoSymbolOverload.k --md-selector k --emit-json --backend llvm --output-definition checkNoSymbolOverload-kompiled --type-inference-mode checked --warnings none --no-exc-wrap

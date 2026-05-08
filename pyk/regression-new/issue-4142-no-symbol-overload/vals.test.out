@@ -1,3 +1,8 @@
-<k>
-  vals ~> .K
-</k>
+<generatedTop>
+  <k>
+    vals ~> .K
+  </k>
+  <generatedCounter>
+    0
+  </generatedCounter>
+</generatedTop>

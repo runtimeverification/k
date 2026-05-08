@@ -34,3 +34,5 @@
 	12 |	syntax lexical EndAnchor = r"foo$"
 	   .	^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Had 7 parsing errors.
+[ERROR] Running process failed with returncode 113:
+    kompile checkLexicalIdentifiers.k --md-selector k --emit-json --backend llvm --output-definition checkLexicalIdentifiers-kompiled --type-inference-mode checked --warnings none --no-exc-wrap

@@ -1,3 +1,8 @@
-<k>
-  b"\xff\xfb" ~> .K
-</k>
+<generatedTop>
+  <k>
+    b"\xff\xfb" ~> .K
+  </k>
+  <generatedCounter>
+    0
+  </generatedCounter>
+</generatedTop>

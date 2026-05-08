@@ -19,3 +19,5 @@
 	7 |	syntax Buz ::= r"(a|b|c){100,1}"
 	  .	               ^~~~~~~~~~~~~~~~~
 [Error] Compiler: Had 4 parsing errors.
+[ERROR] Running process failed with returncode 113:
+    kompile checkRegexRanges.k --md-selector k --emit-json --backend llvm --output-definition checkRegexRanges-kompiled --type-inference-mode checked --warnings none --no-exc-wrap

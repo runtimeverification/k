@@ -1,3 +1,8 @@
-<k>
-  rvals ~> .K
-</k>
+<generatedTop>
+  <k>
+    rvals ~> .K
+  </k>
+  <generatedCounter>
+    0
+  </generatedCounter>
+</generatedTop>

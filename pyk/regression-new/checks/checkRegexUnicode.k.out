@@ -29,3 +29,5 @@
 	4 |	syntax Bar ::= r"[^a😊][😦-ab-🙁]" [token]
 	  .	               ^~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Had 6 parsing errors.
+[ERROR] Running process failed with returncode 113:
+    kompile checkRegexUnicode.k --md-selector k --emit-json --backend llvm --output-definition checkRegexUnicode-kompiled --type-inference-mode checked --warnings none --no-exc-wrap

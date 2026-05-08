@@ -1,3 +1,8 @@
-<k>
-  exps ~> .K
-</k>
+<generatedTop>
+  <k>
+    exps ~> .K
+  </k>
+  <generatedCounter>
+    0
+  </generatedCounter>
+</generatedTop>
