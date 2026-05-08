@@ -6,7 +6,7 @@ KOMPILE_BACKEND=llvm
 KOMPILE_FLAGS=--outer-parsed-json
 export KOMPILE_BACKEND
 
-include ../../../include/kframework/ktest.mak
+include ../include/ktest.mak
 
 .depend:
 	

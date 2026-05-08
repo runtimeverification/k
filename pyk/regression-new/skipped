@@ -24,8 +24,8 @@ imp-haskell
 imp-kore
 imp++-llvm
 imp-llvm
+imp-outer-json
 io-llvm
-issue-946
 issue-1088
 issue-1098
 issue-1145
@@ -51,6 +51,7 @@ issue-3520-freshConfig
 issue-3647-debugTokens
 issue-3672-debugParse
 issue-582
+issue-946
 ite-bug
 itp
 json-input
@@ -89,9 +90,11 @@ poly-sort
 poly-unparsing
 profile
 proof-instrumentation
+proof-instrumentation-debug
 proof-tests
 quadratic-poly-unparsing
 rat
+regex-prec
 search-bound
 set-symbolic-tests
 set_unification
