@@ -1,10 +1,6 @@
-SHELL=/bin/bash
-
-# path to the current makefile
 MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
-# path to the kdep binary of this distribuition
-K_BIN=$(abspath $(MAKEFILE_PATH)/../../bin)
-KDEP=${K_BIN}/kdep
+include $(MAKEFILE_PATH)/ktest-common.mak
+
 # all tests in test directory with matching file extension
 TESTS?=$(wildcard ./*.md) $(wildcard ./*.k)
 
@@ -18,7 +14,7 @@ all: $(TESTS)
 dummy:
 
 %.k %.md: dummy
-	$(PIPEFAIL) $(KDEP) $(KDEP_FLAGS) $@ | sed 's!'`pwd`'/\(\./\)\{0,2\}!!g' $(CHECK) $@.out
+	$(PIPEFAIL) $(KDEP) $(KDEP_FLAGS) $@ $(REMOVE_PATHS) $(CHECK) $@.out
 
 # run all tests and regenerate output files
 update-results: all
