@@ -9,15 +9,6 @@ TESTS?=$(wildcard $(DEFDIR)/*.md) $(wildcard $(DEFDIR)/*.k)
 KOMPILE_BACKEND?=llvm
 KAST_TESTS?=$(wildcard ./*.kast)
 
-VERBOSITY?=
-
-KOMPILE_FLAGS+=--no-exc-wrap --type-inference-mode checked $(VERBOSITY)
-KPROVE_FLAGS+=--no-exc-wrap $(VERBOSITY)
-KRUN_FLAGS+=--no-exc-wrap $(VERBOSITY)
-KAST_FLAGS+=$(VERBOSITY)
-
-CHECK=| diff -
-
 .PHONY: kompile all clean update-results dummy krun proofs searches kast
 
 # run all tests

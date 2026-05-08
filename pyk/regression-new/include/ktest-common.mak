@@ -10,7 +10,7 @@ K_BIN=$(abspath $(MAKEFILE_PATH)/../../bin)
 # path to the kompile binary of this distribuition
 KOMPILE=$(UV_RUN) pyk kompile
 # and krun
-KRUN=$(UV_RUN) pyk krun
+KRUN=$(UV_RUN) pyk run
 # and kdep
 KDEP=${K_BIN}/kdep
 # and kprove
@@ -27,7 +27,26 @@ KSEARCH:=$(KRUN) --search-all
 KPRINT=$(UV_RUN) pyk kprint
 # and llvm-krun
 LLVM_KRUN=$(UV_RUN) pyk llvm-krun
-# and kdep
-KDEP=$(UV_RUN) pyk kdep
+
 # command to strip paths from test outputs
 REMOVE_PATHS=| sed 's!\('`pwd`'\)/\(\./\)\{0,2\}!!g' | sed 's!\('${BUILTIN_DIR}'\)/\(\./\)\{0,2\}!!g' | sed 's!\('/nix/store/..*/include/kframework/builtin'\)/\(\./\)\{0,2\}!!g'
+
+VERBOSITY?=
+
+KOMPILE_FLAGS+=--no-exc-wrap --type-inference-mode checked $(VERBOSITY)
+KPROVE_FLAGS+=--no-exc-wrap --type-inference-mode checked --failure-info $(VERBOSITY)
+KRUN_FLAGS+=$(VERBOSITY)
+KAST_FLAGS+=$(VERBOSITY)
+
+ifeq ($(UNAME), Darwin)
+	KOMPILE_FLAGS+=--no-haskell-binary
+endif
+
+KRUN_OR_LEGACY=$(KRUN)
+
+CHECK?=| diff -
+CONSIDER_ERRORS=2>&1
+
+PIPEFAIL?=set -o pipefail;
+# null by default, add CONSIDER_PROVER_ERRORS=2>&1 to the local Makefile to test kprove output
+#CONSIDER_PROVER_ERRORS=

@@ -24,26 +24,6 @@ KOMPILE_BACKEND?=llvm
 # if not, default to .k to give error message
 SOURCE_EXT?=$(or $(and $(wildcard $(DEF).k), k), $(or $(and $(wildcard $(DEF).md), md), k))
 
-ifeq ($(UNAME), Darwin)
-	KOMPILE_FLAGS+=--no-haskell-binary
-endif
-
-VERBOSITY?=
-
-KOMPILE_FLAGS+=--no-exc-wrap --type-inference-mode checked $(VERBOSITY)
-KPROVE_FLAGS+=--no-exc-wrap --type-inference-mode checked --failure-info $(VERBOSITY)
-KRUN_FLAGS+=--no-exc-wrap $(VERBOSITY)
-KAST_FLAGS+=$(VERBOSITY)
-
-KRUN_OR_LEGACY=$(KRUN)
-
-CHECK?=| diff -
-CONSIDER_ERRORS=2>&1
-
-PIPEFAIL?=set -o pipefail;
-# null by default, add CONSIDER_PROVER_ERRORS=2>&1 to the local Makefile to test kprove output
-#CONSIDER_PROVER_ERRORS=
-
 .PHONY: kompile krun all clean update-results proofs
 
 # run all tests

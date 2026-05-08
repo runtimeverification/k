@@ -4,9 +4,6 @@ include $(MAKEFILE_PATH)/ktest-common.mak
 # all tests in test directory with matching file extension
 TESTS?=$(wildcard ./*.md) $(wildcard ./*.k)
 
-CHECK=| diff -
-PIPEFAIL?=set -o pipefail;
-
 .PHONY: all
 
 all: $(TESTS)
