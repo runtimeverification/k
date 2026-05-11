@@ -7,9 +7,18 @@ import pytest
 
 from pyk.kast.att import Atts, KAtt
 from pyk.kast.inner import KApply, KAs, KLabel, KSequence, KSort, KToken, KVariable
-from pyk.kast.outer import KDefinition, KFlatModule, KNonTerminal, KProduction, KTerminal
+from pyk.kast.outer import (
+    KDefinition,
+    KFlatModule,
+    KNonTerminal,
+    KProduction,
+    KTerminal,
+    _match_sort_params,
+    _sort_contains,
+)
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from typing import Final
 
     from pyk.kast.inner import KInner
@@ -18,9 +27,12 @@ if TYPE_CHECKING:
 # ---------------------------------------------------------------------------
 # Minimal test definition
 #
-# bar: syntax N       ::= bar(N)        -- result sort is the param directly
-# foo: syntax MInt{N} ::= foo(MInt{N})  -- result/arg sorts nest the param
-# #Equals: syntax S2  ::= #Equals{S1,S2}(S1, S1)  -- ML pred, result sort context-dependent
+# bar:    syntax N       ::= bar(N)           -- result sort is the param directly
+# foo:    syntax MInt{N} ::= foo(MInt{N})     -- result/arg sorts nest the param
+# baz:    syntax MInt{N} ::= baz()            -- no args; param bound only from expected sort
+# #Equals: syntax S2     ::= #Equals{S1,S2}(S1, S1)  -- ML pred, result sort context-dependent
+#
+# Subsort: syntax Int ::= MInt{Int}  -- MInt{Int} <: Int (enables subsort-aware matching)
 #
 # Cell map fragment:
 #   AccountCellMap ::= AccountCellMap AccountCellMap  [cellCollection, element(AccountCellMapItem), wrapElement(<account>)]
@@ -81,6 +93,18 @@ _PAIR_PROD: Final = KProduction(
     klabel='pair',
 )
 
+# syntax MInt{N} ::= baz()  — no argument sorts; param N only bound via expected_sort
+_BAZ_PROD: Final = KProduction(
+    sort=MINT_N,
+    items=[KTerminal('baz'), KTerminal('('), KTerminal(')')],
+    params=[N],
+    klabel='baz',
+)
+
+# syntax Int ::= MInt{Int}  — subsort declaration: MInt{Int} <: Int
+# Enables the subsort-aware matching path (Java AddSortInjections.match step 3).
+_MINT_INT_SUBSORT: Final = KProduction(sort=INT, items=[KNonTerminal(MINT_INT)])
+
 _ACCT_MAP_CONCAT: Final = KProduction(
     sort=ACCOUNT_CELL_MAP,
     items=[KNonTerminal(ACCOUNT_CELL_MAP), KNonTerminal(ACCOUNT_CELL_MAP)],
@@ -124,7 +148,18 @@ DEFN: Final = KDefinition(
     'TEST',
     [
         KFlatModule(
-            'TEST', [_BAR_PROD, _FOO_PROD, _EQUALS_PROD, _ACCT_MAP_CONCAT, _ACCT_MAP_ITEM, _ACCOUNT_CELL, _GET_ENTRY]
+            'TEST',
+            [
+                _BAR_PROD,
+                _FOO_PROD,
+                _BAZ_PROD,
+                _EQUALS_PROD,
+                _MINT_INT_SUBSORT,
+                _ACCT_MAP_CONCAT,
+                _ACCT_MAP_ITEM,
+                _ACCOUNT_CELL,
+                _GET_ENTRY,
+            ],
         )
     ],
 )
@@ -227,6 +262,13 @@ ADD_SORT_PARAMS_DATA: Final = (
         KApply(KLabel('foo'), [KVariable('X')]),
         KApply(KLabel('foo'), [KVariable('X')]),
     ),
+    # Subsort-aware: arg sort is Int, but MInt{Int} <: Int in DEFN, so N=Int via subsort match
+    # (this case would fail with structural-only unification since Int ≠ MInt{N})
+    (
+        'subsort_aware',
+        KApply(KLabel('foo'), [KVariable('X', sort=INT)]),
+        KApply(KLabel('foo', [INT]), [KVariable('X', sort=INT)]),
+    ),
 )
 
 
@@ -255,6 +297,115 @@ def test_add_sort_params_user_label_unresolvable_warns(caplog: pytest.LogCapture
         result = DEFN_PAIR.add_sort_params(term)
     assert result == term
     assert any('could not infer sort params' in record.message for record in caplog.records)
+
+
+# ---------------------------------------------------------------------------
+# KDefinition.infer_sort_params
+# ---------------------------------------------------------------------------
+#
+# Tests the public method directly (not through add_sort_params), mirroring the
+# Java AddSortInjections.substituteProd() test scenarios derived from the algorithm.
+
+INFER_SORT_PARAMS_DATA: Final[
+    tuple[tuple[str, KProduction, tuple[KSort | None, ...], KSort | None, dict[KSort, KSort]], ...]
+] = (
+    # Direct param: psort IS the param (N → Int)
+    ('direct_param', _BAR_PROD, (INT,), None, {N: INT}),
+    # Nested param: psort = MInt{N}, asort = MInt{Int} → N=Int via structural match
+    ('nested_param', _FOO_PROD, (MINT_INT,), None, {N: INT}),
+    # Subsort-aware: arg sort is Int, MInt{Int} <: Int in DEFN → N=Int via subsort iteration
+    # (structural match fails: MInt{N} ≠ Int; subsort check finds MInt{Int} ≤ Int)
+    ('subsort_aware', _FOO_PROD, (INT,), None, {N: INT}),
+    # matchExpected: baz() has no arg sorts; N is bound from the expected_sort MInt{Int}
+    ('expected_sort', _BAZ_PROD, (), MINT_INT, {N: INT}),
+    # None arg is skipped; no bindings → empty result
+    ('unbound_absent', _BAR_PROD, (None,), None, {}),
+)
+
+
+@pytest.mark.parametrize(
+    'test_id,prod,actual_sorts,expected_sort,expected_bindings',
+    INFER_SORT_PARAMS_DATA,
+    ids=[test_id for test_id, *_ in INFER_SORT_PARAMS_DATA],
+)
+def test_infer_sort_params(
+    test_id: str,
+    prod: KProduction,
+    actual_sorts: tuple[KSort | None, ...],
+    expected_sort: KSort | None,
+    expected_bindings: dict[KSort, KSort],
+) -> None:
+    assert DEFN.infer_sort_params(prod, actual_sorts, expected_sort) == expected_bindings
+
+
+# ---------------------------------------------------------------------------
+# _match_sort_params (module-level helper)
+# ---------------------------------------------------------------------------
+#
+# Directly tests the three matching strategies described in the docstring.
+
+
+def _subsorts_fn(s: KSort) -> frozenset[KSort]:
+    return frozenset({MINT_INT}) if s == INT else frozenset()
+
+
+MATCH_SORT_PARAMS_DATA: Final[
+    tuple[
+        tuple[
+            str, KSort, KSort, frozenset[KSort], Callable[[KSort], frozenset[KSort]] | None, dict[KSort, list[KSort]]
+        ],
+        ...,
+    ]
+] = (
+    # Case 1 – direct: parametric IS a sort param
+    ('direct', N, INT, frozenset({N}), None, {N: [INT]}),
+    # Case 2 – structural: same head, recurse on sub-params
+    ('structural', MINT_N, MINT_INT, frozenset({N}), None, {N: [INT]}),
+    # Case 2 fails (different heads), no subsorts_fn → empty
+    ('structural_no_match_no_subsorts', MINT_N, INT, frozenset({N}), None, {}),
+    # Case 3 – subsort-aware: MInt{N} vs Int; subsorts_fn yields MInt{Int} → N=Int
+    ('subsort_aware', MINT_N, INT, frozenset({N}), _subsorts_fn, {N: [INT]}),
+    # No match in any case
+    ('no_match', INT, KSort('Bool'), frozenset({N}), None, {}),
+)
+
+
+@pytest.mark.parametrize(
+    'test_id,parametric,actual,params,subsorts_fn,expected',
+    MATCH_SORT_PARAMS_DATA,
+    ids=[test_id for test_id, *_ in MATCH_SORT_PARAMS_DATA],
+)
+def test_match_sort_params(
+    test_id: str,
+    parametric: KSort,
+    actual: KSort,
+    params: frozenset[KSort],
+    subsorts_fn: Callable[[KSort], frozenset[KSort]] | None,
+    expected: dict[KSort, list[KSort]],
+) -> None:
+    assert _match_sort_params(parametric, actual, params, subsorts_fn) == expected
+
+
+# ---------------------------------------------------------------------------
+# _sort_contains (module-level helper)
+# ---------------------------------------------------------------------------
+
+SORT_CONTAINS_DATA: Final = (
+    ('param_itself', N, N, True),
+    ('nested_one_level', MINT_N, N, True),
+    ('nested_two_levels', KSort('Foo', (MINT_N,)), N, True),
+    ('concrete_not_param', MINT_INT, N, False),
+    ('unrelated', INT, N, False),
+)
+
+
+@pytest.mark.parametrize(
+    'test_id,sort,param,expected',
+    SORT_CONTAINS_DATA,
+    ids=[test_id for test_id, *_ in SORT_CONTAINS_DATA],
+)
+def test_sort_contains(test_id: str, sort: KSort, param: KSort, expected: bool) -> None:
+    assert _sort_contains(sort, param) == expected
 
 
 # ---------------------------------------------------------------------------
