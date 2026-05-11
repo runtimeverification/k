@@ -1535,24 +1535,22 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         # EntryCellMap), not when it expects the individual cell element sort (e.g. EntryCell).
         # For example, EntryCellMapKey(<entry>(...)) takes EntryCell — the <entry> must NOT be
         # wrapped, whereas _EntryCellMap_(<entry>(...), ...) expects EntryCellMap — wrapping is needed.
-        cell_wrappers = self.cell_map_item_info
-
         def _wrap_elements(_k: KInner) -> KInner:
             if not isinstance(_k, KApply) or _k.label.name not in self.symbols:
                 return _k
-            prod = self.symbols[_k.label.name]
-            arg_sorts = prod.argument_sorts
-            if not arg_sorts or len(arg_sorts) != _k.arity:
+            arg_sorts = self.symbols[_k.label.name].argument_sorts
+            if not any(isinstance(arg, KApply) and arg.label.name in self.cell_map_item_info for arg in _k.args):
                 return _k
-            new_args: list[KInner] = list(_k.args)
-            changed = False
-            for i, (arg_sort, arg) in enumerate(zip(arg_sorts, _k.args, strict=True)):
-                if isinstance(arg, KApply) and arg.label.name in cell_wrappers:
-                    element_ctor, cell_map_sort = cell_wrappers[arg.label.name]
-                    if arg_sort == cell_map_sort:
-                        new_args[i] = KApply(element_ctor, [arg.args[0], arg])
-                        changed = True
-            return _k.let(args=new_args) if changed else _k
+            new_args: list[KInner] = []
+            for arg_sort, arg in zip(arg_sorts, _k.args, strict=True):
+                new_arg = arg
+                if isinstance(arg, KApply):
+                    if arg.label.name in self.cell_map_item_info:
+                        element_ctor, element_ctor_sort = self.cell_map_item_info[arg.label.name]
+                        if arg_sort == element_ctor_sort:
+                            new_arg = KApply(element_ctor, [arg.args[0], arg])
+                new_args.append(new_arg)
+            return _k.let(args=new_args)
 
         # To ensure we don't get duplicate wrappers.
         _kast = self.remove_cell_map_items(kast)
