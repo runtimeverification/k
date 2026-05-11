@@ -1142,6 +1142,9 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         Derived from cell-collection productions that carry both ELEMENT and WRAP_ELEMENT
         attributes and whose element constructor is a known symbol.
         """
+        # example:
+        # syntax AccountCellMap [cellCollection, hook(MAP.Map)]
+        # syntax AccountCellMap ::= AccountCellMap AccountCellMap [assoc, avoid, cellCollection, comm, element(AccountCellMapItem), function, hook(MAP.concat), unit(.AccountCellMap), wrapElement(<account>)]
         result: dict[str, tuple[str, KSort]] = {}
         for ccp in self.cell_collection_productions:
             if Atts.ELEMENT in ccp.att and Atts.WRAP_ELEMENT in ccp.att:
@@ -1527,9 +1530,6 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
 
     def add_cell_map_items(self, kast: KInner) -> KInner:
         """Wrap cell-map items in the syntactical wrapper that the frontend generates for them (see `KDefinition.remove_cell_map_items`)."""
-        # example:
-        # syntax AccountCellMap [cellCollection, hook(MAP.Map)]
-        # syntax AccountCellMap ::= AccountCellMap AccountCellMap [assoc, avoid, cellCollection, comm, element(AccountCellMapItem), function, hook(MAP.concat), unit(.AccountCellMap), wrapElement(<account>)]
 
         # Wrapping is correct only when the parent production expects the cell MAP sort (e.g.
         # EntryCellMap), not when it expects the individual cell element sort (e.g. EntryCell).
