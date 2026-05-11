@@ -1136,6 +1136,22 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         return tuple(prod for module in self.modules for prod in module.cell_collection_productions)
 
     @cached_property
+    def cell_map_item_info(self) -> dict[str, tuple[str, KSort]]:
+        """Map from cell label to (element-constructor label, cell-map sort).
+
+        Derived from cell-collection productions that carry both ELEMENT and WRAP_ELEMENT
+        attributes and whose element constructor is a known symbol.
+        """
+        result: dict[str, tuple[str, KSort]] = {}
+        for ccp in self.cell_collection_productions:
+            if Atts.ELEMENT in ccp.att and Atts.WRAP_ELEMENT in ccp.att:
+                cell_label = ccp.att[Atts.WRAP_ELEMENT]
+                element_ctor = ccp.att[Atts.ELEMENT]
+                if element_ctor in self.symbols:
+                    result[cell_label] = (element_ctor, self.symbols[element_ctor].sort)
+        return result
+
+    @cached_property
     def rules(self) -> tuple[KRule, ...]:
         """Returns the `KRule` sentences transitively imported by the main module of this definition."""
         return tuple(rule for module in self.modules for rule in module.rules)
@@ -1515,18 +1531,11 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         # syntax AccountCellMap [cellCollection, hook(MAP.Map)]
         # syntax AccountCellMap ::= AccountCellMap AccountCellMap [assoc, avoid, cellCollection, comm, element(AccountCellMapItem), function, hook(MAP.concat), unit(.AccountCellMap), wrapElement(<account>)]
 
-        # Maps cell label -> (element_constructor, cell_map_sort).
         # Wrapping is correct only when the parent production expects the cell MAP sort (e.g.
         # EntryCellMap), not when it expects the individual cell element sort (e.g. EntryCell).
         # For example, EntryCellMapKey(<entry>(...)) takes EntryCell — the <entry> must NOT be
         # wrapped, whereas _EntryCellMap_(<entry>(...), ...) expects EntryCellMap — wrapping is needed.
-        cell_wrappers: dict[str, tuple[str, KSort]] = {}
-        for ccp in self.cell_collection_productions:
-            if Atts.ELEMENT in ccp.att and Atts.WRAP_ELEMENT in ccp.att:
-                cell_label = ccp.att[Atts.WRAP_ELEMENT]
-                element_ctor = ccp.att[Atts.ELEMENT]
-                if element_ctor in self.symbols:
-                    cell_wrappers[cell_label] = (element_ctor, self.symbols[element_ctor].sort)
+        cell_wrappers = self.cell_map_item_info
 
         def _wrap_elements(_k: KInner) -> KInner:
             if not isinstance(_k, KApply) or _k.label.name not in self.symbols:
@@ -1551,14 +1560,7 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
 
     def remove_cell_map_items(self, kast: KInner) -> KInner:
         """Remove cell-map syntactical wrapper items that the frontend generates (see `KDefinition.add_cell_map_items`)."""
-        # example:
-        # syntax AccountCellMap [cellCollection, hook(MAP.Map)]
-        # syntax AccountCellMap ::= AccountCellMap AccountCellMap [assoc, avoid, cellCollection, comm, element(AccountCellMapItem), function, hook(MAP.concat), unit(.AccountCellMap), wrapElement(<account>)]
-
-        cell_wrappers = {}
-        for ccp in self.cell_collection_productions:
-            if Atts.ELEMENT in ccp.att and Atts.WRAP_ELEMENT in ccp.att:
-                cell_wrappers[ccp.att[Atts.ELEMENT]] = ccp.att[Atts.WRAP_ELEMENT]
+        cell_wrappers = {ctor: label for label, (ctor, _) in self.cell_map_item_info.items()}
 
         def _wrap_elements(_k: KInner) -> KInner:
             if (
