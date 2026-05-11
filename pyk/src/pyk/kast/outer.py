@@ -1560,7 +1560,7 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         """Remove cell-map syntactical wrapper items that the frontend generates (see `KDefinition.add_cell_map_items`)."""
         cell_wrappers = {ctor: label for label, (ctor, _) in self.cell_map_item_info.items()}
 
-        def _wrap_elements(_k: KInner) -> KInner:
+        def _unwrap_elements(_k: KInner) -> KInner:
             if (
                 type(_k) is KApply
                 and _k.label.name in cell_wrappers
@@ -1571,7 +1571,7 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
                 return _k.args[1]
             return _k
 
-        return bottom_up(_wrap_elements, kast)
+        return bottom_up(_unwrap_elements, kast)
 
     def empty_config(self, sort: KSort) -> KInner:
         """Given a cell-sort, compute an "empty" configuration for it (all the constructor structure of the configuration in place, but variables in cell positions)."""
