@@ -294,8 +294,8 @@ class KRun(KPrint):
         assert parser.eof
         return res
 
-    def krun(self, input_file: Path) -> tuple[int, KInner]:
-        result = _krun(input_file=input_file, definition_dir=self.definition_dir, output=KRunOutput.KORE)
+    def krun(self, input_file: Path, parser: str | None = None) -> tuple[int, KInner]:
+        result = _krun(input_file=input_file, definition_dir=self.definition_dir, output=KRunOutput.KORE, parser=parser)
         kore = KoreParser(result.stdout).pattern()
         kast = self.kore_to_kast(kore)
         return (result.returncode, kast)

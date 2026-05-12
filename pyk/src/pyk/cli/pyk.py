@@ -354,11 +354,13 @@ class ProveOptions(LoggingOptions, SpecOptions, SaveDirOptions):
 class RunOptions(LoggingOptions):
     pgm_file: str
     definition_dir: Path | None
+    parser: str | None
 
     @staticmethod
     def default() -> dict[str, Any]:
         return {
             'definition_dir': None,
+            'parser': None,
         }
 
     @staticmethod
@@ -481,6 +483,7 @@ def create_argument_parser() -> ArgumentParser:
     )
     run_args.add_argument('pgm_file', type=str, help='File program to run in it.')
     run_args.add_argument('--definition', type=dir_path, dest='definition_dir', help='Path to definition to use.')
+    run_args.add_argument('--parser', type=str, help='Command to use as a custom parser.')
 
     prove_args = pyk_args_command.add_parser(
         'prove',

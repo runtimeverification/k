@@ -373,7 +373,7 @@ def exec_run(options: RunOptions) -> None:
     else:
         kompiled_directory = options.definition_dir
     krun = KRun(kompiled_directory)
-    rc, res = krun.krun(pgm_file)
+    rc, res = krun.krun(pgm_file, parser=options.parser)
     print(krun.pretty_print(res))
     sys.exit(rc)
 
