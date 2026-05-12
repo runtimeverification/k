@@ -51,7 +51,6 @@ issue-3446
 issue-3520-freshConfig
 issue-3647-debugTokens
 issue-3672-debugParse
-issue-582
 ite-bug
 itp
 json-input
@@ -69,7 +68,6 @@ kprove-error-status
 kprove-java
 kprove-markdown
 kprove-var-equals
-krun-deserialize
 llvm-kompile-type
 llvm-krun
 locations
@@ -97,7 +95,6 @@ search-bound
 set-symbolic-tests
 set_unification
 spec-rule-application
-star-multiplicity
 trace
 unification-lemmas
 useless
