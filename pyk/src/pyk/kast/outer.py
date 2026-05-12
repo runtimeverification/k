@@ -1139,12 +1139,12 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
     def cell_map_item_info(self) -> dict[str, tuple[str, KSort]]:
         """Map from cell label to (element-constructor label, cell-map sort).
 
-        Derived from cell-collection productions that carry both ELEMENT and WRAP_ELEMENT
-        attributes and whose element constructor is a known symbol.
+        Derived from cell-collection productions that carry both ``ELEMENT`` and ``WRAP_ELEMENT`` attributes and whose element constructor is a known symbol.
+
+        Example:
+            syntax AccountCellMap [cellCollection, hook(MAP.Map)]
+            syntax AccountCellMap ::= AccountCellMap AccountCellMap [assoc, avoid, cellCollection, comm, element(AccountCellMapItem), function, hook(MAP.concat), unit(.AccountCellMap), wrapElement(<account>)]
         """
-        # example:
-        # syntax AccountCellMap [cellCollection, hook(MAP.Map)]
-        # syntax AccountCellMap ::= AccountCellMap AccountCellMap [assoc, avoid, cellCollection, comm, element(AccountCellMapItem), function, hook(MAP.concat), unit(.AccountCellMap), wrapElement(<account>)]
         result: dict[str, tuple[str, KSort]] = {}
         for ccp in self.cell_collection_productions:
             if Atts.ELEMENT in ccp.att and Atts.WRAP_ELEMENT in ccp.att:
@@ -1529,12 +1529,18 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         return bottom_up(_add_sort_params, kast)
 
     def add_cell_map_items(self, kast: KInner) -> KInner:
-        """Wrap cell-map items in the syntactical wrapper that the frontend generates for them (see `KDefinition.remove_cell_map_items`)."""
+        """Wrap cell-map items in the syntactical wrapper that the frontend generates for them.
 
-        # Wrapping is correct only when the parent production expects the cell MAP sort (e.g.
-        # EntryCellMap), not when it expects the individual cell element sort (e.g. EntryCell).
-        # For example, EntryCellMapKey(<entry>(...)) takes EntryCell — the <entry> must NOT be
-        # wrapped, whereas _EntryCellMap_(<entry>(...), ...) expects EntryCellMap — wrapping is needed.
+        See :func:`KDefinition.remove_cell_map_items`.
+
+        Note:
+            Wrapping is correct only when the parent production expects the cell MAP sort (e.g. ``EntryCellMap``), not when it expects the individual cell element sort (e.g. ``EntryCell``).
+
+        Example:
+            ``EntryCellMapKey(<entry>(...))``: takes ``EntryCell``, ``<entry>`` must NOT be wrapped
+            ``_EntryCellMap_(<entry>(...), ...)``: expects ``EntryCellMap``, wrapping is needed
+        """
+
         def _wrap_elements(_k: KInner) -> KInner:
             if not isinstance(_k, KApply) or _k.label.name not in self.symbols:
                 return _k
