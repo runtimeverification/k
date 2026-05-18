@@ -743,7 +743,7 @@ class CutPointResult(ExecuteResult):
 
     state: State
     depth: int
-    next_states: tuple[State, ...]
+    next_states = None
     rule: str
     logs: tuple[LogEntry, ...]
 
@@ -754,7 +754,6 @@ class CutPointResult(ExecuteResult):
         return CutPointResult(
             state=State.from_dict(dct['state']),
             depth=dct['depth'],
-            next_states=tuple(State.from_dict(next_state) for next_state in dct['next-states']),
             rule=dct['rule'],
             logs=logs,
         )

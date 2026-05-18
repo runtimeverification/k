@@ -50,6 +50,7 @@ class CTermExecute(NamedTuple):
     next_states: tuple[NextState, ...]
     depth: int
     vacuous: bool
+    cut_point: bool
     logs: tuple[LogEntry, ...]
 
 
@@ -140,6 +141,7 @@ class CTermSymbolic:
             next_states=next_states,
             depth=response.depth,
             vacuous=response.reason is StopReason.VACUOUS,
+            cut_point=response.reason is StopReason.CUT_POINT_RULE,
             logs=response.logs,
         )
 

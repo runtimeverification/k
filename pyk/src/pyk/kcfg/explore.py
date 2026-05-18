@@ -228,7 +228,7 @@ class KCFGExplore:
         if _cterm != abstract_cterm:
             return [Abstract(abstract_cterm)]
 
-        cterm, next_states, depth, vacuous, next_node_logs = self.cterm_symbolic.execute(
+        cterm, next_states, depth, vacuous, cut_point, next_node_logs = self.cterm_symbolic.execute(
             _cterm,
             depth=execute_depth,
             cut_point_rules=cut_point_rules,
@@ -246,9 +246,21 @@ class KCFGExplore:
         if not next_states:
             if vacuous:
                 extend_results.append(Vacuous())
+            elif cut_point:
+                # Re-execute from cut-point state with depth=1, no cut-point labels, to get next state
+                next_cterm, _, next_depth, _, _, next_logs = self.cterm_symbolic.execute(
+                    cterm,
+                    depth=1,
+                    module_name=module_name,
+                )
+                if next_depth > 0:
+                    rules = self._extract_rule_labels(next_logs)
+                    extend_results.append(Step(next_cterm, 1, next_logs, rules, cut=True, info='cut-rule'))
+                else:
+                    extend_results.append(Stuck())
             elif depth == 0:
                 extend_results.append(Stuck())
-        # Cut rule
+        # Cut rule (legacy: backend still provides next-states)
         elif len(next_states) == 1:
             if not self.kcfg_semantics.can_make_custom_step(cterm):
                 (next_node_logs, rules) = (
