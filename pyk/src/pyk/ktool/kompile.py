@@ -29,7 +29,7 @@ _LOGGER: Final = logging.getLogger(__name__)
 
 class KompileNotFoundError(RuntimeError):
     def __init__(self, kompile_command: str):
-        super().__init__(f'Kompile command not found: {str}')
+        super().__init__(f'Kompile command not found: {kompile_command}')
 
 
 class PykBackend(Enum):

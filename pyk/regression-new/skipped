@@ -9,7 +9,6 @@ concrete-function
 concrete-function-cache
 concrete-haskell
 configuration-formatting
-context-alias
 context-alias-2
 context-labels
 domains-lemmas-no-smt
@@ -33,10 +32,8 @@ issue-1098
 issue-1145
 issue-1169
 issue-1175
-issue-1263
 issue-1436
 issue-1489-claimLoc
-issue-1528
 issue-1602
 issue-1676-koreBytes
 issue-1682-korePrettyPrint
@@ -54,7 +51,6 @@ issue-3446
 issue-3520-freshConfig
 issue-3647-debugTokens
 issue-3672-debugParse
-issue-582
 ite-bug
 itp
 json-input
@@ -72,7 +68,6 @@ kprove-error-status
 kprove-java
 kprove-markdown
 kprove-var-equals
-krun-deserialize
 llvm-kompile-type
 llvm-krun
 locations
@@ -84,10 +79,7 @@ mutable-bytes
 non-executable
 nonexhaustive
 no-pattern
-or-haskell
-or-llvm
 parse-c
-parseNonPgm
 pattern-macro
 pattern-macro-productions
 pedanticAttributes
@@ -98,14 +90,11 @@ profile
 proof-instrumentation
 proof-tests
 quadratic-poly-unparsing
-rand
-rangemap-tests-llvm
 rat
 search-bound
 set-symbolic-tests
 set_unification
 spec-rule-application
-star-multiplicity
 trace
 unification-lemmas
 useless
