@@ -73,6 +73,7 @@ class CTermSymbolic:
     _definition: KDefinition
     _log_succ_rewrites: bool
     _log_fail_rewrites: bool
+    _booster_only_simplify: bool
 
     def __init__(
         self,
@@ -81,11 +82,13 @@ class CTermSymbolic:
         *,
         log_succ_rewrites: bool = True,
         log_fail_rewrites: bool = False,
+        booster_only_simplify: bool = False,
     ):
         self._kore_client = kore_client
         self._definition = definition
         self._log_succ_rewrites = log_succ_rewrites
         self._log_fail_rewrites = log_fail_rewrites
+        self._booster_only_simplify = booster_only_simplify
 
     def kast_to_kore(self, kinner: KInner) -> Pattern:
         return kast_to_kore(self._definition, kinner, sort=GENERATED_TOP_CELL)
@@ -100,6 +103,7 @@ class CTermSymbolic:
         cut_point_rules: Iterable[str] | None = None,
         terminal_rules: Iterable[str] | None = None,
         module_name: str | None = None,
+        booster_only_simplify: bool | None = None,
     ) -> CTermExecute:
 
         _LOGGER.debug(f'Executing: {cterm}')
@@ -113,6 +117,9 @@ class CTermSymbolic:
                 module_name=module_name,
                 log_successful_rewrites=self._log_succ_rewrites,
                 log_failed_rewrites=self._log_succ_rewrites and self._log_fail_rewrites,
+                booster_only_simplify=(
+                    booster_only_simplify if booster_only_simplify is not None else self._booster_only_simplify
+                ),
             )
         except SmtSolverError as err:
             raise self._smt_solver_error(err) from err
@@ -143,16 +150,28 @@ class CTermSymbolic:
             logs=response.logs,
         )
 
-    def simplify(self, cterm: CTerm, module_name: str | None = None) -> tuple[CTerm, tuple[LogEntry, ...]]:
+    def simplify(
+        self, cterm: CTerm, module_name: str | None = None, booster_only_simplify: bool | None = None
+    ) -> tuple[CTerm, tuple[LogEntry, ...]]:
         _LOGGER.debug(f'Simplifying: {cterm}')
-        kast_simplified, logs = self.kast_simplify(cterm.kast, module_name=module_name)
+        kast_simplified, logs = self.kast_simplify(
+            cterm.kast, module_name=module_name, booster_only_simplify=booster_only_simplify
+        )
         return CTerm.from_kast(kast_simplified), logs
 
-    def kast_simplify(self, kast: KInner, module_name: str | None = None) -> tuple[KInner, tuple[LogEntry, ...]]:
+    def kast_simplify(
+        self, kast: KInner, module_name: str | None = None, booster_only_simplify: bool | None = None
+    ) -> tuple[KInner, tuple[LogEntry, ...]]:
         _LOGGER.debug(f'Simplifying: {kast}')
         kore = self.kast_to_kore(kast)
         try:
-            kore_simplified, logs = self._kore_client.simplify(kore, module_name=module_name)
+            kore_simplified, logs = self._kore_client.simplify(
+                kore,
+                module_name=module_name,
+                booster_only_simplify=(
+                    booster_only_simplify if booster_only_simplify is not None else self._booster_only_simplify
+                ),
+            )
         except SmtSolverError as err:
             raise self._smt_solver_error(err) from err
 
@@ -194,6 +213,7 @@ class CTermSymbolic:
         failure_reason: bool = False,
         module_name: str | None = None,
         assume_defined: bool = False,
+        booster_only_simplify: bool | None = None,
     ) -> CTermImplies:
         _LOGGER.debug(f'Checking implication: {antecedent} #Implies {consequent}')
         _consequent = consequent.kast
@@ -211,7 +231,13 @@ class CTermSymbolic:
         consequent_kore = self.kast_to_kore(_consequent)
         try:
             result = self._kore_client.implies(
-                antecedent_kore, consequent_kore, module_name=module_name, assume_defined=assume_defined
+                antecedent_kore,
+                consequent_kore,
+                module_name=module_name,
+                assume_defined=assume_defined,
+                booster_only_simplify=(
+                    booster_only_simplify if booster_only_simplify is not None else self._booster_only_simplify
+                ),
             )
         except SmtSolverError as err:
             raise self._smt_solver_error(err) from err
@@ -231,6 +257,7 @@ class CTermSymbolic:
                     failure_reason=False,
                     module_name=module_name,
                     assume_defined=assume_defined,
+                    booster_only_simplify=booster_only_simplify,
                 )
                 config_match = _config_match.csubst
                 if config_match is None:
@@ -269,11 +296,17 @@ class CTermSymbolic:
         csubst = CSubst.from_pred(ml_subst_pred)
         return CTermImplies(csubst, (), None, result.logs)
 
-    def assume_defined(self, cterm: CTerm, module_name: str | None = None) -> CTerm:
+    def assume_defined(
+        self, cterm: CTerm, module_name: str | None = None, booster_only_simplify: bool = False
+    ) -> CTerm:
         _LOGGER.debug(f'Computing definedness condition for: {cterm}')
-        cterm_simplified, logs = self.simplify(cterm, module_name=module_name)
+        cterm_simplified, logs = self.simplify(
+            cterm, module_name=module_name, booster_only_simplify=booster_only_simplify
+        )
         kast = KApply(KLabel('#Ceil', [GENERATED_TOP_CELL, GENERATED_TOP_CELL]), [cterm_simplified.config])
-        kast_simplified, logs = self.kast_simplify(kast, module_name=module_name)
+        kast_simplified, logs = self.kast_simplify(
+            kast, module_name=module_name, booster_only_simplify=booster_only_simplify
+        )
         _LOGGER.debug(f'Definedness condition computed: {kast_simplified}')
         return cterm.add_constraint(kast_simplified)
 
@@ -305,6 +338,7 @@ def cterm_symbolic(
     log_axioms_file: Path | None = None,
     log_succ_rewrites: bool = True,
     log_fail_rewrites: bool = False,
+    booster_only_simplify: bool = False,
     start_server: bool = True,
     fallback_on: Iterable[FallbackReason] | None = None,
     interim_simplification: int | None = None,
@@ -333,7 +367,11 @@ def cterm_symbolic(
         ) as server:
             with KoreClient('localhost', server.port, bug_report=bug_report, bug_report_id=id) as client:
                 yield CTermSymbolic(
-                    client, definition, log_succ_rewrites=log_succ_rewrites, log_fail_rewrites=log_fail_rewrites
+                    client,
+                    definition,
+                    log_succ_rewrites=log_succ_rewrites,
+                    log_fail_rewrites=log_fail_rewrites,
+                    booster_only_simplify=booster_only_simplify,
                 )
     else:
         if port is None:

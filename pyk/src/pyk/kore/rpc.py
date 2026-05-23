@@ -965,6 +965,7 @@ class KoreClient(ContextManager['KoreClient']):
         module_name: str | None = None,
         log_successful_rewrites: bool | None = None,
         log_failed_rewrites: bool | None = None,
+        booster_only_simplify: bool | None = None,
     ) -> ExecuteResult:
         params = filter_none(
             {
@@ -978,6 +979,7 @@ class KoreClient(ContextManager['KoreClient']):
                 'state': self._state(pattern),
                 'log-successful-rewrites': log_successful_rewrites,
                 'log-failed-rewrites': log_failed_rewrites,
+                'booster-only': booster_only_simplify,
             }
         )
 
@@ -991,6 +993,7 @@ class KoreClient(ContextManager['KoreClient']):
         *,
         module_name: str | None = None,
         assume_defined: bool = False,
+        booster_only_simplify: bool | None = None,
     ) -> ImpliesResult:
         params = filter_none(
             {
@@ -998,6 +1001,7 @@ class KoreClient(ContextManager['KoreClient']):
                 'consequent': self._state(consequent),
                 'module': module_name,
                 'assume-defined': assume_defined,
+                'booster-only': booster_only_simplify,
             }
         )
 
@@ -1009,11 +1013,13 @@ class KoreClient(ContextManager['KoreClient']):
         pattern: Pattern,
         *,
         module_name: str | None = None,
+        booster_only_simplify: bool | None = None,
     ) -> tuple[Pattern, tuple[LogEntry, ...]]:
         params = filter_none(
             {
                 'state': self._state(pattern),
                 'module': module_name,
+                'booster-only': booster_only_simplify,
             }
         )
 
