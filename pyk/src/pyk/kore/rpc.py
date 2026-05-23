@@ -44,6 +44,7 @@ _LOGGER: Final = logging.getLogger(__name__)
 class KoreExecLogFormat(Enum):
     STANDARD = 'standard'
     ONELINE = 'oneline'
+    JSON = 'json'
 
 
 @final
