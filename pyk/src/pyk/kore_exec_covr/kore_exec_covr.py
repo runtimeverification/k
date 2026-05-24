@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from ..kast.outer import KDefinition, KRule
 
 
-_LOG_FORMAT: Final = '%(levelname)s %(name)s - %(message)s'
+_LOG_FORMAT: Final = '%(levelname)s %(name)s [%(process)d] - %(message)s'
 _LOGGER: Final = logging.getLogger(__name__)
 
 _HASKELL_LOG_ENTRY_REGEXP: Final = re.compile(r'(kore-exec|kore-rpc): \[\d*\] Debug \(([a-zA-Z]*)\):(.*)')

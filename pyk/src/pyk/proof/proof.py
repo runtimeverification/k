@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor, wait
 from dataclasses import dataclass
@@ -521,7 +520,7 @@ class Prover(ContextManager['Prover'], Generic[P, PS, SR]):
             maintenance_rate: Number of iterations between proof maintenance (writing to disk and executing callback).
         """
         iterations = 0
-        _LOGGER.info(f'Initializing proof: {proof.id} (pid: {os.getpid()})')
+        _LOGGER.info(f'Initializing proof: {proof.id}')
         self.init_proof(proof)
         while True:
             steps = list(proof.get_steps())
