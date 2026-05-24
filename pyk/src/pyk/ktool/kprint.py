@@ -219,6 +219,22 @@ class KPrint:
     def definition(self) -> KDefinition:
         return read_kast_definition(self.definition_dir / 'compiled.json')
 
+    @cached_property
+    def all_rules(self) -> dict[str, str]:
+        """Map from 12-char rule hash prefix to source location (file:line:col).
+
+        Parsed from allRules.txt in the kompiled definition directory.
+        Keyed by the first 12 hex characters of each rule's SHA-256 hash.
+        """
+        rules: dict[str, str] = {}
+        for line in (self.definition_dir / 'allRules.txt').read_text().splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            full_hash, _, location = line.partition(' ')
+            rules[full_hash[:12]] = location
+        return rules
+
     @property
     def definition_hash(self) -> str:
         return self.definition.hash
