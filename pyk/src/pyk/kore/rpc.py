@@ -121,7 +121,7 @@ class SingleSocketTransport(Transport):
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 sock.connect((host, port))
                 local_port = sock.getsockname()[1]
-                _LOGGER.info(f'Connected to host: {host}:{port} (local port: {local_port})')
+                _LOGGER.info(f'Connected to host: {host}:{port} (local port: {local_port}, pid: {os.getpid()})')
                 return sock
             except ConnectionRefusedError:
                 sock.close()
