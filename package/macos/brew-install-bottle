@@ -1,5 +1,0 @@
-#!/bin/sh -ex
-package="$1" ; shift
-version="$1" ; shift
-brew tap runtimeverification/k "file:///$(pwd)"
-brew install $package--$version.*.bottle*.tar.gz -v
