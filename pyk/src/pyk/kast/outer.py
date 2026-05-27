@@ -1045,8 +1045,10 @@ def _resolve_sort_partial(
     bindings: dict[KSort, KSort],
     params: frozenset[KSort],
 ) -> KSort | None:
-    """Substitute ``bindings`` into ``sort``, returning ``None`` if any param in
-    ``params`` appears in ``sort`` but is not present in ``bindings``."""
+    """Substitute ``bindings`` into ``sort``, returning ``None`` if any param is unbound.
+
+    A param in ``params`` is considered unbound if it does not appear in ``bindings``.
+    """
     if sort in params:
         return bindings.get(sort)
     if sort.params:
