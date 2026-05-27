@@ -130,7 +130,7 @@ ML_TO_BOOL_TEST_DATA: Final = (
             KLabel('#Ceil', [KSort('Set'), GENERATED_TOP_CELL]),
             [KApply(KLabel('_Set_'), [KVariable('_'), KVariable('_')])],
         ),
-        KVariable('Ceil_fa9c0b54'),
+        KVariable('Ceil_db45cd3a'),
     ),
     (
         'ceil-set-concat-sort',
@@ -144,7 +144,7 @@ ML_TO_BOOL_TEST_DATA: Final = (
                 )
             ],
         ),
-        notBool(KVariable('Ceil_fa9c0b54')),
+        notBool(KVariable('Ceil_db45cd3a')),
     ),
     (
         'exists-equal-int',
@@ -153,7 +153,7 @@ ML_TO_BOOL_TEST_DATA: Final = (
             KLabel('#Exists', [INT, BOOL]),
             [KVariable('X'), KApply('_==Int_', [KVariable('X'), KVariable('Y')])],
         ),
-        KVariable('Exists_9a5d09ae'),
+        KVariable('Exists_a0a13db0'),
     ),
     (
         'kapply-equal-kappy',
@@ -602,30 +602,30 @@ DEFINITION: Final = KDefinition(
 TEST_DATA: tuple[tuple[KInner, KInner, list[KInner]], ...] = (
     (
         add(token(1), token(2)),
-        KVariable('F_eefa6e95', sort=INT),
-        [var_equals('F_eefa6e95', add(token(1), token(2)))],
+        KVariable('F_8e8c9492', sort=INT),
+        [var_equals('F_8e8c9492', add(token(1), token(2)))],
     ),
     (to_s(token(1)), to_s(token(1)), []),
     (
         to_s(to_int(to_s(add(token(1), token(2))))),
-        to_s(KVariable('F_a8146589', sort=INT)),
-        [var_equals('F_a8146589', to_int(to_s(add(token(1), token(2)))))],
+        to_s(KVariable('F_3ddc64b8', sort=INT)),
+        [var_equals('F_3ddc64b8', to_int(to_s(add(token(1), token(2)))))],
     ),
     (
         to_s_2(add(token(1), token(2)), init_s()),
-        to_s_2(KVariable('F_eefa6e95', sort=INT), init_s()),
-        [var_equals('F_eefa6e95', add(token(1), token(2)))],
+        to_s_2(KVariable('F_8e8c9492', sort=INT), init_s()),
+        [var_equals('F_8e8c9492', add(token(1), token(2)))],
     ),
     (to_s_2(token(1), init_s()), to_s_2(token(1), init_s()), []),
     (
         to_s_2(add(token(1), token(2)), to_s(add(token(1), token(2)))),
-        to_s_2(KVariable('F_eefa6e95', INT), to_s(KVariable('F_eefa6e95', INT))),
-        [var_equals('F_eefa6e95', add(token(1), token(2)))],
+        to_s_2(KVariable('F_8e8c9492', INT), to_s(KVariable('F_8e8c9492', INT))),
+        [var_equals('F_8e8c9492', add(token(1), token(2)))],
     ),
     (
         to_s_2(add(token(1), token(2)), to_s(to_int(init_s()))),
-        to_s_2(KVariable('F_eefa6e95', INT), to_s(KVariable('F_3294e1be', INT))),
-        [var_equals('F_eefa6e95', add(token(1), token(2))), var_equals('F_3294e1be', to_int(init_s()))],
+        to_s_2(KVariable('F_8e8c9492', INT), to_s(KVariable('F_3294e1be', INT))),
+        [var_equals('F_8e8c9492', add(token(1), token(2))), var_equals('F_3294e1be', to_int(init_s()))],
     ),
 )
 

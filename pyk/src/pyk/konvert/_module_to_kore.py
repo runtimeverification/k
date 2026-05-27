@@ -212,19 +212,25 @@ def _parse_special_att_value(key: AttKey, value: Any) -> tuple[tuple[Sort, ...],
 
 def sort_decl_to_kore(syntax_sort: KSyntaxSort) -> SortDecl:
     name = _sort_name(syntax_sort.sort.name)
+    # Preserve the sort variable names from KAST (e.g. SortWidth for MInt{Width}).
+    # NOTE: Java's Kore backend diverges here — it emits canonical indexed names
+    # (SortS0, SortS1, …) in sort declarations while using the original names in
+    # production symbols. We use the original names throughout for consistency.
+    sort_vars = tuple(_sort_var(p) for p in syntax_sort.sort.params)
     attrs = atts_to_kore(syntax_sort.att)
     hooked = Atts.HOOK in syntax_sort.att
-    return SortDecl(name, (), attrs=attrs, hooked=hooked)
+    return SortDecl(name, sort_vars, attrs=attrs, hooked=hooked)
 
 
 def sort_to_kore(sort: KSort, production: KProduction | None = None) -> Sort:
     if production and sort in production.params:
         return _sort_var(sort)
-    return _sort_app(sort)
+    return _sort_app(sort, production)
 
 
-def _sort_app(sort: KSort) -> SortApp:
-    return SortApp(_sort_name(sort.name))
+def _sort_app(sort: KSort, production: KProduction | None = None) -> SortApp:
+    sort_args = tuple(sort_to_kore(p, production) for p in sort.params)
+    return SortApp(_sort_name(sort.name), sort_args)
 
 
 def _sort_var(sort: KSort) -> SortVar:
@@ -638,6 +644,10 @@ def _no_junk_axioms(defn: KDefinition) -> list[Axiom]:
     res: list[Axiom] = []
     prods = prods_by_sort()
     for syntax_sort in module.syntax_sorts:
+        # Parameterized sorts (e.g. MInt{Width}) have sort-variable parameters;
+        # Java does not generate no-junk axioms for them.
+        if syntax_sort.sort.params:
+            continue
         no_junk = no_junk_for(syntax_sort, prods.get(syntax_sort.sort, []))
         axiom = no_junk.axiom()
         if axiom:
@@ -737,6 +747,7 @@ def simplified_module(definition: KDefinition, module_name: str | None = None) -
                 Atts.EXIT,
                 Atts.FORMAT,
                 Atts.GROUP,
+                Atts.HYBRID,
                 Atts.INDEX,
                 Atts.INITIALIZER,
                 Atts.LEFT,
@@ -747,17 +758,21 @@ def simplified_module(definition: KDefinition, module_name: str | None = None) -
                 Atts.PRIVATE,
                 Atts.PRODUCTION,
                 Atts.PROJECTION,
+                Atts.PUBLIC,
                 Atts.RETURNS_UNIT,
                 Atts.RIGHT,
                 Atts.SEQSTRICT,
+                Atts.STREAM,
                 Atts.STRICT,
                 Atts.TYPE,
                 Atts.TERMINATOR_SYMBOL,
+                Atts.UNUSED,
                 Atts.USER_LIST,
                 Atts.WRAP_ELEMENT,
             ],
         ),
         DiscardHookAtts(),
+        DiscardPolymorphicSentences(),
         AddImpureAtts(),
         AddSymbolAtts(Atts.MACRO(None), _is_macro),
         AddSymbolAtts(Atts.FUNCTIONAL(None), _is_functional),
@@ -1241,6 +1256,42 @@ class DiscardSymbolAtts(SingleModulePass):
             return production
 
         return production.let(att=production.att.discard(self.keys))
+
+
+@dataclass
+class DiscardPolymorphicSentences(SingleModulePass):
+    """Java compatibility: remove rules for polymorphic function labels.
+
+    Java's ComputeTransitiveFunctionDependencies looks up rules by the
+    post-sort-injection KLabel (e.g. ite{K}), but the production's
+    attributesFor() key is the parametric form (e.g. ite{SortSort}), so no
+    rules are ever found and impurity does not propagate through polymorphic
+    functions. Removing those rules here mirrors that behaviour and avoids
+    special-casing the quirk in every downstream pass.
+
+    Remove this pass (and re-enable the rules) once Java correctly handles
+    polymorphic function rules in its dependency analysis.
+    """
+
+    def _transform_module(self, module: KFlatModule) -> KFlatModule:
+        poly_labels = {
+            prod.klabel.name
+            for prod in module.productions
+            if prod.klabel and prod.klabel.params and Atts.FUNCTION in prod.att
+        }
+        if not poly_labels:
+            return module
+        return module.let(sentences=(sent for sent in module.sentences if not self._is_poly_rule(sent, poly_labels)))
+
+    @staticmethod
+    def _is_poly_rule(sentence: object, poly_labels: set[str]) -> bool:
+        if not isinstance(sentence, KRule):
+            return False
+        match sentence.body:
+            case KRewrite(KApply(KLabel(label)), _):
+                return label in poly_labels
+            case _:
+                return False
 
 
 # -----------------

@@ -20,7 +20,7 @@ _LOGGER: Final = logging.getLogger(__name__)
 class KAst(ABC):
     @staticmethod
     def version() -> int:
-        return 3
+        return 4
 
     @abstractmethod
     def to_dict(self) -> dict[str, Any]: ...
