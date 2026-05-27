@@ -1,6 +1,0 @@
-#!/bin/sh -exu
-package="$1"  ; shift
-version="$1"  ; shift
-root_url="$1" ; shift
-sed -i "" -e 's!^  url ".*"$!  url "'$root_url/v$version/$package-$version-src'.tar.gz"!' Formula/$package.rb
-cat Formula/$package.rb
