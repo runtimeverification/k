@@ -1040,6 +1040,23 @@ def _match_sort_params(
     return {}
 
 
+def _resolve_sort_partial(
+    sort: KSort,
+    bindings: dict[KSort, KSort],
+    params: frozenset[KSort],
+) -> KSort | None:
+    """Substitute ``bindings`` into ``sort``, returning ``None`` if any param in
+    ``params`` appears in ``sort`` but is not present in ``bindings``."""
+    if sort in params:
+        return bindings.get(sort)
+    if sort.params:
+        resolved = [_resolve_sort_partial(p, bindings, params) for p in sort.params]
+        if any(r is None for r in resolved):
+            return None
+        return KSort(sort.name, tuple(resolved))  # type: ignore[arg-type]
+    return sort
+
+
 @final
 @dataclass(frozen=True)
 class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
@@ -1555,11 +1572,23 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         prod: KProduction,
         actual_sorts: tuple[KSort | None, ...],
         expected_sort: KSort | None = None,
-    ) -> dict[KSort, KSort]:
+    ) -> tuple[dict[KSort, KSort | None], KSort | None]:
         """Infer sort parameter bindings for a parametric production application.
 
-        Returns a (possibly partial) mapping from sort params to concrete sorts;
-        unbound parameters are absent from the result.
+        Returns ``(bindings, inferred_sort)`` where:
+
+        ``bindings`` maps each sort param to one of three states:
+        - key present, value non-``None``: parameter successfully bound to that sort.
+        - key present, value ``None``: candidates were found but their LUB could not be
+          computed (conflicting sorts with no common supersort).
+        - key absent: no candidates were collected (unsortable / no structural match).
+
+        ``inferred_sort`` is the production's result sort after substituting the
+        successful bindings.  It is ``None`` if any sort param appearing in the result
+        sort is unbound or conflicted — including the case where ``prod`` is parametric
+        but no candidates were found.  For non-parametric productions it is always the
+        concrete result sort.
+
         Mirrors ``AddSortInjections.substituteProd()`` in the Java frontend.
 
         ``actual_sorts`` must have the same length as ``prod.argument_sorts``.
@@ -1588,7 +1617,7 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
                 for k, vs in _match_sort_params(prod.sort, expected_sort, unbound_result_params).items():
                     candidates.setdefault(k, []).extend(vs)
 
-        result: dict[KSort, KSort] = {}
+        result: dict[KSort, KSort | None] = {}
         for p in prod.params:
             if p not in candidates:
                 continue
@@ -1598,12 +1627,15 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
                     continue
                 new_lub = self.least_common_supersort(lub, s)
                 if new_lub is None:
+                    result[p] = None  # conflict: candidates found but no common supersort
                     break
                 lub = new_lub
             else:
                 result[p] = lub
 
-        return result
+        successful: dict[KSort, KSort] = {k: v for k, v in result.items() if v is not None}
+        inferred_sort = _resolve_sort_partial(prod.sort, successful, params)
+        return result, inferred_sort
 
     # Best-effort addition of sort parameters to klabels, context insensitive
     def add_sort_params(self, kast: KInner) -> KInner:
@@ -1639,7 +1671,8 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
                 else:
                     inference_sorts.append(asort)
 
-            bindings = self.infer_sort_params(prod, tuple(inference_sorts))
+            bindings_raw, _ = self.infer_sort_params(prod, tuple(inference_sorts))
+            bindings: dict[KSort, KSort] = {k: v for k, v in bindings_raw.items() if v is not None}
 
             # Sentinel propagation: if an arg carried the #SortParam sentinel (from a nested ML
             # pred) and inference left that arg's param slot empty, fill it with the sentinel.

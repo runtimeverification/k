@@ -263,7 +263,9 @@ ADD_SORT_PARAMS_DATA: Final = (
         KApply(KLabel('foo'), [KVariable('X')]),
     ),
     # Subsort-aware: arg sort is Int, but MInt{Int} <: Int in DEFN, so N=Int via subsort match
-    # (this case would fail with structural-only unification since Int ≠ MInt{N})
+    # (this case would fail with structural-only unification since Int ≠ MInt{N}).
+    # Note: X keeps sort Int even though the resolved production argument sort is MInt{Int}.
+    # add_sort_params only fills KLabel sort params; it does not check or modify variable sorts.
     (
         'subsort_aware',
         KApply(KLabel('foo'), [KVariable('X', sort=INT)]),
@@ -307,24 +309,33 @@ def test_add_sort_params_user_label_unresolvable_warns(caplog: pytest.LogCapture
 # Java AddSortInjections.substituteProd() test scenarios derived from the algorithm.
 
 INFER_SORT_PARAMS_DATA: Final[
-    tuple[tuple[str, KProduction, tuple[KSort | None, ...], KSort | None, dict[KSort, KSort]], ...]
+    tuple[
+        tuple[str, KProduction, tuple[KSort | None, ...], KSort | None, dict[KSort, KSort | None], KSort | None],
+        ...,
+    ]
 ] = (
-    # Direct param: psort IS the param (N → Int)
-    ('direct_param', _BAR_PROD, (INT,), None, {N: INT}),
-    # Nested param: psort = MInt{N}, asort = MInt{Int} → N=Int via structural match
-    ('nested_param', _FOO_PROD, (MINT_INT,), None, {N: INT}),
+    # Direct param: psort IS the param (N → Int); prod.sort=N → inferred=Int
+    ('direct_param', _BAR_PROD, (INT,), None, {N: INT}, INT),
+    # Nested param: psort = MInt{N}, asort = MInt{Int} → N=Int; prod.sort=MInt{N} → inferred=MInt{Int}
+    ('nested_param', _FOO_PROD, (MINT_INT,), None, {N: INT}, MINT_INT),
     # Subsort-aware: arg sort is Int, MInt{Int} <: Int in DEFN → N=Int via subsort iteration
-    # (structural match fails: MInt{N} ≠ Int; subsort check finds MInt{Int} ≤ Int)
-    ('subsort_aware', _FOO_PROD, (INT,), None, {N: INT}),
-    # matchExpected: baz() has no arg sorts; N is bound from the expected_sort MInt{Int}
-    ('expected_sort', _BAZ_PROD, (), MINT_INT, {N: INT}),
-    # None arg is skipped; no bindings → empty result
-    ('unbound_absent', _BAR_PROD, (None,), None, {}),
+    ('subsort_aware', _FOO_PROD, (INT,), None, {N: INT}, MINT_INT),
+    # matchExpected: baz() has no arg sorts; N bound from expected_sort MInt{Int} → inferred=MInt{Int}
+    ('expected_sort', _BAZ_PROD, (), MINT_INT, {N: INT}, MINT_INT),
+    # None arg skipped; N has no candidates → inferred=None (parametric prod, N unbound)
+    ('unbound_absent', _BAR_PROD, (None,), None, {}, None),
+    # Conflicting args: S1→[Int,Bool] LUB fails → S1:None; S2 no candidates; prod.sort=S2 → inferred=None
+    ('conflicting_args', _EQUALS_PROD, (INT, KSort('Bool')), None, {S1: None}, None),
+    # expected_sort head mismatch: MInt{N} vs Int → no structural match → N absent → inferred=None
+    ('expected_sort_mismatch', _BAZ_PROD, (), INT, {}, None),
+    # Non-parametric: no params to bind, result sort is always concrete → inferred=AccountCell ≠ None
+    # This distinguishes "trivially complete (no params)" from "params exist but no candidates".
+    ('no_params_trivial', _ACCOUNT_CELL, (INT, INT), None, {}, ACCOUNT_CELL),
 )
 
 
 @pytest.mark.parametrize(
-    'test_id,prod,actual_sorts,expected_sort,expected_bindings',
+    'test_id,prod,actual_sorts,expected_sort,expected_bindings,expected_inferred_sort',
     INFER_SORT_PARAMS_DATA,
     ids=[test_id for test_id, *_ in INFER_SORT_PARAMS_DATA],
 )
@@ -333,9 +344,12 @@ def test_infer_sort_params(
     prod: KProduction,
     actual_sorts: tuple[KSort | None, ...],
     expected_sort: KSort | None,
-    expected_bindings: dict[KSort, KSort],
+    expected_bindings: dict[KSort, KSort | None],
+    expected_inferred_sort: KSort | None,
 ) -> None:
-    assert DEFN.infer_sort_params(prod, actual_sorts, expected_sort) == expected_bindings
+    bindings, inferred_sort = DEFN.infer_sort_params(prod, actual_sorts, expected_sort)
+    assert bindings == expected_bindings
+    assert inferred_sort == expected_inferred_sort
 
 
 # ---------------------------------------------------------------------------
@@ -343,10 +357,6 @@ def test_infer_sort_params(
 # ---------------------------------------------------------------------------
 #
 # Directly tests the three matching strategies described in the docstring.
-
-
-def _subsorts_fn(s: KSort) -> frozenset[KSort]:
-    return frozenset({MINT_INT}) if s == INT else frozenset()
 
 
 MATCH_SORT_PARAMS_DATA: Final[
@@ -363,8 +373,8 @@ MATCH_SORT_PARAMS_DATA: Final[
     ('structural', MINT_N, MINT_INT, frozenset({N}), None, {N: [INT]}),
     # Case 2 fails (different heads), no subsorts_fn → empty
     ('structural_no_match_no_subsorts', MINT_N, INT, frozenset({N}), None, {}),
-    # Case 3 – subsort-aware: MInt{N} vs Int; subsorts_fn yields MInt{Int} → N=Int
-    ('subsort_aware', MINT_N, INT, frozenset({N}), _subsorts_fn, {N: [INT]}),
+    # Case 3 – subsort-aware: MInt{N} vs Int; DEFN.subsorts yields MInt{Int} → N=Int
+    ('subsort_aware', MINT_N, INT, frozenset({N}), DEFN.subsorts, {N: [INT]}),
     # No match in any case
     ('no_match', INT, KSort('Bool'), frozenset({N}), None, {}),
 )
