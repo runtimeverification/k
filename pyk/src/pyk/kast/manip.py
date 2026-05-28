@@ -114,7 +114,7 @@ def bool_to_ml_pred(kast: KInner, sort: str | KSort = GENERATED_TOP_CELL) -> KIn
     return mlAnd([_bool_constraint_to_ml(cond) for cond in flatten_label('_andBool_', kast)], sort=sort)
 
 
-def ml_pred_to_bool(kast: KInner, unsafe: bool = False) -> KInner:
+def ml_pred_to_bool(kast: KInner, unsafe: bool = False, keep_unsafe: bool = False) -> KInner:
     def _ml_constraint_to_bool(_kast: KInner) -> KInner:
         if type(_kast) is KApply:
             if _kast.label.name == '#Top':
@@ -165,6 +165,8 @@ def ml_pred_to_bool(kast: KInner, unsafe: bool = False) -> KInner:
                     exists_var = abstract_term_safely(_kast, base_name='Exists')
                     _LOGGER.warning(f'Converting #Exists condition to variable {exists_var.name}: {_kast}')
                     return exists_var
+            if keep_unsafe:
+                return _kast
         raise ValueError(f'Could not convert ML predicate to sort Bool: {_kast}')
 
     return _ml_constraint_to_bool(kast)
@@ -203,8 +205,8 @@ def simplify_bool(k: KInner) -> KInner:
     return new_k
 
 
-def normalize_ml_pred(pred: KInner) -> KInner:
-    return bool_to_ml_pred(simplify_bool(ml_pred_to_bool(pred)))
+def normalize_ml_pred(pred: KInner, keep_unsafe: bool = False) -> KInner:
+    return bool_to_ml_pred(simplify_bool(ml_pred_to_bool(pred, keep_unsafe=keep_unsafe)))
 
 
 def extract_lhs(term: KInner) -> KInner:
@@ -705,6 +707,7 @@ def build_claim(
     init_constraints: Iterable[KInner] = (),
     final_constraints: Iterable[KInner] = (),
     keep_vars: Iterable[str] = (),
+    keep_unsafe: bool = False,
 ) -> tuple[KClaim, Subst]:
     """Return a `KClaim` between the supplied initial and final states.
 
@@ -725,7 +728,13 @@ def build_claim(
           (which can be undone to recover the original variables).
     """
     rule, var_map = build_rule(
-        claim_id, init_config, final_config, init_constraints, final_constraints, keep_vars=keep_vars
+        claim_id,
+        init_config,
+        final_config,
+        init_constraints,
+        final_constraints,
+        keep_vars=keep_vars,
+        keep_unsafe=keep_unsafe,
     )
     claim = KClaim(rule.body, requires=rule.requires, ensures=rule.ensures, att=rule.att)
     return claim, var_map
@@ -740,6 +749,7 @@ def build_rule(
     priority: int | None = None,
     keep_vars: Iterable[str] = (),
     defunc_with: KDefinition | None = None,
+    keep_unsafe: bool = False,
 ) -> tuple[KRule, Subst]:
     """Return a `KRule` between the supplied initial and final states.
 
@@ -761,8 +771,8 @@ def build_rule(
         - ``var_map``: The variable renamings applied to make the rule parseable by the K Frontend
           (which can be undone to recover the original variables).
     """
-    init_constraints = [normalize_ml_pred(c) for c in init_constraints]
-    final_constraints = [normalize_ml_pred(c) for c in final_constraints]
+    init_constraints = [normalize_ml_pred(c, keep_unsafe=keep_unsafe) for c in init_constraints]
+    final_constraints = [normalize_ml_pred(c, keep_unsafe=keep_unsafe) for c in final_constraints]
     final_constraints = [c for c in final_constraints if c not in init_constraints]
     if defunc_with is not None:
         init_config, new_constraints = defunctionalize(defunc_with, init_config)
@@ -798,8 +808,8 @@ def build_rule(
     )
 
     rule_body = push_down_rewrites(KRewrite(new_init_config, new_final_config))
-    rule_requires = simplify_bool(ml_pred_to_bool(mlAnd(new_init_constraints)))
-    rule_ensures = simplify_bool(ml_pred_to_bool(mlAnd(new_final_constraints)))
+    rule_requires = simplify_bool(ml_pred_to_bool(mlAnd(new_init_constraints), keep_unsafe=keep_unsafe))
+    rule_ensures = simplify_bool(ml_pred_to_bool(mlAnd(new_final_constraints), keep_unsafe=keep_unsafe))
     att_entries = [] if priority is None else [Atts.PRIORITY(str(priority))]
     rule_att = KAtt(entries=att_entries)
 
