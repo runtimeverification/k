@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from typing import Final
 
 
-_LOG_FORMAT: Final = '%(levelname)s %(name)s - %(message)s'
+_LOG_FORMAT: Final = '%(levelname)s %(name)s [%(process)d] - %(message)s'
 
 
 def do_analyze(definition_dir: Path, input_file: Path) -> None:
