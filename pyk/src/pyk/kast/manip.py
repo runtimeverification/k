@@ -708,6 +708,7 @@ def build_claim(
     final_constraints: Iterable[KInner] = (),
     keep_vars: Iterable[str] = (),
     keep_unsafe: bool = False,
+    filter_useless_constraints: bool = False,
 ) -> tuple[KClaim, Subst]:
     """Return a `KClaim` between the supplied initial and final states.
 
@@ -735,6 +736,7 @@ def build_claim(
         final_constraints,
         keep_vars=keep_vars,
         keep_unsafe=keep_unsafe,
+        filter_useless_constraints=filter_useless_constraints,
     )
     claim = KClaim(rule.body, requires=rule.requires, ensures=rule.ensures, att=rule.att)
     return claim, var_map
@@ -750,6 +752,7 @@ def build_rule(
     keep_vars: Iterable[str] = (),
     defunc_with: KDefinition | None = None,
     keep_unsafe: bool = False,
+    filter_useless_constraints: bool = False,
 ) -> tuple[KRule, Subst]:
     """Return a `KRule` between the supplied initial and final states.
 
@@ -762,6 +765,8 @@ def build_rule(
         priority: Priority index to assign to generated rules.
         keep_vars: Variables to leave in the side-conditions even if not bound in the configuration.
         defunc_with: KDefinition for filtering out function symbols on LHS of rules.
+        filter_useless_constraints: If True, drop constraints whose free variables are not
+            transitively reachable from the rule body or ``keep_vars`` after push_down_rewrites.
 
     Returns:
         A tuple ``(rule, var_map)`` where
@@ -808,6 +813,10 @@ def build_rule(
     )
 
     rule_body = push_down_rewrites(KRewrite(new_init_config, new_final_config))
+    if filter_useless_constraints:
+        body_vars = free_vars(rule_body) | set(keep_vars)
+        new_init_constraints = remove_useless_constraints(new_init_constraints, body_vars)
+        new_final_constraints = list(remove_useless_constraints(new_final_constraints, body_vars))
     rule_requires = simplify_bool(ml_pred_to_bool(mlAnd(new_init_constraints), keep_unsafe=keep_unsafe))
     rule_ensures = simplify_bool(ml_pred_to_bool(mlAnd(new_final_constraints), keep_unsafe=keep_unsafe))
     att_entries = [] if priority is None else [Atts.PRIORITY(str(priority))]
