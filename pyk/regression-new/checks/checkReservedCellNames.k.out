@@ -10,4 +10,4 @@
 	   .	     ^~~~~~~~~~~~
 [Error] Compiler: Had 2 parsing errors.
 [ERROR] Running process failed with returncode 113:
-    kompile checkReservedCellNames.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition checkReservedCellNames-kompiled --type-inference-mode checked
+    kompile checkReservedCellNames.k --md-selector k --emit-json --backend llvm --output-definition checkReservedCellNames-kompiled --type-inference-mode checked --warnings none --no-exc-wrap

@@ -2,7 +2,6 @@ DEF=a
 TESTDIR=.
 EXT=a
 KOMPILE_BACKEND=haskell
-KOMPILE_FLAGS=
 
 %-spec.k %-spec.md: kompile
 ifeq ($(TESTDIR),$(RESULTDIR))

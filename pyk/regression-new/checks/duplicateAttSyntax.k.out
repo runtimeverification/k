@@ -4,4 +4,4 @@
 	4 |	  syntax Foo  ::= a() [left, left]
 	  .	                             ^~~~
 [ERROR] Running process failed with returncode 113:
-    kompile duplicateAttSyntax.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition duplicateAttSyntax-kompiled --type-inference-mode checked
+    kompile duplicateAttSyntax.k --md-selector k --emit-json --backend llvm --output-definition duplicateAttSyntax-kompiled --type-inference-mode checked --warnings none --no-exc-wrap

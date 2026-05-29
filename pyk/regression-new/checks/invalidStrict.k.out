@@ -40,4 +40,4 @@
 	   .	               ^~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Had 8 structural errors.
 [ERROR] Running process failed with returncode 113:
-    kompile invalidStrict.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition invalidStrict-kompiled --type-inference-mode checked
+    kompile invalidStrict.k --md-selector k --emit-json --backend llvm --output-definition invalidStrict-kompiled --type-inference-mode checked --warnings none --no-exc-wrap
