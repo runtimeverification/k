@@ -137,7 +137,8 @@ class KCFGShow:
             csubst: CSubst, subst_first: bool = False, indent: int = 4, minimize: bool = False
         ) -> list[str]:
             _constraint_strs = [
-                self.pretty_printer.print(ml_pred_to_bool(constraint, unsafe=True)) for constraint in csubst.constraints
+                self.pretty_printer.print(ml_pred_to_bool(constraint, abstract_unsafe=True))
+                for constraint in csubst.constraints
             ]
             constraint_strs = _multi_line_print('constraint', _constraint_strs, 'true')
             if len(csubst.subst.minimize()) > 0 and minimize:

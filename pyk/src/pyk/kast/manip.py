@@ -114,7 +114,10 @@ def bool_to_ml_pred(kast: KInner, sort: str | KSort = GENERATED_TOP_CELL) -> KIn
     return mlAnd([_bool_constraint_to_ml(cond) for cond in flatten_label('_andBool_', kast)], sort=sort)
 
 
-def ml_pred_to_bool(kast: KInner, unsafe: bool = False, keep_unsafe: bool = False) -> KInner:
+def ml_pred_to_bool(kast: KInner, abstract_unsafe: bool = False, keep_unsafe: bool = False) -> KInner:
+    if abstract_unsafe and keep_unsafe:
+        raise ValueError('abstract_unsafe and keep_unsafe are mutually exclusive')
+
     def _ml_constraint_to_bool(_kast: KInner) -> KInner:
         if type(_kast) is KApply:
             if _kast.label.name == '#Top':
@@ -154,7 +157,7 @@ def ml_pred_to_bool(kast: KInner, unsafe: bool = False, keep_unsafe: bool = Fals
                         return KApply('_==K_', (first.items[0], second.items[0]))
                 if is_term_like(first) and is_term_like(second):
                     return KApply('_==K_', first, second)
-            if unsafe:
+            if abstract_unsafe:
                 if _kast.label.name == '#Equals':
                     return KApply('_==K_', _kast.args)
                 if _kast.label.name == '#Ceil':

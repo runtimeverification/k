@@ -189,13 +189,13 @@ ML_TO_BOOL_TEST_DATA: Final = (
 
 
 @pytest.mark.parametrize(
-    'test_id,unsafe,ml_pred,expected',
+    'test_id,abstract_unsafe,ml_pred,expected',
     ML_TO_BOOL_TEST_DATA,
     ids=[test_id for test_id, *_ in ML_TO_BOOL_TEST_DATA],
 )
-def test_ml_pred_to_bool(test_id: str, unsafe: bool, ml_pred: KInner, expected: KInner) -> None:
+def test_ml_pred_to_bool(test_id: str, abstract_unsafe: bool, ml_pred: KInner, expected: KInner) -> None:
     # When
-    actual = ml_pred_to_bool(ml_pred, unsafe=unsafe)
+    actual = ml_pred_to_bool(ml_pred, abstract_unsafe=abstract_unsafe)
 
     # Then
     assert actual == expected
