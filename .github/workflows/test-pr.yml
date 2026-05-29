@@ -313,7 +313,7 @@ jobs:
     needs: test-frontend-package-ubuntu-jammy
     name: 'Pyk: Regression Tests'
     runs-on: [self-hosted, linux, normal]
-    timeout-minutes: 45
+    timeout-minutes: 20
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v4
