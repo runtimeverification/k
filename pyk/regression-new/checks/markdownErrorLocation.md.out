@@ -5,4 +5,4 @@
 	   .	       ^~
 [Error] Compiler: Had 1 structural errors.
 [ERROR] Running process failed with returncode 113:
-    kompile markdownErrorLocation.md --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition markdownErrorLocation-kompiled --type-inference-mode checked
+    kompile markdownErrorLocation.md --md-selector k --emit-json --backend llvm --output-definition markdownErrorLocation-kompiled --type-inference-mode checked --warnings none --no-exc-wrap

@@ -1,4 +1,4 @@
 [Error] Compiler: Had 1 parsing errors.
-[Error] Compiler: Illegal circular relation: Exp < ExpList < Exp
+[Error] Compiler: Illegal circular relation: ExpList < Exp < ExpList
 [ERROR] Running process failed with returncode 113:
-    kompile checkCircularList.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition checkCircularList-kompiled --type-inference-mode checked
+    kompile checkCircularList.k --md-selector k --emit-json --backend llvm --output-definition checkCircularList-kompiled --type-inference-mode checked --warnings none --no-exc-wrap

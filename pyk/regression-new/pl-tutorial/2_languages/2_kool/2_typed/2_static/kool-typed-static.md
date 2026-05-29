@@ -125,7 +125,7 @@ the wrapper in the generated documentation, we associate it an
 
 ```k
   syntax Type ::= "void" | "int" | "bool" | "string"
-                | Id                     [klabel("class"), symbol, avoid]  // see next
+                | Id                     [symbol("class"), avoid]  // see next
                 | Type "[" "]"
                 | "(" Type ")"           [bracket]
                 > Types "->" Type

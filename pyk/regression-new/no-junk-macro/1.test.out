@@ -1,0 +1,9 @@
+<generatedTop>
+  <k>
+    false ~> .K
+  </k>
+  <generatedCounter>
+    0
+  </generatedCounter>
+</generatedTop>
+#And { true #Equals size ( ListItem ( ?X:Int ) ?L:List ) >=Int -1 }
