@@ -756,6 +756,10 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         self.kcfg_explore.cterm_symbolic._kore_client.close()
 
     def init_proof(self, proof: APRProof) -> None:
+        # Stamp proof.id on every subsequent kore-RPC request so booster's
+        # per-line `{request: ...}` context self-identifies the claim driving
+        # the work — no PID join through pyk.log needed downstream.
+        self.kcfg_explore.cterm_symbolic.set_client_label(proof.id)
         main_module_name = self.main_module_name
         if self.extra_module:
             main_module_name = self.kcfg_explore.cterm_symbolic.add_module(self.extra_module, name_as_id=True)

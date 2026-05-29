@@ -193,6 +193,7 @@ class JsonRpcClientFacade(ContextManager['JsonRpcClientFacade']):
         timeout: int | None = None,
         bug_report: BugReport | None = None,
         bug_report_id: str | None = None,
+        client_label: str | None = None,
     ):
         client_cache = {}
         self._clients = {}
@@ -202,6 +203,7 @@ class JsonRpcClientFacade(ContextManager['JsonRpcClientFacade']):
             timeout=timeout,
             bug_report=bug_report,
             bug_report_id=bug_report_id,
+            client_label=client_label,
             transport=default_transport,
         )
         client_cache[(default_host, default_port)] = self._default_client
@@ -212,7 +214,13 @@ class JsonRpcClientFacade(ContextManager['JsonRpcClientFacade']):
                 else:
                     new_id = None if bug_report_id is None else bug_report_id + '_' + str(transport)
                     new_client = JsonRpcClient(
-                        host, port, timeout=timeout, bug_report=bug_report, bug_report_id=new_id, transport=transport
+                        host,
+                        port,
+                        timeout=timeout,
+                        bug_report=bug_report,
+                        bug_report_id=new_id,
+                        client_label=client_label,
+                        transport=transport,
                     )
                     self._update_clients(method, new_client)
                     client_cache[(host, port)] = new_client
@@ -237,6 +245,23 @@ class JsonRpcClientFacade(ContextManager['JsonRpcClientFacade']):
             for client in clients:
                 client.close()
 
+    def _unique_clients(self) -> list[JsonRpcClient]:
+        # Dispatch lists may share clients across methods (one JsonRpcClient per
+        # distinct (host, port)); collect each client only once by identity.
+        result = [self._default_client]
+        seen = {id(self._default_client)}
+        for clients in self._clients.values():
+            for client in clients:
+                if id(client) not in seen:
+                    seen.add(id(client))
+                    result.append(client)
+        return result
+
+    def set_client_label(self, label: str) -> None:
+        """Push a new client_label onto every distinct underlying JsonRpcClient."""
+        for client in self._unique_clients():
+            client.set_client_label(label)
+
     def request(self, method: str, **params: Any) -> dict[str, Any]:
         if method in self._clients:
             for client in self._clients[method]:
@@ -253,6 +278,7 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
 
     _transport: Transport
     _req_id: int
+    _client_label: str
 
     _bug_report: BugReport | None
     _bug_report_id: str | None
@@ -265,12 +291,17 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         timeout: int | None = None,
         bug_report: BugReport | None = None,
         bug_report_id: str | None = None,
+        client_label: str | None = None,
         transport: TransportType = TransportType.SINGLE_SOCKET,
     ):
         self._transport = self._create_transport(transport, host=host, port=port, timeout=timeout)
         self._req_id = 1
         self._bug_report_id = bug_report_id
         self._bug_report = bug_report
+        # Stamped on every outgoing request-id as `{client_label}-NNN` so that
+        # booster's `{request: ...}` context lines self-identify the caller.
+        # Defaults to str(id(self)) so non-adopters keep the prior shape byte-for-byte.
+        self._client_label = client_label if client_label is not None else str(id(self))
 
     @staticmethod
     def _create_transport(transport: TransportType, *, host: str, port: int, timeout: int | None) -> Transport:
@@ -292,7 +323,7 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         self._transport.close()
 
     def request(self, method: str, **params: Any) -> dict[str, Any]:
-        req_id = f'{id(self)}-{self._req_id:03}'
+        req_id = f'{self._client_label}-{self._req_id:03}'
         self._req_id += 1
 
         payload = {
@@ -333,6 +364,14 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
 
         assert response['error']['code'] not in {-32700, -32600}, 'Malformed JSON-RPC request'
         raise JsonRpcError(**response['error'])
+
+    def set_client_label(self, label: str) -> None:
+        """Set the prefix stamped on every subsequent request id.
+
+        Persists until the next `set_client_label` (or close).  Used by
+        APRProver/ImpliesProver to re-tag a shared client per claim.
+        """
+        self._client_label = label
 
 
 class KoreClientError(Exception, ABC):
@@ -895,6 +934,7 @@ class KoreClient(ContextManager['KoreClient']):
         timeout: int | None = None,
         bug_report: BugReport | None = None,
         bug_report_id: str | None = None,
+        client_label: str | None = None,
         transport: TransportType = TransportType.SINGLE_SOCKET,
         dispatch: dict[str, list[tuple[str, int, TransportType]]] | None = None,
     ):
@@ -908,8 +948,17 @@ class KoreClient(ContextManager['KoreClient']):
             timeout=timeout,
             bug_report=bug_report,
             bug_report_id=bug_report_id,
+            client_label=client_label,
             dispatch=dispatch,
         )
+
+    def set_client_label(self, label: str) -> None:
+        """Set the label stamped on every subsequent JSON-RPC request id.
+
+        Persists until the next `set_client_label` (or close).  Booster's
+        per-line `{request: <id>}` context then self-identifies the caller.
+        """
+        self._client.set_client_label(label)
 
     def __enter__(self) -> KoreClient:
         return self

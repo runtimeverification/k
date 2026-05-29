@@ -314,6 +314,16 @@ class CTermSymbolic:
         _kore_module = kflatmodule_to_kore(self._definition, module)
         return self._kore_client.add_module(_kore_module, name_as_id=name_as_id)
 
+    def set_client_label(self, label: str) -> None:
+        """Stamp `label` on every subsequent JSON-RPC request issued through this client.
+
+        Called automatically by APRProver/ImpliesProver at the start of each
+        proof so that booster's per-line `{request: ...}` context self-identifies
+        which claim drove the work.  Safe to call between proofs to re-tag the
+        same client for a different claim.
+        """
+        self._kore_client.set_client_label(label)
+
     def _smt_solver_error(self, err: SmtSolverError) -> CTermSMTError:
         kast = self.kore_to_kast(err.pattern)
         pretty_pattern = PrettyPrinter(self._definition).print(kast)
@@ -326,6 +336,7 @@ def cterm_symbolic(
     definition_dir: Path,
     *,
     id: str | None = None,
+    client_label: str | None = None,
     port: int | None = None,
     kore_rpc_command: str | Iterable[str] | None = None,
     llvm_definition_dir: Path | None = None,
@@ -365,7 +376,13 @@ def cterm_symbolic(
             simplify_each=simplify_each,
             no_post_exec_simplify=no_post_exec_simplify,
         ) as server:
-            with KoreClient('localhost', server.port, bug_report=bug_report, bug_report_id=id) as client:
+            with KoreClient(
+                'localhost',
+                server.port,
+                bug_report=bug_report,
+                bug_report_id=id,
+                client_label=client_label,
+            ) as client:
                 yield CTermSymbolic(
                     client,
                     definition,
@@ -376,7 +393,9 @@ def cterm_symbolic(
     else:
         if port is None:
             raise ValueError('Missing port with start_server=False')
-        with KoreClient('localhost', port, bug_report=bug_report, bug_report_id=id) as client:
+        with KoreClient(
+            'localhost', port, bug_report=bug_report, bug_report_id=id, client_label=client_label
+        ) as client:
             yield CTermSymbolic(
                 client, definition, log_succ_rewrites=log_succ_rewrites, log_fail_rewrites=log_fail_rewrites
             )

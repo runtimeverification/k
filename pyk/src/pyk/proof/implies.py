@@ -466,7 +466,10 @@ class ImpliesProver(Prover[ImpliesProof, ImpliesProofStep, ImpliesProofResult]):
         ]
 
     def init_proof(self, proof: ImpliesProof) -> None:
-        pass
+        # Stamp proof.id on every subsequent kore-RPC request so booster's
+        # per-line `{request: ...}` context self-identifies the claim driving
+        # the work — no PID join through pyk.log needed downstream.
+        self.kcfg_explore.cterm_symbolic.set_client_label(proof.id)
 
     def failure_info(self, proof: ImpliesProof) -> FailureInfo:
         # TODO add implementation
