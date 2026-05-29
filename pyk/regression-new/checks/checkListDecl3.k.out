@@ -4,4 +4,4 @@
 	12 |	syntax KItem ::= Int "+" List{Int,""}
 	   .	                         ^~~~~~~~~~~~
 [ERROR] Running process failed with returncode 113:
-    kompile checkListDecl3.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition checkListDecl3-kompiled --type-inference-mode checked
+    kompile checkListDecl3.k --md-selector k --emit-json --backend llvm --output-definition checkListDecl3-kompiled --type-inference-mode checked --warnings none --no-exc-wrap

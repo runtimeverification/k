@@ -8,4 +8,4 @@
 	Source(expandMacroEnsures.k)
 	Location(12,10,12,49)
 [ERROR] Running process failed with returncode 113:
-    kompile expandMacroEnsures.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition expandMacroEnsures-kompiled --type-inference-mode checked
+    kompile expandMacroEnsures.k --md-selector k --emit-json --backend llvm --output-definition expandMacroEnsures-kompiled --type-inference-mode checked --warnings none --no-exc-wrap

@@ -312,8 +312,8 @@ jobs:
   pyk-regression-tests:
     needs: test-frontend-package-ubuntu-jammy
     name: 'Pyk: Regression Tests'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    runs-on: [self-hosted, linux, normal]
+    timeout-minutes: 20
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v4
@@ -330,7 +330,7 @@ jobs:
       - name: 'Run K regression tests'
         run: |
           docker exec -u user k-pyk-regression-${{ github.sha }} uv sync
-          docker exec -u user k-pyk-regression-${{ github.sha }} make test-regression-new -j4
+          docker exec -u user k-pyk-regression-${{ github.sha }} make test-regression-new -j8
       - name: 'Tear down Docker'
         if: always()
         run: |

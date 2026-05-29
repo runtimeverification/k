@@ -4,4 +4,4 @@
 	3 |	  syntax priority a > b
 	  .	  ^~~~~~~~~~~~~~~~~~~~~
 [ERROR] Running process failed with returncode 113:
-    kompile checkUndeclaredTags.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition checkUndeclaredTags-kompiled --type-inference-mode checked
+    kompile checkUndeclaredTags.k --md-selector k --emit-json --backend llvm --output-definition checkUndeclaredTags-kompiled --type-inference-mode checked --warnings none --no-exc-wrap

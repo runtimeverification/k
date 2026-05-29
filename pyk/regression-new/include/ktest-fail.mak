@@ -1,12 +1,6 @@
-SHELL=/bin/bash
-
-ROOT=$(abspath $(MAKEFILE_PATH)/../..)
-UV_RUN?=uv --project $(ROOT) run --
-# path to the current makefile
 MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
-# path to the kompile binary of this distribuition
-KOMPILE=$(UV_RUN) pyk kompile
-KAST=$(UV_RUN) pyk parse
+include $(MAKEFILE_PATH)/ktest-common.mak
+
 # path to put -kompiled directory in
 DEFDIR?=.
 # all tests in test directory with matching file extension
@@ -15,15 +9,7 @@ TESTS?=$(wildcard $(DEFDIR)/*.md) $(wildcard $(DEFDIR)/*.k)
 KOMPILE_BACKEND?=llvm
 KAST_TESTS?=$(wildcard ./*.kast)
 
-VERBOSITY?=
-
-KOMPILE_FLAGS+=--no-exc-wrap --type-inference-mode checked $(VERBOSITY)
-KPROVE_FLAGS+=$(VERBOSITY)
-KRUN_FLAGS+=$(VERBOSITY)
-
-CHECK=| diff -
-
-.PHONY: kompile all clean update-results dummy krun proofs searches strat kast
+.PHONY: kompile all clean update-results dummy krun proofs searches kast
 
 # run all tests
 all: kompile kast
@@ -36,10 +22,10 @@ kast: $(KAST_TESTS)
 dummy:
 
 %.k %.md: dummy
-	$(KOMPILE) $(KOMPILE_FLAGS) --backend $(KOMPILE_BACKEND) $(DEBUG_FAIL) $@ --output-definition $(DEFDIR)/$(basename $@)-kompiled 2>&1 | sed 's!'`pwd`'/\(\./\)\{0,2\}!!g' $(CHECK) $@.out $(CHECK2)
+	$(KOMPILE) $(KOMPILE_FLAGS) --backend $(KOMPILE_BACKEND) $(DEBUG_FAIL) $@ --output-definition $(DEFDIR)/$(basename $@)-kompiled 2>&1 $(REMOVE_PATHS) $(CHECK) $@.out $(CHECK2)
 
 %.kast: kompile
-	$(KAST) $@ $(KAST_FLAGS) $(DEBUG) 2>&1 | sed 's!'`pwd`'/\(\./\)\{0,2\}!!g' $(CHECK) $@.out
+	$(KAST) $@ $(KAST_FLAGS) 2>&1 $(REMOVE_PATHS) $(CHECK) $@.out
 
 # run all tests and regenerate output files
 update-results: kompile kast

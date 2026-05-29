@@ -4,4 +4,4 @@
 	5 |	  syntax A ::= "(" Exp ")" [bracket]
 	  .	               ^~~~~~~~~~~~~~~~~~~~~
 [ERROR] Running process failed with returncode 113:
-    kompile checkBracketSupersort.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition checkBracketSupersort-kompiled --type-inference-mode checked
+    kompile checkBracketSupersort.k --md-selector k --emit-json --backend llvm --output-definition checkBracketSupersort-kompiled --type-inference-mode checked --warnings none --no-exc-wrap
