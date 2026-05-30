@@ -321,6 +321,44 @@ def test_node_equality_ignores_variants() -> None:
     assert hash(bare) == hash(with_variants)
 
 
+def test_kore_handoffs_add_and_roundtrip() -> None:
+    from pyk.kcfg.kcfg import KoreHandoff
+
+    # Given a kcfg with two recorded handoffs
+    cfg = KCFG()
+    cfg.create_node(term(1))
+    cfg.add_kore_handoff(KoreHandoff(source=1, target=2, flavour='execute', request_id='claim-003'))
+    cfg.add_kore_handoff(KoreHandoff(source=2, target=2, flavour='implies', request_id='claim-004'))
+
+    # Then the accessor returns them and they round-trip through to_dict/from_dict
+    assert len(cfg.kore_handoffs) == 2
+    restored = KCFG.from_dict(cfg.to_dict())
+    assert restored.kore_handoffs == cfg.kore_handoffs
+
+
+def test_kore_handoffs_omitted_when_empty() -> None:
+    # Given a kcfg with no handoffs
+    cfg = KCFG()
+    cfg.create_node(term(1))
+
+    # Then the key is omitted from both serialisations (additive / back-compat)
+    assert 'kore_handoffs' not in cfg.to_dict()
+    assert 'kore_handoffs' not in cfg.to_dict_no_nodes()
+
+
+def test_recover_mode_node_attrs_serialise() -> None:
+    # Given a node carrying the new recover-mode attrs
+    cfg = KCFG()
+    n = cfg.create_node(term(1))
+    cfg.add_attr(n.id, KCFGNodeAttr.BOOSTER_TRIED)
+    cfg.add_attr(n.id, KCFGNodeAttr.SUBSUME_INDETERMINATE)
+
+    # Then the attrs round-trip through the in-memory Node serialisation
+    restored = KCFG.Node.from_dict(cfg.node(n.id).to_dict())
+    assert KCFGNodeAttr.BOOSTER_TRIED in restored.attrs
+    assert KCFGNodeAttr.SUBSUME_INDETERMINATE in restored.attrs
+
+
 def test_remove_unknown_node() -> None:
     # Given
     cfg = KCFG()

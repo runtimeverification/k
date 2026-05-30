@@ -50,6 +50,11 @@ class NodeAttr:
 class KCFGNodeAttr(NodeAttr):
     VACUOUS = NodeAttr('vacuous')
     STUCK = NodeAttr('stuck')
+    # Recover-mode bookkeeping (inert outside recover-mode):
+    BOOSTER_TRIED = NodeAttr('booster-tried')  # a booster `try` made no progress on the current term
+    KORE_TRIED = NodeAttr('kore-tried')  # a kore `try` made no progress on the current term
+    SUBSUME_INDETERMINATE = NodeAttr('subsume-indeterminate')  # last booster subsumption was indeterminate
+    BOTH_BACKENDS_FAILED = NodeAttr('both-backends-failed')  # terminal: neither backend could advance the node
 
 
 class Producer(Enum):
@@ -83,6 +88,29 @@ class NodeVariant:
     @staticmethod
     def from_dict(dct: dict[str, Any]) -> NodeVariant:
         return NodeVariant(Producer(dct['producer']), dct.get('request_id'), CTerm.from_dict(dct['cterm']))
+
+
+@final
+@dataclass(frozen=True)
+class KoreHandoff:
+    """Record an operation-level kore handoff (execute or implies) where kore advanced the proof.
+
+    Lets the diagnostic find every kore handoff without scanning logs.  ``request_id`` is the join
+    key onto the stored per-request log (Layer 5).  For ``execute``, ``source``/``target`` are the
+    lhs/rhs node ids; for ``implies``, ``source`` is the node and ``target`` the subsumption target.
+    """
+
+    source: int
+    target: int
+    flavour: str  # 'execute' | 'implies'
+    request_id: str
+
+    def to_dict(self) -> dict[str, Any]:
+        return {'source': self.source, 'target': self.target, 'flavour': self.flavour, 'request_id': self.request_id}
+
+    @staticmethod
+    def from_dict(dct: dict[str, Any]) -> KoreHandoff:
+        return KoreHandoff(dct['source'], dct['target'], dct['flavour'], dct['request_id'])
 
 
 class KCFGStore:
@@ -500,6 +528,8 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
     _aliases: dict[str, int]
     _lock: RLock
 
+    _kore_handoffs: list[KoreHandoff]
+
     _kcfg_store: KCFGStore | None
 
     def __init__(self, cfg_dir: Path | None = None, optimize_memory: bool = True) -> None:
@@ -519,6 +549,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         self._ndbranches = {}
         self._aliases = {}
         self._lock = RLock()
+        self._kore_handoffs = []
         if cfg_dir is not None:
             self._kcfg_store = KCFGStore(cfg_dir)
 
@@ -699,6 +730,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             'splits': splits,
             'ndbranches': ndbranches,
             'aliases': aliases,
+            'kore_handoffs': [handoff.to_dict() for handoff in self._kore_handoffs],
         }
         return {k: v for k, v in res.items() if v}
 
@@ -721,6 +753,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             'splits': splits,
             'ndbranches': ndbranches,
             'aliases': aliases,
+            'kore_handoffs': [handoff.to_dict() for handoff in self._kore_handoffs],
         }
         return {k: v for k, v in res.items() if v}
 
@@ -757,6 +790,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
 
         for alias, node_id in dct.get('aliases', {}).items():
             cfg.add_alias(alias=alias, node_id=node_id)
+
+        for handoff_dict in dct.get('kore_handoffs') or []:
+            cfg.add_kore_handoff(KoreHandoff.from_dict(handoff_dict))
 
         return cfg
 
@@ -939,6 +975,13 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         new_node = node.let(cterm=cterm, variants=new_variants)
         self.replace_node(new_node)
         return new_node
+
+    @property
+    def kore_handoffs(self) -> list[KoreHandoff]:
+        return list(self._kore_handoffs)
+
+    def add_kore_handoff(self, handoff: KoreHandoff) -> None:
+        self._kore_handoffs.append(handoff)
 
     def replace_node(self, node: KCFG.Node) -> None:
         self._nodes[node.id] = node
