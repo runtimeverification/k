@@ -895,6 +895,10 @@ class ImpliesResult:
     predicate: Pattern | None
     logs: tuple[LogEntry, ...]
     haskell_log_entries: tuple[Any, ...] | None = None
+    # `Just True` only on booster's MatchIndeterminate-no-progress paths; absent (⇒ None) on
+    # every decisive `valid` verdict and every error.  Lets a caller tell a decisive invalid
+    # (trust) from a couldn't-determine (escalate to kore).  See booster `f911be4e0`.
+    indeterminate: bool | None = None
 
     @staticmethod
     def from_dict(dct: Mapping[str, Any]) -> ImpliesResult:
@@ -908,6 +912,7 @@ class ImpliesResult:
             predicate=kore_term(predicate) if predicate is not None else None,
             logs=logs,
             haskell_log_entries=_parse_haskell_log_entries(dct),
+            indeterminate=dct.get('indeterminate'),
         )
 
 

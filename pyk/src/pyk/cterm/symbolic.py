@@ -79,6 +79,7 @@ class CTermImplies(NamedTuple):
     failing_cells: tuple[tuple[str, KInner], ...]
     remaining_implication: KInner | None
     logs: tuple[LogEntry, ...]
+    indeterminate: bool | None = None
 
 
 @final
@@ -371,7 +372,7 @@ class CTermSymbolic:
                         )
                     )
                     remaining_implication = CTerm._ml_impl(antecedent.constraints, consequent_constraints)
-            return CTermImplies(None, tuple(failing_cells), remaining_implication, result.logs)
+            return CTermImplies(None, tuple(failing_cells), remaining_implication, result.logs, result.indeterminate)
 
         if result.substitution is None:
             raise ValueError('Received empty substutition for valid implication.')
@@ -381,7 +382,7 @@ class CTermSymbolic:
         ml_pred = self.kore_to_kast(result.predicate)
         ml_subst_pred = mlAnd(flatten_label('#And', ml_subst) + flatten_label('#And', ml_pred))
         csubst = CSubst.from_pred(ml_subst_pred)
-        return CTermImplies(csubst, (), None, result.logs)
+        return CTermImplies(csubst, (), None, result.logs, result.indeterminate)
 
     def assume_defined(
         self, cterm: CTerm, module_name: str | None = None, booster_only_simplify: bool = False

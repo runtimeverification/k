@@ -205,6 +205,25 @@ def test_implies(
     assert actual == expected
 
 
+@pytest.mark.parametrize('indeterminate', [True, False, None], ids=['true', 'false', 'absent'])
+def test_implies_parses_indeterminate(
+    kore_client: KoreClient,
+    rpc_client: MockClient,
+    indeterminate: bool | None,
+) -> None:
+    # Given a falsifiable implication whose `indeterminate` flag varies (absent ⇒ omitted)
+    response: dict[str, Any] = {'valid': False, 'implication': kore(int_top)}
+    if indeterminate is not None:
+        response['indeterminate'] = indeterminate
+    rpc_client.assume_response(response)
+
+    # When
+    actual = kore_client.implies(int_bottom, int_top)
+
+    # Then
+    assert actual.indeterminate is indeterminate
+
+
 SIMPLIFY_TEST_DATA: Final = (
     (
         And(INT, (int_top, int_top)),

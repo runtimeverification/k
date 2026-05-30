@@ -9,7 +9,7 @@ import pytest
 from pyk.cterm.symbolic import HASKELL_LOGGING_ENTRIES, CTermSymbolic, cterm_symbolic
 from pyk.kast.prelude.ml import mlTop
 from pyk.kore.prelude import int_dv
-from pyk.kore.rpc import AbortedResult, State, StuckResult
+from pyk.kore.rpc import AbortedResult, ImpliesResult, State, StuckResult
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -181,3 +181,29 @@ def test_execute_not_aborted_on_normal_result() -> None:
     # Then
     assert not result.aborted
     assert result.depth == 1
+
+
+@pytest.mark.parametrize('indeterminate', [True, False, None], ids=['true', 'false', 'absent'])
+def test_implies_surfaces_indeterminate(indeterminate: bool | None) -> None:
+    # Given a falsifiable implication carrying the backend `indeterminate` flag
+    kore_client = Mock()
+    kore_client.implies.return_value = ImpliesResult(
+        valid=False,
+        implication=Mock(),
+        substitution=None,
+        predicate=None,
+        logs=(),
+        indeterminate=indeterminate,
+    )
+    cts = CTermSymbolic(kore_client, Mock())
+    cts.kast_to_kore = Mock(return_value=Mock())  # type: ignore[method-assign]
+    # Stub CTerm operands: no free vars (so no consequent binding), arbitrary kast.
+    antecedent: CTerm = Mock(free_vars=frozenset())
+    consequent: CTerm = Mock(free_vars=frozenset())
+
+    # When
+    result = cts.implies(antecedent, consequent)
+
+    # Then
+    assert result.csubst is None
+    assert result.indeterminate is indeterminate
