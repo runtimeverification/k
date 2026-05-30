@@ -116,6 +116,18 @@ class KoreHandoff:
 class KCFGStore:
     store_path: Path
 
+    # Node attributes persisted as top-level side-lists in `kcfg.json` (node files only carry
+    # `cterm`/`variants`; `read_cfg_data` rebuilds `attrs` from these).  Keep this the single source
+    # of truth so adding a persisted attr is a one-line change (see C10).
+    _ATTR_SIDE_LISTS: Final = {
+        'vacuous': KCFGNodeAttr.VACUOUS,
+        'stuck': KCFGNodeAttr.STUCK,
+        'booster_tried': KCFGNodeAttr.BOOSTER_TRIED,
+        'kore_tried': KCFGNodeAttr.KORE_TRIED,
+        'subsume_indeterminate': KCFGNodeAttr.SUBSUME_INDETERMINATE,
+        'both_backends_failed': KCFGNodeAttr.BOTH_BACKENDS_FAILED,
+    }
+
     def __init__(self, store_path: Path) -> None:
         self.store_path = store_path
         ensure_dir_path(store_path)
@@ -135,12 +147,8 @@ class KCFGStore:
     def write_cfg_data(
         self, kcfg: KCFG, dct: dict[str, Any], deleted_nodes: Iterable[int] = (), created_nodes: Iterable[int] = ()
     ) -> None:
-        vacuous_nodes = [
-            node_id for node_id in kcfg._nodes.keys() if KCFGNodeAttr.VACUOUS in kcfg._nodes[node_id].attrs
-        ]
-        stuck_nodes = [node_id for node_id in kcfg._nodes.keys() if KCFGNodeAttr.STUCK in kcfg._nodes[node_id].attrs]
-        dct['vacuous'] = vacuous_nodes
-        dct['stuck'] = stuck_nodes
+        for key, attr in self._ATTR_SIDE_LISTS.items():
+            dct[key] = [node_id for node_id in kcfg._nodes.keys() if attr in kcfg._nodes[node_id].attrs]
         for node_id in deleted_nodes:
             self.kcfg_node_path(node_id).unlink(missing_ok=True)
         for node_id in created_nodes:
@@ -150,21 +158,22 @@ class KCFGStore:
     def read_cfg_data(self) -> dict[str, Any]:
         dct = json.loads(self.kcfg_json_path.read_text())
         nodes = [self.read_node_data(node_id) for node_id in dct.get('nodes') or []]
-        dct['nodes'] = nodes
 
         new_nodes = []
-        for node in dct['nodes']:
-            attrs = []
-            if node['id'] in dct['vacuous']:
-                attrs.append(KCFGNodeAttr.VACUOUS.value)
-            if node['id'] in dct['stuck']:
-                attrs.append(KCFGNodeAttr.STUCK.value)
-            new_nodes.append({'id': node['id'], 'cterm': node['cterm'], 'attrs': attrs})
+        for node in nodes:
+            # Rebuild attrs from the side-lists; carry `variants` through from the node file
+            # (`KCFG.Node.from_dict` ignores it if absent).  `dct.get` keeps old stores (which lack
+            # the new keys) loadable.
+            attrs = [attr.value for key, attr in self._ATTR_SIDE_LISTS.items() if node['id'] in (dct.get(key) or [])]
+            new_node: dict[str, Any] = {'id': node['id'], 'cterm': node['cterm'], 'attrs': attrs}
+            if 'variants' in node:
+                new_node['variants'] = node['variants']
+            new_nodes.append(new_node)
 
         dct['nodes'] = new_nodes
 
-        del dct['vacuous']
-        del dct['stuck']
+        for key in self._ATTR_SIDE_LISTS:
+            dct.pop(key, None)
 
         return dct
 
