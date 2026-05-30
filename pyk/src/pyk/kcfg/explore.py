@@ -229,7 +229,7 @@ class KCFGExplore:
         if _cterm != abstract_cterm:
             return [Abstract(abstract_cterm)]
 
-        cterm, next_states, depth, vacuous, next_node_logs = self.cterm_symbolic.execute(
+        exec_result = self.cterm_symbolic.execute(
             _cterm,
             depth=execute_depth,
             cut_point_rules=cut_point_rules,
@@ -237,6 +237,11 @@ class KCFGExplore:
             module_name=module_name,
             haskell_logging=haskell_logging,
         )
+        cterm = exec_result.state
+        next_states = exec_result.next_states
+        depth = exec_result.depth
+        vacuous = exec_result.vacuous
+        next_node_logs = exec_result.logs
 
         extend_results: list[KCFGExtendResult] = []
 
