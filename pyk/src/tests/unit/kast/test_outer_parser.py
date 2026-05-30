@@ -76,6 +76,9 @@ SENTENCE_TEST_DATA: Final = (
     ('syntax Foo{Bar}', SyntaxDecl(SortDecl('Foo', args=('Bar',)))),
     ('syntax Foo{Bar, Baz}', SyntaxDecl(SortDecl('Foo', args=('Bar', 'Baz')))),
     ('syntax {Bar} Foo{Baz}', SyntaxDecl(SortDecl('Foo', params=('Bar',), args=('Baz',)))),
+    # Numeric (NAT) sort arguments, e.g. syntax MInt{8}
+    ('syntax MInt{8}', SyntaxDecl(SortDecl('MInt', args=('8',)))),
+    ('syntax MInt{8, 16}', SyntaxDecl(SortDecl('MInt', args=('8', '16')))),
     ('syntax Foo [bar]', SyntaxDecl(SortDecl('Foo'), att=Att((('bar', ''),)))),
     ('syntax Foo [bar, baz]', SyntaxDecl(SortDecl('Foo'), att=Att((('bar', ''), ('baz', ''))))),
     (
@@ -492,3 +495,29 @@ def test_definition(k_text: str, expected: AST) -> None:
 
     # Then
     assert actual == expected
+
+
+def test_bubble_has_no_source_location_without_source_path() -> None:
+    """Bubbles parsed from an in-memory string must carry source=None and location=None.
+
+    Java's inner parser only uses contentStartLine/contentStartColumn for error
+    reporting when compiling from a real file.  Emitting spurious location attributes
+    for in-memory strings causes mismatches with Java's compiled.json output.
+    """
+    parser = OuterParser('rule X => Y')
+    rule = parser.sentence()
+    assert isinstance(rule, Rule)
+    assert rule.source is None
+    assert rule.location is None
+
+
+def test_bubble_records_source_location_when_source_path_given() -> None:
+    """Bubbles parsed with a source Path must have source and location set."""
+    from pathlib import Path
+
+    source = Path('test.k')
+    parser = OuterParser('rule X => Y', source=source)
+    rule = parser.sentence()
+    assert isinstance(rule, Rule)
+    assert rule.source == source
+    assert rule.location is not None

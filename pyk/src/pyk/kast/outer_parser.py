@@ -237,10 +237,13 @@ class OuterParser:
         args: list[str] = []
         if self._la.type is TokenType.LBRACE:
             self._consume()
-            args.append(self._match(TokenType.ID_UPPER))
+            # Args may be type-variable names (ID_UPPER) or numeric literals (NAT),
+            # e.g. syntax MInt{8}.  Store NAT as its string text so that _ast_to_kast
+            # can turn it into KSort('8') matching Java's compiled.json.
+            args.append(self._consume() if self._la.type is TokenType.NAT else self._match(TokenType.ID_UPPER))
             while self._la.type is TokenType.COMMA:
                 self._consume()
-                args.append(self._match(TokenType.ID_UPPER))
+                args.append(self._consume() if self._la.type is TokenType.NAT else self._match(TokenType.ID_UPPER))
             self._match(TokenType.RBRACE)
 
         return SortDecl(name, params, args)
@@ -361,9 +364,14 @@ class OuterParser:
         else:
             label = ''
 
+        bubble_loc = self._la.loc
         bubble = self._match(TokenType.BUBBLE)
         att = self._maybe_att()
-        return cls(bubble, label, att)
+        # Only record source + location when we have a source path: the location is the
+        # (line, col) of the bubble content start in the original file, used by Java's
+        # inner parser as contentStartLine/contentStartColumn for error reporting.
+        location = (bubble_loc.line, bubble_loc.col, bubble_loc.line, bubble_loc.col) if self._source else None
+        return cls(bubble, label, att, source=self._source, location=location)
 
     def _maybe_att(self) -> Att:
         items: list[tuple[str, str]] = []
