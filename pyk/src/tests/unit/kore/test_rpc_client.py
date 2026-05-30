@@ -1,13 +1,15 @@
 from __future__ import annotations
 
+import json
 from itertools import count
+from threading import Barrier, Thread
 from typing import TYPE_CHECKING
 from unittest.mock import patch
 
 import pytest
 
 from pyk.kore.prelude import int_dv
-from pyk.kore.rpc import KoreClient, SingleSocketTransport
+from pyk.kore.rpc import KoreClient, SingleSocketTransport, _last_request_id, client_label
 from pyk.kore.syntax import App
 
 if TYPE_CHECKING:
@@ -78,3 +80,39 @@ def test_exceptions(
     # Then
     assert client_err.type is type(expected)
     assert str(client_err.value) == str(expected)
+
+
+def test_last_request_id_tracks_issued_id(kore_client: KoreClient, transport: MockTransport) -> None:
+    # Given a known client label, the issued id is deterministic: f'{label}-001'.
+    token = client_label.set('claim-x')
+    try:
+        transport.assume_response(json.dumps({'jsonrpc': '2.0', 'id': 'claim-x-001', 'result': {'k': 'v'}}))
+
+        # When (drive the underlying JsonRpcClient directly, bypassing Kore result parsing)
+        out = kore_client._client._default_client.request('simplify', state={'x': 1})
+
+        # Then
+        assert out == {'k': 'v'}
+        assert kore_client.last_request_id == 'claim-x-001'
+    finally:
+        client_label.reset(token)
+
+
+def test_last_request_id_is_thread_local(kore_client: KoreClient) -> None:
+    # Each thread must read back its own last-request id, never another thread's.
+    seen: dict[str, str | None] = {}
+    barrier = Barrier(2)
+
+    def worker(name: str) -> None:
+        _last_request_id.value = name
+        barrier.wait()  # both threads have set their value before either reads
+        seen[name] = kore_client.last_request_id
+
+    t1 = Thread(target=worker, args=('a',))
+    t2 = Thread(target=worker, args=('b',))
+    t1.start()
+    t2.start()
+    t1.join()
+    t2.join()
+
+    assert seen == {'a': 'a', 'b': 'b'}

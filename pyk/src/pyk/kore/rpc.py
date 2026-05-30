@@ -14,7 +14,7 @@ from enum import Enum, auto
 from pathlib import Path
 from signal import SIGINT
 from subprocess import DEVNULL, PIPE, Popen
-from threading import Thread
+from threading import Thread, local
 from time import sleep
 from typing import ClassVar  # noqa: TC003
 from typing import TYPE_CHECKING, ContextManager, NamedTuple, TypedDict, final
@@ -47,6 +47,13 @@ _LOGGER: Final = logging.getLogger(__name__)
 # threaded consumers must re-`set` inside their worker entry points, since
 # `ContextVar` values are not propagated by `ThreadPoolExecutor`.
 client_label: ContextVar[str | None] = ContextVar('kore_rpc_client_label', default=None)
+
+# Records the JSON-RPC request id of the most recent wire request issued on the
+# calling thread (see `JsonRpcClient.request`).  A diagnostic caller snapshots
+# `KoreClient.last_request_id` immediately after each RPC to use the deterministic
+# `f'{client_label}-{NNN}'` id as a join key onto the captured per-request logs.
+# Thread-local so parallel proof workers never clobber each other's ids.
+_last_request_id: local = local()
 
 
 class KoreExecLogFormat(Enum):
@@ -304,6 +311,7 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         prefix = label if label is not None else str(id(self))
         req_id = f'{prefix}-{self._req_id:03}'
         self._req_id += 1
+        _last_request_id.value = req_id
 
         payload = {
             'jsonrpc': self._JSON_RPC_VERSION,
@@ -929,6 +937,16 @@ class KoreClient(ContextManager['KoreClient']):
 
     def close(self) -> None:
         self._client.close()
+
+    @property
+    def last_request_id(self) -> str | None:
+        """The JSON-RPC id of the most recent wire request issued on the calling thread.
+
+        ``None`` before any request has been made on this thread.  Snapshot it
+        immediately after a call (e.g. ``execute``/``implies``/``simplify``) to key the
+        captured logs / handoff metadata to that exact request.
+        """
+        return getattr(_last_request_id, 'value', None)
 
     def _request(self, method: str, **params: Any) -> dict[str, Any]:
         try:
