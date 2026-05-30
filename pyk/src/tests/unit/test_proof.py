@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from unittest.mock import Mock
 
 import pytest
 
+from pyk.cterm import CSubst
+from pyk.cterm.symbolic import CTermImplies
 from pyk.kast.prelude.kbool import BOOL
 from pyk.kast.prelude.kint import intToken
 from pyk.kcfg.exploration import KCFGExplorationNodeAttr
@@ -11,7 +14,16 @@ from pyk.kcfg.kcfg import KCFG, KCFGNodeAttr
 from pyk.proof import EqualityProof
 from pyk.proof.implies import EqualitySummary
 from pyk.proof.proof import CompositeSummary, Proof, ProofStatus
-from pyk.proof.reachability import APRFailureInfo, APRProof, APRProofStuckResult, APRSummary
+from pyk.proof.reachability import (
+    APRFailureInfo,
+    APRProof,
+    APRProofStuckResult,
+    APRProver,
+    APRSummary,
+    DecisiveInvalid,
+    Indeterminate,
+    Subsumed,
+)
 
 from .kcfg.test_minimize import minimization_test_kcfg
 from .test_kcfg import node, node_dicts, term
@@ -21,6 +33,8 @@ if TYPE_CHECKING:
     from typing import Final
 
     from pytest import TempPathFactory
+
+    from pyk.proof.reachability import SubsumptionCheck
 
 
 @pytest.fixture(scope='function')
@@ -252,6 +266,56 @@ def test_commit_stuck_result_marks_node_stuck() -> None:
 
     # Then the node is marked stuck — `commit` is the sole `add_stuck` site (C6)
     assert kcfg.is_stuck(n3.id)
+
+
+_CSUBST_SENTINEL: Final = CSubst()
+
+_CHECK_SUBSUME_DATA: Final = (
+    ('subsumed', _CSUBST_SENTINEL, None, Subsumed),
+    ('decisive-invalid', None, False, DecisiveInvalid),
+    ('decisive-invalid-absent', None, None, DecisiveInvalid),
+    ('indeterminate', None, True, Indeterminate),
+)
+
+
+@pytest.mark.parametrize(
+    'test_id,csubst,indeterminate,expected',
+    _CHECK_SUBSUME_DATA,
+    ids=[d[0] for d in _CHECK_SUBSUME_DATA],
+)
+def test_check_subsume_classification(
+    test_id: str,
+    csubst: CSubst | None,
+    indeterminate: bool | None,
+    expected: type[SubsumptionCheck],
+) -> None:
+    # Given a prover whose implies returns a CTermImplies with the given csubst / indeterminate
+    prover = Mock()
+    prover.fast_check_subsumption = False
+    prover.assume_defined = False
+    prover.kcfg_explore.cterm_symbolic.implies.return_value = CTermImplies(csubst, (), None, (), indeterminate)
+
+    # When (call the unbound method with the Mock as self)
+    result = APRProver._check_subsume(prover, Mock(id=1), Mock(id=2), proof_id='p')
+
+    # Then the verdict is classified per §1c
+    assert isinstance(result, expected)
+    if isinstance(result, Subsumed):
+        assert result.csubst is csubst
+
+
+def test_check_subsume_fast_skip_is_decisive_invalid() -> None:
+    # Given the fast may-subsume heuristic rejects subsumption
+    prover = Mock()
+    prover.fast_check_subsumption = True
+    prover._may_subsume.return_value = False
+
+    # When
+    result = APRProver._check_subsume(prover, Mock(id=1), Mock(id=2), proof_id='p')
+
+    # Then it is a decisive non-subsumption and the backend is never consulted
+    assert isinstance(result, DecisiveInvalid)
+    prover.kcfg_explore.cterm_symbolic.implies.assert_not_called()
 
 
 def test_apr_proof_minimization_and_terminals() -> None:

@@ -3,8 +3,9 @@ from __future__ import annotations
 import json
 import logging
 import re
+from abc import ABC
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, final
 
 from ..cterm.cterm import remove_useless_constraints
 from ..kast.inner import KInner, Subst
@@ -83,6 +84,31 @@ class APRProofStuckResult(APRProofResult):
     Carrying this as a distinct result — rather than a `Stuck` extension applied by `KCFG.extend` —
     keeps `add_stuck` solely in `commit`, where the full node context lives (see C6).
     """
+
+
+class SubsumptionCheck(ABC):
+    """Tagged outcome of a subsumption (`implies`) check, replacing a bare ``CSubst | None``.
+
+    Distinguishes a decisive non-subsumption (``DecisiveInvalid`` — trust it) from a
+    couldn't-determine (``Indeterminate`` — recover-mode escalates to a kore implies).  Today both
+    map to "proceed to execute", identical to the old ``csubst is None`` (see C7).
+    """
+
+
+@final
+@dataclass(frozen=True)
+class Subsumed(SubsumptionCheck):
+    csubst: CSubst
+
+
+@final
+@dataclass(frozen=True)
+class DecisiveInvalid(SubsumptionCheck): ...
+
+
+@final
+@dataclass(frozen=True)
+class Indeterminate(SubsumptionCheck): ...
 
 
 @dataclass(frozen=True)
@@ -812,17 +838,27 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
             return False
         return True
 
-    def _check_subsume(self, node: KCFG.Node, target_node: KCFG.Node, proof_id: str) -> CSubst | None:
+    def _check_subsume(
+        self,
+        node: KCFG.Node,
+        target_node: KCFG.Node,
+        proof_id: str,
+        booster_only: bool | None = None,
+    ) -> SubsumptionCheck:
         target_cterm = target_node.cterm
         _LOGGER.debug(f'Checking subsumption into target state {proof_id}: {shorten_hashes((node.id, target_cterm))}')
         if self.fast_check_subsumption and not self._may_subsume(node, target_node):
             _LOGGER.info(f'Skipping full subsumption check because of fast may subsume check {proof_id}: {node.id}')
-            return None
-        _csubst = self.kcfg_explore.cterm_symbolic.implies(node.cterm, target_cterm, assume_defined=self.assume_defined)
-        csubst = _csubst.csubst
-        if csubst is not None:
+            return DecisiveInvalid()
+        result = self.kcfg_explore.cterm_symbolic.implies(
+            node.cterm, target_cterm, assume_defined=self.assume_defined, booster_only_simplify=booster_only
+        )
+        if result.csubst is not None:
             _LOGGER.info(f'Subsumed into target node {proof_id}: {shorten_hashes((node.id, target_node.id))}')
-        return csubst
+            return Subsumed(result.csubst)
+        # Not subsumed: a decisive invalid is trusted; a couldn't-determine (booster
+        # `MatchIndeterminate`) is surfaced so recover-mode can escalate to a kore implies (C13).
+        return Indeterminate() if result.indeterminate else DecisiveInvalid()
 
     def step_proof(self, step: APRProofStep) -> list[APRProofResult]:
         # Check if the current node should be bounded
@@ -860,13 +896,13 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         # Subsumption is checked if and only if the target node
         # and the current node are either both terminal or both not terminal
         if is_terminal == target_is_terminal:
-            csubst = self._check_subsume(step.node, step.target, proof_id=step.proof_id)
-            if csubst is not None:
+            subsumption = self._check_subsume(step.node, step.target, proof_id=step.proof_id)
+            if isinstance(subsumption, Subsumed):
                 # Information about the subsumed node being terminal must be returned
                 # so that the set of terminal nodes is correctly updated
                 return terminal_result + [
                     APRProofSubsumeResult(
-                        csubst=csubst,
+                        csubst=subsumption.csubst,
                         optimize_kcfg=self.optimize_kcfg,
                         node_id=step.node.id,
                         prior_loops_cache_update=prior_loops,
