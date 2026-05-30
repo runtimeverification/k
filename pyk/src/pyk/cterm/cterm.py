@@ -362,7 +362,12 @@ class CSubst:
 
 
 def cterm_build_claim(
-    claim_id: str, init_cterm: CTerm, final_cterm: CTerm, keep_vars: Iterable[str] = ()
+    claim_id: str,
+    init_cterm: CTerm,
+    final_cterm: CTerm,
+    keep_vars: Iterable[str] = (),
+    keep_unsafe: bool = False,
+    filter_useless_constraints: bool = False,
 ) -> tuple[KClaim, Subst]:
     """Return a `KClaim` between the supplied initial and final states.
 
@@ -371,6 +376,8 @@ def cterm_build_claim(
         init_cterm: State to put on LHS of the rule (constraints interpreted as `requires` clause).
         final_cterm: State to put on RHS of the rule (constraints interpreted as `ensures` clause).
         keep_vars: Variables to leave in the side-conditions even if not bound in the configuration.
+        keep_unsafe: Forwarded to `build_claim` — retain ML constraints that cannot be compiled to Bool.
+        filter_useless_constraints: Forwarded to `build_claim` — drop constraints not reachable from the rule body.
 
     Returns:
         A tuple ``(claim, var_map)`` where
@@ -382,7 +389,16 @@ def cterm_build_claim(
     """
     init_config, *init_constraints = init_cterm
     final_config, *final_constraints = final_cterm
-    return build_claim(claim_id, init_config, final_config, init_constraints, final_constraints, keep_vars=keep_vars)
+    return build_claim(
+        claim_id,
+        init_config,
+        final_config,
+        init_constraints,
+        final_constraints,
+        keep_vars=keep_vars,
+        keep_unsafe=keep_unsafe,
+        filter_useless_constraints=filter_useless_constraints,
+    )
 
 
 def cterm_build_rule(
@@ -392,6 +408,8 @@ def cterm_build_rule(
     priority: int | None = None,
     keep_vars: Iterable[str] = (),
     defunc_with: KDefinition | None = None,
+    keep_unsafe: bool = False,
+    filter_useless_constraints: bool = False,
 ) -> tuple[KRule, Subst]:
     """Return a `KRule` between the supplied initial and final states.
 
@@ -402,6 +420,8 @@ def cterm_build_rule(
         keep_vars: Variables to leave in the side-conditions even if not bound in the configuration.
         priority: Priority index to use for generated rules.
         defunc_with (optional): KDefinition to be able to defunctionalize LHS appropriately.
+        keep_unsafe: Forwarded to `build_rule` — retain ML constraints that cannot be compiled to Bool.
+        filter_useless_constraints: Forwarded to `build_rule` — drop constraints not reachable from the rule body.
 
     Returns:
         A tuple ``(rule, var_map)`` where
@@ -422,6 +442,8 @@ def cterm_build_rule(
         priority,
         keep_vars,
         defunc_with=defunc_with,
+        keep_unsafe=keep_unsafe,
+        filter_useless_constraints=filter_useless_constraints,
     )
 
 

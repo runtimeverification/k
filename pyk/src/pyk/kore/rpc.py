@@ -7,6 +7,7 @@ import os
 import socket
 import sys
 from abc import ABC, abstractmethod
+from contextvars import ContextVar
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum, auto
@@ -39,6 +40,13 @@ if TYPE_CHECKING:
     LE = TypeVar('LE', bound='LogEntry')
 
 _LOGGER: Final = logging.getLogger(__name__)
+
+# Label prefixed onto every outgoing JSON-RPC request id, so booster's per-line
+# `{request: ...}` context in `kore.jsonl` self-identifies the originating claim.
+# Provers should `client_label.set(proof.id)` at the start of each proof; multi-
+# threaded consumers must re-`set` inside their worker entry points, since
+# `ContextVar` values are not propagated by `ThreadPoolExecutor`.
+client_label: ContextVar[str | None] = ContextVar('kore_rpc_client_label', default=None)
 
 
 class KoreExecLogFormat(Enum):
@@ -292,7 +300,9 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         self._transport.close()
 
     def request(self, method: str, **params: Any) -> dict[str, Any]:
-        req_id = f'{id(self)}-{self._req_id:03}'
+        label = client_label.get()
+        prefix = label if label is not None else str(id(self))
+        req_id = f'{prefix}-{self._req_id:03}'
         self._req_id += 1
 
         payload = {

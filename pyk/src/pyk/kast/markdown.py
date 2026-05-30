@@ -11,17 +11,40 @@ if TYPE_CHECKING:
 
 
 def select_code_blocks(text: str, selector: str | None = None) -> str:
+    """Extract selected fenced code blocks, preserving line and column positions.
+
+    Non-code characters (markdown prose, fence markers) are replaced with spaces so
+    that the output string has the same newline structure as the input.  This ensures
+    that line/column numbers reported by the outer lexer match the original file,
+    which is required for accurate error reporting in the inner parser (Java kompile).
+
+    Replicates the behaviour of Java's ExtractFencedKCodeFromMarkdown.
+    """
     _selector = SelectorParser(selector).parse() if selector else None
 
-    def selected(code_block: CodeBlock) -> bool:
-        if _selector is None:
-            return True
+    def _blank(s: str) -> str:
+        return ''.join(c if c in ' \t\n\r' else ' ' for c in s)
 
-        tags = parse_tags(code_block.info)
-        return _selector.eval(tags)
+    result: list[str] = []
+    last_end = 0
 
-    # TODO: Preserve line numbers from input text
-    return '\n'.join(code_block.code for code_block in code_blocks(text) if selected(code_block))
+    for match in _CODE_BLOCK_PATTERN.finditer(text):
+        result.append(_blank(text[last_end : match.start()]))
+
+        tags = parse_tags(match['info'])
+        is_selected = _selector is None or _selector.eval(tags)
+
+        if is_selected:
+            result.append(_blank(text[match.start() : match.start('code')]))
+            result.append(text[match.start('code') : match.end('code')])
+            result.append(_blank(text[match.end('code') : match.end()]))
+        else:
+            result.append(_blank(text[match.start() : match.end()]))
+
+        last_end = match.end()
+
+    result.append(_blank(text[last_end:]))
+    return ''.join(result)
 
 
 class CodeBlock(NamedTuple):

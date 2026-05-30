@@ -11,6 +11,7 @@ from ..kast.manip import extract_lhs, extract_rhs, flatten_label
 from ..kast.prelude.k import GENERATED_TOP_CELL
 from ..kast.prelude.kbool import BOOL, FALSE, TRUE
 from ..kast.prelude.ml import is_bottom, is_top, mlAnd, mlEquals, mlEqualsFalse, mlEqualsTrue
+from ..kore.rpc import client_label
 from ..utils import ensure_dir_path
 from .proof import FailureInfo, Proof, ProofStatus, ProofSummary, Prover
 
@@ -466,7 +467,11 @@ class ImpliesProver(Prover[ImpliesProof, ImpliesProofStep, ImpliesProofResult]):
         ]
 
     def init_proof(self, proof: ImpliesProof) -> None:
-        pass
+        # Stamp proof.id on every subsequent kore-RPC request from this thread so
+        # booster's `{request: ...}` log lines self-identify the originating
+        # claim.  Worker-thread consumers must `client_label.set(...)` inside
+        # their own closure — `ContextVar` is not propagated by ThreadPoolExecutor.
+        client_label.set(proof.id)
 
     def failure_info(self, proof: ImpliesProof) -> FailureInfo:
         # TODO add implementation
