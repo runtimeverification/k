@@ -11,7 +11,7 @@ from pyk.kast.prelude.kbool import BOOL
 from pyk.kast.prelude.kint import intToken
 from pyk.kcfg.exploration import KCFGExplorationNodeAttr
 from pyk.kcfg.explore import SimplifyVariant
-from pyk.kcfg.kcfg import KCFG, KCFGNodeAttr, NodeVariant, NoProgress, Producer
+from pyk.kcfg.kcfg import KCFG, KCFGNodeAttr, KoreHandoff, NodeVariant, NoProgress, Producer, Step
 from pyk.proof import EqualityProof
 from pyk.proof.implies import EqualitySummary
 from pyk.proof.proof import CompositeSummary, Proof, ProofStatus
@@ -23,6 +23,7 @@ from pyk.proof.reachability import (
     APRProofRecoverCloseResult,
     APRProofRecoverNoProgressResult,
     APRProofStuckResult,
+    APRProofTerminalResult,
     APRProver,
     APRSummary,
     DecisiveInvalid,
@@ -42,6 +43,7 @@ if TYPE_CHECKING:
 
     from pytest import TempPathFactory
 
+    from pyk.cterm import CTerm
     from pyk.kcfg.kcfg import NodeAttr
     from pyk.proof.reachability import SubsumptionCheck
 
@@ -468,6 +470,176 @@ def test_recover_try_kore_close_records_handoff_id() -> None:
     close = result[-1]
     assert isinstance(close, APRProofRecoverCloseResult)
     assert close.kore_request_id == 'req-1'  # kore implies closed ⇒ handoff id set
+
+
+@pytest.mark.parametrize('subsumption', [Indeterminate(), DecisiveInvalid()], ids=['indeterminate', 'decisive-invalid'])
+def test_recover_try_terminal_booster_escalates_instead_of_failing(subsumption: object) -> None:
+    # Regression (recover-mode parity): a terminal node whose booster subsumption does not close must
+    # NOT be finalized as terminal at the booster rung — that drops it out of `pending` before the
+    # ladder can reach a kore implies, regressing proofs that normal mode's kore-capable proxy implies
+    # would close.  Both a booster `Indeterminate` and a decisive booster `invalid` escalate: for a
+    # terminal node we always want kore's second opinion before declaring it failing.
+    node = KCFG.Node(1, term(1))
+    prover = _recover_prover(node=node)
+    prover.kcfg_explore.kcfg_semantics.is_terminal.return_value = True
+    prover._check_subsume.return_value = subsumption
+
+    result = APRProver._recover_try(prover, _step(node, RecoverTask.TRY_BOOSTER), (), is_kore=False)
+
+    # Not finalized as terminal; escalates so the node climbs to TRY_KORE's kore implies.
+    assert not any(isinstance(r, APRProofTerminalResult) for r in result)
+    no_progress = result[0]
+    assert isinstance(no_progress, APRProofRecoverNoProgressResult)
+    assert no_progress.backend == 'booster'
+    assert no_progress.subsume_indeterminate is True
+    prover.kcfg_explore.extend_cterm.assert_not_called()  # a terminal node is never executed
+
+
+def test_recover_try_terminal_kore_finalizes_when_implies_fails() -> None:
+    # The kore rung is the top of the ladder: once the kore implies on a terminal node also fails to
+    # close, the node is legitimately finalized as terminal (and so, unsubsumed, becomes failing).
+    node = KCFG.Node(1, term(1), [KCFGNodeAttr.SUBSUME_INDETERMINATE])
+    prover = _recover_prover(node=node)
+    prover.kcfg_explore.kcfg_semantics.is_terminal.return_value = True
+    prover._check_subsume.return_value = DecisiveInvalid()
+
+    result = APRProver._recover_try(prover, _step(node, RecoverTask.TRY_KORE), (), is_kore=True)
+
+    prover._check_subsume.assert_called_once()
+    assert len(result) == 1
+    assert isinstance(result[0], APRProofTerminalResult)
+    prover.kcfg_explore.extend_cterm.assert_not_called()
+
+
+# --- commit recover transitions (C14) ------------------------------------------------------------
+
+
+def _recover_proof() -> tuple[APRProof, int]:
+    kcfg = KCFG()
+    n_init = kcfg.create_node(term(1))
+    n_target = kcfg.create_node(term(2))
+    n = kcfg.create_node(term(3))
+    proof = APRProof(id='rec', kcfg=kcfg, terminal=[], init=n_init.id, target=n_target.id, logs={})
+    return proof, n.id
+
+
+def _no_progress(node_id: int, backend: str, indeterminate: bool = False) -> APRProofRecoverNoProgressResult:
+    return APRProofRecoverNoProgressResult(
+        node_id=node_id,
+        prior_loops_cache_update=(),
+        optimize_kcfg=False,
+        backend=backend,
+        subsume_indeterminate=indeterminate,
+        logged_calls=(),
+    )
+
+
+def _add_variant(node_id: int, producer: Producer, cterm: CTerm) -> APRProofAddVariantResult:
+    return APRProofAddVariantResult(
+        node_id=node_id,
+        prior_loops_cache_update=(),
+        optimize_kcfg=False,
+        producer=producer,
+        cterm=cterm,
+        request_id='r',
+        log_entries=None,
+    )
+
+
+def test_commit_no_progress_sets_booster_tried_and_indeterminate() -> None:
+    proof, nid = _recover_proof()
+    proof.commit(_no_progress(nid, 'booster', indeterminate=True))
+    attrs = proof.kcfg.node(nid).attrs
+    assert KCFGNodeAttr.BOOSTER_TRIED in attrs
+    assert KCFGNodeAttr.SUBSUME_INDETERMINATE in attrs
+    assert not proof.kcfg.is_stuck(nid)
+
+
+def test_commit_add_variant_clear_iff_changed() -> None:
+    proof, nid = _recover_proof()
+    proof.commit(_no_progress(nid, 'booster', indeterminate=True))
+
+    # No-op simplify (term unchanged): BOOSTER_TRIED stays set → short-circuit to next rung
+    proof.commit(_add_variant(nid, Producer.BOOSTER_SIMPLIFY, term(3)))
+    assert KCFGNodeAttr.BOOSTER_TRIED in proof.kcfg.node(nid).attrs
+    assert recovery_rung(proof.kcfg.node(nid)) == 1
+
+    # A term-changing simplify clears the per-rung try attrs
+    proof.commit(_add_variant(nid, Producer.KORE_SIMPLIFY, term(99)))
+    cleared = proof.kcfg.node(nid).attrs
+    assert KCFGNodeAttr.BOOSTER_TRIED not in cleared
+    assert KCFGNodeAttr.SUBSUME_INDETERMINATE not in cleared
+    assert recovery_rung(proof.kcfg.node(nid)) == 2
+
+
+def test_commit_full_ladder_to_both_backends_failed() -> None:
+    proof, nid = _recover_proof()
+    # rung 0: booster try fails (indeterminate), booster simplify changes the term → rung 1
+    proof.commit(_no_progress(nid, 'booster', indeterminate=True))
+    proof.commit(_add_variant(nid, Producer.BOOSTER_SIMPLIFY, term(10)))
+    # rung 1: booster try fails, kore simplify changes the term → rung 2
+    proof.commit(_no_progress(nid, 'booster'))
+    proof.commit(_add_variant(nid, Producer.KORE_SIMPLIFY, term(20)))
+    # rung 2: booster try fails, then kore try fails → both backends exhausted
+    proof.commit(_no_progress(nid, 'booster'))
+    assert not proof.kcfg.is_stuck(nid)
+    proof.commit(_no_progress(nid, 'kore'))
+
+    node = proof.kcfg.node(nid)
+    assert KCFGNodeAttr.BOTH_BACKENDS_FAILED in node.attrs
+    assert proof.kcfg.is_stuck(nid)
+
+
+def test_commit_recover_close_records_implies_handoff() -> None:
+    proof, nid = _recover_proof()
+    proof.commit(
+        APRProofRecoverCloseResult(
+            node_id=nid,
+            prior_loops_cache_update=(),
+            optimize_kcfg=False,
+            csubst=CSubst(),
+            kore_request_id='r-imp',
+            logged_calls=(),
+        )
+    )
+    assert proof.kcfg.kore_handoffs == [
+        KoreHandoff(source=nid, target=proof.target, flavour='implies', request_id='r-imp')
+    ]
+
+
+def test_commit_recover_advance_records_execute_handoff() -> None:
+    proof, nid = _recover_proof()
+    proof.commit(
+        APRProofRecoverAdvanceResult(
+            node_id=nid,
+            prior_loops_cache_update=(),
+            optimize_kcfg=False,
+            extension_to_apply=Step(term(50), 1, (), []),
+            kore_request_id='r-exec',
+            logged_calls=(),
+        )
+    )
+    handoffs = proof.kcfg.kore_handoffs
+    assert len(handoffs) == 1
+    assert handoffs[0].flavour == 'execute'
+    assert handoffs[0].source == nid
+    assert handoffs[0].request_id == 'r-exec'
+
+
+def test_commit_recover_advance_no_handoff_for_booster() -> None:
+    # A booster advance (kore_request_id None) records no handoff.
+    proof, nid = _recover_proof()
+    proof.commit(
+        APRProofRecoverAdvanceResult(
+            node_id=nid,
+            prior_loops_cache_update=(),
+            optimize_kcfg=False,
+            extension_to_apply=Step(term(50), 1, (), []),
+            kore_request_id=None,
+            logged_calls=(),
+        )
+    )
+    assert proof.kcfg.kore_handoffs == []
 
 
 def test_apr_proof_minimization_and_terminals() -> None:
