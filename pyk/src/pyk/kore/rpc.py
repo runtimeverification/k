@@ -1245,19 +1245,20 @@ class KoreServer(ContextManager['KoreServer']):
         if self._smt_tactic is not None:
             smt_server_args += ['--smt-tactic', self._smt_tactic]
 
-        if self._log_axioms_file is not None:
-            haskell_log_args = [
-                '--log',
-                str(self._log_axioms_file),
-                '--log-format',
-                self._haskell_log_format.value,
-                '--log-entries',
-                ','.join(self._haskell_log_entries),
-            ]
-        else:
-            haskell_log_args = []
+        return smt_server_args + self._haskell_log_cli_args()
 
-        return smt_server_args + haskell_log_args
+    def _haskell_log_cli_args(self) -> list[str]:
+        # kore-rpc form: `--log FILE`, `--log-entries A,B,C`.  Booster overrides for `--log-file FILE` and repeated `-l`.
+        if self._log_axioms_file is None:
+            return []
+        return [
+            '--log',
+            str(self._log_axioms_file),
+            '--log-format',
+            self._haskell_log_format.value,
+            '--log-entries',
+            ','.join(self._haskell_log_entries),
+        ]
 
     def _populate_bug_report(self, bug_report: BugReport) -> None:
         prog_name = self._command[0]
