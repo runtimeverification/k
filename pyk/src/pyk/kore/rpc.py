@@ -634,6 +634,16 @@ class RewriteFailure(RewriteResult):
         return {'tag': 'failure', 'rule-id': self.rule_id, 'reason': self.reason}
 
 
+def _parse_haskell_log_entries(dct: Mapping[str, Any]) -> tuple[Any, ...] | None:
+    """Parse the optional per-request ``haskell-log-entries`` bundle (arbitrary JSON values).
+
+    Present only when the request set a non-empty ``haskell-logging`` entry list; absent ⇒ ``None``.
+    Entries are kept as raw JSON in ``--log-format json`` shape so they feed straight into ``parse_kore_log``.
+    """
+    entries = dct.get('haskell-log-entries')
+    return tuple(entries) if entries is not None else None
+
+
 class ExecuteResult(ABC):
     _TYPES: Mapping[StopReason, str] = {
         StopReason.STUCK: 'StuckResult',
@@ -653,6 +663,7 @@ class ExecuteResult(ABC):
     next_states: tuple[State, ...] | None
     rule: str | None
     logs: tuple[LogEntry, ...]
+    haskell_log_entries: tuple[Any, ...] | None
 
     @classmethod
     def from_dict(cls: type[ER], dct: Mapping[str, Any]) -> ER:
@@ -677,6 +688,7 @@ class StuckResult(ExecuteResult):
     state: State
     depth: int
     logs: tuple[LogEntry, ...]
+    haskell_log_entries: tuple[Any, ...] | None = None
 
     @classmethod
     def from_dict(cls: type[StuckResult], dct: Mapping[str, Any]) -> StuckResult:
@@ -686,6 +698,7 @@ class StuckResult(ExecuteResult):
             state=State.from_dict(dct['state']),
             depth=dct['depth'],
             logs=logs,
+            haskell_log_entries=_parse_haskell_log_entries(dct),
         )
 
 
@@ -699,6 +712,7 @@ class DepthBoundResult(ExecuteResult):
     state: State
     depth: int
     logs: tuple[LogEntry, ...]
+    haskell_log_entries: tuple[Any, ...] | None = None
 
     @classmethod
     def from_dict(cls: type[DepthBoundResult], dct: Mapping[str, Any]) -> DepthBoundResult:
@@ -708,6 +722,7 @@ class DepthBoundResult(ExecuteResult):
             state=State.from_dict(dct['state']),
             depth=dct['depth'],
             logs=logs,
+            haskell_log_entries=_parse_haskell_log_entries(dct),
         )
 
 
@@ -721,6 +736,7 @@ class TimeoutResult(ExecuteResult):
     state: State
     depth: int
     logs: tuple[LogEntry, ...]
+    haskell_log_entries: tuple[Any, ...] | None = None
 
     @classmethod
     def from_dict(cls: type[TimeoutResult], dct: Mapping[str, Any]) -> TimeoutResult:
@@ -730,6 +746,7 @@ class TimeoutResult(ExecuteResult):
             state=State.from_dict(dct['state']),
             depth=dct['depth'],
             logs=logs,
+            haskell_log_entries=_parse_haskell_log_entries(dct),
         )
 
 
@@ -743,6 +760,7 @@ class BranchingResult(ExecuteResult):
     depth: int
     next_states: tuple[State, ...]
     logs: tuple[LogEntry, ...]
+    haskell_log_entries: tuple[Any, ...] | None = None
 
     @classmethod
     def from_dict(cls: type[BranchingResult], dct: Mapping[str, Any]) -> BranchingResult:
@@ -753,6 +771,7 @@ class BranchingResult(ExecuteResult):
             depth=dct['depth'],
             next_states=tuple(State.from_dict(next_state) for next_state in dct['next-states']),
             logs=logs,
+            haskell_log_entries=_parse_haskell_log_entries(dct),
         )
 
 
@@ -766,6 +785,7 @@ class CutPointResult(ExecuteResult):
     next_states: tuple[State, ...]
     rule: str
     logs: tuple[LogEntry, ...]
+    haskell_log_entries: tuple[Any, ...] | None = None
 
     @classmethod
     def from_dict(cls: type[CutPointResult], dct: Mapping[str, Any]) -> CutPointResult:
@@ -777,6 +797,7 @@ class CutPointResult(ExecuteResult):
             next_states=tuple(State.from_dict(next_state) for next_state in dct['next-states']),
             rule=dct['rule'],
             logs=logs,
+            haskell_log_entries=_parse_haskell_log_entries(dct),
         )
 
 
@@ -790,12 +811,19 @@ class TerminalResult(ExecuteResult):
     depth: int
     rule: str
     logs: tuple[LogEntry, ...]
+    haskell_log_entries: tuple[Any, ...] | None = None
 
     @classmethod
     def from_dict(cls: type[TerminalResult], dct: Mapping[str, Any]) -> TerminalResult:
         cls._check_reason(dct)
         logs = tuple(LogEntry.from_dict(l) for l in dct['logs']) if 'logs' in dct else ()
-        return TerminalResult(state=State.from_dict(dct['state']), depth=dct['depth'], rule=dct['rule'], logs=logs)
+        return TerminalResult(
+            state=State.from_dict(dct['state']),
+            depth=dct['depth'],
+            rule=dct['rule'],
+            logs=logs,
+            haskell_log_entries=_parse_haskell_log_entries(dct),
+        )
 
 
 @final
@@ -808,6 +836,7 @@ class VacuousResult(ExecuteResult):
     state: State
     depth: int
     logs: tuple[LogEntry, ...]
+    haskell_log_entries: tuple[Any, ...] | None = None
 
     @classmethod
     def from_dict(cls: type[VacuousResult], dct: Mapping[str, Any]) -> VacuousResult:
@@ -817,6 +846,7 @@ class VacuousResult(ExecuteResult):
             state=State.from_dict(dct['state']),
             depth=dct['depth'],
             logs=logs,
+            haskell_log_entries=_parse_haskell_log_entries(dct),
         )
 
 
@@ -831,6 +861,7 @@ class AbortedResult(ExecuteResult):
     depth: int
     unknown_predicate: Pattern | None
     logs: tuple[LogEntry, ...]
+    haskell_log_entries: tuple[Any, ...] | None = None
 
     @classmethod
     def from_dict(cls: type[AbortedResult], dct: Mapping[str, Any]) -> AbortedResult:
@@ -841,6 +872,7 @@ class AbortedResult(ExecuteResult):
             depth=dct['depth'],
             unknown_predicate=kore_term(dct['unknown-predicate']) if dct.get('unknown-predicate') else None,
             logs=logs,
+            haskell_log_entries=_parse_haskell_log_entries(dct),
         )
 
 
@@ -852,6 +884,7 @@ class ImpliesResult:
     substitution: Pattern | None
     predicate: Pattern | None
     logs: tuple[LogEntry, ...]
+    haskell_log_entries: tuple[Any, ...] | None = None
 
     @staticmethod
     def from_dict(dct: Mapping[str, Any]) -> ImpliesResult:
@@ -864,39 +897,61 @@ class ImpliesResult:
             substitution=kore_term(substitution) if substitution is not None else None,
             predicate=kore_term(predicate) if predicate is not None else None,
             logs=logs,
+            haskell_log_entries=_parse_haskell_log_entries(dct),
         )
 
 
+class SimplifyResult(NamedTuple):
+    """Result of a ``simplify`` call.
+
+    A ``NamedTuple`` (not a bare tuple) so the optional ``haskell_log_entries`` bundle can be
+    carried alongside the simplified ``state`` and ``logs`` without losing positional ergonomics.
+    """
+
+    state: Pattern
+    logs: tuple[LogEntry, ...]
+    haskell_log_entries: tuple[Any, ...] | None
+
+
 class GetModelResult(ABC):  # noqa: B024
+    haskell_log_entries: tuple[Any, ...] | None
+
     @staticmethod
     def from_dict(dct: Mapping[str, Any]) -> GetModelResult:
         status = dct['satisfiable']
+        entries = _parse_haskell_log_entries(dct)
         match status:
             case 'Unknown':
-                return UnknownResult()
+                return UnknownResult(haskell_log_entries=entries)
             case 'Unsat':
-                return UnsatResult()
+                return UnsatResult(haskell_log_entries=entries)
             case 'Sat':
                 substitution = dct.get('substitution')
-                return SatResult(model=kore_term(substitution) if substitution else None)
+                return SatResult(
+                    model=kore_term(substitution) if substitution else None,
+                    haskell_log_entries=entries,
+                )
             case _:
                 raise ValueError(f'Unknown status: {status}')
 
 
 @final
 @dataclass(frozen=True)
-class UnknownResult(GetModelResult): ...
+class UnknownResult(GetModelResult):
+    haskell_log_entries: tuple[Any, ...] | None = None
 
 
 @final
 @dataclass(frozen=True)
-class UnsatResult(GetModelResult): ...
+class UnsatResult(GetModelResult):
+    haskell_log_entries: tuple[Any, ...] | None = None
 
 
 @final
 @dataclass(frozen=True)
 class SatResult(GetModelResult):
     model: Pattern | None
+    haskell_log_entries: tuple[Any, ...] | None = None
 
 
 class KoreClient(ContextManager['KoreClient']):
@@ -996,6 +1051,7 @@ class KoreClient(ContextManager['KoreClient']):
         log_successful_rewrites: bool | None = None,
         log_failed_rewrites: bool | None = None,
         booster_only_simplify: bool | None = None,
+        haskell_logging: Iterable[str] | None = None,
     ) -> ExecuteResult:
         params = filter_none(
             {
@@ -1010,6 +1066,7 @@ class KoreClient(ContextManager['KoreClient']):
                 'log-successful-rewrites': log_successful_rewrites,
                 'log-failed-rewrites': log_failed_rewrites,
                 'booster-only': booster_only_simplify,
+                'haskell-logging': list(haskell_logging) if haskell_logging is not None else None,
             }
         )
 
@@ -1024,6 +1081,7 @@ class KoreClient(ContextManager['KoreClient']):
         module_name: str | None = None,
         assume_defined: bool = False,
         booster_only_simplify: bool | None = None,
+        haskell_logging: Iterable[str] | None = None,
     ) -> ImpliesResult:
         params = filter_none(
             {
@@ -1032,6 +1090,7 @@ class KoreClient(ContextManager['KoreClient']):
                 'module': module_name,
                 'assume-defined': assume_defined,
                 'booster-only': booster_only_simplify,
+                'haskell-logging': list(haskell_logging) if haskell_logging is not None else None,
             }
         )
 
@@ -1044,35 +1103,50 @@ class KoreClient(ContextManager['KoreClient']):
         *,
         module_name: str | None = None,
         booster_only_simplify: bool | None = None,
-    ) -> tuple[Pattern, tuple[LogEntry, ...]]:
+        haskell_logging: Iterable[str] | None = None,
+    ) -> SimplifyResult:
         params = filter_none(
             {
                 'state': self._state(pattern),
                 'module': module_name,
                 'booster-only': booster_only_simplify,
+                'haskell-logging': list(haskell_logging) if haskell_logging is not None else None,
             }
         )
 
         result = self._request('simplify', **params)
         logs = tuple(LogEntry.from_dict(l) for l in result['logs']) if 'logs' in result else ()
-        return kore_term(result['state']), logs
+        return SimplifyResult(kore_term(result['state']), logs, _parse_haskell_log_entries(result))
 
-    def get_model(self, pattern: Pattern, module_name: str | None = None) -> GetModelResult:
+    def get_model(
+        self,
+        pattern: Pattern,
+        module_name: str | None = None,
+        haskell_logging: Iterable[str] | None = None,
+    ) -> GetModelResult:
         params = filter_none(
             {
                 'state': self._state(pattern),
                 'module': module_name,
+                'haskell-logging': list(haskell_logging) if haskell_logging is not None else None,
             }
         )
 
         result = self._request('get-model', **params)
         return GetModelResult.from_dict(result)
 
-    def add_module(self, module: Module, *, name_as_id: bool | None = None) -> str:
+    def add_module(
+        self,
+        module: Module,
+        *,
+        name_as_id: bool | None = None,
+        haskell_logging: Iterable[str] | None = None,
+    ) -> str:
         params = filter_none(
             {
                 'module': module.text,
                 'name-as-id': name_as_id,
+                'haskell-logging': list(haskell_logging) if haskell_logging is not None else None,
             }
         )
         result = self._request('add-module', **params)

@@ -165,7 +165,7 @@ class CTermSymbolic:
         _LOGGER.debug(f'Simplifying: {kast}')
         kore = self.kast_to_kore(kast)
         try:
-            kore_simplified, logs = self._kore_client.simplify(
+            kore_simplified, logs, _ = self._kore_client.simplify(
                 kore,
                 module_name=module_name,
                 booster_only_simplify=(
