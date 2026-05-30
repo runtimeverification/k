@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from typing import TYPE_CHECKING
 from unittest.mock import Mock
 
@@ -28,6 +29,7 @@ from pyk.proof.reachability import (
     APRSummary,
     DecisiveInvalid,
     Indeterminate,
+    LoggedCall,
     RecoverTask,
     Subsumed,
     recover_task_for,
@@ -640,6 +642,57 @@ def test_commit_recover_advance_no_handoff_for_booster() -> None:
         )
     )
     assert proof.kcfg.kore_handoffs == []
+
+
+def test_commit_writes_recover_logs(proof_dir: Path) -> None:
+    kcfg = KCFG()
+    n_init = kcfg.create_node(term(1))
+    n_target = kcfg.create_node(term(2))
+    n = kcfg.create_node(term(3))
+    proof = APRProof(id='rec', kcfg=kcfg, terminal=[], init=n_init.id, target=n_target.id, logs={}, proof_dir=proof_dir)
+    entries = ({'context': ['proxy'], 'message': 'x'}, {'rule_id': 'abc', 'pre_hash': 'd'})
+
+    proof.commit(
+        APRProofRecoverNoProgressResult(
+            node_id=n.id,
+            prior_loops_cache_update=(),
+            optimize_kcfg=False,
+            backend='kore',
+            subsume_indeterminate=False,
+            logged_calls=(LoggedCall('claim-007', entries),),
+        )
+    )
+
+    assert proof.proof_subdir is not None
+    log_file = proof.proof_subdir / 'recover-logs' / 'claim-007.jsonl'
+    assert log_file.exists()
+    parsed = [json.loads(line) for line in log_file.read_text().splitlines()]
+    assert parsed == [dict(entry) for entry in entries]
+
+
+def test_commit_recover_logs_skipped_when_no_entries(proof_dir: Path) -> None:
+    kcfg = KCFG()
+    n_init = kcfg.create_node(term(1))
+    n_target = kcfg.create_node(term(2))
+    n = kcfg.create_node(term(3))
+    proof = APRProof(
+        id='rec2', kcfg=kcfg, terminal=[], init=n_init.id, target=n_target.id, logs={}, proof_dir=proof_dir
+    )
+
+    # A call that captured no entries (None) writes no file.
+    proof.commit(
+        APRProofRecoverNoProgressResult(
+            node_id=n.id,
+            prior_loops_cache_update=(),
+            optimize_kcfg=False,
+            backend='booster',
+            subsume_indeterminate=False,
+            logged_calls=(LoggedCall('claim-008', None),),
+        )
+    )
+
+    assert proof.proof_subdir is not None
+    assert not (proof.proof_subdir / 'recover-logs' / 'claim-008.jsonl').exists()
 
 
 def test_apr_proof_minimization_and_terminals() -> None:

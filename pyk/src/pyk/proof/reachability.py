@@ -407,6 +407,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
                         source=result.node_id, target=target_id, flavour='execute', request_id=result.kore_request_id
                     )
                 )
+            self._write_recover_logs(result.logged_calls)
         elif isinstance(result, APRProofRecoverCloseResult):
             self.kcfg.create_cover(result.node_id, self.target, csubst=result.csubst)
             if result.kore_request_id is not None:
@@ -415,6 +416,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
                         source=result.node_id, target=self.target, flavour='implies', request_id=result.kore_request_id
                     )
                 )
+            self._write_recover_logs(result.logged_calls)
         elif isinstance(result, APRProofBoundedResult):
             self.add_bounded(result.node_id)
         else:
@@ -430,6 +432,8 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         if result.cterm != prev_cterm:
             self.kcfg.discard_attr(result.node_id, KCFGNodeAttr.BOOSTER_TRIED)
             self.kcfg.discard_attr(result.node_id, KCFGNodeAttr.SUBSUME_INDETERMINATE)
+        if result.request_id is not None and result.log_entries is not None:
+            self._write_recover_logs((LoggedCall(result.request_id, result.log_entries),))
 
     def _commit_recover_no_progress(self, result: APRProofRecoverNoProgressResult) -> None:
         if result.backend == 'kore':
@@ -446,6 +450,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
             self.kcfg.add_attr(result.node_id, KCFGNodeAttr.BOTH_BACKENDS_FAILED)
             _LOGGER.info(f'Both backends failed, stuck node {self.id}: {result.node_id}')
             self.kcfg.add_stuck(result.node_id)
+        self._write_recover_logs(result.logged_calls)
 
     def _recover_successor_id(self, node_id: int) -> int:
         """Resolve the kore execute handoff target: the (min) new successor of ``node_id``.
@@ -457,6 +462,24 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
             return node_id
         targets = [target_id for succ in self.kcfg.successors(node_id) for target_id in succ.target_ids]
         return min(targets) if targets else node_id
+
+    def _write_recover_logs(self, logged_calls: Iterable[LoggedCall]) -> None:
+        """Write one ``recover-logs/{request_id}.jsonl`` per logged kore call (§5).
+
+        Each line is one captured log entry in ``--log-format json`` shape, so the file feeds
+        straight into ``parse_kore_log``.  No-ops when the proof is in-memory (no ``proof_subdir``)
+        or a call captured no entries.  Disk writes stay on the coordinator (main) thread.
+        """
+        if self.proof_subdir is None:
+            return
+        log_dir = self.proof_subdir / 'recover-logs'
+        for call in logged_calls:
+            if call.log_entries is None:
+                continue
+            ensure_dir_path(log_dir)
+            (log_dir / f'{call.request_id}.jsonl').write_text(
+                '\n'.join(json.dumps(entry) for entry in call.log_entries)
+            )
 
     def nonzero_depth(self, node: KCFG.Node) -> bool:
         return not self.kcfg.zero_depth_between(self.init, node.id)
