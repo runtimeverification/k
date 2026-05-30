@@ -13,6 +13,7 @@ from ..kast.outer import KClaim, KFlatModule, KImport, KRule
 from ..kast.prelude.ml import mlAnd, mlTop
 from ..kcfg import KCFG, KCFGStore
 from ..kcfg.exploration import KCFGExploration
+from ..kcfg.kcfg import NoProgress
 from ..kore.rpc import LogEntry, client_label
 from ..ktool.claim_index import ClaimIndex
 from ..utils import FrozenDict, ensure_dir_path, hash_str, shorten_hashes, single
@@ -73,6 +74,15 @@ class APRProofTerminalResult(APRProofResult): ...
 
 @dataclass
 class APRProofBoundedResult(APRProofResult): ...
+
+
+@dataclass
+class APRProofStuckResult(APRProofResult):
+    """The backend reported no progress; the coordinator (`commit`) is to mark the node stuck.
+
+    Carrying this as a distinct result — rather than a `Stuck` extension applied by `KCFG.extend` —
+    keeps `add_stuck` solely in `commit`, where the full node context lives (see C6).
+    """
 
 
 @dataclass(frozen=True)
@@ -240,6 +250,10 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
             self.kcfg.create_cover(result.node_id, self.target, csubst=result.csubst)
         elif isinstance(result, APRProofTerminalResult):
             self.add_terminal(result.node_id)
+        elif isinstance(result, APRProofStuckResult):
+            # Sole site that marks a node stuck: the coordinator owns this judgment (C6).
+            _LOGGER.info(f'Stuck node {self.id}: {result.node_id}')
+            self.kcfg.add_stuck(result.node_id)
         elif isinstance(result, APRProofBoundedResult):
             self.add_bounded(result.node_id)
         else:
@@ -896,6 +910,16 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
 
         # We can obtain two results at most
         assert len(extend_results) <= 2
+        # A no-progress result is not applied to the KCFG by the worker; the coordinator decides
+        # the node is stuck (sole `add_stuck` site is `commit`, see C6).
+        if len(extend_results) == 1 and isinstance(extend_results[0], NoProgress):
+            return [
+                APRProofStuckResult(
+                    node_id=step.node.id,
+                    optimize_kcfg=self.optimize_kcfg,
+                    prior_loops_cache_update=prior_loops,
+                )
+            ]
         # We have obtained two results: first is to be applied, second to be cached potentially
         if len(extend_results) == 2:
             # Cache only if the current node is at non-zero depth

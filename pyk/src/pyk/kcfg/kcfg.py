@@ -1322,6 +1322,17 @@ class Stuck(KCFGExtendResult): ...
 
 @final
 @dataclass(frozen=True)
+class NoProgress(KCFGExtendResult):
+    """The backend made no progress on a node, without judging it stuck.
+
+    Emitted by ``KCFGExplore.extend_cterm`` in place of ``Stuck`` so the *decision* of whether a
+    no-progress node is terminal stays with the proof coordinator (``APRProof.commit``), which has
+    the full node context.  Never applied by ``KCFG.extend`` — the coordinator intercepts it.
+    """
+
+
+@final
+@dataclass(frozen=True)
 class Abstract(KCFGExtendResult):
     cterm: CTerm
 

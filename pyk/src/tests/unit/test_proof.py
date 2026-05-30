@@ -11,7 +11,7 @@ from pyk.kcfg.kcfg import KCFG, KCFGNodeAttr
 from pyk.proof import EqualityProof
 from pyk.proof.implies import EqualitySummary
 from pyk.proof.proof import CompositeSummary, Proof, ProofStatus
-from pyk.proof.reachability import APRFailureInfo, APRProof, APRSummary
+from pyk.proof.reachability import APRFailureInfo, APRProof, APRProofStuckResult, APRSummary
 
 from .kcfg.test_minimize import minimization_test_kcfg
 from .test_kcfg import node, node_dicts, term
@@ -236,6 +236,22 @@ def test_apr_proof_from_dict_heterogeneous_subproofs(proof_dir: Path) -> None:
 
     # Then
     assert proof.dict == proof_from_disk.dict
+
+
+def test_commit_stuck_result_marks_node_stuck() -> None:
+    # Given a proof with a pending leaf node that is neither init nor target
+    kcfg = KCFG()
+    n1 = kcfg.create_node(term(1))
+    n2 = kcfg.create_node(term(2))
+    n3 = kcfg.create_node(term(3))
+    proof = APRProof(id='stuck_proof', kcfg=kcfg, terminal=[], init=n1.id, target=n2.id, logs={})
+    assert not kcfg.is_stuck(n3.id)
+
+    # When the coordinator commits a no-progress (stuck) result for that node
+    proof.commit(APRProofStuckResult(node_id=n3.id, prior_loops_cache_update=(), optimize_kcfg=False))
+
+    # Then the node is marked stuck — `commit` is the sole `add_stuck` site (C6)
+    assert kcfg.is_stuck(n3.id)
 
 
 def test_apr_proof_minimization_and_terminals() -> None:

@@ -17,7 +17,7 @@ from ..kast.prelude.ml import is_top, mlAnd
 from ..kast.pretty import PrettyPrinter
 from ..kore.rpc import LogRewrite, RewriteSuccess
 from ..utils import not_none, shorten_hashes, single, unique
-from .kcfg import KCFG, Abstract, Branch, NDBranch, Step, Stuck, Vacuous
+from .kcfg import KCFG, Abstract, Branch, NDBranch, NoProgress, Step, Vacuous
 from .semantics import DefaultSemantics
 
 if TYPE_CHECKING:
@@ -253,12 +253,14 @@ class KCFGExplore:
         if depth > 0:
             extend_results.append(Step(cterm, depth, next_node_logs, self._extract_rule_labels(next_node_logs)))
 
-        # Stuck or vacuous
+        # No-progress or vacuous.  `Vacuous` is a context-free semantic verdict and stays here; a
+        # depth-0 no-progress result is reported as the neutral `NoProgress` rather than `Stuck`, so
+        # the coordinator (`APRProof.commit`) decides whether the node is terminal (see C6).
         if not next_states:
             if vacuous:
                 extend_results.append(Vacuous())
             elif depth == 0:
-                extend_results.append(Stuck())
+                extend_results.append(NoProgress())
         # Cut rule
         elif len(next_states) == 1:
             if not self.kcfg_semantics.can_make_custom_step(cterm):
