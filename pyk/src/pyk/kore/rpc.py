@@ -1376,6 +1376,21 @@ class BoosterServer(KoreServer):
         res += [arg for glob in self._not_log_context for arg in ['--not-log-context', glob]]
         return res
 
+    def _haskell_log_cli_args(self) -> list[str]:
+        # kore-rpc-booster diverged from kore-rpc: `--log-file FILE` (not `--log FILE`),
+        # and repeated `-l ENTRY` (not `--log-entries A,B,C`).
+        if self._log_axioms_file is None:
+            return []
+        args = [
+            '--log-file',
+            str(self._log_axioms_file),
+            '--log-format',
+            self._haskell_log_format.value,
+        ]
+        for entry in self._haskell_log_entries:
+            args += ['-l', entry]
+        return args
+
     def _populate_bug_report(self, bug_report: BugReport) -> None:
         super()._populate_bug_report(bug_report)
         bug_report.add_file(self._llvm_definition, Path('llvm_definition/definition.kore'))
