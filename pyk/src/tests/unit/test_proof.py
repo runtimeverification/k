@@ -10,7 +10,7 @@ from pyk.cterm.symbolic import CTermImplies
 from pyk.kast.prelude.kbool import BOOL
 from pyk.kast.prelude.kint import intToken
 from pyk.kcfg.exploration import KCFGExplorationNodeAttr
-from pyk.kcfg.kcfg import KCFG, KCFGNodeAttr
+from pyk.kcfg.kcfg import KCFG, KCFGNodeAttr, NodeVariant, Producer
 from pyk.proof import EqualityProof
 from pyk.proof.implies import EqualitySummary
 from pyk.proof.proof import CompositeSummary, Proof, ProofStatus
@@ -22,7 +22,10 @@ from pyk.proof.reachability import (
     APRSummary,
     DecisiveInvalid,
     Indeterminate,
+    RecoverTask,
     Subsumed,
+    recover_task_for,
+    recovery_rung,
 )
 
 from .kcfg.test_minimize import minimization_test_kcfg
@@ -34,6 +37,7 @@ if TYPE_CHECKING:
 
     from pytest import TempPathFactory
 
+    from pyk.kcfg.kcfg import NodeAttr
     from pyk.proof.reachability import SubsumptionCheck
 
 
@@ -316,6 +320,46 @@ def test_check_subsume_fast_skip_is_decisive_invalid() -> None:
     # Then it is a decisive non-subsumption and the backend is never consulted
     assert isinstance(result, DecisiveInvalid)
     prover.kcfg_explore.cterm_symbolic.implies.assert_not_called()
+
+
+def _node_at_rung(rung: int, attrs: list[NodeAttr]) -> KCFG.Node:
+    chain: list[NodeVariant] = []
+    if rung >= 1:
+        chain = [NodeVariant(Producer.INIT, None, term(1)), NodeVariant(Producer.BOOSTER_SIMPLIFY, 'r-b', term(2))]
+    if rung >= 2:
+        chain.append(NodeVariant(Producer.KORE_SIMPLIFY, 'r-k', term(3)))
+    return KCFG.Node(1, term(rung + 1), attrs, chain)
+
+
+def test_recovery_rung() -> None:
+    assert recovery_rung(KCFG.Node(1, term(1))) == 0
+    assert recovery_rung(_node_at_rung(0, [])) == 0
+    assert recovery_rung(_node_at_rung(1, [])) == 1
+    assert recovery_rung(_node_at_rung(2, [])) == 2
+
+
+_TASK_DATA: tuple[tuple[str, int, list[NodeAttr], RecoverTask], ...] = (
+    # (rung, attrs, expected) — first matching §3d rule
+    ('rung0-fresh', 0, [], RecoverTask.TRY_BOOSTER),
+    ('rung0-tried', 0, [KCFGNodeAttr.BOOSTER_TRIED], RecoverTask.SIMPLIFY_BOOSTER),
+    ('rung1-fresh', 1, [], RecoverTask.TRY_BOOSTER),
+    ('rung1-tried', 1, [KCFGNodeAttr.BOOSTER_TRIED], RecoverTask.SIMPLIFY_KORE),
+    ('rung2-fresh', 2, [], RecoverTask.TRY_BOOSTER),
+    ('rung2-tried', 2, [KCFGNodeAttr.BOOSTER_TRIED], RecoverTask.TRY_KORE),
+)
+
+
+@pytest.mark.parametrize('test_id,rung,attrs,expected', _TASK_DATA, ids=[d[0] for d in _TASK_DATA])
+def test_recover_task_selection(test_id: str, rung: int, attrs: list[NodeAttr], expected: RecoverTask) -> None:
+    assert recover_task_for(_node_at_rung(rung, attrs)) is expected
+
+
+def test_recover_task_noop_shortcircuit() -> None:
+    # After a no-op SIMPLIFY_BOOSTER, the term advanced to rung 1 but BOOSTER_TRIED stays set
+    # (commit's clear-iff-changed invariant), so the next task skips the redundant TRY_BOOSTER and
+    # goes straight to SIMPLIFY_KORE.
+    node = _node_at_rung(1, [KCFGNodeAttr.BOOSTER_TRIED])
+    assert recover_task_for(node) is RecoverTask.SIMPLIFY_KORE
 
 
 def test_apr_proof_minimization_and_terminals() -> None:

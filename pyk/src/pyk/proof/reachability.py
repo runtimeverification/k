@@ -5,6 +5,7 @@ import logging
 import re
 from abc import ABC
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import TYPE_CHECKING, final
 
 from ..cterm.cterm import remove_useless_constraints
@@ -14,7 +15,7 @@ from ..kast.outer import KClaim, KFlatModule, KImport, KRule
 from ..kast.prelude.ml import mlAnd, mlTop
 from ..kcfg import KCFG, KCFGStore
 from ..kcfg.exploration import KCFGExploration
-from ..kcfg.kcfg import NoProgress
+from ..kcfg.kcfg import KCFGNodeAttr, NoProgress, Producer
 from ..kore.rpc import LogEntry, client_label
 from ..ktool.claim_index import ClaimIndex
 from ..utils import FrozenDict, ensure_dir_path, hash_str, shorten_hashes, single
@@ -34,6 +35,45 @@ if TYPE_CHECKING:
     T = TypeVar('T', bound='Proof')
 
 _LOGGER: Final = logging.getLogger(__name__)
+
+
+class RecoverTask(Enum):
+    """The per-node task the recover-mode coordinator assigns to a worker (see §unifying model).
+
+    `TRY_BOOSTER`/`TRY_KORE` are the combined subsume-then-execute step with one backend;
+    `SIMPLIFY_BOOSTER`/`SIMPLIFY_KORE` each produce one re-simplification variant.
+    """
+
+    TRY_BOOSTER = 'try-booster'
+    SIMPLIFY_BOOSTER = 'simplify-booster'
+    SIMPLIFY_KORE = 'simplify-kore'
+    TRY_KORE = 'try-kore'
+
+
+def recovery_rung(node: KCFG.Node) -> int:
+    """Compute the node's recovery rung: 0 (original), 1 (booster-simplified), 2 (kore-simplified).
+
+    Derived from the producer of the most-simplified variant; an empty chain is rung 0.
+    """
+    if not node.variants:
+        return 0
+    return {Producer.INIT: 0, Producer.BOOSTER_SIMPLIFY: 1, Producer.KORE_SIMPLIFY: 2}[node.variants[-1].producer]
+
+
+def recover_task_for(node: KCFG.Node) -> RecoverTask:
+    """Pick the next recover-mode task for a *pending* node from its rung and attrs (§3d).
+
+    A pending node never has both `BOOSTER_TRIED` and `KORE_TRIED` at rung 2 — `commit` would have
+    marked that node stuck — so the rung-2 branch is always `TRY_KORE`.
+    """
+    if KCFGNodeAttr.BOOSTER_TRIED not in node.attrs:
+        return RecoverTask.TRY_BOOSTER
+    rung = recovery_rung(node)
+    if rung == 0:
+        return RecoverTask.SIMPLIFY_BOOSTER
+    if rung == 1:
+        return RecoverTask.SIMPLIFY_KORE
+    return RecoverTask.TRY_KORE
 
 
 @dataclass
@@ -124,6 +164,7 @@ class APRProofStep:
     circularity: bool
     nonzero_depth: bool
     circularity_rule_id: str
+    recover_task: RecoverTask | None = None
 
 
 class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
@@ -149,6 +190,9 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
     _exec_time: float
     error_info: Exception | None
     prior_loops_cache: dict[int, tuple[int, ...]]
+    # Runtime flag (not persisted): the prover sets it in `init_proof` so the coordinator's
+    # `get_steps`/`commit` run the recover-mode ladder.  Resume re-supplies it via the CLI flag.
+    recover_mode: bool
 
     _checked_for_bounded: set[int]
     _next_steps: dict[NodeIdLike, KCFGExtendResult]
@@ -192,6 +236,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
 
         self._checked_for_bounded = set()
         self._next_steps = {}
+        self.recover_mode = False
 
         if self.proof_dir is not None and self.proof_subdir is not None:
             ensure_dir_path(self.proof_dir)
@@ -233,12 +278,21 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
                 single(predecessor_edges).source.id if predecessor_edges != [] else None
             )
 
+            # Recover-mode: the coordinator picks the per-node task and disables extend-and-cache
+            # (caching a second extend interacts badly with re-trying a node across rungs, §3b).
+            recover_task = recover_task_for(node) if self.recover_mode else None
+            use_cache = (
+                None
+                if self.recover_mode
+                else (predecessor_node_id if predecessor_node_id in self._next_steps else None)
+            )
+
             steps.append(
                 APRProofStep(
                     bmc_depth=self.bmc_depth,
                     module_name=module_name,
                     node=node,
-                    use_cache=predecessor_node_id if predecessor_node_id in self._next_steps else None,
+                    use_cache=use_cache,
                     proof_id=self.id,
                     target=self.kcfg.node(self.target),
                     shortest_path_to_node=tuple(shortest_path),
@@ -246,6 +300,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
                     circularity=self.circularity,
                     nonzero_depth=nonzero_depth,
                     circularity_rule_id=f'{self.rule_id}-{self.init}-TO-{self.target}',
+                    recover_task=recover_task,
                 )
             )
         return steps
@@ -765,6 +820,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
     kcfg_explore: KCFGExplore
     extra_module: KFlatModule | None
     optimize_kcfg: bool
+    recover_mode: bool
 
     def __init__(
         self,
@@ -778,6 +834,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         assume_defined: bool = False,
         extra_module: KFlatModule | None = None,
         optimize_kcfg: bool = False,
+        recover_mode: bool = False,
     ) -> None:
 
         self.kcfg_explore = kcfg_explore
@@ -791,6 +848,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         self.assume_defined = assume_defined
         self.extra_module = extra_module
         self.optimize_kcfg = optimize_kcfg
+        self.recover_mode = recover_mode
 
     def close(self) -> None:
         self.kcfg_explore.cterm_symbolic._kore_client.close()
@@ -801,6 +859,10 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         # claim.  Worker-thread consumers must `client_label.set(...)` inside
         # their own closure — `ContextVar` is not propagated by ThreadPoolExecutor.
         client_label.set(proof.id)
+
+        # Propagate the prover's recover-mode config onto the proof so the coordinator's
+        # `get_steps`/`commit` (which live on the proof) run the recover-mode ladder.
+        proof.recover_mode = self.recover_mode
 
         main_module_name = self.main_module_name
         if self.extra_module:
