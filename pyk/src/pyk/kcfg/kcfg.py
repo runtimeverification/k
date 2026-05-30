@@ -5,6 +5,7 @@ import logging
 from abc import ABC, abstractmethod
 from collections.abc import Container
 from dataclasses import dataclass, field
+from enum import Enum
 from threading import RLock
 from typing import TYPE_CHECKING, Final, List, Union, cast, final
 
@@ -49,6 +50,39 @@ class NodeAttr:
 class KCFGNodeAttr(NodeAttr):
     VACUOUS = NodeAttr('vacuous')
     STUCK = NodeAttr('stuck')
+
+
+class Producer(Enum):
+    """How a node's term was produced — the basis for a node's recover-mode 'rung'.
+
+    ``INIT`` is the original term; ``BOOSTER_SIMPLIFY`` / ``KORE_SIMPLIFY`` record a
+    re-simplification that produced a new term (booster-only, then kore-enabled).
+    """
+
+    INIT = 'init'
+    BOOSTER_SIMPLIFY = 'simplified-booster'
+    KORE_SIMPLIFY = 'simplified-booster-kore'
+
+
+@final
+@dataclass(frozen=True)
+class NodeVariant:
+    """One entry in a node's simplification-provenance chain (`KCFG.Node.variants`).
+
+    Records the term produced by a simplification step and the producer + JSON-RPC ``request_id``
+    that produced it.  The chain is flat (least→most simplified) with the canonical term last.
+    """
+
+    producer: Producer
+    request_id: str | None  # the simplify RPC that produced this cterm; None for INIT
+    cterm: CTerm
+
+    def to_dict(self) -> dict[str, Any]:
+        return {'producer': self.producer.value, 'request_id': self.request_id, 'cterm': self.cterm.to_dict()}
+
+    @staticmethod
+    def from_dict(dct: dict[str, Any]) -> NodeVariant:
+        return NodeVariant(Producer(dct['producer']), dct.get('request_id'), CTerm.from_dict(dct['cterm']))
 
 
 class KCFGStore:
@@ -117,34 +151,61 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         id: int
         cterm: CTerm
         attrs: frozenset[NodeAttr]
+        # Simplification-provenance chain, least→most simplified, canonical term last; `()` == no
+        # recorded history (back-compat default).  `compare=False` excludes it from the dataclass's
+        # generated eq/order/hash, so node identity is unchanged — `cterm` already reflects the
+        # canonical term, and the rest of the system stays oblivious to `variants` (see C8).
+        variants: tuple[NodeVariant, ...] = field(default=(), compare=False)
 
-        def __init__(self, id: int, cterm: CTerm, attrs: Iterable[NodeAttr] = ()) -> None:
+        def __init__(
+            self, id: int, cterm: CTerm, attrs: Iterable[NodeAttr] = (), variants: Iterable[NodeVariant] = ()
+        ) -> None:
             object.__setattr__(self, 'id', id)
             object.__setattr__(self, 'cterm', cterm)
             object.__setattr__(self, 'attrs', frozenset(attrs))
+            object.__setattr__(self, 'variants', tuple(variants))
 
         def to_dict(self) -> dict[str, Any]:
-            return {'id': self.id, 'cterm': self.cterm.to_dict(), 'attrs': [attr.value for attr in self.attrs]}
+            dct: dict[str, Any] = {
+                'id': self.id,
+                'cterm': self.cterm.to_dict(),
+                'attrs': [attr.value for attr in self.attrs],
+            }
+            # Omitted when empty so variant-less nodes serialise byte-identically to before.
+            if self.variants:
+                dct['variants'] = [variant.to_dict() for variant in self.variants]
+            return dct
 
         @staticmethod
         def from_dict(dct: dict[str, Any]) -> KCFG.Node:
-            return KCFG.Node(dct['id'], CTerm.from_dict(dct['cterm']), [NodeAttr(attr) for attr in dct['attrs']])
+            return KCFG.Node(
+                dct['id'],
+                CTerm.from_dict(dct['cterm']),
+                [NodeAttr(attr) for attr in dct['attrs']],
+                [NodeVariant.from_dict(v) for v in dct.get('variants', ())],
+            )
 
         def add_attr(self, attr: NodeAttr) -> KCFG.Node:
-            return KCFG.Node(self.id, self.cterm, list(self.attrs) + [attr])
+            return KCFG.Node(self.id, self.cterm, list(self.attrs) + [attr], self.variants)
 
         def remove_attr(self, attr: NodeAttr) -> KCFG.Node:
             if attr not in self.attrs:
                 raise ValueError(f'Node {self.id} does not have attribute {attr.value}')
-            return KCFG.Node(self.id, self.cterm, self.attrs.difference([attr]))
+            return KCFG.Node(self.id, self.cterm, self.attrs.difference([attr]), self.variants)
 
         def discard_attr(self, attr: NodeAttr) -> KCFG.Node:
-            return KCFG.Node(self.id, self.cterm, self.attrs.difference([attr]))
+            return KCFG.Node(self.id, self.cterm, self.attrs.difference([attr]), self.variants)
 
-        def let(self, cterm: CTerm | None = None, attrs: Iterable[KCFGNodeAttr] | None = None) -> KCFG.Node:
+        def let(
+            self,
+            cterm: CTerm | None = None,
+            attrs: Iterable[KCFGNodeAttr] | None = None,
+            variants: Iterable[NodeVariant] | None = None,
+        ) -> KCFG.Node:
             new_cterm = cterm if cterm is not None else self.cterm
             new_attrs = attrs if attrs is not None else self.attrs
-            return KCFG.Node(self.id, new_cterm, new_attrs)
+            new_variants = variants if variants is not None else self.variants
+            return KCFG.Node(self.id, new_cterm, new_attrs, new_variants)
 
         @property
         def free_vars(self) -> frozenset[str]:
@@ -855,6 +916,29 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         node = self.node(node_id)
         new_node = node.let(cterm=cterm, attrs=attrs)
         self.replace_node(new_node)
+
+    def add_variant(
+        self,
+        node_id: NodeIdLike,
+        producer: Producer,
+        cterm: CTerm,
+        request_id: str | None = None,
+    ) -> KCFG.Node:
+        """Append a simplification variant to a node and make its term canonical.
+
+        Non-destructive provenance: the node's ``cterm`` is updated to the most-simplified term
+        (so downstream readers see it transparently) while ``variants`` records the full chain.
+        On the first variant the original term is seeded as an ``INIT`` entry, so the chain is
+        self-contained (``variants[i-1].cterm`` → ``variants[i].cterm`` is always a real step).
+
+        Exposed publicly so downstream (e.g. kevm-pyk init/target pre-simplification) can drive it.
+        """
+        node = self.node(node_id)
+        chain = node.variants if node.variants else (NodeVariant(Producer.INIT, None, node.cterm),)
+        new_variants = chain + (NodeVariant(producer, request_id, cterm),)
+        new_node = node.let(cterm=cterm, variants=new_variants)
+        self.replace_node(new_node)
+        return new_node
 
     def replace_node(self, node: KCFG.Node) -> None:
         self._nodes[node.id] = node

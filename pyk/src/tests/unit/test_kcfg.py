@@ -252,6 +252,75 @@ def test_create_node() -> None:
     assert not cfg.is_stuck(new_node.id)
 
 
+def test_node_variants_default_empty_and_roundtrip() -> None:
+    # Given a node built the legacy way
+    n = node(1)
+
+    # Then variants default to empty and the serialised form omits the key
+    assert n.variants == ()
+    assert 'variants' not in n.to_dict()
+    # And a legacy node dict (no 'variants') still loads
+    assert KCFG.Node.from_dict(n.to_dict()) == n
+
+
+def test_add_variant_chains_and_updates_cterm() -> None:
+    from pyk.kcfg.kcfg import Producer
+
+    # Given a fresh node at rung 0
+    cfg = KCFG()
+    n = cfg.create_node(term(1))
+
+    # When a booster-simplify variant is appended
+    cfg.add_variant(n.id, Producer.BOOSTER_SIMPLIFY, term(2), request_id='claim-001')
+    updated = cfg.node(n.id)
+
+    # Then the canonical cterm advances and the chain seeds INIT then records the step
+    assert updated.cterm == term(2)
+    assert [v.producer for v in updated.variants] == [Producer.INIT, Producer.BOOSTER_SIMPLIFY]
+    assert updated.variants[0].cterm == term(1)
+    assert updated.variants[-1].cterm == term(2)
+    assert updated.variants[-1].request_id == 'claim-001'
+
+    # When a second (kore-simplify) variant is appended, INIT is not re-seeded
+    cfg.add_variant(n.id, Producer.KORE_SIMPLIFY, term(3), request_id='claim-002')
+    updated = cfg.node(n.id)
+    assert updated.cterm == term(3)
+    assert [v.producer for v in updated.variants] == [
+        Producer.INIT,
+        Producer.BOOSTER_SIMPLIFY,
+        Producer.KORE_SIMPLIFY,
+    ]
+
+
+def test_node_variants_to_dict_from_dict_roundtrip() -> None:
+    from pyk.kcfg.kcfg import Producer
+
+    # Given a node carrying a variant chain
+    cfg = KCFG()
+    n = cfg.create_node(term(1))
+    cfg.add_variant(n.id, Producer.BOOSTER_SIMPLIFY, term(2), request_id='r-1')
+    original = cfg.node(n.id)
+
+    # When round-tripped through dict
+    restored = KCFG.Node.from_dict(original.to_dict())
+
+    # Then variants survive (equality ignores variants, so compare them explicitly)
+    assert restored == original
+    assert restored.variants == original.variants
+
+
+def test_node_equality_ignores_variants() -> None:
+    from pyk.kcfg.kcfg import NodeVariant, Producer
+
+    # Given two nodes identical but for their variant chains
+    bare = KCFG.Node(1, term(1))
+    with_variants = KCFG.Node(1, term(1), variants=[NodeVariant(Producer.INIT, None, term(1))])
+
+    # Then they compare equal and hash equal (variants is metadata)
+    assert bare == with_variants
+    assert hash(bare) == hash(with_variants)
+
+
 def test_remove_unknown_node() -> None:
     # Given
     cfg = KCFG()
