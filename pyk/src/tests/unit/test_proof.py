@@ -10,13 +10,18 @@ from pyk.cterm.symbolic import CTermImplies
 from pyk.kast.prelude.kbool import BOOL
 from pyk.kast.prelude.kint import intToken
 from pyk.kcfg.exploration import KCFGExplorationNodeAttr
-from pyk.kcfg.kcfg import KCFG, KCFGNodeAttr, NodeVariant, Producer
+from pyk.kcfg.explore import SimplifyVariant
+from pyk.kcfg.kcfg import KCFG, KCFGNodeAttr, NodeVariant, NoProgress, Producer
 from pyk.proof import EqualityProof
 from pyk.proof.implies import EqualitySummary
 from pyk.proof.proof import CompositeSummary, Proof, ProofStatus
 from pyk.proof.reachability import (
     APRFailureInfo,
     APRProof,
+    APRProofAddVariantResult,
+    APRProofRecoverAdvanceResult,
+    APRProofRecoverCloseResult,
+    APRProofRecoverNoProgressResult,
     APRProofStuckResult,
     APRProver,
     APRSummary,
@@ -360,6 +365,109 @@ def test_recover_task_noop_shortcircuit() -> None:
     # goes straight to SIMPLIFY_KORE.
     node = _node_at_rung(1, [KCFGNodeAttr.BOOSTER_TRIED])
     assert recover_task_for(node) is RecoverTask.SIMPLIFY_KORE
+
+
+# --- step_proof recover dispatch (C13) -----------------------------------------------------------
+
+
+def _recover_prover(*, node: KCFG.Node) -> Mock:
+    """A Mock APRProver wired enough to exercise the unbound `_recover_*` methods."""
+    prover = Mock()
+    prover.optimize_kcfg = False
+    prover.cut_point_rules = []
+    prover.terminal_rules = []
+    prover.execute_depth = None
+    prover.kcfg_explore.kcfg_semantics.is_terminal.return_value = False
+    prover.kcfg_explore.cterm_symbolic.last_request_id = 'req-1'
+    prover.kcfg_explore.cterm_symbolic.last_haskell_log_entries = ({'message': 'log'},)
+    return prover
+
+
+def _step(node: KCFG.Node, task: RecoverTask) -> Mock:
+    return Mock(node=node, target=node, proof_id='p', circularity=False, nonzero_depth=True, recover_task=task)
+
+
+def test_recover_simplify_yields_add_variant() -> None:
+    node = KCFG.Node(1, term(1))
+    prover = _recover_prover(node=node)
+    prover.kcfg_explore.simplify_variant.return_value = SimplifyVariant(
+        Producer.BOOSTER_SIMPLIFY, term(2), 'req-s', ({'message': 'log'},)
+    )
+
+    result = APRProver._recover_simplify(prover, _step(node, RecoverTask.SIMPLIFY_BOOSTER), (), booster_only=True)
+
+    assert len(result) == 1
+    variant_result = result[0]
+    assert isinstance(variant_result, APRProofAddVariantResult)
+    assert variant_result.producer is Producer.BOOSTER_SIMPLIFY
+    assert variant_result.cterm == term(2)
+    assert variant_result.request_id == 'req-s'
+
+
+def test_recover_try_booster_close() -> None:
+    node = KCFG.Node(1, term(1))
+    prover = _recover_prover(node=node)
+    prover._check_subsume.return_value = Subsumed(CSubst())
+
+    result = APRProver._recover_try(prover, _step(node, RecoverTask.TRY_BOOSTER), (), is_kore=False)
+
+    assert isinstance(result[-1], APRProofRecoverCloseResult)
+    # booster close → no kore handoff
+    assert result[-1].kore_request_id is None
+
+
+def test_recover_try_booster_advance() -> None:
+    node = KCFG.Node(1, term(1))
+    prover = _recover_prover(node=node)
+    prover._check_subsume.return_value = DecisiveInvalid()
+    prover.kcfg_explore.extend_cterm.return_value = [Mock()]  # not NoProgress ⇒ advance
+
+    result = APRProver._recover_try(prover, _step(node, RecoverTask.TRY_BOOSTER), (), is_kore=False)
+
+    assert isinstance(result[0], APRProofRecoverAdvanceResult)
+    assert result[0].kore_request_id is None
+
+
+def test_recover_try_booster_no_progress_carries_indeterminate() -> None:
+    node = KCFG.Node(1, term(1))
+    prover = _recover_prover(node=node)
+    prover._check_subsume.return_value = Indeterminate()
+    prover.kcfg_explore.extend_cterm.return_value = [NoProgress()]
+
+    result = APRProver._recover_try(prover, _step(node, RecoverTask.TRY_BOOSTER), (), is_kore=False)
+
+    no_progress = result[0]
+    assert isinstance(no_progress, APRProofRecoverNoProgressResult)
+    assert no_progress.backend == 'booster'
+    assert no_progress.subsume_indeterminate is True
+
+
+def test_recover_try_kore_skips_implies_without_indeterminate_flag() -> None:
+    # rung-2 node without SUBSUME_INDETERMINATE: trust the decisive booster invalid, go to execute.
+    node = KCFG.Node(1, term(1), [KCFGNodeAttr.BOOSTER_TRIED])
+    prover = _recover_prover(node=node)
+    prover.kcfg_explore.extend_cterm.return_value = [Mock()]
+
+    result = APRProver._recover_try(prover, _step(node, RecoverTask.TRY_KORE), (), is_kore=True)
+
+    prover._check_subsume.assert_not_called()
+    advance = result[0]
+    assert isinstance(advance, APRProofRecoverAdvanceResult)
+    # kore execute advance → handoff request id captured
+    assert advance.kore_request_id == 'req-1'
+
+
+def test_recover_try_kore_close_records_handoff_id() -> None:
+    node = KCFG.Node(1, term(1), [KCFGNodeAttr.SUBSUME_INDETERMINATE])
+    prover = _recover_prover(node=node)
+    prover._check_subsume.return_value = Subsumed(CSubst())
+
+    result = APRProver._recover_try(prover, _step(node, RecoverTask.TRY_KORE), (), is_kore=True)
+
+    prover._check_subsume.assert_called_once()
+    close = result[-1]
+    assert isinstance(close, APRProofRecoverCloseResult)
+    assert close.kore_request_id == 'req-1'  # kore implies closed ⇒ handoff id set
 
 
 def test_apr_proof_minimization_and_terminals() -> None:
