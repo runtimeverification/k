@@ -155,6 +155,16 @@ class CTermSymbolic:
         log_file = self._haskell_log_dir / f'{request_id}.jsonl'
         log_file.write_text('\n'.join(json.dumps(entry) for entry in entries) + '\n')
 
+    @property
+    def last_request_id(self) -> str | None:
+        """JSON-RPC id of the most recent RPC issued on this thread (see `KoreClient.last_request_id`)."""
+        return self._kore_client.last_request_id
+
+    @property
+    def last_haskell_log_entries(self) -> tuple[Any, ...] | None:
+        """`haskell-log-entries` bundle of the most recent RPC on this thread (see `KoreClient`)."""
+        return self._kore_client.last_haskell_log_entries
+
     def execute(
         self,
         cterm: CTerm,
@@ -165,7 +175,6 @@ class CTermSymbolic:
         booster_only_simplify: bool | None = None,
         haskell_logging: bool | None = None,
         raise_on_aborted: bool = True,
-        haskell_logging: bool | None = None,
     ) -> CTermExecute:
 
         _LOGGER.debug(f'Executing: {cterm}')
