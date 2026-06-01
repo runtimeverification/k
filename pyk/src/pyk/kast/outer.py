@@ -31,7 +31,7 @@ from .inner import (
     top_down,
 )
 from .kast import kast_term
-from .prelude.k import K_ITEM, K
+from .prelude.k import K_ITEM, SORT_PARAM_SENTINEL, K
 from .rewrite import indexed_rewrite
 
 if TYPE_CHECKING:
@@ -1667,8 +1667,10 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         # ML predicate labels whose result sort (Sort2) is context-dependent and not inferable
         # from the arguments alone.  When Sort1 can be determined but Sort2 cannot, we fill Sort2
         # with the sentinel KSort('#SortParam') so that downstream Kore emission can introduce a
-        # universally-quantified sort variable (Q0) in the axiom.
-        _ML_PRED_RESULT_SORT_PARAM = KSort('#SortParam')  # noqa: N806
+        # universally-quantified sort variable (Q0) in the axiom.  NOTE: that Kore emission step
+        # is not yet implemented — _ksort_to_kore rejects the sentinel with a clear error.  See
+        # pyk/docs/2026-06-01-sortparam-kore-emission.md for the design of the full fix.
+        _ML_PRED_RESULT_SORT_PARAM = SORT_PARAM_SENTINEL  # noqa: N806
         _ML_PRED_LABELS = frozenset({'#Equals', '#Ceil', '#Floor', '#In'})  # noqa: N806
 
         def _add_sort_params(_k: KInner) -> KInner:
