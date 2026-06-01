@@ -1609,11 +1609,15 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
                 candidates.setdefault(k, []).extend(vs)
 
         if expected_sort is not None:
+            # Only params that occur in the result sort but in NO declared argument sort are
+            # inferred from the expected sort (Java matchExpected, AddSortInjections.java:435).
+            # The membership test must use the production's *declared* (parametric) argument
+            # sorts — those are what can contain a param `p`; the concrete `actual_sorts` never
+            # do, so testing them would wrongly treat arg-bound params as expected-only.
             unbound_result_params = frozenset(
                 p
                 for p in params
-                if _sort_contains(prod.sort, p)
-                and not any(_sort_contains(asort, p) for asort in actual_sorts if asort is not None)
+                if _sort_contains(prod.sort, p) and not any(_sort_contains(psort, p) for psort in prod.argument_sorts)
             )
             if unbound_result_params:
                 for k, vs in _match_sort_params(prod.sort, expected_sort, unbound_result_params).items():
