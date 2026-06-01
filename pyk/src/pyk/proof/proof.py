@@ -3,7 +3,9 @@ from __future__ import annotations
 import json
 import logging
 from abc import ABC, abstractmethod
-from concurrent.futures import ThreadPoolExecutor, wait
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import TimeoutError as FuturesTimeoutError
+from concurrent.futures import wait
 from dataclasses import dataclass
 from enum import Enum
 from itertools import chain
@@ -499,6 +501,30 @@ class Prover(ContextManager['Prover'], Generic[P, PS, SR]):
         """
         ...
 
+    def get_step_depth(self) -> int | None:
+        """Return the current per-step exploration depth, if this prover exposes a tunable one.
+
+        Returning `None` (the default) opts the prover out of the progressive depth-halving
+        policy in `advance_proof`. Provers with a tunable execution depth (e.g. `APRProver`)
+        should override this together with `set_step_depth`.
+        """
+        return None
+
+    def set_step_depth(self, depth: int) -> None:
+        """Set the per-step exploration depth. No-op by default; see `get_step_depth`."""
+        ...
+
+    def interrupt(self) -> None:
+        """Abort a `step_proof` call currently running on another thread, as quickly as possible.
+
+        Used by the progressive depth-halving policy in `advance_proof` to abandon a step that
+        has exhausted its stall window. After this returns, a thread blocked in `step_proof` must
+        raise promptly and the prover must remain usable for subsequent steps. The default
+        implementation does nothing; provers backed by an interruptible resource (e.g. a Kore RPC
+        connection) should override it.
+        """
+        ...
+
     def advance_proof(
         self,
         proof: P,
@@ -506,6 +532,7 @@ class Prover(ContextManager['Prover'], Generic[P, PS, SR]):
         fail_fast: bool = False,
         callback: Callable[[P], None] = (lambda x: None),
         maintenance_rate: int = 1,
+        per_depth_timeout: float | None = None,
     ) -> None:
         """Advance a proof.
 
@@ -518,29 +545,74 @@ class Prover(ContextManager['Prover'], Generic[P, PS, SR]):
               halt execution even if there are still available steps.
             callback: Callable to run in between each completed step, useful for getting real-time information about the proof.
             maintenance_rate: Number of iterations between proof maintenance (writing to disk and executing callback).
+            per_depth_timeout (optional): Enables progressive depth halving when set to a positive value.
+              Each step is given a stall window of `current_depth * per_depth_timeout` seconds (where
+              `current_depth` is the prover's `get_step_depth()`) to commit its result. If a step does not
+              finish within its window, it is interrupted, the step depth is halved (down to a floor of 1),
+              and the step is retried at the shallower depth. Has no effect for provers whose
+              `get_step_depth()` returns `None`.
         """
         iterations = 0
         _LOGGER.info(f'Initializing proof: {proof.id}')
         self.init_proof(proof)
-        while True:
-            steps = list(proof.get_steps())
-            _LOGGER.info(f'Found {len(steps)} next steps for proof: {proof.id}')
-            if len(steps) == 0:
-                break
-            for step in steps:
-                if fail_fast and proof.failed:
-                    _LOGGER.warning(f'Terminating proof early because fail_fast is set: {proof.id}')
-                    proof.failure_info = self.failure_info(proof)
-                    return
-                if max_iterations is not None and max_iterations <= iterations:
-                    return
-                iterations += 1
-                results = self.step_proof(step)
-                for result in results:
-                    proof.commit(result)
-                if iterations % maintenance_rate == 0:
-                    proof.write_proof_data()
-                    callback(proof)
+
+        progressive = per_depth_timeout is not None and per_depth_timeout > 0 and self.get_step_depth() is not None
+        executor = ThreadPoolExecutor(max_workers=1) if progressive else None
+        try:
+            while True:
+                steps = list(proof.get_steps())
+                _LOGGER.info(f'Found {len(steps)} next steps for proof: {proof.id}')
+                if len(steps) == 0:
+                    break
+                halved_depth = False
+                for step in steps:
+                    if fail_fast and proof.failed:
+                        _LOGGER.warning(f'Terminating proof early because fail_fast is set: {proof.id}')
+                        proof.failure_info = self.failure_info(proof)
+                        return
+                    if max_iterations is not None and max_iterations <= iterations:
+                        return
+                    if progressive:
+                        assert executor is not None
+                        assert per_depth_timeout is not None
+                        depth = self.get_step_depth()
+                        assert depth is not None
+                        window = max(depth, 1) * per_depth_timeout
+                        future = executor.submit(self.step_proof, step)
+                        try:
+                            results = future.result(timeout=window)
+                        except FuturesTimeoutError:
+                            # The step exhausted its stall window: interrupt it, halve the depth,
+                            # and re-fetch steps so the same node is retried at the shallower depth.
+                            self.interrupt()
+                            wait([future])
+                            new_depth = max(1, depth // 2)
+                            if new_depth >= depth:
+                                _LOGGER.warning(
+                                    f'Proof {proof.id}: step exhausted {window}s stall window at minimum '
+                                    f'depth {depth}; stopping.'
+                                )
+                                return
+                            _LOGGER.warning(
+                                f'Proof {proof.id}: step exhausted {window}s stall window at depth {depth}; '
+                                f'halving to {new_depth}.'
+                            )
+                            self.set_step_depth(new_depth)
+                            halved_depth = True
+                            break
+                    else:
+                        results = self.step_proof(step)
+                    iterations += 1
+                    for result in results:
+                        proof.commit(result)
+                    if iterations % maintenance_rate == 0:
+                        proof.write_proof_data()
+                        callback(proof)
+                if halved_depth:
+                    continue
+        finally:
+            if executor is not None:
+                executor.shutdown(wait=False)
 
         if proof.failed:
             proof.failure_info = self.failure_info(proof)

@@ -76,6 +76,15 @@ class Transport(ContextManager['Transport'], ABC):
     @abstractmethod
     def close(self) -> None: ...
 
+    def interrupt(self) -> None:
+        """Abort a request that is currently in flight on another thread.
+
+        After `interrupt()` returns, a thread blocked in `request()` must raise promptly and
+        the transport must remain usable for subsequent requests. The default implementation
+        does nothing; transports backed by an interruptible connection should override it.
+        """
+        ...
+
     @abstractmethod
     def _request(self, req: str) -> str: ...
 
@@ -92,6 +101,7 @@ class TransportType(Enum):
 class SingleSocketTransport(Transport):
     _host: str
     _port: int
+    _timeout: int | None
     _sock: socket.socket
     _file: IO[str]
 
@@ -104,6 +114,7 @@ class SingleSocketTransport(Transport):
     ):
         self._host = host
         self._port = port
+        self._timeout = timeout
         self._sock = self._create_connection(host, port, timeout)
         self._file = self._sock.makefile('r')
 
@@ -130,6 +141,23 @@ class SingleSocketTransport(Transport):
     def close(self) -> None:
         self._file.close()
         self._sock.close()
+
+    def interrupt(self) -> None:
+        # Shutting down the socket unblocks a thread currently blocked in `readline`, causing
+        # its read to raise. We then reconnect so the transport stays usable for later requests.
+        # The old socket is closed; the old file object is left to be reclaimed by the garbage
+        # collector to avoid racing a `close()` against the unwinding reader thread.
+        old_sock = self._sock
+        try:
+            old_sock.shutdown(socket.SHUT_RDWR)
+        except OSError:
+            pass
+        self._sock = self._create_connection(self._host, self._port, self._timeout)
+        self._file = self._sock.makefile('r')
+        try:
+            old_sock.close()
+        except OSError:
+            pass
 
     def _request(self, req: str) -> str:
         self._sock.sendall(req.encode())
@@ -235,6 +263,12 @@ class JsonRpcClientFacade(ContextManager['JsonRpcClientFacade']):
             for client in clients:
                 client.close()
 
+    def interrupt(self) -> None:
+        self._default_client.interrupt()
+        for clients in self._clients.values():
+            for client in clients:
+                client.interrupt()
+
     def request(self, method: str, **params: Any) -> dict[str, Any]:
         if method in self._clients:
             for client in self._clients[method]:
@@ -288,6 +322,9 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
 
     def close(self) -> None:
         self._transport.close()
+
+    def interrupt(self) -> None:
+        self._transport.interrupt()
 
     def request(self, method: str, **params: Any) -> dict[str, Any]:
         req_id = f'{id(self)}-{self._req_id:03}'
@@ -917,6 +954,15 @@ class KoreClient(ContextManager['KoreClient']):
 
     def close(self) -> None:
         self._client.close()
+
+    def interrupt(self) -> None:
+        """Abort an `execute`/`simplify`/… request currently in flight on another thread.
+
+        After this returns the interrupted call raises and the client stays usable. Only
+        effective for the single-socket transport; a no-op for transports that cannot abort
+        an in-flight request.
+        """
+        self._client.interrupt()
 
     def _request(self, method: str, **params: Any) -> dict[str, Any]:
         try:

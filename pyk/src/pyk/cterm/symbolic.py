@@ -93,6 +93,10 @@ class CTermSymbolic:
     def kore_to_kast(self, pattern: Pattern) -> KInner:
         return kore_to_kast(self._definition, pattern)
 
+    def interrupt(self) -> None:
+        """Abort a backend request currently in flight on another thread; see `KoreClient.interrupt`."""
+        self._kore_client.interrupt()
+
     def execute(
         self,
         cterm: CTerm,

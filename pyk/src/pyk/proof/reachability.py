@@ -755,6 +755,15 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
     def close(self) -> None:
         self.kcfg_explore.cterm_symbolic._kore_client.close()
 
+    def get_step_depth(self) -> int | None:
+        return self.execute_depth
+
+    def set_step_depth(self, depth: int) -> None:
+        self.execute_depth = depth
+
+    def interrupt(self) -> None:
+        self.kcfg_explore.interrupt()
+
     def init_proof(self, proof: APRProof) -> None:
         main_module_name = self.main_module_name
         if self.extra_module:
