@@ -13,7 +13,7 @@ from ..kast.outer import KClaim, KFlatModule, KImport, KRule
 from ..kast.prelude.ml import mlAnd, mlTop
 from ..kcfg import KCFG, KCFGStore
 from ..kcfg.exploration import KCFGExploration
-from ..kore.rpc import LogEntry
+from ..kore.rpc import LogEntry, client_label
 from ..ktool.claim_index import ClaimIndex
 from ..utils import FrozenDict, ensure_dir_path, hash_str, shorten_hashes, single
 from .implies import ProofSummary, Prover, RefutationProof
@@ -756,6 +756,12 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         self.kcfg_explore.cterm_symbolic._kore_client.close()
 
     def init_proof(self, proof: APRProof) -> None:
+        # Stamp proof.id on every subsequent kore-RPC request from this thread so
+        # booster's `{request: ...}` log lines self-identify the originating
+        # claim.  Worker-thread consumers must `client_label.set(...)` inside
+        # their own closure — `ContextVar` is not propagated by ThreadPoolExecutor.
+        client_label.set(proof.id)
+
         main_module_name = self.main_module_name
         if self.extra_module:
             main_module_name = self.kcfg_explore.cterm_symbolic.add_module(self.extra_module, name_as_id=True)

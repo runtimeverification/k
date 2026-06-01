@@ -189,13 +189,13 @@ ML_TO_BOOL_TEST_DATA: Final = (
 
 
 @pytest.mark.parametrize(
-    'test_id,unsafe,ml_pred,expected',
+    'test_id,abstract_unsafe,ml_pred,expected',
     ML_TO_BOOL_TEST_DATA,
     ids=[test_id for test_id, *_ in ML_TO_BOOL_TEST_DATA],
 )
-def test_ml_pred_to_bool(test_id: str, unsafe: bool, ml_pred: KInner, expected: KInner) -> None:
+def test_ml_pred_to_bool(test_id: str, abstract_unsafe: bool, ml_pred: KInner, expected: KInner) -> None:
     # When
-    actual = ml_pred_to_bool(ml_pred, unsafe=unsafe)
+    actual = ml_pred_to_bool(ml_pred, abstract_unsafe=abstract_unsafe)
 
     # Then
     assert actual == expected
@@ -638,3 +638,30 @@ def test_defunctionalize(input: KInner, expected_output: KInner, expected_constr
     # Then
     assert actual_output == expected_output
     assert actual_constraints == expected_constraints
+
+
+def test_on_attributes_recurses_into_kdefinition_sentences() -> None:
+    """on_attributes applied to a KDefinition must transform sentence-level atts.
+
+    The bug being guarded: the old code called module.map_att(f) (which only maps
+    the module's own att, not its sentences) and used kast.let(modules=...) (wrong
+    keyword — KDefinition uses all_modules=).  The fix uses on_attributes(module, f)
+    recursively so that every sentence att inside every module is transformed.
+    """
+    from pyk.kast.manip import on_attributes
+    from pyk.kast.outer import KBubble
+
+    rule_with_label = KBubble(
+        sentence_type='rule',
+        contents='X => Y',
+        att=KAtt.from_dict({'att': {'label': 'myLabel'}}),
+    )
+    module = KFlatModule('TEST', sentences=(rule_with_label,))
+    defn = KDefinition('TEST', all_modules=(module,))
+
+    result = on_attributes(defn, lambda att: EMPTY_ATT)
+
+    assert isinstance(result, KDefinition)
+    result_rule = result.all_modules[0].sentences[0]
+    assert isinstance(result_rule, KBubble)
+    assert result_rule.att == EMPTY_ATT

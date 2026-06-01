@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from typing import Any, Final
 
 
-LOG_FORMAT: Final = '%(levelname)s %(asctime)s %(name)s - %(message)s'
+LOG_FORMAT: Final = '%(levelname)s %(asctime)s %(name)s [%(process)d] - %(message)s'
 
 
 def package_path(obj: Any) -> Path:

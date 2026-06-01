@@ -8,4 +8,4 @@
 	Source(macroWithFunction.k)
 	Location(23,10,23,37)
 [ERROR] Running process failed with returncode 113:
-    kompile macroWithFunction.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition macroWithFunction-kompiled --type-inference-mode checked
+    kompile macroWithFunction.k --md-selector k --emit-json --backend llvm --output-definition macroWithFunction-kompiled --type-inference-mode checked --warnings none --no-exc-wrap

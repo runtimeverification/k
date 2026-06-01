@@ -35,4 +35,4 @@
 	   .	               ^~~~~~~~
 [Error] Compiler: Had 7 structural errors.
 [ERROR] Running process failed with returncode 113:
-    kompile invalidFormat.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition invalidFormat-kompiled --type-inference-mode checked
+    kompile invalidFormat.k --md-selector k --emit-json --backend llvm --output-definition invalidFormat-kompiled --type-inference-mode checked --warnings none --no-exc-wrap

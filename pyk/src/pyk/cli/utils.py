@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     T1 = TypeVar('T1')
     T2 = TypeVar('T2')
 
-LOG_FORMAT: Final = '%(levelname)s %(asctime)s %(name)s - %(message)s'
+LOG_FORMAT: Final = '%(levelname)s %(asctime)s %(name)s [%(process)d] - %(message)s'
 
 
 def loglevel(args: Namespace) -> int:

@@ -7,6 +7,7 @@ import os
 import socket
 import sys
 from abc import ABC, abstractmethod
+from contextvars import ContextVar
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum, auto
@@ -40,10 +41,18 @@ if TYPE_CHECKING:
 
 _LOGGER: Final = logging.getLogger(__name__)
 
+# Label prefixed onto every outgoing JSON-RPC request id, so booster's per-line
+# `{request: ...}` context in `kore.jsonl` self-identifies the originating claim.
+# Provers should `client_label.set(proof.id)` at the start of each proof; multi-
+# threaded consumers must re-`set` inside their worker entry points, since
+# `ContextVar` values are not propagated by `ThreadPoolExecutor`.
+client_label: ContextVar[str | None] = ContextVar('kore_rpc_client_label', default=None)
+
 
 class KoreExecLogFormat(Enum):
     STANDARD = 'standard'
     ONELINE = 'oneline'
+    JSON = 'json'
 
 
 @final
@@ -119,7 +128,8 @@ class SingleSocketTransport(Transport):
             try:
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 sock.connect((host, port))
-                _LOGGER.info(f'Connected to host: {host}:{port}')
+                local_port = sock.getsockname()[1]
+                _LOGGER.info(f'Connected to host: {host}:{port} (local port: {local_port})')
                 return sock
             except ConnectionRefusedError:
                 sock.close()
@@ -290,7 +300,9 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         self._transport.close()
 
     def request(self, method: str, **params: Any) -> dict[str, Any]:
-        req_id = f'{id(self)}-{self._req_id:03}'
+        label = client_label.get()
+        prefix = label if label is not None else str(id(self))
+        req_id = f'{prefix}-{self._req_id:03}'
         self._req_id += 1
 
         payload = {
@@ -965,6 +977,7 @@ class KoreClient(ContextManager['KoreClient']):
         module_name: str | None = None,
         log_successful_rewrites: bool | None = None,
         log_failed_rewrites: bool | None = None,
+        booster_only_simplify: bool | None = None,
     ) -> ExecuteResult:
         params = filter_none(
             {
@@ -978,6 +991,7 @@ class KoreClient(ContextManager['KoreClient']):
                 'state': self._state(pattern),
                 'log-successful-rewrites': log_successful_rewrites,
                 'log-failed-rewrites': log_failed_rewrites,
+                'booster-only': booster_only_simplify,
             }
         )
 
@@ -991,6 +1005,7 @@ class KoreClient(ContextManager['KoreClient']):
         *,
         module_name: str | None = None,
         assume_defined: bool = False,
+        booster_only_simplify: bool | None = None,
     ) -> ImpliesResult:
         params = filter_none(
             {
@@ -998,6 +1013,7 @@ class KoreClient(ContextManager['KoreClient']):
                 'consequent': self._state(consequent),
                 'module': module_name,
                 'assume-defined': assume_defined,
+                'booster-only': booster_only_simplify,
             }
         )
 
@@ -1009,11 +1025,13 @@ class KoreClient(ContextManager['KoreClient']):
         pattern: Pattern,
         *,
         module_name: str | None = None,
+        booster_only_simplify: bool | None = None,
     ) -> tuple[Pattern, tuple[LogEntry, ...]]:
         params = filter_none(
             {
                 'state': self._state(pattern),
                 'module': module_name,
+                'booster-only': booster_only_simplify,
             }
         )
 

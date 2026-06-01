@@ -1,0 +1,4 @@
+[Error] Compiler: Configuration variable found in declaration of collection cell <bad>. Implicitly, this causes the initial configuration to start with one <bad> element instead of zero. Add the `initial=""` attribute to make that behavior explicit.
+[Error] Compiler: Had 1 parsing errors.
+[ERROR] Running process failed with returncode 113:
+    kompile configVarInitial.k --md-selector k --emit-json --backend haskell --output-definition configVarInitial-kompiled --type-inference-mode checked --warnings all --warnings-to-errors --no-exc-wrap

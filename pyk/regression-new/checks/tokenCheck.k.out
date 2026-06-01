@@ -15,4 +15,4 @@
 	   .	                ^~~~~~~
 [Error] Compiler: Had 3 structural errors.
 [ERROR] Running process failed with returncode 113:
-    kompile tokenCheck.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition tokenCheck-kompiled --type-inference-mode checked
+    kompile tokenCheck.k --md-selector k --emit-json --backend llvm --output-definition tokenCheck-kompiled --type-inference-mode checked --warnings none --no-exc-wrap
