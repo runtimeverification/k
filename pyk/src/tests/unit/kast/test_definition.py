@@ -31,8 +31,13 @@ if TYPE_CHECKING:
 # foo:    syntax MInt{N} ::= foo(MInt{N})     -- result/arg sorts nest the param
 # baz:    syntax MInt{N} ::= baz()            -- no args; param bound only from expected sort
 # #Equals: syntax S2     ::= #Equals{S1,S2}(S1, S1)  -- ML pred, result sort context-dependent
+# f2:     syntax {S} S   ::= f2(S, S)         -- one param bound from two argument positions
+# f3:     syntax {S} S   ::= f3(S, S, S)      -- one param bound from three argument positions
 #
-# Subsort: syntax Int ::= MInt{Int}  -- MInt{Int} <: Int (enables subsort-aware matching)
+# Subsorts:
+#   syntax Int    ::= MInt{Int}  -- MInt{Int} <: Int (enables subsort-aware matching)
+#   syntax Number ::= Int        -- Int <: Number
+#   syntax Number ::= Float      -- Float <: Number  (Int, Float incomparable; LUB is Number)
 #
 # Cell map fragment:
 #   AccountCellMap ::= AccountCellMap AccountCellMap  [cellCollection, element(AccountCellMapItem), wrapElement(<account>)]
@@ -42,12 +47,17 @@ if TYPE_CHECKING:
 # ---------------------------------------------------------------------------
 
 INT: Final = KSort('Int')
+BOOL: Final = KSort('Bool')
+FLOAT: Final = KSort('Float')
+NUMBER: Final = KSort('Number')
 N: Final = KSort('N')
+S: Final = KSort('S')
 S1: Final = KSort('S1')
 S2: Final = KSort('S2')
 S3: Final = KSort('S3')
 MINT_N: Final = KSort('MInt', (N,))
 MINT_INT: Final = KSort('MInt', (INT,))
+MINT_BOOL: Final = KSort('MInt', (BOOL,))
 SORT_PARAM: Final = KSort('#SortParam')
 ACCOUNT_CELL_MAP: Final = KSort('AccountCellMap')
 ACCOUNT_CELL: Final = KSort('AccountCell')
@@ -105,6 +115,37 @@ _BAZ_PROD: Final = KProduction(
 # Enables the subsort-aware matching path (Java AddSortInjections.match step 3).
 _MINT_INT_SUBSORT: Final = KProduction(sort=INT, items=[KNonTerminal(MINT_INT)])
 
+# syntax {S} S ::= f2(S, S)  — one sort param bound from two argument positions.
+_F2_PROD: Final = KProduction(
+    sort=S,
+    items=[KTerminal('f2'), KTerminal('('), KNonTerminal(S), KTerminal(','), KNonTerminal(S), KTerminal(')')],
+    params=[S],
+    klabel='f2',
+)
+
+# syntax {S} S ::= f3(S, S, S)  — one sort param bound from three argument positions.
+_F3_PROD: Final = KProduction(
+    sort=S,
+    items=[
+        KTerminal('f3'),
+        KTerminal('('),
+        KNonTerminal(S),
+        KTerminal(','),
+        KNonTerminal(S),
+        KTerminal(','),
+        KNonTerminal(S),
+        KTerminal(')'),
+    ],
+    params=[S],
+    klabel='f3',
+)
+
+# Subsort lattice with two incomparable subsorts sharing a common supersort:
+#   syntax Number ::= Int   and   syntax Number ::= Float
+# LUB(Int, Float) = Number, exercising set-based (not pairwise-chain) lub computation.
+_NUMBER_INT_SUBSORT: Final = KProduction(sort=NUMBER, items=[KNonTerminal(INT)])
+_NUMBER_FLOAT_SUBSORT: Final = KProduction(sort=NUMBER, items=[KNonTerminal(FLOAT)])
+
 _ACCT_MAP_CONCAT: Final = KProduction(
     sort=ACCOUNT_CELL_MAP,
     items=[KNonTerminal(ACCOUNT_CELL_MAP), KNonTerminal(ACCOUNT_CELL_MAP)],
@@ -154,7 +195,11 @@ DEFN: Final = KDefinition(
                 _FOO_PROD,
                 _BAZ_PROD,
                 _EQUALS_PROD,
+                _F2_PROD,
+                _F3_PROD,
                 _MINT_INT_SUBSORT,
+                _NUMBER_INT_SUBSORT,
+                _NUMBER_FLOAT_SUBSORT,
                 _ACCT_MAP_CONCAT,
                 _ACCT_MAP_ITEM,
                 _ACCOUNT_CELL,
@@ -301,6 +346,19 @@ def test_add_sort_params_user_label_unresolvable_warns(caplog: pytest.LogCapture
     assert any('could not infer sort params' in record.message for record in caplog.records)
 
 
+def test_add_sort_params_conflicting_ml_pred_args_warns(caplog: pytest.LogCaptureFixture) -> None:
+    # Issue #4: #Equals(X:Int, Y:Bool) has a genuine sort mismatch in its shared S1 argument
+    # positions (Int and Bool have no common supersort).  This is distinct from the legitimate
+    # multi-unbound-param case (test_add_sort_params_multi_unbound_raises), where every param is
+    # either bound or has no candidates at all.  A sort *conflict* must be reported as a warning
+    # with the term returned unchanged — NOT raised as a NotImplementedError that misattributes
+    # the failure to the single-sentinel scheme.
+    term = KApply('#Equals', [KVariable('X', sort=INT), KVariable('Y', sort=BOOL)])
+    with caplog.at_level(logging.WARNING):
+        result = DEFN.add_sort_params(term)
+    assert result == term
+
+
 # ---------------------------------------------------------------------------
 # KDefinition.infer_sort_params
 # ---------------------------------------------------------------------------
@@ -325,12 +383,23 @@ INFER_SORT_PARAMS_DATA: Final[
     # None arg skipped; N has no candidates → inferred=None (parametric prod, N unbound)
     ('unbound_absent', _BAR_PROD, (None,), None, {}, None),
     # Conflicting args: S1→[Int,Bool] LUB fails → S1:None; S2 no candidates; prod.sort=S2 → inferred=None
-    ('conflicting_args', _EQUALS_PROD, (INT, KSort('Bool')), None, {S1: None}, None),
+    ('conflicting_args', _EQUALS_PROD, (INT, BOOL), None, {S1: None}, None),
     # expected_sort head mismatch: MInt{N} vs Int → no structural match → N absent → inferred=None
     ('expected_sort_mismatch', _BAZ_PROD, (), INT, {}, None),
     # Non-parametric: no params to bind, result sort is always concrete → inferred=AccountCell ≠ None
     # This distinguishes "trivially complete (no params)" from "params exist but no candidates".
     ('no_params_trivial', _ACCOUNT_CELL, (INT, INT), None, {}, ACCOUNT_CELL),
+    # ----- regression cases for known sort-inference bugs (fixed in follow-up commits) -----
+    # Issue #2 (matchExpected): N occurs in foo's declared argument sort MInt{N}, so it must be
+    # bound from the argument (Int) and the expected sort MInt{Bool} must be ignored — exactly
+    # as Java's matchExpected skips params present in a nonterminal sort.  The buggy version
+    # checks the *concrete* actual sorts (which never contain the param N), wrongly also matches
+    # against the expected sort, and reports a conflict {N: None} from lub(Int, Bool).
+    ('expected_sort_param_in_arg', _FOO_PROD, (MINT_INT,), MINT_BOOL, {N: INT}, MINT_INT),
+    # Issue #3 (lub weakness): S gets candidates {Int, Float}; both are subsorts of Number with
+    # no subsort relation between them, so the LUB is Number.  The buggy pairwise fold only
+    # succeeds when one candidate subsorts the other and reports a conflict {S: None}.
+    ('lub_common_supersort', _F2_PROD, (INT, FLOAT), None, {S: NUMBER}, NUMBER),
 )
 
 
@@ -350,6 +419,18 @@ def test_infer_sort_params(
     bindings, inferred_sort = DEFN.infer_sort_params(prod, actual_sorts, expected_sort)
     assert bindings == expected_bindings
     assert inferred_sort == expected_inferred_sort
+
+
+def test_infer_sort_params_lub_order_independent() -> None:
+    # Issue #3: the candidate LUB must not depend on the order candidates were collected.
+    # f3 binds S from three positions; the candidate set {Int, Number, Float} must resolve to
+    # Number regardless of argument order.  The buggy pairwise fold succeeds for
+    # (Int, Number, Float) — it reaches Number before encountering Float — but fails for
+    # (Int, Float, Number) because lub(Int, Float) has no pairwise chain.
+    bindings_a, _ = DEFN.infer_sort_params(_F3_PROD, (INT, NUMBER, FLOAT))
+    bindings_b, _ = DEFN.infer_sort_params(_F3_PROD, (INT, FLOAT, NUMBER))
+    assert bindings_a == {S: NUMBER}
+    assert bindings_b == {S: NUMBER}
 
 
 # ---------------------------------------------------------------------------
@@ -376,7 +457,7 @@ MATCH_SORT_PARAMS_DATA: Final[
     # Case 3 – subsort-aware: MInt{N} vs Int; DEFN.subsorts yields MInt{Int} → N=Int
     ('subsort_aware', MINT_N, INT, frozenset({N}), DEFN.subsorts, {N: [INT]}),
     # No match in any case
-    ('no_match', INT, KSort('Bool'), frozenset({N}), None, {}),
+    ('no_match', INT, BOOL, frozenset({N}), None, {}),
 )
 
 
