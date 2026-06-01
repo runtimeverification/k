@@ -456,6 +456,39 @@ class SmtSolverError(KoreClientError):
 
 @final
 @dataclass
+class AbortedError(KoreClientError):
+    """A backend engine aborted the request because it could not decide it (JSON-RPC ``code: 6``).
+
+    The backend raises this when a request carried something the engine does not know how to
+    process — e.g. an ``implies`` whose constraints it cannot discharge.  It is a "couldn't
+    determine," not a decisive verdict, so callers should treat it as indeterminate rather than as
+    a definite answer.  ``data`` is the abort-reason text (e.g. ``"unknown constraints"``).
+    """
+
+    data: str
+
+    def __init__(self, data: str):
+        self.data = data
+        super().__init__(f'Backend aborted: {self.data}')
+
+
+@final
+@dataclass
+class MultipleStatesError(KoreClientError):
+    """The backend returned multiple states where one was expected (JSON-RPC ``code: 7``).
+
+    ``data`` is the accompanying reason text.
+    """
+
+    data: str
+
+    def __init__(self, data: str):
+        self.data = data
+        super().__init__(f'Multiple states: {self.data}')
+
+
+@final
+@dataclass
 class DefaultError(KoreClientError):
     message: str
     code: int
@@ -1056,6 +1089,10 @@ class KoreClient(ContextManager['KoreClient']):
                 return ImplicationError(error=err.data['error'], context=err.data['context'])
             case 5:
                 return SmtSolverError(error=err.data['error'], pattern=kore_term(err.data['term']))
+            case 6:
+                return AbortedError(data=err.data)
+            case 7:
+                return MultipleStatesError(data=err.data)
             case 8:
                 return InvalidModuleError(error=err.data['error'], context=err.data.get('context'))
             case 9:

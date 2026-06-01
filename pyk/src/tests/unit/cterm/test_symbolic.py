@@ -9,7 +9,7 @@ import pytest
 from pyk.cterm.symbolic import HASKELL_LOGGING_ENTRIES, CTermSymbolic, cterm_symbolic
 from pyk.kast.prelude.ml import mlTop
 from pyk.kore.prelude import int_dv
-from pyk.kore.rpc import AbortedResult, ImpliesResult, State, StuckResult
+from pyk.kore.rpc import AbortedError, AbortedResult, ImpliesResult, State, StuckResult
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -234,3 +234,21 @@ def test_implies_surfaces_indeterminate(indeterminate: bool | None) -> None:
     # Then
     assert result.csubst is None
     assert result.indeterminate is indeterminate
+
+
+def test_implies_aborted_treated_as_indeterminate() -> None:
+    # Given a backend whose implies aborts (kore-rpc `code: 6`, e.g. recover-mode's direct
+    # kore-implies call hitting "unknown constraints" the proxy would otherwise absorb)
+    kore_client = Mock()
+    kore_client.implies.side_effect = AbortedError(data='unknown constraints')
+    cts = CTermSymbolic(kore_client, Mock())
+    cts.kast_to_kore = Mock(return_value=Mock())  # type: ignore[method-assign]
+    antecedent: CTerm = Mock(free_vars=frozenset())
+    consequent: CTerm = Mock(free_vars=frozenset())
+
+    # When
+    result = cts.implies(antecedent, consequent)
+
+    # Then the abort is surfaced as an indeterminate, not-subsumed result rather than crashing
+    assert result.csubst is None
+    assert result.indeterminate is True

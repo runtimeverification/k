@@ -8,6 +8,7 @@ import pytest
 
 from pyk.kore.prelude import INT, SORT_GENERATED_TOP_CELL, int_dv
 from pyk.kore.rpc import (
+    AbortedError,
     AbortedResult,
     DefaultError,
     ImplicationError,
@@ -16,6 +17,7 @@ from pyk.kore.rpc import (
     JsonRpcError,
     KoreClient,
     KoreClientError,
+    MultipleStatesError,
     ParseError,
     PatternError,
     SatResult,
@@ -399,6 +401,18 @@ ERROR_TEST_DATA: Final = (
         ),
         SmtSolverError('Failed to decide predicate.', int_dv(0)),
         r'SMT solver error: Failed to decide predicate. Pattern: \dv{SortInt{}}("0")',
+    ),
+    (
+        'aborted-error',
+        JsonRpcError(message='Aborted', code=6, data='unknown constraints'),
+        AbortedError(data='unknown constraints'),
+        'Backend aborted: unknown constraints',
+    ),
+    (
+        'multiple-states-error',
+        JsonRpcError(message='Multiple states', code=7, data='more than one state'),
+        MultipleStatesError(data='more than one state'),
+        'Multiple states: more than one state',
     ),
     (
         'default-error',

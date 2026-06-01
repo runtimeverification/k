@@ -14,6 +14,7 @@ from ..kast.prelude.ml import mlAnd
 from ..kast.pretty import PrettyPrinter
 from ..konvert import kast_to_kore, kflatmodule_to_kore, kore_to_kast
 from ..kore.rpc import (
+    AbortedError,
     AbortedResult,
     KoreClient,
     KoreExecLogFormat,
@@ -337,6 +338,15 @@ class CTermSymbolic:
             )
         except SmtSolverError as err:
             raise self._smt_solver_error(err) from err
+        except AbortedError as err:
+            # kore-implies aborted because it could not decide the implication (e.g. constraints
+            # the engine cannot discharge).  Surface it as an indeterminate, not-subsumed result —
+            # uniform with how booster-implies reports a MatchIndeterminate (`indeterminate=True`) —
+            # so callers (notably recover-mode's TRY_KORE escalation, which calls kore-implies
+            # directly and so sees the raw abort the proxy would otherwise absorb) treat it as
+            # "unknown" instead of crashing.
+            _LOGGER.warning(f'implies aborted, treating as indeterminate: {err.data}')
+            return CTermImplies(None, (), None, (), indeterminate=True)
         self._capture_haskell_log(result.haskell_log_entries)
 
         if not result.valid:
