@@ -1459,6 +1459,34 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         # vice versa. In that case there may be more than one LCS.
         return None
 
+    def least_upper_bound(self, sorts: Iterable[KSort]) -> KSort | None:
+        """Compute the least upper bound of a set of sorts in the subsort lattice.
+
+        Returns the unique minimal common supersort, or `None` when none exists or the bound is
+        ambiguous (several incomparable minimal upper bounds).  Unlike `least_common_supersort`,
+        this examines the whole lattice rather than only the pairwise subsort relation, so it is
+        order-independent and resolves siblings that share a common supersort (e.g. the LUB of
+        `Int` and `Float` is `Number` when both are subsorts of `Number`).  Mirrors the set-based
+        `AddSortInjections.lub` in the Java frontend.
+        """
+        sort_set = set(sorts)
+        if not sort_set:
+            return None
+        if len(sort_set) == 1:
+            return single(sort_set)
+
+        def is_supersort(upper: KSort, lower: KSort) -> bool:
+            return upper == lower or lower in self.subsorts(upper)
+
+        # Every proper supersort of some sort appears as a key in the subsort table; the sorts
+        # themselves are included to cover a candidate that is already an upper bound of the rest.
+        universe = set(self.subsort_table.keys()) | sort_set
+        upper_bounds = {u for u in universe if all(is_supersort(u, s) for s in sort_set)}
+        minimal = {u for u in upper_bounds if not any(o != u and is_supersort(u, o) for o in upper_bounds)}
+        if len(minimal) == 1:
+            return single(minimal)
+        return None
+
     def greatest_common_subsort(self, sort1: KSort, sort2: KSort) -> KSort | None:
         """Compute the greatest-lower-bound of two sorts in the sort lattice using very simple approach, returning `None` on failure (not necessarily meaning there isn't a glb)."""
         if sort1 == sort2:
@@ -1623,21 +1651,11 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
                 for k, vs in _match_sort_params(prod.sort, expected_sort, unbound_result_params).items():
                     candidates.setdefault(k, []).extend(vs)
 
-        result: dict[KSort, KSort | None] = {}
-        for p in prod.params:
-            if p not in candidates:
-                continue
-            lub: KSort = candidates[p][0]
-            for s in candidates[p][1:]:
-                if lub == s:
-                    continue
-                new_lub = self.least_common_supersort(lub, s)
-                if new_lub is None:
-                    result[p] = None  # conflict: candidates found but no common supersort
-                    break
-                lub = new_lub
-            else:
-                result[p] = lub
+        # Resolve each param to the least upper bound of its candidates.  A param with candidates
+        # but no computable LUB maps to None (conflict); a param with no candidates is omitted.
+        result: dict[KSort, KSort | None] = {
+            p: self.least_upper_bound(candidates[p]) for p in prod.params if p in candidates
+        }
 
         successful: dict[KSort, KSort] = {k: v for k, v in result.items() if v is not None}
         inferred_sort = _resolve_sort_partial(prod.sort, successful, params)
