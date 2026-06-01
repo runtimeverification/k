@@ -1676,6 +1676,17 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
             bindings_raw, _ = self.infer_sort_params(prod, tuple(inference_sorts))
             bindings: dict[KSort, KSort] = {k: v for k, v in bindings_raw.items() if v is not None}
 
+            # A param mapped to None had candidate sorts that could not be unified (no common
+            # supersort): a genuine sort mismatch, not a missing binding.  This is distinct from
+            # a param with no candidates at all (the result-sort case handled by the sentinel
+            # below), so report it and bail rather than papering over it with a sentinel.
+            conflicts = [p for p, v in bindings_raw.items() if v is None]
+            if conflicts:
+                _LOGGER.warning(
+                    f'Failed to add sort parameter, conflicting sorts for sort parameter(s): {(prod, conflicts)}'
+                )
+                return _k
+
             # Sentinel propagation: if an arg carried the #SortParam sentinel (from a nested ML
             # pred) and inference left that arg's param slot empty, fill it with the sentinel.
             # Only direct-param positions (psort IS a param) propagate the sentinel; nested cases
