@@ -15,6 +15,7 @@ from pyk.kast.outer import (
     KTerminal,
     _match_sort_params,
 )
+from pyk.kast.prelude.k import GENERATED_TOP_CELL
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -57,7 +58,6 @@ S3: Final = KSort('S3')
 MINT_N: Final = KSort('MInt', (N,))
 MINT_INT: Final = KSort('MInt', (INT,))
 MINT_BOOL: Final = KSort('MInt', (BOOL,))
-SORT_PARAM: Final = KSort('#SortParam')
 ACCOUNT_CELL_MAP: Final = KSort('AccountCellMap')
 ACCOUNT_CELL: Final = KSort('AccountCell')
 
@@ -82,9 +82,8 @@ _EQUALS_PROD: Final = KProduction(
     klabel='#Equals',
 )
 
-# Hypothetical 3-param #Equals to test the multi-unbound-param guard.
-# S1 is inferred from arguments; S2 and S3 are both unbound, which the single-sentinel
-# scheme cannot handle — add_sort_params must raise NotImplementedError.
+# Hypothetical 3-param #Equals. S1 is inferred from arguments; S2 (result) and S3 (occurring
+# nowhere) are independent free sorts, so add_sort_params gives each a distinct fresh sort var.
 _EQUALS3_PROD: Final = KProduction(
     sort=S2,
     items=[KNonTerminal(S1), KNonTerminal(S1)],
@@ -92,9 +91,8 @@ _EQUALS3_PROD: Final = KProduction(
     klabel='#Equals',
 )
 
-# User-defined label where S2 does not appear in any argument sort, so it remains
-# unbound after argument processing.  add_sort_params must emit a warning and
-# return the term unchanged (best-effort).
+# User-defined label whose S2 occurs only in the result sort (not in any argument).  With no
+# expected sort it becomes a fresh sort variable; with a matching expected sort it resolves.
 _PAIR_PROD: Final = KProduction(
     sort=KSort('Pair', (S1, S2)),
     items=[KTerminal('pair'), KTerminal('('), KNonTerminal(S1), KTerminal(')')],
@@ -145,6 +143,28 @@ _F3_PROD: Final = KProduction(
 _NUMBER_INT_SUBSORT: Final = KProduction(sort=NUMBER, items=[KNonTerminal(INT)])
 _NUMBER_FLOAT_SUBSORT: Final = KProduction(sort=NUMBER, items=[KNonTerminal(FLOAT)])
 
+# #Ceil: syntax S2 ::= #Ceil{S1,S2}(S1)  -- ML pred, like #Equals (S2 is the free result sort)
+_CEIL_PROD: Final = KProduction(
+    sort=S2,
+    items=[KNonTerminal(S1)],
+    params=[S1, S2],
+    klabel='#Ceil',
+)
+
+# #And: syntax S ::= #And{S}(S, S)  -- homogeneous ML connective (S is arg-bound and the result)
+_AND_PROD: Final = KProduction(
+    sort=S,
+    items=[KNonTerminal(S), KNonTerminal(S)],
+    params=[S],
+    klabel='#And',
+)
+
+
+def _sp(n: int) -> KSort:
+    """The n-th fresh #SortParam sort variable (`#SortParam{Qn}`) the algorithm allocates."""
+    return KSort('#SortParam', (KSort(f'Q{n}'),))
+
+
 _ACCT_MAP_CONCAT: Final = KProduction(
     sort=ACCOUNT_CELL_MAP,
     items=[KNonTerminal(ACCOUNT_CELL_MAP), KNonTerminal(ACCOUNT_CELL_MAP)],
@@ -194,6 +214,8 @@ DEFN: Final = KDefinition(
                 _FOO_PROD,
                 _BAZ_PROD,
                 _EQUALS_PROD,
+                _CEIL_PROD,
+                _AND_PROD,
                 _F2_PROD,
                 _F3_PROD,
                 _MINT_INT_SUBSORT,
@@ -294,11 +316,11 @@ ADD_SORT_PARAMS_DATA: Final = (
         KApply(KLabel('foo'), [KVariable('X', sort=MINT_INT)]),
         KApply(KLabel('foo', [INT]), [KVariable('X', sort=MINT_INT)]),
     ),
-    # ML pred: S1 inferred from args, S2 (result sort) filled with #SortParam sentinel
+    # ML pred, no expected sort: S1 inferred from args, S2 (result sort) becomes a fresh sort var.
     (
         'ml_pred_sentinel',
         KApply('#Equals', [KVariable('X', sort=INT), KVariable('Y', sort=INT)]),
-        KApply(KLabel('#Equals', [INT, SORT_PARAM]), [KVariable('X', sort=INT), KVariable('Y', sort=INT)]),
+        KApply(KLabel('#Equals', [INT, _sp(0)]), [KVariable('X', sort=INT), KVariable('Y', sort=INT)]),
     ),
     # Unsortable argument (no sort annotation): cannot fill params, term returned unchanged
     (
@@ -327,35 +349,113 @@ def test_add_sort_params(test_id: str, term: KInner, expected: KInner) -> None:
     assert DEFN.add_sort_params(term) == expected
 
 
-def test_add_sort_params_multi_unbound_raises() -> None:
-    # #Equals with 3 sort params: S1 is inferred from arguments, S2 and S3 are both unbound.
-    # The single-sentinel scheme cannot distinguish them, so NotImplementedError must be raised.
+def test_add_sort_params_multi_unbound_distinct_sentinels() -> None:
+    # #Equals with 3 sort params and no expected sort: S1 is inferred from the arguments; S2 (the
+    # result sort) and S3 (a parameter occurring nowhere) are independent free sorts and so get
+    # distinct fresh sort variables — the single-sentinel scheme could not distinguish them.
     term = KApply('#Equals', [KVariable('X', sort=INT), KVariable('Y', sort=INT)])
-    with pytest.raises(NotImplementedError, match='2 unbound sort parameters'):
-        DEFN3.add_sort_params(term)
+    result = DEFN3.add_sort_params(term)
+    assert isinstance(result, KApply)
+    assert result.label.params == (INT, _sp(0), _sp(1))
 
 
-def test_add_sort_params_user_label_unresolvable_warns(caplog: pytest.LogCaptureFixture) -> None:
-    # pair(S1, S2) has S2 absent from arguments — S2 is unbound after inference.
-    # add_sort_params emits a warning and returns the term unchanged (best-effort).
+def test_add_sort_params_user_label_free_return_sort() -> None:
+    # pair{S1,S2}(S1): S1 is bound from the argument; S2 occurs only in the result sort and has
+    # no determining context, so it becomes a fresh sort variable (best-effort).
     term = KApply(KLabel('pair'), [KVariable('X', sort=INT)])
-    with caplog.at_level(logging.WARNING):
-        result = DEFN_PAIR.add_sort_params(term)
-    assert result == term
-    assert any('could not infer sort params' in record.message for record in caplog.records)
+    result = DEFN_PAIR.add_sort_params(term)
+    assert isinstance(result, KApply)
+    assert result.label.name == 'pair'
+    assert result.label.params[0] == INT
+    assert result.label.params[1].name == '#SortParam'
 
 
 def test_add_sort_params_conflicting_ml_pred_args_warns(caplog: pytest.LogCaptureFixture) -> None:
-    # Issue #4: #Equals(X:Int, Y:Bool) has a genuine sort mismatch in its shared S1 argument
-    # positions (Int and Bool have no common supersort).  This is distinct from the legitimate
-    # multi-unbound-param case (test_add_sort_params_multi_unbound_raises), where every param is
-    # either bound or has no candidates at all.  A sort *conflict* must be reported as a warning
-    # with the term returned unchanged — NOT raised as a NotImplementedError that misattributes
-    # the failure to the single-sentinel scheme.
+    # #Equals(X:Int, Y:Bool) has a genuine sort mismatch in its shared S1 argument positions (Int
+    # and Bool have no common supersort).  A sort *conflict* must be reported as a warning with
+    # the label left unfilled (best-effort), not papered over with a sort variable.
     term = KApply('#Equals', [KVariable('X', sort=INT), KVariable('Y', sort=BOOL)])
     with caplog.at_level(logging.WARNING):
         result = DEFN.add_sort_params(term)
     assert result == term
+
+
+# ---------------------------------------------------------------------------
+# KDefinition.add_sort_params with an expected sort (top-down resolution)
+# ---------------------------------------------------------------------------
+
+_EQ_ARGS: Final = [KVariable('X', sort=INT), KVariable('Y', sort=INT)]
+_CEIL_ARGS: Final = [KVariable('Z', sort=INT)]
+
+ADD_SORT_PARAMS_EXPECTED_DATA: Final = (
+    # ML pred with a concrete expected sort: the free result sort resolves to it (no sort var).
+    (
+        'ml_pred_expected',
+        KApply('#Equals', _EQ_ARGS),
+        GENERATED_TOP_CELL,
+        KApply(KLabel('#Equals', [INT, GENERATED_TOP_CELL]), _EQ_ARGS),
+    ),
+    # #Ceil similarly resolves its result sort from the expected sort.
+    (
+        'ceil_expected',
+        KApply('#Ceil', _CEIL_ARGS),
+        GENERATED_TOP_CELL,
+        KApply(KLabel('#Ceil', [INT, GENERATED_TOP_CELL]), _CEIL_ARGS),
+    ),
+    # Spine: the expected sort threads down through the #And connective so every conjunct's
+    # result sort resolves to the same concrete sort.
+    (
+        'spine_concrete',
+        KApply('#And', [KApply('#Equals', _EQ_ARGS), KApply('#Ceil', _CEIL_ARGS)]),
+        GENERATED_TOP_CELL,
+        KApply(
+            KLabel('#And', [GENERATED_TOP_CELL]),
+            [
+                KApply(KLabel('#Equals', [INT, GENERATED_TOP_CELL]), _EQ_ARGS),
+                KApply(KLabel('#Ceil', [INT, GENERATED_TOP_CELL]), _CEIL_ARGS),
+            ],
+        ),
+    ),
+)
+
+
+@pytest.mark.parametrize(
+    'test_id,term,sort,expected',
+    ADD_SORT_PARAMS_EXPECTED_DATA,
+    ids=[test_id for test_id, *_ in ADD_SORT_PARAMS_EXPECTED_DATA],
+)
+def test_add_sort_params_expected(test_id: str, term: KInner, sort: KSort, expected: KInner) -> None:
+    assert DEFN.add_sort_params(term, sort) == expected
+
+
+def test_add_sort_params_spine_shares_one_sort_variable() -> None:
+    # No expected sort: a fresh sort variable is synthesized at the top and threads down the
+    # #And spine, so every conjunct's free result sort is the *same* variable (Q0).
+    term = KApply('#And', [KApply('#Equals', _EQ_ARGS), KApply('#Ceil', _CEIL_ARGS)])
+    expected = KApply(
+        KLabel('#And', [_sp(0)]),
+        [
+            KApply(KLabel('#Equals', [INT, _sp(0)]), _EQ_ARGS),
+            KApply(KLabel('#Ceil', [INT, _sp(0)]), _CEIL_ARGS),
+        ],
+    )
+    assert DEFN.add_sort_params(term) == expected
+
+
+def test_add_sort_params_expected_pair_resolves_return_sort() -> None:
+    # A user parametric symbol's return-only param resolves from a concrete expected sort.
+    term = KApply(KLabel('pair'), [KVariable('X', sort=INT)])
+    expected = KApply(KLabel('pair', [INT, BOOL]), [KVariable('X', sort=INT)])
+    assert DEFN_PAIR.add_sort_params(term, KSort('Pair', (INT, BOOL))) == expected
+
+
+def test_add_sort_params_spine_violation_asserts() -> None:
+    # A parametric return sort in a position expecting a concrete sort it cannot satisfy (pair,
+    # whose result Pair{S1,S2} cannot match GeneratedTopCell) is off the spine — an ill-formed
+    # term that the spine assertion must reject.
+    term = KApply(KLabel('pair'), [KVariable('X', sort=INT)])
+    with pytest.raises(AssertionError, match='off the spine'):
+        DEFN_PAIR.add_sort_params(term, GENERATED_TOP_CELL)
 
 
 # ---------------------------------------------------------------------------
