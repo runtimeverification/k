@@ -1035,25 +1035,6 @@ def _match_sort_params(
     return {}
 
 
-def _resolve_sort_partial(
-    sort: KSort,
-    bindings: dict[KSort, KSort],
-    params: frozenset[KSort],
-) -> KSort | None:
-    """Substitute ``bindings`` into ``sort``, returning ``None`` if any param is unbound.
-
-    A param in ``params`` is considered unbound if it does not appear in ``bindings``.
-    """
-    if sort in params:
-        return bindings.get(sort)
-    if sort.params:
-        resolved = [_resolve_sort_partial(p, bindings, params) for p in sort.params]
-        if any(r is None for r in resolved):
-            return None
-        return KSort(sort.name, tuple(resolved))  # type: ignore[arg-type]
-    return sort
-
-
 @final
 @dataclass(frozen=True)
 class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
@@ -1591,70 +1572,6 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
             add_var_to_subst(vname, occurrences, subst)
 
         return Subst(subst)(new_term)
-
-    def infer_sort_params(
-        self,
-        prod: KProduction,
-        actual_sorts: tuple[KSort | None, ...],
-        expected_sort: KSort | None = None,
-    ) -> tuple[dict[KSort, KSort | None], KSort | None]:
-        """Infer sort parameter bindings for a parametric production application.
-
-        Returns ``(bindings, inferred_sort)`` where:
-
-        ``bindings`` maps each sort param to one of three states:
-        - key present, value non-``None``: parameter successfully bound to that sort.
-        - key present, value ``None``: candidates were found but their LUB could not be
-          computed (conflicting sorts with no common supersort).
-        - key absent: no candidates were collected (unsortable / no structural match).
-
-        ``inferred_sort`` is the production's result sort after substituting the
-        successful bindings.  It is ``None`` if any sort param appearing in the result
-        sort is unbound or conflicted — including the case where ``prod`` is parametric
-        but no candidates were found.  For non-parametric productions it is always the
-        concrete result sort.
-
-        Mirrors ``AddSortInjections.substituteProd()`` in the Java frontend.
-
-        ``actual_sorts`` must have the same length as ``prod.argument_sorts``.
-        ``None`` entries are skipped (unsortable arguments).
-        If ``expected_sort`` is given, parameters that appear only in the result sort
-        (not in any argument sort) are also inferred from it — this is the
-        ``matchExpected`` path in the Java algorithm.
-        """
-        params = frozenset(prod.params)
-        candidates: dict[KSort, list[KSort]] = {}
-
-        for psort, asort in zip(prod.argument_sorts, actual_sorts, strict=True):
-            if asort is None:
-                continue
-            for k, vs in _match_sort_params(psort, asort, params, self.subsorts).items():
-                candidates.setdefault(k, []).extend(vs)
-
-        if expected_sort is not None:
-            # Only params that occur in the result sort but in NO declared argument sort are
-            # inferred from the expected sort (Java matchExpected, AddSortInjections.java:435).
-            # The membership test must use the production's *declared* (parametric) argument
-            # sorts — those are what can contain a param `p`; the concrete `actual_sorts` never
-            # do, so testing them would wrongly treat arg-bound params as expected-only.
-            unbound_result_params = frozenset(
-                p
-                for p in params
-                if prod.sort.contains(p) and not any(psort.contains(p) for psort in prod.argument_sorts)
-            )
-            if unbound_result_params:
-                for k, vs in _match_sort_params(prod.sort, expected_sort, unbound_result_params).items():
-                    candidates.setdefault(k, []).extend(vs)
-
-        # Resolve each param to the least upper bound of its candidates.  A param with candidates
-        # but no computable LUB maps to None (conflict); a param with no candidates is omitted.
-        result: dict[KSort, KSort | None] = {
-            p: self.least_upper_bound(candidates[p]) for p in prod.params if p in candidates
-        }
-
-        successful: dict[KSort, KSort] = {k: v for k, v in result.items() if v is not None}
-        inferred_sort = _resolve_sort_partial(prod.sort, successful, params)
-        return result, inferred_sort
 
     # Best-effort addition of sort parameters to klabels
     def add_sort_params(self, kast: KInner, sort: KSort | None = None) -> KInner:
