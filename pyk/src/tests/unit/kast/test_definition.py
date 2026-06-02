@@ -14,7 +14,6 @@ from pyk.kast.outer import (
     KProduction,
     KTerminal,
     _match_sort_params,
-    _sort_contains,
 )
 
 if TYPE_CHECKING:
@@ -475,28 +474,6 @@ def test_match_sort_params(
     expected: dict[KSort, list[KSort]],
 ) -> None:
     assert _match_sort_params(parametric, actual, params, subsorts_fn) == expected
-
-
-# ---------------------------------------------------------------------------
-# _sort_contains (module-level helper)
-# ---------------------------------------------------------------------------
-
-SORT_CONTAINS_DATA: Final = (
-    ('param_itself', N, N, True),
-    ('nested_one_level', MINT_N, N, True),
-    ('nested_two_levels', KSort('Foo', (MINT_N,)), N, True),
-    ('concrete_not_param', MINT_INT, N, False),
-    ('unrelated', INT, N, False),
-)
-
-
-@pytest.mark.parametrize(
-    'test_id,sort,param,expected',
-    SORT_CONTAINS_DATA,
-    ids=[test_id for test_id, *_ in SORT_CONTAINS_DATA],
-)
-def test_sort_contains(test_id: str, sort: KSort, param: KSort, expected: bool) -> None:
-    assert _sort_contains(sort, param) == expected
 
 
 # ---------------------------------------------------------------------------

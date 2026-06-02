@@ -1001,11 +1001,6 @@ class KRequire(KOuter):
         return KRequire(require=require)
 
 
-def _sort_contains(sort: KSort, param: KSort) -> bool:
-    """Return whether ``param`` appears anywhere in the sort tree of ``sort``."""
-    return sort == param or any(_sort_contains(p, param) for p in sort.params)
-
-
 def _match_sort_params(
     parametric: KSort,
     actual: KSort,
@@ -1645,7 +1640,7 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
             unbound_result_params = frozenset(
                 p
                 for p in params
-                if _sort_contains(prod.sort, p) and not any(_sort_contains(psort, p) for psort in prod.argument_sorts)
+                if prod.sort.contains(p) and not any(psort.contains(p) for psort in prod.argument_sorts)
             )
             if unbound_result_params:
                 for k, vs in _match_sort_params(prod.sort, expected_sort, unbound_result_params).items():
