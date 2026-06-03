@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 from contextlib import contextmanager
 from dataclasses import dataclass
@@ -28,7 +29,7 @@ from ..utils import not_none
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
     from pathlib import Path
-    from typing import Final
+    from typing import Any, Final
 
     from ..kast import KInner
     from ..kast.outer import KDefinition, KFlatModule
@@ -38,6 +39,25 @@ if TYPE_CHECKING:
 
 
 _LOGGER: Final = logging.getLogger(__name__)
+
+
+#: Canonical default set of haskell-backend log entries to capture per request for fallback
+#: diagnosis.  Spans both engines: kore entry types (resolved by the backend against its log
+#: registry) and booster context tags.  Sent verbatim on the ``haskell-logging`` request field;
+#: the backend skips any name it does not recognise, so this can evolve without a lockstep backend
+#: release.  Override per `CTermSymbolic` (e.g. downstream semantics needing a different set).
+HASKELL_LOGGING_ENTRIES: Final[tuple[str, ...]] = (
+    # Kore engine: equation attempt/application plus the term index that resolves their hashes.
+    'DebugAttemptEquation',
+    'DebugApplyEquation',
+    'DebugTerm',
+    # Booster: proxy/fallback decisions, detail, aborts, simplification, and rewrite steps.
+    'Proxy',
+    'Detail',
+    'Abort',
+    'Simplify',
+    'Rewrite',
+)
 
 
 class NextState(NamedTuple):
@@ -74,6 +94,8 @@ class CTermSymbolic:
     _log_succ_rewrites: bool
     _log_fail_rewrites: bool
     _booster_only_simplify: bool
+    _haskell_log_entries: tuple[str, ...]
+    _haskell_log_dir: Path | None
 
     def __init__(
         self,
@@ -83,18 +105,52 @@ class CTermSymbolic:
         log_succ_rewrites: bool = True,
         log_fail_rewrites: bool = False,
         booster_only_simplify: bool = False,
+        haskell_log_entries: Iterable[str] = HASKELL_LOGGING_ENTRIES,
+        haskell_log_dir: Path | None = None,
     ):
         self._kore_client = kore_client
         self._definition = definition
         self._log_succ_rewrites = log_succ_rewrites
         self._log_fail_rewrites = log_fail_rewrites
         self._booster_only_simplify = booster_only_simplify
+        # The set of haskell-backend log entries to request per RPC; defaults to the canonical
+        # diagnosis bundle and is overridable here so downstream callers can tailor it.
+        self._haskell_log_entries = tuple(haskell_log_entries)
+        # When set, every RPC requests the per-request `haskell-logging` bundle and the captured
+        # entries are written to `<haskell_log_dir>/<request_id>.jsonl` (one JSON value per line).
+        self._haskell_log_dir = haskell_log_dir
 
     def kast_to_kore(self, kinner: KInner) -> Pattern:
         return kast_to_kore(self._definition, kinner, sort=GENERATED_TOP_CELL)
 
     def kore_to_kast(self, pattern: Pattern) -> KInner:
         return kore_to_kast(self._definition, pattern)
+
+    def _haskell_logging_request(self, haskell_logging: bool | None) -> tuple[str, ...] | None:
+        """Resolve the per-call on/off flag to the list of log entries to request.
+
+        An explicit per-call value wins; otherwise logging is on exactly when a ``haskell_log_dir``
+        is configured (so the captured bundle has somewhere to land).  When on, the configured entry
+        set is requested; when off — or the set is empty — the wire field is omitted (``None``).
+        """
+        enabled = haskell_logging if haskell_logging is not None else self._haskell_log_dir is not None
+        return self._haskell_log_entries if enabled and self._haskell_log_entries else None
+
+    def _capture_haskell_log(self, entries: tuple[Any, ...] | None) -> None:
+        """Write a response's ``haskell-log-entries`` bundle to its own file.
+
+        No-op unless a ``haskell_log_dir`` is configured and ``entries`` is non-empty.  Each entry
+        is one JSON value per line (jsonl), in a file named for the request id (taken from the
+        backing client) so concurrent proof workers never collide.
+        """
+        if self._haskell_log_dir is None or not entries:
+            return
+        request_id = self._kore_client.last_request_id
+        if request_id is None:
+            return
+        self._haskell_log_dir.mkdir(parents=True, exist_ok=True)
+        log_file = self._haskell_log_dir / f'{request_id}.jsonl'
+        log_file.write_text('\n'.join(json.dumps(entry) for entry in entries) + '\n')
 
     def execute(
         self,
@@ -121,10 +177,11 @@ class CTermSymbolic:
                 booster_only_simplify=(
                     booster_only_simplify if booster_only_simplify is not None else self._booster_only_simplify
                 ),
-                haskell_logging=haskell_logging,
+                haskell_logging=self._haskell_logging_request(haskell_logging),
             )
         except SmtSolverError as err:
             raise self._smt_solver_error(err) from err
+        self._capture_haskell_log(response.haskell_log_entries)
 
         if isinstance(response, AbortedResult):
             unknown_predicate = response.unknown_predicate.text if response.unknown_predicate else None
@@ -178,16 +235,17 @@ class CTermSymbolic:
         _LOGGER.debug(f'Simplifying: {kast}')
         kore = self.kast_to_kore(kast)
         try:
-            kore_simplified, logs, _ = self._kore_client.simplify(
+            kore_simplified, logs, entries = self._kore_client.simplify(
                 kore,
                 module_name=module_name,
                 booster_only_simplify=(
                     booster_only_simplify if booster_only_simplify is not None else self._booster_only_simplify
                 ),
-                haskell_logging=haskell_logging,
+                haskell_logging=self._haskell_logging_request(haskell_logging),
             )
         except SmtSolverError as err:
             raise self._smt_solver_error(err) from err
+        self._capture_haskell_log(entries)
 
         kast_simplified = self.kore_to_kast(kore_simplified)
         return kast_simplified, logs
@@ -253,10 +311,11 @@ class CTermSymbolic:
                 booster_only_simplify=(
                     booster_only_simplify if booster_only_simplify is not None else self._booster_only_simplify
                 ),
-                haskell_logging=haskell_logging,
+                haskell_logging=self._haskell_logging_request(haskell_logging),
             )
         except SmtSolverError as err:
             raise self._smt_solver_error(err) from err
+        self._capture_haskell_log(result.haskell_log_entries)
 
         if not result.valid:
             if result.substitution is not None:
@@ -356,6 +415,7 @@ def cterm_symbolic(
     log_succ_rewrites: bool = True,
     log_fail_rewrites: bool = False,
     booster_only_simplify: bool = False,
+    haskell_log_dir: Path | None = None,
     start_server: bool = True,
     fallback_on: Iterable[FallbackReason] | None = None,
     interim_simplification: int | None = None,
@@ -389,11 +449,16 @@ def cterm_symbolic(
                     log_succ_rewrites=log_succ_rewrites,
                     log_fail_rewrites=log_fail_rewrites,
                     booster_only_simplify=booster_only_simplify,
+                    haskell_log_dir=haskell_log_dir,
                 )
     else:
         if port is None:
             raise ValueError('Missing port with start_server=False')
         with KoreClient('localhost', port, bug_report=bug_report, bug_report_id=id) as client:
             yield CTermSymbolic(
-                client, definition, log_succ_rewrites=log_succ_rewrites, log_fail_rewrites=log_fail_rewrites
+                client,
+                definition,
+                log_succ_rewrites=log_succ_rewrites,
+                log_fail_rewrites=log_fail_rewrites,
+                haskell_log_dir=haskell_log_dir,
             )
