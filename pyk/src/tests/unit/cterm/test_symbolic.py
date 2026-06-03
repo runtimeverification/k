@@ -188,7 +188,7 @@ def test_execute_forwards_per_call_params() -> None:
     kore_client, cts = _mock_client_cts(StuckResult(state=State(term=int_dv(2)), depth=1, logs=()))
 
     # When
-    cts.execute(Mock(), booster_only_simplify=True, haskell_logging=True)
+    cts.execute(Mock(), booster_only_simplify=True, haskell_logging=True, raise_on_aborted=False)
 
     # Then the per-call flags reach the underlying KoreClient.execute; the haskell_logging bool is
     # resolved to the configured entry set on the way through.

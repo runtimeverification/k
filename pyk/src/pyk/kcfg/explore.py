@@ -218,6 +218,8 @@ class KCFGExplore:
         cut_point_rules: Iterable[str] = (),
         terminal_rules: Iterable[str] = (),
         module_name: str | None = None,
+        booster_only_simplify: bool | None = None,
+        raise_on_aborted: bool = True,
         haskell_logging: bool | None = None,
     ) -> list[KCFGExtendResult]:
 
@@ -235,6 +237,8 @@ class KCFGExplore:
             cut_point_rules=cut_point_rules,
             terminal_rules=terminal_rules,
             module_name=module_name,
+            booster_only_simplify=booster_only_simplify,
+            raise_on_aborted=raise_on_aborted,
             haskell_logging=haskell_logging,
         )
         cterm = exec_result.state
