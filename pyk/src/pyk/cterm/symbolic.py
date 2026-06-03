@@ -104,6 +104,7 @@ class CTermSymbolic:
         terminal_rules: Iterable[str] | None = None,
         module_name: str | None = None,
         booster_only_simplify: bool | None = None,
+        haskell_logging: bool | None = None,
     ) -> CTermExecute:
 
         _LOGGER.debug(f'Executing: {cterm}')
@@ -120,6 +121,7 @@ class CTermSymbolic:
                 booster_only_simplify=(
                     booster_only_simplify if booster_only_simplify is not None else self._booster_only_simplify
                 ),
+                haskell_logging=haskell_logging,
             )
         except SmtSolverError as err:
             raise self._smt_solver_error(err) from err
@@ -151,16 +153,27 @@ class CTermSymbolic:
         )
 
     def simplify(
-        self, cterm: CTerm, module_name: str | None = None, booster_only_simplify: bool | None = None
+        self,
+        cterm: CTerm,
+        module_name: str | None = None,
+        booster_only_simplify: bool | None = None,
+        haskell_logging: bool | None = None,
     ) -> tuple[CTerm, tuple[LogEntry, ...]]:
         _LOGGER.debug(f'Simplifying: {cterm}')
         kast_simplified, logs = self.kast_simplify(
-            cterm.kast, module_name=module_name, booster_only_simplify=booster_only_simplify
+            cterm.kast,
+            module_name=module_name,
+            booster_only_simplify=booster_only_simplify,
+            haskell_logging=haskell_logging,
         )
         return CTerm.from_kast(kast_simplified), logs
 
     def kast_simplify(
-        self, kast: KInner, module_name: str | None = None, booster_only_simplify: bool | None = None
+        self,
+        kast: KInner,
+        module_name: str | None = None,
+        booster_only_simplify: bool | None = None,
+        haskell_logging: bool | None = None,
     ) -> tuple[KInner, tuple[LogEntry, ...]]:
         _LOGGER.debug(f'Simplifying: {kast}')
         kore = self.kast_to_kore(kast)
@@ -171,6 +184,7 @@ class CTermSymbolic:
                 booster_only_simplify=(
                     booster_only_simplify if booster_only_simplify is not None else self._booster_only_simplify
                 ),
+                haskell_logging=haskell_logging,
             )
         except SmtSolverError as err:
             raise self._smt_solver_error(err) from err
@@ -214,6 +228,7 @@ class CTermSymbolic:
         module_name: str | None = None,
         assume_defined: bool = False,
         booster_only_simplify: bool | None = None,
+        haskell_logging: bool | None = None,
     ) -> CTermImplies:
         _LOGGER.debug(f'Checking implication: {antecedent} #Implies {consequent}')
         _consequent = consequent.kast
@@ -238,6 +253,7 @@ class CTermSymbolic:
                 booster_only_simplify=(
                     booster_only_simplify if booster_only_simplify is not None else self._booster_only_simplify
                 ),
+                haskell_logging=haskell_logging,
             )
         except SmtSolverError as err:
             raise self._smt_solver_error(err) from err
@@ -258,6 +274,7 @@ class CTermSymbolic:
                     module_name=module_name,
                     assume_defined=assume_defined,
                     booster_only_simplify=booster_only_simplify,
+                    haskell_logging=haskell_logging,
                 )
                 config_match = _config_match.csubst
                 if config_match is None:

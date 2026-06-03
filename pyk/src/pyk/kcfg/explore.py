@@ -218,6 +218,7 @@ class KCFGExplore:
         cut_point_rules: Iterable[str] = (),
         terminal_rules: Iterable[str] = (),
         module_name: str | None = None,
+        haskell_logging: bool | None = None,
     ) -> list[KCFGExtendResult]:
 
         custom_step_result = self.kcfg_semantics.custom_step(_cterm, self.cterm_symbolic, node_id)
@@ -234,6 +235,7 @@ class KCFGExplore:
             cut_point_rules=cut_point_rules,
             terminal_rules=terminal_rules,
             module_name=module_name,
+            haskell_logging=haskell_logging,
         )
 
         extend_results: list[KCFGExtendResult] = []
