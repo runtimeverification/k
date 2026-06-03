@@ -183,6 +183,33 @@ def test_execute_not_aborted_on_normal_result() -> None:
     assert result.depth == 1
 
 
+def test_execute_forwards_per_call_params() -> None:
+    # Given
+    kore_client, cts = _mock_client_cts(StuckResult(state=State(term=int_dv(2)), depth=1, logs=()))
+
+    # When
+    cts.execute(Mock(), booster_only_simplify=True, haskell_logging=True)
+
+    # Then the per-call flags reach the underlying KoreClient.execute; the haskell_logging bool is
+    # resolved to the configured entry set on the way through.
+    _args, kwargs = kore_client.execute.call_args
+    assert kwargs['booster_only_simplify'] is True
+    assert kwargs['haskell_logging'] == HASKELL_LOGGING_ENTRIES
+
+
+def test_execute_default_params_preserve_current_call() -> None:
+    # Given
+    kore_client, cts = _mock_client_cts(StuckResult(state=State(term=int_dv(2)), depth=1, logs=()))
+
+    # When called with defaults
+    cts.execute(Mock())
+
+    # Then booster-only falls back to the instance default (False) and logging is off
+    _args, kwargs = kore_client.execute.call_args
+    assert kwargs['booster_only_simplify'] is False
+    assert kwargs['haskell_logging'] is None
+
+
 @pytest.mark.parametrize('indeterminate', [True, False, None], ids=['true', 'false', 'absent'])
 def test_implies_surfaces_indeterminate(indeterminate: bool | None) -> None:
     # Given a falsifiable implication carrying the backend `indeterminate` flag

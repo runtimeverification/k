@@ -165,6 +165,7 @@ class CTermSymbolic:
         booster_only_simplify: bool | None = None,
         haskell_logging: bool | None = None,
         raise_on_aborted: bool = True,
+        haskell_logging: bool | None = None,
     ) -> CTermExecute:
 
         _LOGGER.debug(f'Executing: {cterm}')
