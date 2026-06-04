@@ -40,7 +40,7 @@ def test_execute_on_requests_configured_entries() -> None:
     assert kwargs['haskell_logging'] == HASKELL_LOGGING_ENTRIES
 
 
-def test_execute_honours_custom_entry_set() -> None:
+def test_execute_honors_custom_entry_set() -> None:
     # Given a CTermSymbolic configured with a custom entry set
     kore_client = Mock()
     kore_client.execute.return_value = StuckResult(state=State(term=int_dv(2)), depth=1, logs=())

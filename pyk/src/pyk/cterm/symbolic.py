@@ -45,8 +45,8 @@ _LOGGER: Final = logging.getLogger(__name__)
 #: diagnosis.  Spans both engines: kore entry types (resolved by the backend against its log
 #: registry) and booster context tags.  Sent verbatim on the ``haskell-logging`` request field;
 #: the backend skips any name it does not recognise, so this can evolve without a lockstep backend
-#: release.  Override per `CTermSymbolic` (e.g. downstream semantics needing a different set).
-HASKELL_LOGGING_ENTRIES: Final[tuple[str, ...]] = (
+#: release.  Override per ``CTermSymbolic`` (e.g. downstream semantics needing a different set).
+HASKELL_LOGGING_ENTRIES: Final = (
     # Kore engine: equation attempt/application plus the term index that resolves their hashes.
     'DebugAttemptEquation',
     'DebugApplyEquation',
@@ -113,11 +113,12 @@ class CTermSymbolic:
         self._log_succ_rewrites = log_succ_rewrites
         self._log_fail_rewrites = log_fail_rewrites
         self._booster_only_simplify = booster_only_simplify
-        # The set of haskell-backend log entries to request per RPC; defaults to the canonical
-        # diagnosis bundle and is overridable here so downstream callers can tailor it.
+        # *Which* entries to request when logging is on; this populated default is not itself a
+        # switch — logging stays off until `haskell_log_dir` is set (or a per-call flag enables it).
+        # Overridable so downstream callers can tailor the set.
         self._haskell_log_entries = tuple(haskell_log_entries)
-        # When set, every RPC requests the per-request `haskell-logging` bundle and the captured
-        # entries are written to `<haskell_log_dir>/<request_id>.jsonl` (one JSON value per line).
+        # The switch: when set, every RPC requests the per-request `haskell-logging` bundle and the
+        # captured entries are written to `<haskell_log_dir>/<request_id>.jsonl` (one JSON value per line).
         self._haskell_log_dir = haskell_log_dir
 
     def kast_to_kore(self, kinner: KInner) -> Pattern:
