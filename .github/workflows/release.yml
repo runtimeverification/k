@@ -45,7 +45,7 @@ jobs:
           gh release upload --repo runtimeverification/k --clobber "v${version}" "${tarball}"
 
   cachix-release:
-    name: 'Cachix release (binary cache + dependency closure)'
+    name: 'Cachix release (binary cache `k-framework-binary` + dependency cache `k-framework`)'
     strategy:
       matrix:
         include:
@@ -79,17 +79,11 @@ jobs:
         with:
           name: k-framework-binary
 
-      # The binary publish and the dependency-closure publish build the same three
-      # derivations.  Running them as sequential steps on one runner means the build
-      # happens once: the first step populates the local Nix store, so the second
-      # step's `nix build` is an instant store hit rather than a full recompile.
-      #
-      # The two publishes target different caches with different tokens (private
-      # `k-framework-binary` via kup vs. public `k-framework` via cachix), so they are
-      # kept independent: `continue-on-error` plus `if: always()` ensures a flaky
-      # upload to one cache neither blocks nor masks the other, and the final guard
-      # re-fails the job if either push failed — preserving the release gate that the
-      # two separate jobs used to provide.
+      # Both publishes build the same three derivations, so they run as sequential
+      # steps on one runner: the first populates the local Nix store and the second is
+      # a store hit. They run independently (continue-on-error) so a flaky upload to
+      # one cache neither blocks nor masks the other, and a final guard fails the job
+      # if either push failed.
       - name: 'Publish K to k-framework-binary cache (private)'
         id: binary
         continue-on-error: true
@@ -116,7 +110,6 @@ jobs:
 
       - name: 'Build and cache K and K dependencies (public)'
         id: dependencies
-        if: always()
         continue-on-error: true
         uses: workflow/nix-shell-action@v3
         env:
@@ -138,7 +131,6 @@ jobs:
             nix-store --query --requisites --include-outputs ${DRV_K_OPENSSL_PROCPS_SECP256K1} | cachix push k-framework
 
       - name: 'Fail if either cachix publish failed'
-        if: always()
         run: |
           binary='${{ steps.binary.outcome }}'
           dependencies='${{ steps.dependencies.outcome }}'
