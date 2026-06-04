@@ -235,6 +235,20 @@ def test_simplify(
     assert actual == expected
 
 
+def test_last_request_id_surfaces_underlying_client_id(
+    kore_client: KoreClient, rpc_client: MockClient, mock: Mock
+) -> None:
+    # Given the underlying client reports an id and a normal response
+    mock.last_request_id = 'claim-x-001'
+    rpc_client.assume_response({'state': {'term': kore(int_dv(2))}, 'depth': 1, 'reason': 'stuck'})
+
+    # When
+    kore_client.execute(int_dv(0))
+
+    # Then KoreClient surfaces the id of the request the facade just dispatched
+    assert kore_client.last_request_id == 'claim-x-001'
+
+
 _HASKELL_LOG_ENTRIES: Final = [
     {'context': ['proxy', 'detail'], 'message': 'kore-simplify'},
     {'label': 'EVM.foo', 'rule_id': 'abc', 'pre_hash': 'deadbeef', 'post_hash': 'f00d'},

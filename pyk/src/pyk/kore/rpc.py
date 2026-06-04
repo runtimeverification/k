@@ -14,7 +14,7 @@ from enum import Enum, auto
 from pathlib import Path
 from signal import SIGINT
 from subprocess import DEVNULL, PIPE, Popen
-from threading import Thread, local
+from threading import Thread
 from time import sleep
 from typing import ClassVar  # noqa: TC003
 from typing import TYPE_CHECKING, ContextManager, NamedTuple, TypedDict, final
@@ -47,13 +47,6 @@ _LOGGER: Final = logging.getLogger(__name__)
 # threaded consumers must re-`set` inside their worker entry points, since
 # `ContextVar` values are not propagated by `ThreadPoolExecutor`.
 client_label: ContextVar[str | None] = ContextVar('kore_rpc_client_label', default=None)
-
-# Records the JSON-RPC request id of the most recent wire request issued on the
-# calling thread (see `JsonRpcClient.request`).  A diagnostic caller snapshots
-# `KoreClient.last_request_id` immediately after each RPC to use the deterministic
-# `f'{client_label}-{NNN}'` id as a join key onto the captured per-request logs.
-# Thread-local so parallel proof workers never clobber each other's ids.
-_last_request_id: local = local()
 
 
 class KoreExecLogFormat(Enum):
@@ -197,6 +190,7 @@ class JsonRpcClientFacade(ContextManager['JsonRpcClientFacade']):
 
     _clients: dict[str, list[JsonRpcClient]]
     _default_client: JsonRpcClient
+    _last_request_id: str | None
 
     def __init__(
         self,
@@ -211,6 +205,7 @@ class JsonRpcClientFacade(ContextManager['JsonRpcClientFacade']):
     ):
         client_cache = {}
         self._clients = {}
+        self._last_request_id = None
         self._default_client = JsonRpcClient(
             default_host,
             default_port,
@@ -252,15 +247,23 @@ class JsonRpcClientFacade(ContextManager['JsonRpcClientFacade']):
             for client in clients:
                 client.close()
 
+    @property
+    def last_request_id(self) -> str | None:
+        """The JSON-RPC id of the most recent request issued through this facade (``None`` if none yet)."""
+        return self._last_request_id
+
     def request(self, method: str, **params: Any) -> dict[str, Any]:
         if method in self._clients:
             for client in self._clients[method]:
                 response = client.request(method, **params)
+                self._last_request_id = client.last_request_id
                 if 'error' in response:
                     return response
             return response
         else:
-            return self._default_client.request(method, **params)
+            response = self._default_client.request(method, **params)
+            self._last_request_id = self._default_client.last_request_id
+            return response
 
 
 class JsonRpcClient(ContextManager['JsonRpcClient']):
@@ -268,6 +271,7 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
 
     _transport: Transport
     _req_id: int
+    _last_request_id: str | None
 
     _bug_report: BugReport | None
     _bug_report_id: str | None
@@ -284,8 +288,14 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
     ):
         self._transport = self._create_transport(transport, host=host, port=port, timeout=timeout)
         self._req_id = 1
+        self._last_request_id = None
         self._bug_report_id = bug_report_id
         self._bug_report = bug_report
+
+    @property
+    def last_request_id(self) -> str | None:
+        """The JSON-RPC id of the most recent request issued by this client (``None`` if none yet)."""
+        return self._last_request_id
 
     @staticmethod
     def _create_transport(transport: TransportType, *, host: str, port: int, timeout: int | None) -> Transport:
@@ -311,7 +321,7 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         prefix = label if label is not None else str(id(self))
         req_id = f'{prefix}-{self._req_id:03}'
         self._req_id += 1
-        _last_request_id.value = req_id
+        self._last_request_id = req_id
 
         payload = {
             'jsonrpc': self._JSON_RPC_VERSION,
@@ -995,13 +1005,14 @@ class KoreClient(ContextManager['KoreClient']):
 
     @property
     def last_request_id(self) -> str | None:
-        """The JSON-RPC id of the most recent wire request issued on the calling thread.
+        """The JSON-RPC id of the most recent request issued by this client.
 
-        ``None`` before any request has been made on this thread.  Snapshot it
-        immediately after a call (e.g. ``execute``/``implies``/``simplify``) to key the
-        captured logs / handoff metadata to that exact request.
+        ``None`` before any request has been made.  Snapshot it immediately after a call
+        (e.g. ``execute``/``implies``/``simplify``) to key per-request data (logs, handoff
+        metadata) to that exact request.  Each proof worker drives its own ``KoreClient``
+        (see ``_ProverPool``), so this needs no cross-thread synchronization.
         """
-        return getattr(_last_request_id, 'value', None)
+        return self._client.last_request_id
 
     def _request(self, method: str, **params: Any) -> dict[str, Any]:
         try:
