@@ -45,7 +45,7 @@ jobs:
           gh release upload --repo runtimeverification/k --clobber "v${version}" "${tarball}"
 
   cachix-release:
-    name: 'k-framework-binary cachix release'
+    name: 'Cachix release (binary cache `k-framework-binary` + dependency cache `k-framework`)'
     strategy:
       matrix:
         include:
@@ -79,7 +79,14 @@ jobs:
         with:
           name: k-framework-binary
 
-      - name: 'Publish K to k-framework-binary cache'
+      # Both publishes build the same three derivations, so they run as sequential
+      # steps on one runner: the first populates the local Nix store and the second is
+      # a store hit. They run independently (continue-on-error) so a flaky upload to
+      # one cache neither blocks nor masks the other, and a final guard fails the job
+      # if either push failed.
+      - name: 'Publish K to k-framework-binary cache (private)'
+        id: binary
+        continue-on-error: true
         uses: workflow/nix-shell-action@v3.3.2
         env:
           CACHIX_AUTH_TOKEN: '${{ secrets.CACHIX_PRIVATE_KFB_TOKEN }}'
@@ -91,7 +98,7 @@ jobs:
           script: |
             # Install kup
             export PATH="$(nix build github:runtimeverification/kup --no-link --json | jq -r '.[].outputs | to_entries[].value')/bin:$PATH"
-            
+
             # Publish all three package variants using kup publish
             # Using public macOS runner has proven reliable for large file uploads
             kup publish --verbose k-framework-binary .#k --keep-days 180 || true
@@ -101,38 +108,9 @@ jobs:
             # kup/cachix pin visibility can be flaky; verify pins and narinfo via public API
             bash .github/scripts/check-cachix-pin.sh
 
-  cachix-release-dependencies:
-    name: 'k-framework cachix release'
-    strategy:
-      matrix:
-        include:
-          - runner: ubuntu-24.04
-            os: ubuntu-24.04
-          - runner: macos-latest
-            os: macos-15
-    runs-on: ${{ matrix.runner }}
-    timeout-minutes: 120
-    steps:
-      - name: 'Check out code'
-        uses: actions/checkout@v4
-
-      - name: 'Install Nix'
-        if: ${{ !startsWith(matrix.os, 'self') }}
-        uses: cachix/install-nix-action@v31.5.1
-        with:
-          install_url: https://releases.nixos.org/nix/nix-2.30.1/install
-          extra_nix_config: |
-            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-            substituters = http://cache.nixos.org
-            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
-
-      - name: 'Install Cachix'
-        if: ${{ !startsWith(matrix.os, 'self') }}
-        uses: cachix/cachix-action@v14
-        with:
-          name: k-framework-binary
-
-      - name: 'Build and cache K and K dependencies'
+      - name: 'Build and cache K and K dependencies (public)'
+        id: dependencies
+        continue-on-error: true
         uses: workflow/nix-shell-action@v3
         env:
           GC_DONT_GC: 1
@@ -151,6 +129,14 @@ jobs:
             K_OPENSSL_PROCPS_SECP256K1=$(nix build --extra-experimental-features 'nix-command flakes' .#k.openssl.procps.secp256k1 --json | jq -r '.[].outputs | to_entries[].value')
             DRV_K_OPENSSL_PROCPS_SECP256K1=$(nix-store --query --deriver ${K_OPENSSL_PROCPS_SECP256K1})
             nix-store --query --requisites --include-outputs ${DRV_K_OPENSSL_PROCPS_SECP256K1} | cachix push k-framework
+
+      - name: 'Fail if either cachix publish failed'
+        run: |
+          binary='${{ steps.binary.outcome }}'
+          dependencies='${{ steps.dependencies.outcome }}'
+          echo "binary publish:       ${binary}"
+          echo "dependencies publish: ${dependencies}"
+          [ "${binary}" = 'success' ] && [ "${dependencies}" = 'success' ]
 
   pyk-build-wheel:
     name: 'Pyk: Build Python wheel'
@@ -313,7 +299,7 @@ jobs:
     name: 'Publish Release'
     runs-on: [self-hosted, linux, normal]
     environment: production
-    needs: [cachix-release, cachix-release-dependencies, source-tarball, ubuntu-jammy, ubuntu-noble, set-release-id]
+    needs: [cachix-release, source-tarball, ubuntu-jammy, ubuntu-noble, set-release-id]
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v4
