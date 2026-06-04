@@ -255,70 +255,48 @@ _HASKELL_LOG_ENTRIES: Final = [
 ]
 
 
-def test_execute_parses_haskell_log_entries(kore_client: KoreClient, rpc_client: MockClient) -> None:
-    # Given
-    response = {
-        'state': {'term': kore(int_dv(2))},
-        'depth': 1,
-        'reason': 'stuck',
-        'haskell-log-entries': _HASKELL_LOG_ENTRIES,
-    }
-    rpc_client.assume_response(response)
-
-    # When
-    actual = kore_client.execute(int_dv(0), haskell_logging=['Proxy', 'DebugApplyEquation'])
-
-    # Then — the requested entry list is sent on the wire and the bundle is surfaced on the result
-    rpc_client.assert_request('execute', state=kore(int_dv(0)), **{'haskell-logging': ['Proxy', 'DebugApplyEquation']})
-    assert actual.haskell_log_entries == tuple(_HASKELL_LOG_ENTRIES)
+_HASKELL_LOG_RESPONSES: Final[dict[str, dict[str, Any]]] = {
+    'execute': {'state': {'term': kore(int_dv(2))}, 'depth': 1, 'reason': 'stuck'},
+    'implies': {'valid': True, 'implication': kore(int_top)},
+    'simplify': {'state': kore(int_top)},
+}
 
 
-def test_execute_omits_flag_and_entries_by_default(kore_client: KoreClient, rpc_client: MockClient) -> None:
-    # Given a response with no haskell-log-entries
-    response = {'state': {'term': kore(int_dv(2))}, 'depth': 1, 'reason': 'stuck'}
-    rpc_client.assume_response(response)
-
-    # When the flag is left at its default
-    actual = kore_client.execute(int_dv(0))
-
-    # Then no wire field is sent and the result carries no entries
-    rpc_client.assert_request('execute', state=kore(int_dv(0)))
-    assert actual.haskell_log_entries is None
-
-
-def test_implies_parses_haskell_log_entries(kore_client: KoreClient, rpc_client: MockClient) -> None:
-    # Given
-    response = {'valid': True, 'implication': kore(int_top), 'haskell-log-entries': _HASKELL_LOG_ENTRIES}
-    rpc_client.assume_response(response)
-
-    # When
-    actual = kore_client.implies(int_bottom, int_top, haskell_logging=['Proxy', 'DebugApplyEquation'])
-
-    # Then
-    assert actual.haskell_log_entries == tuple(_HASKELL_LOG_ENTRIES)
+def _invoke_with_logging(client: KoreClient, method: str, haskell_logging: list[str] | None) -> Any:
+    match method:
+        case 'execute':
+            return client.execute(int_dv(0), haskell_logging=haskell_logging)
+        case 'implies':
+            return client.implies(int_bottom, int_top, haskell_logging=haskell_logging)
+        case 'simplify':
+            return client.simplify(And(INT, (int_top, int_top)), haskell_logging=haskell_logging)
+        case _:
+            raise AssertionError(method)
 
 
-def test_simplify_parses_haskell_log_entries(kore_client: KoreClient, rpc_client: MockClient) -> None:
-    # Given
-    response = {'state': kore(int_top), 'haskell-log-entries': _HASKELL_LOG_ENTRIES}
-    rpc_client.assume_response(response)
+@pytest.mark.parametrize('method', ['execute', 'implies', 'simplify'])
+def test_haskell_logging_requested(kore_client: KoreClient, rpc_client: MockClient, method: str) -> None:
+    # Given a response carrying the per-request bundle
+    rpc_client.assume_response({**_HASKELL_LOG_RESPONSES[method], 'haskell-log-entries': _HASKELL_LOG_ENTRIES})
 
-    # When
-    result = kore_client.simplify(And(INT, (int_top, int_top)), haskell_logging=['Proxy', 'DebugApplyEquation'])
+    # When an entry list is requested
+    result = _invoke_with_logging(kore_client, method, ['Proxy', 'DebugApplyEquation'])
 
-    # Then
+    # Then the list is sent on the wire and the bundle is surfaced on the result
+    assert rpc_client.mock.request.call_args.kwargs['haskell-logging'] == ['Proxy', 'DebugApplyEquation']
     assert result.haskell_log_entries == tuple(_HASKELL_LOG_ENTRIES)
 
 
-def test_simplify_no_entries_by_default(kore_client: KoreClient, rpc_client: MockClient) -> None:
-    # Given
-    response = {'state': kore(int_top)}
-    rpc_client.assume_response(response)
+@pytest.mark.parametrize('method', ['execute', 'implies', 'simplify'])
+def test_haskell_logging_omitted_by_default(kore_client: KoreClient, rpc_client: MockClient, method: str) -> None:
+    # Given a response without a bundle
+    rpc_client.assume_response(_HASKELL_LOG_RESPONSES[method])
 
-    # When
-    result = kore_client.simplify(int_top)
+    # When no entry list is requested
+    result = _invoke_with_logging(kore_client, method, None)
 
-    # Then
+    # Then no wire field is sent and the result carries no entries
+    assert 'haskell-logging' not in rpc_client.mock.request.call_args.kwargs
     assert result.haskell_log_entries is None
 
 
