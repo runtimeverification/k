@@ -423,6 +423,11 @@ def cterm_symbolic(
     simplify_each: int | None = None,
     no_post_exec_simplify: bool = False,
 ) -> Iterator[CTermSymbolic]:
+    # `haskell_log_entries` feeds both the legacy server-side `-l` file logging and the new
+    # per-request capture set.  For the latter, fall back to the canonical default when the caller
+    # leaves it unset, so the per-request bundle works out of the box while still letting clients
+    # override which entries to request here.
+    request_log_entries = tuple(haskell_log_entries) or HASKELL_LOGGING_ENTRIES
     if start_server:
         # Old way of handling KoreServer, to be removed
         with kore_server(
@@ -450,6 +455,7 @@ def cterm_symbolic(
                     log_succ_rewrites=log_succ_rewrites,
                     log_fail_rewrites=log_fail_rewrites,
                     booster_only_simplify=booster_only_simplify,
+                    haskell_log_entries=request_log_entries,
                     haskell_log_dir=haskell_log_dir,
                 )
     else:
@@ -461,5 +467,6 @@ def cterm_symbolic(
                 definition,
                 log_succ_rewrites=log_succ_rewrites,
                 log_fail_rewrites=log_fail_rewrites,
+                haskell_log_entries=request_log_entries,
                 haskell_log_dir=haskell_log_dir,
             )

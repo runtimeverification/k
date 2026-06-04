@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import json
 from typing import TYPE_CHECKING
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
-from pyk.cterm.symbolic import HASKELL_LOGGING_ENTRIES, CTermSymbolic
+from pyk.cterm.symbolic import HASKELL_LOGGING_ENTRIES, CTermSymbolic, cterm_symbolic
 from pyk.kast.prelude.ml import mlTop
 from pyk.kore.prelude import int_dv
 from pyk.kore.rpc import State, StuckResult
@@ -106,3 +106,25 @@ def test_execute_writes_no_file_when_bundle_absent(tmp_path: Path) -> None:
 
     # Then nothing is written
     assert not list(tmp_path.iterdir())
+
+
+def test_cterm_symbolic_forwards_custom_entry_set() -> None:
+    # Given a caller that overrides the per-request entry set through the factory
+    with patch('pyk.cterm.symbolic.KoreClient'):
+        with cterm_symbolic(
+            definition=Mock(),
+            definition_dir=Mock(),
+            start_server=False,
+            port=1,
+            haskell_log_entries=['Rewrite', 'DebugApplyEquation'],
+        ) as cts:
+            # Then the built CTermSymbolic requests exactly that set
+            assert cts._haskell_log_entries == ('Rewrite', 'DebugApplyEquation')
+
+
+def test_cterm_symbolic_defaults_to_canonical_entry_set() -> None:
+    # Given no override
+    with patch('pyk.cterm.symbolic.KoreClient'):
+        with cterm_symbolic(definition=Mock(), definition_dir=Mock(), start_server=False, port=1) as cts:
+            # Then the canonical default is used
+            assert cts._haskell_log_entries == HASKELL_LOGGING_ENTRIES
