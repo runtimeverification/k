@@ -318,6 +318,7 @@ class ProveOptions(LoggingOptions, SpecOptions, SaveDirOptions):
     max_iterations: int | None
     assume_defined: bool
     show_kcfg: bool
+    haskell_logging: bool
 
     @staticmethod
     def default() -> dict[str, Any]:
@@ -330,6 +331,7 @@ class ProveOptions(LoggingOptions, SpecOptions, SaveDirOptions):
             'max_iterations': None,
             'assume_defined': False,
             'show_kcfg': False,
+            'haskell_logging': False,
         }
 
     @staticmethod
@@ -519,6 +521,17 @@ def create_argument_parser() -> ArgumentParser:
         type=str,
         default=None,
         help='Custom command to start RPC server.',
+    )
+    prove_args.add_argument(
+        '--haskell-logging',
+        dest='haskell_logging',
+        default=None,
+        action='store_true',
+        help=(
+            "Request the haskell-backend's per-request log bundle on every RPC and write it to"
+            ' <save-directory>/haskell-logs/<request_id>.jsonl (one JSON value per line).'
+            ' Requires --save-directory.'
+        ),
     )
 
     show_args = pyk_args_command.add_parser(

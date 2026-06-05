@@ -391,7 +391,7 @@ class TestKoreClient(KoreClientTest):
         expected: Pattern,
     ) -> None:
         # When
-        actual, _logs = kore_client.simplify(pattern)
+        actual, _logs, _entries = kore_client.simplify(pattern)
 
         # Then
         assert actual == expected

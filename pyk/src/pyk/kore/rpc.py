@@ -190,6 +190,7 @@ class JsonRpcClientFacade(ContextManager['JsonRpcClientFacade']):
 
     _clients: dict[str, list[JsonRpcClient]]
     _default_client: JsonRpcClient
+    _last_request_id: str | None
 
     def __init__(
         self,
@@ -204,6 +205,7 @@ class JsonRpcClientFacade(ContextManager['JsonRpcClientFacade']):
     ):
         client_cache = {}
         self._clients = {}
+        self._last_request_id = None
         self._default_client = JsonRpcClient(
             default_host,
             default_port,
@@ -245,15 +247,23 @@ class JsonRpcClientFacade(ContextManager['JsonRpcClientFacade']):
             for client in clients:
                 client.close()
 
+    @property
+    def last_request_id(self) -> str | None:
+        """The JSON-RPC id of the most recent request issued through this facade (``None`` if none yet)."""
+        return self._last_request_id
+
     def request(self, method: str, **params: Any) -> dict[str, Any]:
         if method in self._clients:
             for client in self._clients[method]:
                 response = client.request(method, **params)
+                self._last_request_id = client.last_request_id
                 if 'error' in response:
                     return response
             return response
         else:
-            return self._default_client.request(method, **params)
+            response = self._default_client.request(method, **params)
+            self._last_request_id = self._default_client.last_request_id
+            return response
 
 
 class JsonRpcClient(ContextManager['JsonRpcClient']):
@@ -261,6 +271,7 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
 
     _transport: Transport
     _req_id: int
+    _last_request_id: str | None
 
     _bug_report: BugReport | None
     _bug_report_id: str | None
@@ -277,8 +288,14 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
     ):
         self._transport = self._create_transport(transport, host=host, port=port, timeout=timeout)
         self._req_id = 1
+        self._last_request_id = None
         self._bug_report_id = bug_report_id
         self._bug_report = bug_report
+
+    @property
+    def last_request_id(self) -> str | None:
+        """The JSON-RPC id of the most recent request issued by this client (``None`` if none yet)."""
+        return self._last_request_id
 
     @staticmethod
     def _create_transport(transport: TransportType, *, host: str, port: int, timeout: int | None) -> Transport:
@@ -304,6 +321,7 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         prefix = label if label is not None else str(id(self))
         req_id = f'{prefix}-{self._req_id:03}'
         self._req_id += 1
+        self._last_request_id = req_id
 
         payload = {
             'jsonrpc': self._JSON_RPC_VERSION,
@@ -626,6 +644,16 @@ class RewriteFailure(RewriteResult):
         return {'tag': 'failure', 'rule-id': self.rule_id, 'reason': self.reason}
 
 
+def _parse_haskell_log_entries(dct: Mapping[str, Any]) -> tuple[Any, ...] | None:
+    """Parse the optional per-request ``haskell-log-entries`` bundle (arbitrary JSON values).
+
+    Present only when the request set a non-empty ``haskell-logging`` entry list; absent ⇒ ``None``.
+    Entries are kept as raw JSON in ``--log-format json`` shape so they feed straight into ``parse_kore_log``.
+    """
+    entries = dct.get('haskell-log-entries')
+    return tuple(entries) if entries is not None else None
+
+
 class ExecuteResult(ABC):
     _TYPES: Mapping[StopReason, str] = {
         StopReason.STUCK: 'StuckResult',
@@ -645,6 +673,7 @@ class ExecuteResult(ABC):
     next_states: tuple[State, ...] | None
     rule: str | None
     logs: tuple[LogEntry, ...]
+    haskell_log_entries: tuple[Any, ...] | None
 
     @classmethod
     def from_dict(cls: type[ER], dct: Mapping[str, Any]) -> ER:
@@ -669,6 +698,7 @@ class StuckResult(ExecuteResult):
     state: State
     depth: int
     logs: tuple[LogEntry, ...]
+    haskell_log_entries: tuple[Any, ...] | None = None
 
     @classmethod
     def from_dict(cls: type[StuckResult], dct: Mapping[str, Any]) -> StuckResult:
@@ -678,6 +708,7 @@ class StuckResult(ExecuteResult):
             state=State.from_dict(dct['state']),
             depth=dct['depth'],
             logs=logs,
+            haskell_log_entries=_parse_haskell_log_entries(dct),
         )
 
 
@@ -691,6 +722,7 @@ class DepthBoundResult(ExecuteResult):
     state: State
     depth: int
     logs: tuple[LogEntry, ...]
+    haskell_log_entries: tuple[Any, ...] | None = None
 
     @classmethod
     def from_dict(cls: type[DepthBoundResult], dct: Mapping[str, Any]) -> DepthBoundResult:
@@ -700,6 +732,7 @@ class DepthBoundResult(ExecuteResult):
             state=State.from_dict(dct['state']),
             depth=dct['depth'],
             logs=logs,
+            haskell_log_entries=_parse_haskell_log_entries(dct),
         )
 
 
@@ -713,6 +746,7 @@ class TimeoutResult(ExecuteResult):
     state: State
     depth: int
     logs: tuple[LogEntry, ...]
+    haskell_log_entries: tuple[Any, ...] | None = None
 
     @classmethod
     def from_dict(cls: type[TimeoutResult], dct: Mapping[str, Any]) -> TimeoutResult:
@@ -722,6 +756,7 @@ class TimeoutResult(ExecuteResult):
             state=State.from_dict(dct['state']),
             depth=dct['depth'],
             logs=logs,
+            haskell_log_entries=_parse_haskell_log_entries(dct),
         )
 
 
@@ -735,6 +770,7 @@ class BranchingResult(ExecuteResult):
     depth: int
     next_states: tuple[State, ...]
     logs: tuple[LogEntry, ...]
+    haskell_log_entries: tuple[Any, ...] | None = None
 
     @classmethod
     def from_dict(cls: type[BranchingResult], dct: Mapping[str, Any]) -> BranchingResult:
@@ -745,6 +781,7 @@ class BranchingResult(ExecuteResult):
             depth=dct['depth'],
             next_states=tuple(State.from_dict(next_state) for next_state in dct['next-states']),
             logs=logs,
+            haskell_log_entries=_parse_haskell_log_entries(dct),
         )
 
 
@@ -758,6 +795,7 @@ class CutPointResult(ExecuteResult):
     next_states: tuple[State, ...]
     rule: str
     logs: tuple[LogEntry, ...]
+    haskell_log_entries: tuple[Any, ...] | None = None
 
     @classmethod
     def from_dict(cls: type[CutPointResult], dct: Mapping[str, Any]) -> CutPointResult:
@@ -769,6 +807,7 @@ class CutPointResult(ExecuteResult):
             next_states=tuple(State.from_dict(next_state) for next_state in dct['next-states']),
             rule=dct['rule'],
             logs=logs,
+            haskell_log_entries=_parse_haskell_log_entries(dct),
         )
 
 
@@ -782,12 +821,19 @@ class TerminalResult(ExecuteResult):
     depth: int
     rule: str
     logs: tuple[LogEntry, ...]
+    haskell_log_entries: tuple[Any, ...] | None = None
 
     @classmethod
     def from_dict(cls: type[TerminalResult], dct: Mapping[str, Any]) -> TerminalResult:
         cls._check_reason(dct)
         logs = tuple(LogEntry.from_dict(l) for l in dct['logs']) if 'logs' in dct else ()
-        return TerminalResult(state=State.from_dict(dct['state']), depth=dct['depth'], rule=dct['rule'], logs=logs)
+        return TerminalResult(
+            state=State.from_dict(dct['state']),
+            depth=dct['depth'],
+            rule=dct['rule'],
+            logs=logs,
+            haskell_log_entries=_parse_haskell_log_entries(dct),
+        )
 
 
 @final
@@ -800,6 +846,7 @@ class VacuousResult(ExecuteResult):
     state: State
     depth: int
     logs: tuple[LogEntry, ...]
+    haskell_log_entries: tuple[Any, ...] | None = None
 
     @classmethod
     def from_dict(cls: type[VacuousResult], dct: Mapping[str, Any]) -> VacuousResult:
@@ -809,6 +856,7 @@ class VacuousResult(ExecuteResult):
             state=State.from_dict(dct['state']),
             depth=dct['depth'],
             logs=logs,
+            haskell_log_entries=_parse_haskell_log_entries(dct),
         )
 
 
@@ -823,6 +871,7 @@ class AbortedResult(ExecuteResult):
     depth: int
     unknown_predicate: Pattern | None
     logs: tuple[LogEntry, ...]
+    haskell_log_entries: tuple[Any, ...] | None = None
 
     @classmethod
     def from_dict(cls: type[AbortedResult], dct: Mapping[str, Any]) -> AbortedResult:
@@ -833,6 +882,7 @@ class AbortedResult(ExecuteResult):
             depth=dct['depth'],
             unknown_predicate=kore_term(dct['unknown-predicate']) if dct.get('unknown-predicate') else None,
             logs=logs,
+            haskell_log_entries=_parse_haskell_log_entries(dct),
         )
 
 
@@ -844,6 +894,7 @@ class ImpliesResult:
     substitution: Pattern | None
     predicate: Pattern | None
     logs: tuple[LogEntry, ...]
+    haskell_log_entries: tuple[Any, ...] | None = None
 
     @staticmethod
     def from_dict(dct: Mapping[str, Any]) -> ImpliesResult:
@@ -856,39 +907,61 @@ class ImpliesResult:
             substitution=kore_term(substitution) if substitution is not None else None,
             predicate=kore_term(predicate) if predicate is not None else None,
             logs=logs,
+            haskell_log_entries=_parse_haskell_log_entries(dct),
         )
 
 
+class SimplifyResult(NamedTuple):
+    """Result of a ``simplify`` call.
+
+    A ``NamedTuple`` (not a bare tuple) so the optional ``haskell_log_entries`` bundle can be
+    carried alongside the simplified ``state`` and ``logs`` without losing positional ergonomics.
+    """
+
+    state: Pattern
+    logs: tuple[LogEntry, ...]
+    haskell_log_entries: tuple[Any, ...] | None
+
+
 class GetModelResult(ABC):  # noqa: B024
+    haskell_log_entries: tuple[Any, ...] | None
+
     @staticmethod
     def from_dict(dct: Mapping[str, Any]) -> GetModelResult:
         status = dct['satisfiable']
+        entries = _parse_haskell_log_entries(dct)
         match status:
             case 'Unknown':
-                return UnknownResult()
+                return UnknownResult(haskell_log_entries=entries)
             case 'Unsat':
-                return UnsatResult()
+                return UnsatResult(haskell_log_entries=entries)
             case 'Sat':
                 substitution = dct.get('substitution')
-                return SatResult(model=kore_term(substitution) if substitution else None)
+                return SatResult(
+                    model=kore_term(substitution) if substitution else None,
+                    haskell_log_entries=entries,
+                )
             case _:
                 raise ValueError(f'Unknown status: {status}')
 
 
 @final
 @dataclass(frozen=True)
-class UnknownResult(GetModelResult): ...
+class UnknownResult(GetModelResult):
+    haskell_log_entries: tuple[Any, ...] | None = None
 
 
 @final
 @dataclass(frozen=True)
-class UnsatResult(GetModelResult): ...
+class UnsatResult(GetModelResult):
+    haskell_log_entries: tuple[Any, ...] | None = None
 
 
 @final
 @dataclass(frozen=True)
 class SatResult(GetModelResult):
     model: Pattern | None
+    haskell_log_entries: tuple[Any, ...] | None = None
 
 
 class KoreClient(ContextManager['KoreClient']):
@@ -929,6 +1002,17 @@ class KoreClient(ContextManager['KoreClient']):
 
     def close(self) -> None:
         self._client.close()
+
+    @property
+    def last_request_id(self) -> str | None:
+        """The JSON-RPC id of the most recent request issued by this client.
+
+        ``None`` before any request has been made.  Snapshot it immediately after a call
+        (e.g. ``execute``/``implies``/``simplify``) to key per-request data (logs, handoff
+        metadata) to that exact request.  Each proof worker drives its own ``KoreClient``
+        (see ``_ProverPool``), so this needs no cross-thread synchronization.
+        """
+        return self._client.last_request_id
 
     def _request(self, method: str, **params: Any) -> dict[str, Any]:
         try:
@@ -978,6 +1062,7 @@ class KoreClient(ContextManager['KoreClient']):
         log_successful_rewrites: bool | None = None,
         log_failed_rewrites: bool | None = None,
         booster_only_simplify: bool | None = None,
+        haskell_logging: Iterable[str] | None = None,
     ) -> ExecuteResult:
         params = filter_none(
             {
@@ -992,6 +1077,7 @@ class KoreClient(ContextManager['KoreClient']):
                 'log-successful-rewrites': log_successful_rewrites,
                 'log-failed-rewrites': log_failed_rewrites,
                 'booster-only': booster_only_simplify,
+                'haskell-logging': list(haskell_logging) if haskell_logging is not None else None,
             }
         )
 
@@ -1006,6 +1092,7 @@ class KoreClient(ContextManager['KoreClient']):
         module_name: str | None = None,
         assume_defined: bool = False,
         booster_only_simplify: bool | None = None,
+        haskell_logging: Iterable[str] | None = None,
     ) -> ImpliesResult:
         params = filter_none(
             {
@@ -1014,6 +1101,7 @@ class KoreClient(ContextManager['KoreClient']):
                 'module': module_name,
                 'assume-defined': assume_defined,
                 'booster-only': booster_only_simplify,
+                'haskell-logging': list(haskell_logging) if haskell_logging is not None else None,
             }
         )
 
@@ -1026,35 +1114,50 @@ class KoreClient(ContextManager['KoreClient']):
         *,
         module_name: str | None = None,
         booster_only_simplify: bool | None = None,
-    ) -> tuple[Pattern, tuple[LogEntry, ...]]:
+        haskell_logging: Iterable[str] | None = None,
+    ) -> SimplifyResult:
         params = filter_none(
             {
                 'state': self._state(pattern),
                 'module': module_name,
                 'booster-only': booster_only_simplify,
+                'haskell-logging': list(haskell_logging) if haskell_logging is not None else None,
             }
         )
 
         result = self._request('simplify', **params)
         logs = tuple(LogEntry.from_dict(l) for l in result['logs']) if 'logs' in result else ()
-        return kore_term(result['state']), logs
+        return SimplifyResult(kore_term(result['state']), logs, _parse_haskell_log_entries(result))
 
-    def get_model(self, pattern: Pattern, module_name: str | None = None) -> GetModelResult:
+    def get_model(
+        self,
+        pattern: Pattern,
+        module_name: str | None = None,
+        haskell_logging: Iterable[str] | None = None,
+    ) -> GetModelResult:
         params = filter_none(
             {
                 'state': self._state(pattern),
                 'module': module_name,
+                'haskell-logging': list(haskell_logging) if haskell_logging is not None else None,
             }
         )
 
         result = self._request('get-model', **params)
         return GetModelResult.from_dict(result)
 
-    def add_module(self, module: Module, *, name_as_id: bool | None = None) -> str:
+    def add_module(
+        self,
+        module: Module,
+        *,
+        name_as_id: bool | None = None,
+        haskell_logging: Iterable[str] | None = None,
+    ) -> str:
         params = filter_none(
             {
                 'module': module.text,
                 'name-as-id': name_as_id,
+                'haskell-logging': list(haskell_logging) if haskell_logging is not None else None,
             }
         )
         result = self._request('add-module', **params)
@@ -1245,19 +1348,20 @@ class KoreServer(ContextManager['KoreServer']):
         if self._smt_tactic is not None:
             smt_server_args += ['--smt-tactic', self._smt_tactic]
 
-        if self._log_axioms_file is not None:
-            haskell_log_args = [
-                '--log',
-                str(self._log_axioms_file),
-                '--log-format',
-                self._haskell_log_format.value,
-                '--log-entries',
-                ','.join(self._haskell_log_entries),
-            ]
-        else:
-            haskell_log_args = []
+        return smt_server_args + self._haskell_log_cli_args()
 
-        return smt_server_args + haskell_log_args
+    def _haskell_log_cli_args(self) -> list[str]:
+        # kore-rpc form: `--log FILE`, `--log-entries A,B,C`.  Booster overrides for `--log-file FILE` and repeated `-l`.
+        if self._log_axioms_file is None:
+            return []
+        return [
+            '--log',
+            str(self._log_axioms_file),
+            '--log-format',
+            self._haskell_log_format.value,
+            '--log-entries',
+            ','.join(self._haskell_log_entries),
+        ]
 
     def _populate_bug_report(self, bug_report: BugReport) -> None:
         prog_name = self._command[0]
@@ -1374,6 +1478,21 @@ class BoosterServer(KoreServer):
         res += [arg for glob in self._log_context for arg in ['--log-context', glob]]
         res += [arg for glob in self._not_log_context for arg in ['--not-log-context', glob]]
         return res
+
+    def _haskell_log_cli_args(self) -> list[str]:
+        # kore-rpc-booster diverged from kore-rpc: `--log-file FILE` (not `--log FILE`),
+        # and repeated `-l ENTRY` (not `--log-entries A,B,C`).
+        if self._log_axioms_file is None:
+            return []
+        args = [
+            '--log-file',
+            str(self._log_axioms_file),
+            '--log-format',
+            self._haskell_log_format.value,
+        ]
+        for entry in self._haskell_log_entries:
+            args += ['-l', entry]
+        return args
 
     def _populate_bug_report(self, bug_report: BugReport) -> None:
         super()._populate_bug_report(bug_report)
