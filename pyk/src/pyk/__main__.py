@@ -255,11 +255,18 @@ def exec_prove(options: ProveOptions) -> None:
 
     kprove = KProve(kompiled_directory, use_directory=options.temp_directory)
 
+    haskell_log_dir: Path | None = None
+    if options.haskell_logging:
+        if options.save_directory is None:
+            raise ValueError('--haskell-logging requires --save-directory to write the per-request log bundles')
+        haskell_log_dir = options.save_directory / 'haskell-logs'
+
     @contextmanager
     def explore_context() -> Iterator[KCFGExplore]:
         with cterm_symbolic(
             definition=kprove.definition,
             definition_dir=kprove.definition_dir,
+            haskell_log_dir=haskell_log_dir,
         ) as cts:
             yield KCFGExplore(cts)
 

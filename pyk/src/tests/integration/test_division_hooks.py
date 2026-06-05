@@ -137,7 +137,7 @@ class TestDivisionHooksHs(KoreClientTest):
 
         # Given
         pattern = div_pattern(op, a, b)
-        expected = (int_dv(c), ())
+        expected = (int_dv(c), (), None)
 
         # When
         actual = kore_client.simplify(pattern)
