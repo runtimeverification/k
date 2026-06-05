@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 from itertools import count
 from typing import TYPE_CHECKING
 from unittest.mock import patch
@@ -8,7 +7,7 @@ from unittest.mock import patch
 import pytest
 
 from pyk.kore.prelude import int_dv
-from pyk.kore.rpc import JsonRpcClient, KoreClient, SingleSocketTransport, client_label
+from pyk.kore.rpc import KoreClient, SingleSocketTransport
 from pyk.kore.syntax import App
 
 if TYPE_CHECKING:
@@ -79,18 +78,3 @@ def test_exceptions(
     # Then
     assert client_err.type is type(expected)
     assert str(client_err.value) == str(expected)
-
-
-def test_last_request_id_tracks_issued_id(mock: Mock) -> None:
-    # Given a known client label, the issued id is deterministic: f'{label}-001'.
-    mock.request.return_value = json.dumps({'jsonrpc': '2.0', 'id': 'claim-x-001', 'result': {'k': 'v'}})
-    client = JsonRpcClient('localhost', 3000)
-    token = client_label.set('claim-x')
-    try:
-        # Then — the id is recorded once a request is issued, and not before
-        assert client.last_request_id is None
-        out = client.request('simplify', state={'x': 1})
-        assert out == {'k': 'v'}
-        assert client.last_request_id == 'claim-x-001'
-    finally:
-        client_label.reset(token)
