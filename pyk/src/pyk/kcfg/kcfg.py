@@ -90,27 +90,40 @@ class NodeVariant:
         return NodeVariant(Producer(dct['producer']), dct.get('request_id'), CTerm.from_dict(dct['cterm']))
 
 
+class HandoffFlavour(Enum):
+    """Which kore operation performed a `KoreHandoff` — an execute step or an implies (subsumption)."""
+
+    EXECUTE = 'execute'
+    IMPLIES = 'implies'
+
+
 @final
 @dataclass(frozen=True)
 class KoreHandoff:
     """Record an operation-level kore handoff (execute or implies) where kore advanced the proof.
 
     Lets the diagnostic find every kore handoff without scanning logs.  ``request_id`` is the join
-    key onto the stored per-request log (Layer 5).  For ``execute``, ``source``/``target`` are the
-    lhs/rhs node ids; for ``implies``, ``source`` is the node and ``target`` the subsumption target.
+    key onto the per-request log file the configured ``haskell_log_dir`` writes for that request.
+    For ``execute``, ``source``/``target`` are the lhs/rhs node ids; for ``implies``, ``source`` is
+    the node and ``target`` the subsumption target.
     """
 
     source: int
     target: int
-    flavour: str  # 'execute' | 'implies'
+    flavour: HandoffFlavour
     request_id: str
 
     def to_dict(self) -> dict[str, Any]:
-        return {'source': self.source, 'target': self.target, 'flavour': self.flavour, 'request_id': self.request_id}
+        return {
+            'source': self.source,
+            'target': self.target,
+            'flavour': self.flavour.value,
+            'request_id': self.request_id,
+        }
 
     @staticmethod
     def from_dict(dct: dict[str, Any]) -> KoreHandoff:
-        return KoreHandoff(dct['source'], dct['target'], dct['flavour'], dct['request_id'])
+        return KoreHandoff(dct['source'], dct['target'], HandoffFlavour(dct['flavour']), dct['request_id'])
 
 
 class KCFGStore:
@@ -118,7 +131,7 @@ class KCFGStore:
 
     # Node attributes persisted as top-level side-lists in `kcfg.json` (node files only carry
     # `cterm`/`variants`; `read_cfg_data` rebuilds `attrs` from these).  Keep this the single source
-    # of truth so adding a persisted attr is a one-line change (see C10).
+    # of truth so adding a persisted attr is a one-line change.
     _ATTR_SIDE_LISTS: Final = {
         'vacuous': KCFGNodeAttr.VACUOUS,
         'stuck': KCFGNodeAttr.STUCK,
@@ -191,7 +204,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         # Simplification-provenance chain, least→most simplified, canonical term last; `()` == no
         # recorded history (back-compat default).  `compare=False` excludes it from the dataclass's
         # generated eq/order/hash, so node identity is unchanged — `cterm` already reflects the
-        # canonical term, and the rest of the system stays oblivious to `variants` (see C8).
+        # canonical term, and the rest of the system stays oblivious to `variants`.
         variants: tuple[NodeVariant, ...] = field(default=(), compare=False)
 
         def __init__(

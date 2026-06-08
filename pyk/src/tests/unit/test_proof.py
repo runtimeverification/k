@@ -10,7 +10,7 @@ from pyk.cterm.symbolic import CTermImplies
 from pyk.kast.prelude.kbool import BOOL
 from pyk.kast.prelude.kint import intToken
 from pyk.kcfg.exploration import KCFGExplorationNodeAttr
-from pyk.kcfg.kcfg import KCFG, KCFGNodeAttr, KoreHandoff, NodeVariant, Producer, Step
+from pyk.kcfg.kcfg import KCFG, HandoffFlavour, KCFGNodeAttr, KoreHandoff, NodeVariant, Producer, Step
 from pyk.proof import EqualityProof
 from pyk.proof.implies import EqualitySummary
 from pyk.proof.proof import CompositeSummary, Proof, ProofStatus
@@ -26,6 +26,7 @@ from pyk.proof.reachability import (
     APRSummary,
     DecisiveInvalid,
     Indeterminate,
+    RecoverBackend,
     RecoverTask,
     Subsumed,
     recover_task_for,
@@ -273,7 +274,7 @@ def test_commit_stuck_result_marks_node_stuck() -> None:
     # When the coordinator commits a no-progress (stuck) result for that node
     proof.commit(APRProofStuckResult(node_id=n3.id, prior_loops_cache_update=(), optimize_kcfg=False))
 
-    # Then the node is marked stuck — `commit` is the sole `add_stuck` site (C6)
+    # Then the node is marked stuck — `commit` is the sole `add_stuck` site
     assert kcfg.is_stuck(n3.id)
 
 
@@ -307,7 +308,7 @@ def test_check_subsume_classification(
     # When (call the unbound method with the Mock as self)
     result = APRProver._check_subsume(prover, Mock(id=1), Mock(id=2), proof_id='p')
 
-    # Then the verdict is classified per §1c
+    # Then the verdict is classified
     assert isinstance(result, expected)
     if isinstance(result, Subsumed):
         assert result.csubst is csubst
@@ -344,7 +345,7 @@ def test_recovery_rung() -> None:
 
 
 _TASK_DATA: tuple[tuple[str, int, list[NodeAttr], RecoverTask], ...] = (
-    # (rung, attrs, expected) — first matching §3d rule
+    # (rung, attrs, expected) — first matching recover_task_for rule
     ('rung0-fresh', 0, [], RecoverTask.TRY_BOOSTER),
     ('rung0-tried', 0, [KCFGNodeAttr.BOOSTER_TRIED], RecoverTask.SIMPLIFY_BOOSTER),
     ('rung1-fresh', 1, [], RecoverTask.TRY_BOOSTER),
@@ -367,7 +368,7 @@ def test_recover_task_noop_shortcircuit() -> None:
     assert recover_task_for(node) is RecoverTask.SIMPLIFY_KORE
 
 
-# --- commit recover transitions (C14) ------------------------------------------------------------
+# --- commit recover transitions ------------------------------------------------------------------
 
 
 def _recover_proof() -> tuple[APRProof, int]:
@@ -384,7 +385,7 @@ def _no_progress(node_id: int, backend: str, indeterminate: bool = False) -> APR
         node_id=node_id,
         prior_loops_cache_update=(),
         optimize_kcfg=False,
-        backend=backend,
+        backend=RecoverBackend(backend),
         subsume_indeterminate=indeterminate,
     )
 
@@ -456,7 +457,7 @@ def test_commit_recover_close_records_implies_handoff() -> None:
         )
     )
     assert proof.kcfg.kore_handoffs == [
-        KoreHandoff(source=nid, target=proof.target, flavour='implies', request_id='r-imp')
+        KoreHandoff(source=nid, target=proof.target, flavour=HandoffFlavour.IMPLIES, request_id='r-imp')
     ]
 
 
@@ -473,7 +474,7 @@ def test_commit_recover_advance_records_execute_handoff() -> None:
     )
     handoffs = proof.kcfg.kore_handoffs
     assert len(handoffs) == 1
-    assert handoffs[0].flavour == 'execute'
+    assert handoffs[0].flavour == HandoffFlavour.EXECUTE
     assert handoffs[0].source == nid
     assert handoffs[0].request_id == 'r-exec'
 

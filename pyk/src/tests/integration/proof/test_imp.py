@@ -15,6 +15,7 @@ from pyk.kast.prelude.kbool import BOOL, FALSE, andBool, orBool
 from pyk.kast.prelude.kint import intToken
 from pyk.kast.prelude.ml import mlAnd, mlBottom, mlEquals, mlEqualsFalse, mlEqualsTrue, mlTop
 from pyk.kast.pretty import PrettyPrinter
+from pyk.kcfg.kcfg import HandoffFlavour
 from pyk.kcfg.semantics import DefaultSemantics
 from pyk.kcfg.show import KCFGShow
 from pyk.proof import APRProver, ProofStatus
@@ -931,7 +932,7 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         # Every recorded handoff/variant must name a Kore-producer with a request-id join key; a
         # node's canonical term always matches its variant chain's tail (invariant of add_variant).
         for handoff in proof.kcfg.kore_handoffs:
-            assert handoff.flavour in ('execute', 'implies')
+            assert handoff.flavour in (HandoffFlavour.EXECUTE, HandoffFlavour.IMPLIES)
             assert handoff.request_id
         for node in proof.kcfg.nodes:
             if node.variants:

@@ -9,7 +9,7 @@ import pytest
 from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KSequence
 from pyk.kast.prelude.utils import token
-from pyk.kcfg.kcfg import KCFG, KCFGNodeAttr, KoreHandoff, Producer
+from pyk.kcfg.kcfg import KCFG, HandoffFlavour, KCFGNodeAttr, KoreHandoff, Producer
 from pyk.kcfg.store import OptimizedNodeStore, _Cache
 
 from ..utils import a, b, c, f
@@ -99,7 +99,7 @@ def test_kcfg_store_roundtrip_preserves_attrs_variants_handoffs(tmp_path: Path) 
     cfg.add_attr(n2.id, KCFGNodeAttr.STUCK)
     cfg.add_attr(n2.id, KCFGNodeAttr.BOTH_BACKENDS_FAILED)
     cfg.add_variant(n1.id, Producer.BOOSTER_SIMPLIFY, _cell(3), request_id='r-1')
-    cfg.add_kore_handoff(KoreHandoff(source=n1.id, target=n2.id, flavour='execute', request_id='r-2'))
+    cfg.add_kore_handoff(KoreHandoff(source=n1.id, target=n2.id, flavour=HandoffFlavour.EXECUTE, request_id='r-2'))
 
     # When written and read back through KCFGStore
     cfg.write_cfg_data()
@@ -114,7 +114,9 @@ def test_kcfg_store_roundtrip_preserves_attrs_variants_handoffs(tmp_path: Path) 
     rn2 = restored.node(n2.id)
     assert KCFGNodeAttr.STUCK in rn2.attrs
     assert KCFGNodeAttr.BOTH_BACKENDS_FAILED in rn2.attrs
-    assert restored.kore_handoffs == [KoreHandoff(source=n1.id, target=n2.id, flavour='execute', request_id='r-2')]
+    assert restored.kore_handoffs == [
+        KoreHandoff(source=n1.id, target=n2.id, flavour=HandoffFlavour.EXECUTE, request_id='r-2')
+    ]
 
 
 def test_kcfg_store_loads_legacy_without_new_keys(tmp_path: Path) -> None:

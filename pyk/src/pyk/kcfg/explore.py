@@ -285,7 +285,7 @@ class KCFGExplore:
 
         # No-progress or vacuous.  `Vacuous` is a context-free semantic verdict and stays here; a
         # depth-0 no-progress result is reported as the neutral `NoProgress` rather than `Stuck`, so
-        # the coordinator (`APRProof.commit`) decides whether the node is terminal (see C6).
+        # the coordinator (`APRProof.commit`) decides whether the node is terminal.
         if not next_states:
             if vacuous:
                 extend_results.append(Vacuous())

@@ -322,13 +322,13 @@ def test_node_equality_ignores_variants() -> None:
 
 
 def test_kore_handoffs_add_and_roundtrip() -> None:
-    from pyk.kcfg.kcfg import KoreHandoff
+    from pyk.kcfg.kcfg import HandoffFlavour, KoreHandoff
 
     # Given a kcfg with two recorded handoffs
     cfg = KCFG()
     cfg.create_node(term(1))
-    cfg.add_kore_handoff(KoreHandoff(source=1, target=2, flavour='execute', request_id='claim-003'))
-    cfg.add_kore_handoff(KoreHandoff(source=2, target=2, flavour='implies', request_id='claim-004'))
+    cfg.add_kore_handoff(KoreHandoff(source=1, target=2, flavour=HandoffFlavour.EXECUTE, request_id='claim-003'))
+    cfg.add_kore_handoff(KoreHandoff(source=2, target=2, flavour=HandoffFlavour.IMPLIES, request_id='claim-004'))
 
     # Then the accessor returns them and they round-trip through to_dict/from_dict
     assert len(cfg.kore_handoffs) == 2
