@@ -51,26 +51,22 @@ def test_extend_cterm_step_on_progress() -> None:
     ids=['booster', 'kore'],
 )
 def test_simplify_variant_producer_and_capture(booster_only: bool, expected_producer: Producer) -> None:
-    # Given a cterm_symbolic that simplifies to a new term and exposes request id + log entries
-    entries = ({'context': ['proxy'], 'message': 'x'},)
+    # Given a cterm_symbolic that simplifies to a new term and exposes the request id
     cterm_symbolic = Mock()
     cterm_symbolic.simplify.return_value = (term(2), ())
     cterm_symbolic.last_request_id = 'claim-001'
-    cterm_symbolic.last_haskell_log_entries = entries
     explore = KCFGExplore(cterm_symbolic)
 
     # When
     variant = explore.simplify_variant(term(1), booster_only=booster_only)
 
-    # Then the producer matches the backend, and request_id + entries are captured
+    # Then the producer matches the backend, and the request_id is captured
     assert variant.producer is expected_producer
     assert variant.cterm == term(2)
     assert variant.request_id == 'claim-001'
-    assert variant.log_entries == entries
-    # And the simplify was invoked with logging on and the right backend
+    # And the simplify was invoked with the right backend
     _args, kwargs = cterm_symbolic.simplify.call_args
     assert kwargs['booster_only_simplify'] is booster_only
-    assert kwargs['haskell_logging'] is True
 
 
 def test_simplify_variant_noop_still_yields_variant() -> None:
@@ -78,7 +74,6 @@ def test_simplify_variant_noop_still_yields_variant() -> None:
     cterm_symbolic = Mock()
     cterm_symbolic.simplify.return_value = (term(1), ())
     cterm_symbolic.last_request_id = 'claim-002'
-    cterm_symbolic.last_haskell_log_entries = None
     explore = KCFGExplore(cterm_symbolic)
 
     # When

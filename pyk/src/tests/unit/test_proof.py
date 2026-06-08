@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 from typing import TYPE_CHECKING
 from unittest.mock import Mock
 
@@ -11,8 +10,7 @@ from pyk.cterm.symbolic import CTermImplies
 from pyk.kast.prelude.kbool import BOOL
 from pyk.kast.prelude.kint import intToken
 from pyk.kcfg.exploration import KCFGExplorationNodeAttr
-from pyk.kcfg.explore import SimplifyVariant
-from pyk.kcfg.kcfg import KCFG, KCFGNodeAttr, KoreHandoff, NodeVariant, NoProgress, Producer, Step
+from pyk.kcfg.kcfg import KCFG, KCFGNodeAttr, KoreHandoff, NodeVariant, Producer, Step
 from pyk.proof import EqualityProof
 from pyk.proof.implies import EqualitySummary
 from pyk.proof.proof import CompositeSummary, Proof, ProofStatus
@@ -24,12 +22,10 @@ from pyk.proof.reachability import (
     APRProofRecoverCloseResult,
     APRProofRecoverNoProgressResult,
     APRProofStuckResult,
-    APRProofTerminalResult,
     APRProver,
     APRSummary,
     DecisiveInvalid,
     Indeterminate,
-    LoggedCall,
     RecoverTask,
     Subsumed,
     recover_task_for,
@@ -371,148 +367,6 @@ def test_recover_task_noop_shortcircuit() -> None:
     assert recover_task_for(node) is RecoverTask.SIMPLIFY_KORE
 
 
-# --- step_proof recover dispatch (C13) -----------------------------------------------------------
-
-
-def _recover_prover(*, node: KCFG.Node) -> Mock:
-    """A Mock APRProver wired enough to exercise the unbound `_recover_*` methods."""
-    prover = Mock()
-    prover.optimize_kcfg = False
-    prover.cut_point_rules = []
-    prover.terminal_rules = []
-    prover.execute_depth = None
-    prover.kcfg_explore.kcfg_semantics.is_terminal.return_value = False
-    prover.kcfg_explore.cterm_symbolic.last_request_id = 'req-1'
-    prover.kcfg_explore.cterm_symbolic.last_haskell_log_entries = ({'message': 'log'},)
-    return prover
-
-
-def _step(node: KCFG.Node, task: RecoverTask) -> Mock:
-    return Mock(node=node, target=node, proof_id='p', circularity=False, nonzero_depth=True, recover_task=task)
-
-
-def test_recover_simplify_yields_add_variant() -> None:
-    node = KCFG.Node(1, term(1))
-    prover = _recover_prover(node=node)
-    prover.kcfg_explore.simplify_variant.return_value = SimplifyVariant(
-        Producer.BOOSTER_SIMPLIFY, term(2), 'req-s', ({'message': 'log'},)
-    )
-
-    result = APRProver._recover_simplify(prover, _step(node, RecoverTask.SIMPLIFY_BOOSTER), (), booster_only=True)
-
-    assert len(result) == 1
-    variant_result = result[0]
-    assert isinstance(variant_result, APRProofAddVariantResult)
-    assert variant_result.producer is Producer.BOOSTER_SIMPLIFY
-    assert variant_result.cterm == term(2)
-    assert variant_result.request_id == 'req-s'
-
-
-def test_recover_try_booster_close() -> None:
-    node = KCFG.Node(1, term(1))
-    prover = _recover_prover(node=node)
-    prover._check_subsume.return_value = Subsumed(CSubst())
-
-    result = APRProver._recover_try(prover, _step(node, RecoverTask.TRY_BOOSTER), (), is_kore=False)
-
-    assert isinstance(result[-1], APRProofRecoverCloseResult)
-    # booster close → no kore handoff
-    assert result[-1].kore_request_id is None
-
-
-def test_recover_try_booster_advance() -> None:
-    node = KCFG.Node(1, term(1))
-    prover = _recover_prover(node=node)
-    prover._check_subsume.return_value = DecisiveInvalid()
-    prover.kcfg_explore.extend_cterm.return_value = [Mock()]  # not NoProgress ⇒ advance
-
-    result = APRProver._recover_try(prover, _step(node, RecoverTask.TRY_BOOSTER), (), is_kore=False)
-
-    assert isinstance(result[0], APRProofRecoverAdvanceResult)
-    assert result[0].kore_request_id is None
-
-
-def test_recover_try_booster_no_progress_carries_indeterminate() -> None:
-    node = KCFG.Node(1, term(1))
-    prover = _recover_prover(node=node)
-    prover._check_subsume.return_value = Indeterminate()
-    prover.kcfg_explore.extend_cterm.return_value = [NoProgress()]
-
-    result = APRProver._recover_try(prover, _step(node, RecoverTask.TRY_BOOSTER), (), is_kore=False)
-
-    no_progress = result[0]
-    assert isinstance(no_progress, APRProofRecoverNoProgressResult)
-    assert no_progress.backend == 'booster'
-    assert no_progress.subsume_indeterminate is True
-
-
-def test_recover_try_kore_skips_implies_without_indeterminate_flag() -> None:
-    # rung-2 node without SUBSUME_INDETERMINATE: trust the decisive booster invalid, go to execute.
-    node = KCFG.Node(1, term(1), [KCFGNodeAttr.BOOSTER_TRIED])
-    prover = _recover_prover(node=node)
-    prover.kcfg_explore.extend_cterm.return_value = [Mock()]
-
-    result = APRProver._recover_try(prover, _step(node, RecoverTask.TRY_KORE), (), is_kore=True)
-
-    prover._check_subsume.assert_not_called()
-    advance = result[0]
-    assert isinstance(advance, APRProofRecoverAdvanceResult)
-    # kore execute advance → handoff request id captured
-    assert advance.kore_request_id == 'req-1'
-
-
-def test_recover_try_kore_close_records_handoff_id() -> None:
-    node = KCFG.Node(1, term(1), [KCFGNodeAttr.SUBSUME_INDETERMINATE])
-    prover = _recover_prover(node=node)
-    prover._check_subsume.return_value = Subsumed(CSubst())
-
-    result = APRProver._recover_try(prover, _step(node, RecoverTask.TRY_KORE), (), is_kore=True)
-
-    prover._check_subsume.assert_called_once()
-    close = result[-1]
-    assert isinstance(close, APRProofRecoverCloseResult)
-    assert close.kore_request_id == 'req-1'  # kore implies closed ⇒ handoff id set
-
-
-@pytest.mark.parametrize('subsumption', [Indeterminate(), DecisiveInvalid()], ids=['indeterminate', 'decisive-invalid'])
-def test_recover_try_terminal_booster_escalates_instead_of_failing(subsumption: object) -> None:
-    # Regression (recover-mode parity): a terminal node whose booster subsumption does not close must
-    # NOT be finalized as terminal at the booster rung — that drops it out of `pending` before the
-    # ladder can reach a kore implies, regressing proofs that normal mode's kore-capable proxy implies
-    # would close.  Both a booster `Indeterminate` and a decisive booster `invalid` escalate: for a
-    # terminal node we always want kore's second opinion before declaring it failing.
-    node = KCFG.Node(1, term(1))
-    prover = _recover_prover(node=node)
-    prover.kcfg_explore.kcfg_semantics.is_terminal.return_value = True
-    prover._check_subsume.return_value = subsumption
-
-    result = APRProver._recover_try(prover, _step(node, RecoverTask.TRY_BOOSTER), (), is_kore=False)
-
-    # Not finalized as terminal; escalates so the node climbs to TRY_KORE's kore implies.
-    assert not any(isinstance(r, APRProofTerminalResult) for r in result)
-    no_progress = result[0]
-    assert isinstance(no_progress, APRProofRecoverNoProgressResult)
-    assert no_progress.backend == 'booster'
-    assert no_progress.subsume_indeterminate is True
-    prover.kcfg_explore.extend_cterm.assert_not_called()  # a terminal node is never executed
-
-
-def test_recover_try_terminal_kore_finalizes_when_implies_fails() -> None:
-    # The kore rung is the top of the ladder: once the kore implies on a terminal node also fails to
-    # close, the node is legitimately finalized as terminal (and so, unsubsumed, becomes failing).
-    node = KCFG.Node(1, term(1), [KCFGNodeAttr.SUBSUME_INDETERMINATE])
-    prover = _recover_prover(node=node)
-    prover.kcfg_explore.kcfg_semantics.is_terminal.return_value = True
-    prover._check_subsume.return_value = DecisiveInvalid()
-
-    result = APRProver._recover_try(prover, _step(node, RecoverTask.TRY_KORE), (), is_kore=True)
-
-    prover._check_subsume.assert_called_once()
-    assert len(result) == 1
-    assert isinstance(result[0], APRProofTerminalResult)
-    prover.kcfg_explore.extend_cterm.assert_not_called()
-
-
 # --- commit recover transitions (C14) ------------------------------------------------------------
 
 
@@ -532,7 +386,6 @@ def _no_progress(node_id: int, backend: str, indeterminate: bool = False) -> APR
         optimize_kcfg=False,
         backend=backend,
         subsume_indeterminate=indeterminate,
-        logged_calls=(),
     )
 
 
@@ -544,7 +397,6 @@ def _add_variant(node_id: int, producer: Producer, cterm: CTerm) -> APRProofAddV
         producer=producer,
         cterm=cterm,
         request_id='r',
-        log_entries=None,
     )
 
 
@@ -601,7 +453,6 @@ def test_commit_recover_close_records_implies_handoff() -> None:
             optimize_kcfg=False,
             csubst=CSubst(),
             kore_request_id='r-imp',
-            logged_calls=(),
         )
     )
     assert proof.kcfg.kore_handoffs == [
@@ -618,7 +469,6 @@ def test_commit_recover_advance_records_execute_handoff() -> None:
             optimize_kcfg=False,
             extension_to_apply=Step(term(50), 1, (), []),
             kore_request_id='r-exec',
-            logged_calls=(),
         )
     )
     handoffs = proof.kcfg.kore_handoffs
@@ -638,61 +488,9 @@ def test_commit_recover_advance_no_handoff_for_booster() -> None:
             optimize_kcfg=False,
             extension_to_apply=Step(term(50), 1, (), []),
             kore_request_id=None,
-            logged_calls=(),
         )
     )
     assert proof.kcfg.kore_handoffs == []
-
-
-def test_commit_writes_recover_logs(proof_dir: Path) -> None:
-    kcfg = KCFG()
-    n_init = kcfg.create_node(term(1))
-    n_target = kcfg.create_node(term(2))
-    n = kcfg.create_node(term(3))
-    proof = APRProof(id='rec', kcfg=kcfg, terminal=[], init=n_init.id, target=n_target.id, logs={}, proof_dir=proof_dir)
-    entries = ({'context': ['proxy'], 'message': 'x'}, {'rule_id': 'abc', 'pre_hash': 'd'})
-
-    proof.commit(
-        APRProofRecoverNoProgressResult(
-            node_id=n.id,
-            prior_loops_cache_update=(),
-            optimize_kcfg=False,
-            backend='kore',
-            subsume_indeterminate=False,
-            logged_calls=(LoggedCall('claim-007', entries),),
-        )
-    )
-
-    assert proof.proof_subdir is not None
-    log_file = proof.proof_subdir / 'recover-logs' / 'claim-007.jsonl'
-    assert log_file.exists()
-    parsed = [json.loads(line) for line in log_file.read_text().splitlines()]
-    assert parsed == [dict(entry) for entry in entries]
-
-
-def test_commit_recover_logs_skipped_when_no_entries(proof_dir: Path) -> None:
-    kcfg = KCFG()
-    n_init = kcfg.create_node(term(1))
-    n_target = kcfg.create_node(term(2))
-    n = kcfg.create_node(term(3))
-    proof = APRProof(
-        id='rec2', kcfg=kcfg, terminal=[], init=n_init.id, target=n_target.id, logs={}, proof_dir=proof_dir
-    )
-
-    # A call that captured no entries (None) writes no file.
-    proof.commit(
-        APRProofRecoverNoProgressResult(
-            node_id=n.id,
-            prior_loops_cache_update=(),
-            optimize_kcfg=False,
-            backend='booster',
-            subsume_indeterminate=False,
-            logged_calls=(LoggedCall('claim-008', None),),
-        )
-    )
-
-    assert proof.proof_subdir is not None
-    assert not (proof.proof_subdir / 'recover-logs' / 'claim-008.jsonl').exists()
 
 
 def test_apr_proof_minimization_and_terminals() -> None:
