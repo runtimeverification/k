@@ -38,31 +38,26 @@ def test_execute_raises_on_abort_by_default() -> None:
         cts.execute(dummy)
 
 
-def test_execute_surfaces_abort_when_not_raising() -> None:
-    # Given
-    cts = _cterm_symbolic(AbortedResult(state=State(term=int_dv(1)), depth=3, unknown_predicate=None, logs=()))
-    dummy: CTerm = Mock()
+_ABORT_SURFACE_DATA = (
+    ('aborted', AbortedResult(state=State(term=int_dv(1)), depth=3, unknown_predicate=None, logs=()), True, 3),
+    ('normal', StuckResult(state=State(term=int_dv(2)), depth=1, logs=()), False, 1),
+)
 
-    # When
-    result = cts.execute(dummy, raise_on_aborted=False)
 
-    # Then
-    assert result.aborted
-    assert result.depth == 3
+@pytest.mark.parametrize(
+    'test_id,response,expected_aborted,expected_depth', _ABORT_SURFACE_DATA, ids=[d[0] for d in _ABORT_SURFACE_DATA]
+)
+def test_execute_surfaces_abort_when_not_raising(
+    test_id: str, response: object, expected_aborted: bool, expected_depth: int
+) -> None:
+    # With raise_on_aborted=False, the CTermExecute.aborted flag reflects whether the backend aborted.
+    cts = _cterm_symbolic(response)
+
+    result = cts.execute(Mock(), raise_on_aborted=False)
+
+    assert result.aborted is expected_aborted
+    assert result.depth == expected_depth
     assert not result.vacuous
-
-
-def test_execute_not_aborted_on_normal_result() -> None:
-    # Given
-    cts = _cterm_symbolic(StuckResult(state=State(term=int_dv(2)), depth=1, logs=()))
-    dummy: CTerm = Mock()
-
-    # When
-    result = cts.execute(dummy, raise_on_aborted=False)
-
-    # Then
-    assert not result.aborted
-    assert result.depth == 1
 
 
 @pytest.mark.parametrize('indeterminate', [True, False, None], ids=['true', 'false', 'absent'])

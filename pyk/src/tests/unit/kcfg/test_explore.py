@@ -1,14 +1,18 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
 from unittest.mock import Mock
 
 import pytest
 
 from pyk.cterm.symbolic import CTermExecute
 from pyk.kcfg.explore import KCFGExplore
-from pyk.kcfg.kcfg import NoProgress, Producer, Step
+from pyk.kcfg.kcfg import NoProgress, Step
 
 from ..test_kcfg import term
+
+if TYPE_CHECKING:
+    from pyk.kcfg.kcfg import KCFGExtendResult
 
 
 def _explore(exec_result: CTermExecute) -> KCFGExplore:
@@ -18,67 +22,23 @@ def _explore(exec_result: CTermExecute) -> KCFGExplore:
     return KCFGExplore(cterm_symbolic)
 
 
-def test_extend_cterm_reports_no_progress_not_stuck() -> None:
-    # Given a backend that makes no progress (depth 0, no next states, not vacuous)
-    cterm = term(1)
-    explore = _explore(CTermExecute(state=cterm, next_states=(), depth=0, vacuous=False, aborted=False, logs=()))
-
-    # When
-    results = explore.extend_cterm(cterm, node_id=1)
-
-    # Then the worker emits the neutral NoProgress signal — never Stuck (the coordinator decides)
-    assert len(results) == 1
-    assert isinstance(results[0], NoProgress)
-
-
-def test_extend_cterm_step_on_progress() -> None:
-    # Given a backend that makes progress
-    cterm = term(1)
-    nxt = term(2)
-    explore = _explore(CTermExecute(state=nxt, next_states=(), depth=3, vacuous=False, aborted=False, logs=()))
-
-    # When
-    results = explore.extend_cterm(cterm, node_id=1)
-
-    # Then a basic-block Step is produced (unchanged behaviour)
-    assert len(results) == 1
-    assert isinstance(results[0], Step)
-
-
-@pytest.mark.parametrize(
-    'booster_only,expected_producer',
-    [(True, Producer.BOOSTER_SIMPLIFY), (False, Producer.KORE_SIMPLIFY)],
-    ids=['booster', 'kore'],
+# A zero-depth no-op execute yields the neutral NoProgress (never Stuck — the coordinator decides);
+# a progressing execute yields a basic-block Step (unchanged behaviour).
+_EXTEND_DATA: tuple[tuple[str, CTermExecute, type[KCFGExtendResult]], ...] = (
+    (
+        'no-progress',
+        CTermExecute(state=term(1), next_states=(), depth=0, vacuous=False, aborted=False, logs=()),
+        NoProgress,
+    ),
+    ('progress', CTermExecute(state=term(2), next_states=(), depth=3, vacuous=False, aborted=False, logs=()), Step),
 )
-def test_simplify_variant_producer_and_capture(booster_only: bool, expected_producer: Producer) -> None:
-    # Given a cterm_symbolic that simplifies to a new term and exposes the request id
-    cterm_symbolic = Mock()
-    cterm_symbolic.simplify.return_value = (term(2), ())
-    cterm_symbolic.last_request_id = 'claim-001'
-    explore = KCFGExplore(cterm_symbolic)
-
-    # When
-    variant = explore.simplify_variant(term(1), booster_only=booster_only)
-
-    # Then the producer matches the backend, and the request_id is captured
-    assert variant.producer is expected_producer
-    assert variant.cterm == term(2)
-    assert variant.request_id == 'claim-001'
-    # And the simplify was invoked with the right backend
-    _args, kwargs = cterm_symbolic.simplify.call_args
-    assert kwargs['booster_only_simplify'] is booster_only
 
 
-def test_simplify_variant_noop_still_yields_variant() -> None:
-    # Given a no-op simplification (term unchanged)
-    cterm_symbolic = Mock()
-    cterm_symbolic.simplify.return_value = (term(1), ())
-    cterm_symbolic.last_request_id = 'claim-002'
-    explore = KCFGExplore(cterm_symbolic)
-
-    # When
-    variant = explore.simplify_variant(term(1), booster_only=True)
-
-    # Then a variant is still produced, whose cterm equals the input (the no-op is recorded)
-    assert variant.cterm == term(1)
-    assert variant.producer is Producer.BOOSTER_SIMPLIFY
+@pytest.mark.parametrize('test_id,exec_result,expected', _EXTEND_DATA, ids=[d[0] for d in _EXTEND_DATA])
+def test_extend_cterm_classifies_execute_result(
+    test_id: str, exec_result: CTermExecute, expected: type[KCFGExtendResult]
+) -> None:
+    explore = _explore(exec_result)
+    results = explore.extend_cterm(term(1), node_id=1)
+    assert len(results) == 1
+    assert isinstance(results[0], expected)

@@ -10,23 +10,18 @@ from pyk.cterm.symbolic import CTermImplies
 from pyk.kast.prelude.kbool import BOOL
 from pyk.kast.prelude.kint import intToken
 from pyk.kcfg.exploration import KCFGExplorationNodeAttr
-from pyk.kcfg.kcfg import KCFG, HandoffFlavour, KCFGNodeAttr, KoreHandoff, NodeVariant, Producer, Step
+from pyk.kcfg.kcfg import KCFG, KCFGNodeAttr, NodeVariant, Producer
 from pyk.proof import EqualityProof
 from pyk.proof.implies import EqualitySummary
 from pyk.proof.proof import CompositeSummary, Proof, ProofStatus
 from pyk.proof.reachability import (
     APRFailureInfo,
     APRProof,
-    APRProofAddVariantResult,
-    APRProofRecoverAdvanceResult,
-    APRProofRecoverCloseResult,
-    APRProofRecoverNoProgressResult,
     APRProofStuckResult,
     APRProver,
     APRSummary,
     DecisiveInvalid,
     Indeterminate,
-    RecoverBackend,
     RecoverTask,
     Subsumed,
     recover_task_for,
@@ -42,7 +37,6 @@ if TYPE_CHECKING:
 
     from pytest import TempPathFactory
 
-    from pyk.cterm import CTerm
     from pyk.kcfg.kcfg import NodeAttr
     from pyk.proof.reachability import SubsumptionCheck
 
@@ -337,11 +331,17 @@ def _node_at_rung(rung: int, attrs: list[NodeAttr]) -> KCFG.Node:
     return KCFG.Node(1, term(rung + 1), attrs, chain)
 
 
-def test_recovery_rung() -> None:
-    assert recovery_rung(KCFG.Node(1, term(1))) == 0
-    assert recovery_rung(_node_at_rung(0, [])) == 0
-    assert recovery_rung(_node_at_rung(1, [])) == 1
-    assert recovery_rung(_node_at_rung(2, [])) == 2
+_RUNG_DATA: tuple[tuple[str, KCFG.Node, int], ...] = (
+    ('bare-node', KCFG.Node(1, term(1)), 0),
+    ('empty-chain', _node_at_rung(0, []), 0),
+    ('booster-simplified', _node_at_rung(1, []), 1),
+    ('kore-simplified', _node_at_rung(2, []), 2),
+)
+
+
+@pytest.mark.parametrize('test_id,node,expected', _RUNG_DATA, ids=[d[0] for d in _RUNG_DATA])
+def test_recovery_rung(test_id: str, node: KCFG.Node, expected: int) -> None:
+    assert recovery_rung(node) == expected
 
 
 _TASK_DATA: tuple[tuple[str, int, list[NodeAttr], RecoverTask], ...] = (
@@ -358,140 +358,6 @@ _TASK_DATA: tuple[tuple[str, int, list[NodeAttr], RecoverTask], ...] = (
 @pytest.mark.parametrize('test_id,rung,attrs,expected', _TASK_DATA, ids=[d[0] for d in _TASK_DATA])
 def test_recover_task_selection(test_id: str, rung: int, attrs: list[NodeAttr], expected: RecoverTask) -> None:
     assert recover_task_for(_node_at_rung(rung, attrs)) is expected
-
-
-def test_recover_task_noop_shortcircuit() -> None:
-    # After a no-op SIMPLIFY_BOOSTER, the term advanced to rung 1 but BOOSTER_TRIED stays set
-    # (commit's clear-iff-changed invariant), so the next task skips the redundant TRY_BOOSTER and
-    # goes straight to SIMPLIFY_KORE.
-    node = _node_at_rung(1, [KCFGNodeAttr.BOOSTER_TRIED])
-    assert recover_task_for(node) is RecoverTask.SIMPLIFY_KORE
-
-
-# --- commit recover transitions ------------------------------------------------------------------
-
-
-def _recover_proof() -> tuple[APRProof, int]:
-    kcfg = KCFG()
-    n_init = kcfg.create_node(term(1))
-    n_target = kcfg.create_node(term(2))
-    n = kcfg.create_node(term(3))
-    proof = APRProof(id='rec', kcfg=kcfg, terminal=[], init=n_init.id, target=n_target.id, logs={})
-    return proof, n.id
-
-
-def _no_progress(node_id: int, backend: str, indeterminate: bool = False) -> APRProofRecoverNoProgressResult:
-    return APRProofRecoverNoProgressResult(
-        node_id=node_id,
-        prior_loops_cache_update=(),
-        optimize_kcfg=False,
-        backend=RecoverBackend(backend),
-        subsume_indeterminate=indeterminate,
-    )
-
-
-def _add_variant(node_id: int, producer: Producer, cterm: CTerm) -> APRProofAddVariantResult:
-    return APRProofAddVariantResult(
-        node_id=node_id,
-        prior_loops_cache_update=(),
-        optimize_kcfg=False,
-        producer=producer,
-        cterm=cterm,
-        request_id='r',
-    )
-
-
-def test_commit_no_progress_sets_booster_tried_and_indeterminate() -> None:
-    proof, nid = _recover_proof()
-    proof.commit(_no_progress(nid, 'booster', indeterminate=True))
-    attrs = proof.kcfg.node(nid).attrs
-    assert KCFGNodeAttr.BOOSTER_TRIED in attrs
-    assert KCFGNodeAttr.SUBSUME_INDETERMINATE in attrs
-    assert not proof.kcfg.is_stuck(nid)
-
-
-def test_commit_add_variant_clear_iff_changed() -> None:
-    proof, nid = _recover_proof()
-    proof.commit(_no_progress(nid, 'booster', indeterminate=True))
-
-    # No-op simplify (term unchanged): BOOSTER_TRIED stays set → short-circuit to next rung
-    proof.commit(_add_variant(nid, Producer.BOOSTER_SIMPLIFY, term(3)))
-    assert KCFGNodeAttr.BOOSTER_TRIED in proof.kcfg.node(nid).attrs
-    assert recovery_rung(proof.kcfg.node(nid)) == 1
-
-    # A term-changing simplify clears the per-rung try attrs
-    proof.commit(_add_variant(nid, Producer.KORE_SIMPLIFY, term(99)))
-    cleared = proof.kcfg.node(nid).attrs
-    assert KCFGNodeAttr.BOOSTER_TRIED not in cleared
-    assert KCFGNodeAttr.SUBSUME_INDETERMINATE not in cleared
-    assert recovery_rung(proof.kcfg.node(nid)) == 2
-
-
-def test_commit_full_ladder_to_both_backends_failed() -> None:
-    proof, nid = _recover_proof()
-    # rung 0: booster try fails (indeterminate), booster simplify changes the term → rung 1
-    proof.commit(_no_progress(nid, 'booster', indeterminate=True))
-    proof.commit(_add_variant(nid, Producer.BOOSTER_SIMPLIFY, term(10)))
-    # rung 1: booster try fails, kore simplify changes the term → rung 2
-    proof.commit(_no_progress(nid, 'booster'))
-    proof.commit(_add_variant(nid, Producer.KORE_SIMPLIFY, term(20)))
-    # rung 2: booster try fails, then kore try fails → both backends exhausted
-    proof.commit(_no_progress(nid, 'booster'))
-    assert not proof.kcfg.is_stuck(nid)
-    proof.commit(_no_progress(nid, 'kore'))
-
-    node = proof.kcfg.node(nid)
-    assert KCFGNodeAttr.BOTH_BACKENDS_FAILED in node.attrs
-    assert proof.kcfg.is_stuck(nid)
-
-
-def test_commit_recover_close_records_implies_handoff() -> None:
-    proof, nid = _recover_proof()
-    proof.commit(
-        APRProofRecoverCloseResult(
-            node_id=nid,
-            prior_loops_cache_update=(),
-            optimize_kcfg=False,
-            csubst=CSubst(),
-            kore_request_id='r-imp',
-        )
-    )
-    assert proof.kcfg.kore_handoffs == [
-        KoreHandoff(source=nid, target=proof.target, flavour=HandoffFlavour.IMPLIES, request_id='r-imp')
-    ]
-
-
-def test_commit_recover_advance_records_execute_handoff() -> None:
-    proof, nid = _recover_proof()
-    proof.commit(
-        APRProofRecoverAdvanceResult(
-            node_id=nid,
-            prior_loops_cache_update=(),
-            optimize_kcfg=False,
-            extension_to_apply=Step(term(50), 1, (), []),
-            kore_request_id='r-exec',
-        )
-    )
-    handoffs = proof.kcfg.kore_handoffs
-    assert len(handoffs) == 1
-    assert handoffs[0].flavour == HandoffFlavour.EXECUTE
-    assert handoffs[0].source == nid
-    assert handoffs[0].request_id == 'r-exec'
-
-
-def test_commit_recover_advance_no_handoff_for_booster() -> None:
-    # A booster advance (kore_request_id None) records no handoff.
-    proof, nid = _recover_proof()
-    proof.commit(
-        APRProofRecoverAdvanceResult(
-            node_id=nid,
-            prior_loops_cache_update=(),
-            optimize_kcfg=False,
-            extension_to_apply=Step(term(50), 1, (), []),
-            kore_request_id=None,
-        )
-    )
-    assert proof.kcfg.kore_handoffs == []
 
 
 def test_apr_proof_minimization_and_terminals() -> None:

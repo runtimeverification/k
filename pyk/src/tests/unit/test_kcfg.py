@@ -14,7 +14,7 @@ from pyk.kast.prelude.ml import mlEquals, mlTop
 from pyk.kast.prelude.utils import token
 from pyk.kast.pretty import PrettyPrinter
 from pyk.kcfg import KCFG, KCFGShow
-from pyk.kcfg.kcfg import KCFGNodeAttr
+from pyk.kcfg.kcfg import KCFGNodeAttr, NodeVariant, Producer
 from pyk.kcfg.show import NodePrinter
 from pyk.utils import not_none, single
 
@@ -252,20 +252,42 @@ def test_create_node() -> None:
     assert not cfg.is_stuck(new_node.id)
 
 
-def test_node_variants_default_empty_and_roundtrip() -> None:
-    # Given a node built the legacy way
-    n = node(1)
+_NODE_ROUNDTRIP_DATA: tuple[tuple[str, KCFG.Node], ...] = (
+    ('bare', KCFG.Node(1, term(1))),
+    (
+        'with-variants',
+        KCFG.Node(
+            1,
+            term(2),
+            variants=[
+                NodeVariant(Producer.INIT, None, term(1)),
+                NodeVariant(Producer.BOOSTER_SIMPLIFY, 'r-1', term(2)),
+            ],
+        ),
+    ),
+    ('with-attrs', KCFG.Node(1, term(1), attrs=[KCFGNodeAttr.BOOSTER_TRIED, KCFGNodeAttr.SUBSUME_INDETERMINATE])),
+)
 
-    # Then variants default to empty and the serialised form omits the key
-    assert n.variants == ()
-    assert 'variants' not in n.to_dict()
-    # And a legacy node dict (no 'variants') still loads
-    assert KCFG.Node.from_dict(n.to_dict()) == n
+
+@pytest.mark.parametrize('test_id,node', _NODE_ROUNDTRIP_DATA, ids=[d[0] for d in _NODE_ROUNDTRIP_DATA])
+def test_node_serialisation_roundtrip(test_id: str, node: KCFG.Node) -> None:
+    # Node.to_dict/from_dict round-trips attrs and the variant chain; node equality ignores variants,
+    # so the chain is compared explicitly.
+    restored = KCFG.Node.from_dict(node.to_dict())
+    assert restored == node
+    assert restored.variants == node.variants
+
+
+def test_serialisation_omits_empty_recover_keys() -> None:
+    # Additive/back-compat: recover-mode keys are absent when empty, so legacy readers are unaffected.
+    assert 'variants' not in KCFG.Node(1, term(1)).to_dict()
+    cfg = KCFG()
+    cfg.create_node(term(1))
+    assert 'kore_handoffs' not in cfg.to_dict()
+    assert 'kore_handoffs' not in cfg.to_dict_no_nodes()
 
 
 def test_add_variant_chains_and_updates_cterm() -> None:
-    from pyk.kcfg.kcfg import Producer
-
     # Given a fresh node at rung 0
     cfg = KCFG()
     n = cfg.create_node(term(1))
@@ -292,26 +314,7 @@ def test_add_variant_chains_and_updates_cterm() -> None:
     ]
 
 
-def test_node_variants_to_dict_from_dict_roundtrip() -> None:
-    from pyk.kcfg.kcfg import Producer
-
-    # Given a node carrying a variant chain
-    cfg = KCFG()
-    n = cfg.create_node(term(1))
-    cfg.add_variant(n.id, Producer.BOOSTER_SIMPLIFY, term(2), request_id='r-1')
-    original = cfg.node(n.id)
-
-    # When round-tripped through dict
-    restored = KCFG.Node.from_dict(original.to_dict())
-
-    # Then variants survive (equality ignores variants, so compare them explicitly)
-    assert restored == original
-    assert restored.variants == original.variants
-
-
 def test_node_equality_ignores_variants() -> None:
-    from pyk.kcfg.kcfg import NodeVariant, Producer
-
     # Given two nodes identical but for their variant chains
     bare = KCFG.Node(1, term(1))
     with_variants = KCFG.Node(1, term(1), variants=[NodeVariant(Producer.INIT, None, term(1))])
@@ -334,29 +337,6 @@ def test_kore_handoffs_add_and_roundtrip() -> None:
     assert len(cfg.kore_handoffs) == 2
     restored = KCFG.from_dict(cfg.to_dict())
     assert restored.kore_handoffs == cfg.kore_handoffs
-
-
-def test_kore_handoffs_omitted_when_empty() -> None:
-    # Given a kcfg with no handoffs
-    cfg = KCFG()
-    cfg.create_node(term(1))
-
-    # Then the key is omitted from both serialisations (additive / back-compat)
-    assert 'kore_handoffs' not in cfg.to_dict()
-    assert 'kore_handoffs' not in cfg.to_dict_no_nodes()
-
-
-def test_recover_mode_node_attrs_serialise() -> None:
-    # Given a node carrying the new recover-mode attrs
-    cfg = KCFG()
-    n = cfg.create_node(term(1))
-    cfg.add_attr(n.id, KCFGNodeAttr.BOOSTER_TRIED)
-    cfg.add_attr(n.id, KCFGNodeAttr.SUBSUME_INDETERMINATE)
-
-    # Then the attrs round-trip through the in-memory Node serialisation
-    restored = KCFG.Node.from_dict(cfg.node(n.id).to_dict())
-    assert KCFGNodeAttr.BOOSTER_TRIED in restored.attrs
-    assert KCFGNodeAttr.SUBSUME_INDETERMINATE in restored.attrs
 
 
 def test_remove_unknown_node() -> None:
