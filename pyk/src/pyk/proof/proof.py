@@ -3,7 +3,9 @@ from __future__ import annotations
 import json
 import logging
 from abc import ABC, abstractmethod
-from concurrent.futures import ThreadPoolExecutor, wait
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import TimeoutError as FuturesTimeoutError
+from concurrent.futures import wait
 from dataclasses import dataclass
 from enum import Enum
 from itertools import chain
@@ -499,6 +501,33 @@ class Prover(ContextManager['Prover'], Generic[P, PS, SR]):
         """
         ...
 
+    #: Per-step wall-clock budget in whole seconds (minimum 1). When set, `advance_proof` runs each
+    #: step under this budget and, on timeout, interrupts it, calls `shrink_step`, and retries.
+    #: `None` (the default) disables the policy, so steps run synchronously with no time limit. A
+    #: prover that can do less work per step (e.g. `APRProver`, by lowering its execution depth)
+    #: should pair this with `shrink_step`.
+    step_timeout: int | None = None
+
+    def shrink_step(self) -> bool:
+        """Reduce the amount of work a single `step_proof` does, after a step timed out.
+
+        Return `True` if the step was made smaller (so it is worth retrying), or `False` if the
+        step is already at its minimum size (so `advance_proof` should stop). The default is a
+        no-op that returns `False`; see `step_timeout`.
+        """
+        return False
+
+    def interrupt(self) -> None:
+        """Abort a `step_proof` call currently running on another thread, as quickly as possible.
+
+        Used by the timeout-and-shrink policy in `advance_proof` to abandon a step that has
+        exhausted its `step_timeout` budget. After this returns, a thread blocked in `step_proof`
+        must raise promptly and the prover must remain usable for subsequent steps. The default
+        implementation does nothing; provers backed by an interruptible resource (e.g. a Kore RPC
+        connection) should override it.
+        """
+        ...
+
     def advance_proof(
         self,
         proof: P,
@@ -509,7 +538,8 @@ class Prover(ContextManager['Prover'], Generic[P, PS, SR]):
     ) -> None:
         """Advance a proof.
 
-        Performs loop `Proof.get_steps()` -> `Prover.step_proof()` -> `Proof.commit()`.
+        Performs loop `Proof.get_steps()` -> `Prover.step_proof()` (within `step_timeout`, else
+        `interrupt` + `shrink_step` and retry, or stop if it cannot shrink) -> `Proof.commit()`.
 
         Args:
             proof: proof to advance.
@@ -522,25 +552,59 @@ class Prover(ContextManager['Prover'], Generic[P, PS, SR]):
         iterations = 0
         _LOGGER.info(f'Initializing proof: {proof.id}')
         self.init_proof(proof)
-        while True:
-            steps = list(proof.get_steps())
-            _LOGGER.info(f'Found {len(steps)} next steps for proof: {proof.id}')
-            if len(steps) == 0:
-                break
-            for step in steps:
-                if fail_fast and proof.failed:
-                    _LOGGER.warning(f'Terminating proof early because fail_fast is set: {proof.id}')
-                    proof.failure_info = self.failure_info(proof)
-                    return
-                if max_iterations is not None and max_iterations <= iterations:
-                    return
-                iterations += 1
-                results = self.step_proof(step)
-                for result in results:
-                    proof.commit(result)
-                if iterations % maintenance_rate == 0:
-                    proof.write_proof_data()
-                    callback(proof)
+
+        timed = self.step_timeout is not None
+        executor = ThreadPoolExecutor(max_workers=1) if timed else None
+        try:
+            while True:
+                steps = list(proof.get_steps())
+                _LOGGER.info(f'Found {len(steps)} next steps for proof: {proof.id}')
+                if len(steps) == 0:
+                    break
+                shrank_step = False
+                for step in steps:
+                    if fail_fast and proof.failed:
+                        _LOGGER.warning(f'Terminating proof early because fail_fast is set: {proof.id}')
+                        proof.failure_info = self.failure_info(proof)
+                        return
+                    if max_iterations is not None and max_iterations <= iterations:
+                        return
+                    if timed:
+                        assert executor is not None
+                        budget = self.step_timeout
+                        assert budget is not None
+                        future = executor.submit(self.step_proof, step)
+                        try:
+                            results = future.result(timeout=budget)
+                        except FuturesTimeoutError:
+                            # The step exhausted its budget: interrupt it, ask the prover to do less
+                            # work per step, and re-fetch steps so the same node is retried smaller.
+                            self.interrupt()
+                            wait([future])
+                            if not self.shrink_step():
+                                _LOGGER.warning(
+                                    f'Proof {proof.id}: step exhausted {budget}s budget and cannot be '
+                                    f'shrunk further; stopping.'
+                                )
+                                return
+                            _LOGGER.warning(
+                                f'Proof {proof.id}: step exhausted {budget}s budget; shrinking and retrying.'
+                            )
+                            shrank_step = True
+                            break
+                    else:
+                        results = self.step_proof(step)
+                    iterations += 1
+                    for result in results:
+                        proof.commit(result)
+                    if iterations % maintenance_rate == 0:
+                        proof.write_proof_data()
+                        callback(proof)
+                if shrank_step:
+                    continue
+        finally:
+            if executor is not None:
+                executor.shutdown(wait=False)
 
         if proof.failed:
             proof.failure_info = self.failure_info(proof)
