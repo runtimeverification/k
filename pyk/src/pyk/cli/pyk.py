@@ -316,6 +316,7 @@ class ProveOptions(LoggingOptions, SpecOptions, SaveDirOptions):
     kore_rpc_command: str | Iterable[str] | None
     max_depth: int | None
     max_iterations: int | None
+    step_timeout: int | None
     assume_defined: bool
     show_kcfg: bool
     haskell_logging: bool
@@ -329,6 +330,7 @@ class ProveOptions(LoggingOptions, SpecOptions, SaveDirOptions):
             'kore_rpc_command': None,
             'max_depth': None,
             'max_iterations': None,
+            'step_timeout': None,
             'assume_defined': False,
             'show_kcfg': False,
             'haskell_logging': False,
@@ -514,6 +516,17 @@ def create_argument_parser() -> ArgumentParser:
         '--max-iterations',
         type=int,
         help='Maximum number of KCFG explorations to take in attempting to discharge proof.',
+    )
+    prove_args.add_argument(
+        '--step-timeout',
+        dest='step_timeout',
+        type=int,
+        default=None,
+        help=(
+            'Per-step wall-clock budget in whole seconds (floored at 1). When a symbolic-execution step'
+            ' exceeds it, the step is interrupted, its execution depth is halved, and it is retried;'
+            ' proving stops once the depth cannot be reduced further. Omit to disable the timeout.'
+        ),
     )
     prove_args.add_argument(
         '--kore-rpc-command',
