@@ -127,14 +127,6 @@ class APRProofStuckResult(APRProofResult):
     """
 
 
-@dataclass(frozen=True)
-class LoggedCall:
-    """One kore RPC whose captured per-request log bundle the coordinator writes to disk (§5)."""
-
-    request_id: str
-    log_entries: tuple[Any, ...] | None
-
-
 @dataclass
 class APRProofAddVariantResult(APRProofResult):
     """Recover-mode: a re-simplification variant for `commit` to append via `KCFG.add_variant`."""
@@ -142,7 +134,6 @@ class APRProofAddVariantResult(APRProofResult):
     producer: Producer
     cterm: CTerm
     request_id: str | None
-    log_entries: tuple[Any, ...] | None
 
 
 @dataclass
@@ -151,7 +142,6 @@ class APRProofRecoverNoProgressResult(APRProofResult):
 
     backend: str  # 'booster' | 'kore'
     subsume_indeterminate: bool
-    logged_calls: tuple[LoggedCall, ...]
 
 
 @dataclass
@@ -164,7 +154,6 @@ class APRProofRecoverAdvanceResult(APRProofResult):
 
     extension_to_apply: KCFGExtendResult
     kore_request_id: str | None
-    logged_calls: tuple[LoggedCall, ...]
 
 
 @dataclass
@@ -177,7 +166,6 @@ class APRProofRecoverCloseResult(APRProofResult):
 
     csubst: CSubst
     kore_request_id: str | None
-    logged_calls: tuple[LoggedCall, ...]
 
 
 class SubsumptionCheck(ABC):
@@ -407,7 +395,6 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
                         source=result.node_id, target=target_id, flavour='execute', request_id=result.kore_request_id
                     )
                 )
-            self._write_recover_logs(result.logged_calls)
         elif isinstance(result, APRProofRecoverCloseResult):
             self.kcfg.create_cover(result.node_id, self.target, csubst=result.csubst)
             if result.kore_request_id is not None:
@@ -416,7 +403,6 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
                         source=result.node_id, target=self.target, flavour='implies', request_id=result.kore_request_id
                     )
                 )
-            self._write_recover_logs(result.logged_calls)
         elif isinstance(result, APRProofBoundedResult):
             self.add_bounded(result.node_id)
         else:
@@ -432,8 +418,6 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         if result.cterm != prev_cterm:
             self.kcfg.discard_attr(result.node_id, KCFGNodeAttr.BOOSTER_TRIED)
             self.kcfg.discard_attr(result.node_id, KCFGNodeAttr.SUBSUME_INDETERMINATE)
-        if result.request_id is not None and result.log_entries is not None:
-            self._write_recover_logs((LoggedCall(result.request_id, result.log_entries),))
 
     def _commit_recover_no_progress(self, result: APRProofRecoverNoProgressResult) -> None:
         if result.backend == 'kore':
@@ -450,7 +434,6 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
             self.kcfg.add_attr(result.node_id, KCFGNodeAttr.BOTH_BACKENDS_FAILED)
             _LOGGER.info(f'Both backends failed, stuck node {self.id}: {result.node_id}')
             self.kcfg.add_stuck(result.node_id)
-        self._write_recover_logs(result.logged_calls)
 
     def _recover_successor_id(self, node_id: int) -> int:
         """Resolve the kore execute handoff target: the (min) new successor of ``node_id``.
@@ -462,24 +445,6 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
             return node_id
         targets = [target_id for succ in self.kcfg.successors(node_id) for target_id in succ.target_ids]
         return min(targets) if targets else node_id
-
-    def _write_recover_logs(self, logged_calls: Iterable[LoggedCall]) -> None:
-        """Write one ``recover-logs/{request_id}.jsonl`` per logged kore call (§5).
-
-        Each line is one captured log entry in ``--log-format json`` shape, so the file feeds
-        straight into ``parse_kore_log``.  No-ops when the proof is in-memory (no ``proof_subdir``)
-        or a call captured no entries.  Disk writes stay on the coordinator (main) thread.
-        """
-        if self.proof_subdir is None:
-            return
-        log_dir = self.proof_subdir / 'recover-logs'
-        for call in logged_calls:
-            if call.log_entries is None:
-                continue
-            ensure_dir_path(log_dir)
-            (log_dir / f'{call.request_id}.jsonl').write_text(
-                '\n'.join(json.dumps(entry) for entry in call.log_entries)
-            )
 
     def nonzero_depth(self, node: KCFG.Node) -> bool:
         return not self.kcfg.zero_depth_between(self.init, node.id)
@@ -1047,7 +1012,6 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         target_node: KCFG.Node,
         proof_id: str,
         booster_only: bool | None = None,
-        haskell_logging: bool | None = None,
     ) -> SubsumptionCheck:
         target_cterm = target_node.cterm
         _LOGGER.debug(f'Checking subsumption into target state {proof_id}: {shorten_hashes((node.id, target_cterm))}')
@@ -1059,7 +1023,6 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
             target_cterm,
             assume_defined=self.assume_defined,
             booster_only_simplify=booster_only,
-            haskell_logging=haskell_logging,
         )
         if result.csubst is not None:
             _LOGGER.info(f'Subsumed into target node {proof_id}: {shorten_hashes((node.id, target_node.id))}')
@@ -1213,7 +1176,6 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
                 producer=variant.producer,
                 cterm=variant.cterm,
                 request_id=variant.request_id,
-                log_entries=variant.log_entries,
             )
         ]
 
@@ -1221,16 +1183,6 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         node = step.node
         cs = self.kcfg_explore.cterm_symbolic
         semantics = self.kcfg_explore.kcfg_semantics
-        # §3e: rung-0 booster tries (the happy path) are not logged; everything else is.
-        should_log = is_kore or recovery_rung(node) >= 1
-        logged_calls: list[LoggedCall] = []
-
-        def capture() -> str | None:
-            rid = cs.last_request_id
-            if should_log and rid is not None:
-                logged_calls.append(LoggedCall(rid, cs.last_haskell_log_entries))
-            return rid
-
         is_terminal = semantics.is_terminal(node.cterm)
         target_is_terminal = semantics.is_terminal(step.target.cterm)
         terminal_result: list[APRProofResult] = (
@@ -1251,10 +1203,8 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
             not is_kore or KCFGNodeAttr.SUBSUME_INDETERMINATE in node.attrs
         )
         if run_subsume:
-            subsumption = self._check_subsume(
-                node, step.target, proof_id=step.proof_id, booster_only=not is_kore, haskell_logging=should_log
-            )
-            request_id = capture()
+            subsumption = self._check_subsume(node, step.target, proof_id=step.proof_id, booster_only=not is_kore)
+            request_id = cs.last_request_id
             if isinstance(subsumption, Subsumed):
                 return terminal_result + [
                     APRProofRecoverCloseResult(
@@ -1263,7 +1213,6 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
                         optimize_kcfg=self.optimize_kcfg,
                         csubst=subsumption.csubst,
                         kore_request_id=request_id if is_kore else None,
-                        logged_calls=tuple(logged_calls),
                     )
                 ]
             subsume_indeterminate = isinstance(subsumption, Indeterminate)
@@ -1288,7 +1237,6 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
                         optimize_kcfg=self.optimize_kcfg,
                         backend='booster',
                         subsume_indeterminate=True,
-                        logged_calls=tuple(logged_calls),
                     )
                 ]
             return terminal_result
@@ -1310,9 +1258,8 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
             node_id=node.id,
             booster_only_simplify=not is_kore,
             raise_on_aborted=False,
-            haskell_logging=should_log,
         )
-        request_id = capture()
+        request_id = cs.last_request_id
 
         # No progress: the worker does not stuck the node; commit sets the per-backend attr (C14).
         if extend_results and isinstance(extend_results[0], NoProgress):
@@ -1323,7 +1270,6 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
                     optimize_kcfg=self.optimize_kcfg,
                     backend='kore' if is_kore else 'booster',
                     subsume_indeterminate=subsume_indeterminate,
-                    logged_calls=tuple(logged_calls),
                 )
             ]
         # Progress: apply the first extension (extend-and-cache is disabled in recover-mode).
@@ -1334,7 +1280,6 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
                 optimize_kcfg=self.optimize_kcfg,
                 extension_to_apply=extend_results[0],
                 kore_request_id=request_id if is_kore else None,
-                logged_calls=tuple(logged_calls),
             )
         ]
 

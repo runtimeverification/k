@@ -22,7 +22,7 @@ from .semantics import DefaultSemantics
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
-    from typing import Any, Final
+    from typing import Final
 
     from ..cterm import CTerm, CTermSymbolic
     from ..kast import KInner
@@ -38,15 +38,15 @@ _LOGGER: Final = logging.getLogger(__name__)
 class SimplifyVariant(NamedTuple):
     """Result of a recover-mode variant-producing simplification.
 
-    Carries everything the coordinator needs to land the variant (`KCFG.add_variant`) and store its
-    captured logs (keyed by `request_id`): the `producer`, the simplified `cterm`, the simplify RPC's
-    `request_id`, and the `haskell-log-entries` bundle (`None` if the backend captured nothing).
+    Carries what the coordinator needs to land the variant (`KCFG.add_variant`) and key its
+    `KoreHandoff`: the `producer`, the simplified `cterm`, and the simplify RPC's `request_id`.
+    The per-request haskell log bundle, when wanted, is written by the configured `haskell_log_dir`
+    (see `CTermSymbolic._capture_haskell_log`) under the same `request_id`.
     """
 
     producer: Producer
     cterm: CTerm
     request_id: str | None
-    log_entries: tuple[Any, ...] | None
 
 
 class KCFGExplore:
@@ -151,22 +151,19 @@ class KCFGExplore:
                     logs[node.id] = next_node_logs
 
     def simplify_variant(self, cterm: CTerm, *, booster_only: bool) -> SimplifyVariant:
-        """Re-simplify ``cterm`` with one backend, capturing the request id and per-request logs.
+        """Re-simplify ``cterm`` with one backend, capturing the request id of the call.
 
         Non-destructive: returns a `SimplifyVariant` for the coordinator to land via
         `KCFG.add_variant`; the recover-mode ladder uses `booster_only=True` (rung 0→1) then
-        `booster_only=False` (rung 1→2).  Always logs (`haskell_logging=True`) — every simplify on
-        the ladder is diagnostic-relevant.
+        `booster_only=False` (rung 1→2).  Per-request haskell logging is governed by the
+        `CTermSymbolic`'s configured `haskell_log_dir`, not forced here.
         """
         producer = Producer.BOOSTER_SIMPLIFY if booster_only else Producer.KORE_SIMPLIFY
-        simplified, _logs = self.cterm_symbolic.simplify(
-            cterm, booster_only_simplify=booster_only, haskell_logging=True
-        )
+        simplified, _logs = self.cterm_symbolic.simplify(cterm, booster_only_simplify=booster_only)
         return SimplifyVariant(
             producer=producer,
             cterm=simplified,
             request_id=self.cterm_symbolic.last_request_id,
-            log_entries=self.cterm_symbolic.last_haskell_log_entries,
         )
 
     def step(

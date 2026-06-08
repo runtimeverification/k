@@ -14,7 +14,7 @@ from enum import Enum, auto
 from pathlib import Path
 from signal import SIGINT
 from subprocess import DEVNULL, PIPE, Popen
-from threading import Thread, local
+from threading import Thread
 from time import sleep
 from typing import ClassVar  # noqa: TC003
 from typing import TYPE_CHECKING, ContextManager, NamedTuple, TypedDict, final
@@ -47,11 +47,6 @@ _LOGGER: Final = logging.getLogger(__name__)
 # threaded consumers must re-`set` inside their worker entry points, since
 # `ContextVar` values are not propagated by `ThreadPoolExecutor`.
 client_label: ContextVar[str | None] = ContextVar('kore_rpc_client_label', default=None)
-
-# Records the `haskell-log-entries` bundle (or None) of the most recent response on the calling
-# thread.  Snapshotted alongside `last_request_id` so a diagnostic worker can capture the per-request
-# logs of the exact call it just made without threading them through every result type.
-_last_haskell_log_entries: local = local()
 
 
 class KoreExecLogFormat(Enum):
@@ -1057,24 +1052,11 @@ class KoreClient(ContextManager['KoreClient']):
         """
         return self._client.last_request_id
 
-    @property
-    def last_haskell_log_entries(self) -> tuple[Any, ...] | None:
-        """The ``haskell-log-entries`` bundle of the most recent response on the calling thread.
-
-        ``None`` when the last request did not set ``haskell-logging`` (or before any request).
-        Snapshot alongside ``last_request_id`` to store the per-request logs of that exact call.
-        """
-        return getattr(_last_haskell_log_entries, 'value', None)
-
     def _request(self, method: str, **params: Any) -> dict[str, Any]:
         try:
-            result = self._client.request(method, **params)
+            return self._client.request(method, **params)
         except JsonRpcError as err:
             raise self._error(err) from err
-        # Capture the per-request log bundle (if any) on this thread for `last_haskell_log_entries`.
-        entries = result.get('haskell-log-entries')
-        _last_haskell_log_entries.value = tuple(entries) if entries is not None else None
-        return result
 
     def _error(self, err: JsonRpcError) -> KoreClientError:
         assert err.code not in {-32601, -32602}, 'Malformed Kore-RPC request'

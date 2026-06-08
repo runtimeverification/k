@@ -158,13 +158,13 @@ class CTermSymbolic:
 
     @property
     def last_request_id(self) -> str | None:
-        """JSON-RPC id of the most recent RPC issued on this thread (see `KoreClient.last_request_id`)."""
-        return self._kore_client.last_request_id
+        """JSON-RPC id of the most recent RPC issued by the backing client (see `KoreClient.last_request_id`).
 
-    @property
-    def last_haskell_log_entries(self) -> tuple[Any, ...] | None:
-        """`haskell-log-entries` bundle of the most recent RPC on this thread (see `KoreClient`)."""
-        return self._kore_client.last_haskell_log_entries
+        Recover-mode snapshots this immediately after a simplify to key the `KoreHandoff` to that
+        request, so a handoff can be correlated with the per-request log file that the configured
+        `haskell_log_dir` writer (see `_capture_haskell_log`) emits for the same id.
+        """
+        return self._kore_client.last_request_id
 
     def execute(
         self,
