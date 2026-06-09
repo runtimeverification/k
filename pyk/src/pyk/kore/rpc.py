@@ -85,12 +85,14 @@ class Transport(ContextManager['Transport'], ABC):
     @abstractmethod
     def close(self) -> None: ...
 
-    def interrupt(self) -> None:
-        """Abort a request that is currently in flight on another thread.
+    def send_interrupt(self, data: str) -> None:
+        """Inject `data` onto the live connection to abort an in-flight request.
 
-        After `interrupt()` returns, a thread blocked in `request()` must raise promptly and
-        the transport must remain usable for subsequent requests. The default implementation
-        does nothing; transports backed by an interruptible connection should override it.
+        Used to deliver an out-of-band `cancel` message on a connection whose response is
+        currently being awaited by another thread, so the server aborts the in-flight request
+        and the awaiting thread receives a "cancelled" error shortly after. The connection is
+        left open and usable for subsequent requests. The default implementation does nothing;
+        transports backed by a persistent, multiplexable connection should override it.
         """
         ...
 
@@ -152,22 +154,13 @@ class SingleSocketTransport(Transport):
         self._file.close()
         self._sock.close()
 
-    def interrupt(self) -> None:
-        # Shutting down the socket unblocks a thread currently blocked in `readline`, causing
-        # its read to raise. We then reconnect so the transport stays usable for later requests.
-        # The old socket is closed; the old file object is left to be reclaimed by the garbage
-        # collector to avoid racing a `close()` against the unwinding reader thread.
-        old_sock = self._sock
-        try:
-            old_sock.shutdown(socket.SHUT_RDWR)
-        except OSError:
-            pass
-        self._sock = self._create_connection(self._host, self._port, self._timeout)
-        self._file = self._sock.makefile('r')
-        try:
-            old_sock.close()
-        except OSError:
-            pass
+    def send_interrupt(self, data: str) -> None:
+        # Inject `data` (a `cancel` request) onto the current socket without reading a response:
+        # the server's read loop picks it up concurrently and aborts the in-flight request, so the
+        # thread blocked in `_request`'s `readline` receives the server's "cancelled" error for that
+        # request. The connection is left open and reusable -- no reconnect. The leading newline just
+        # guarantees the injected value is separated from any preceding request on the byte stream.
+        self._sock.sendall(b'\n' + data.encode())
 
     def _request(self, req: str) -> str:
         self._sock.sendall(req.encode())
@@ -351,7 +344,18 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         self._transport.close()
 
     def interrupt(self) -> None:
-        self._transport.interrupt()
+        # Send a `cancel` request on the live connection so the server aborts the in-flight request
+        # (the request currently being awaited by another thread). The cancel itself gets no response;
+        # the awaiting thread receives the server's "cancelled" error for the original request. We do
+        # not touch `_req_id` (it is owned by the requesting thread); the cancel id is purely for traceability.
+        cancel_id = f'{self._last_request_id}-cancel' if self._last_request_id is not None else 'cancel'
+        payload = {
+            'jsonrpc': self._JSON_RPC_VERSION,
+            'id': cancel_id,
+            'method': 'cancel',
+            'params': {},
+        }
+        self._transport.send_interrupt(json.dumps(payload))
 
     def request(self, method: str, **params: Any) -> dict[str, Any]:
         label = client_label.get()
@@ -1054,9 +1058,10 @@ class KoreClient(ContextManager['KoreClient']):
     def interrupt(self) -> None:
         """Abort an `execute`/`simplify`/… request currently in flight on another thread.
 
-        After this returns the interrupted call raises and the client stays usable. Only
-        effective for the single-socket transport; a no-op for transports that cannot abort
-        an in-flight request.
+        Sends a `cancel` request on the live connection so the server stops computing the
+        in-flight request; the interrupted call then raises a "cancelled" error and the
+        connection stays open and usable. Only effective for the single-socket transport;
+        a no-op for transports that cannot inject onto an in-flight request (e.g. HTTP).
         """
         self._client.interrupt()
 
