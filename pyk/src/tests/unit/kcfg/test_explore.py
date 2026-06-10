@@ -27,10 +27,10 @@ def _explore(exec_result: CTermExecute) -> KCFGExplore:
 _EXTEND_DATA: tuple[tuple[str, CTermExecute, type[KCFGExtendResult]], ...] = (
     (
         'no-progress',
-        CTermExecute(state=term(1), next_states=(), depth=0, vacuous=False, aborted=False, logs=()),
+        CTermExecute(state=term(1), next_states=(), depth=0, vacuous=False, logs=()),
         NoProgress,
     ),
-    ('progress', CTermExecute(state=term(2), next_states=(), depth=3, vacuous=False, aborted=False, logs=()), Step),
+    ('progress', CTermExecute(state=term(2), next_states=(), depth=3, vacuous=False, logs=()), Step),
 )
 
 

@@ -71,7 +71,6 @@ class CTermExecute(NamedTuple):
     next_states: tuple[NextState, ...]
     depth: int
     vacuous: bool
-    aborted: bool
     logs: tuple[LogEntry, ...]
 
 
@@ -200,12 +199,10 @@ class CTermSymbolic:
 
         # Under booster-only execution, an `AbortedResult` is the expected signal that the booster
         # could make no further progress (it is what drives the recover-mode ladder).  Callers that
-        # want to inspect the abort rather than treat it as fatal pass `raise_on_aborted=False`; the
-        # `AbortedResult.reason`/`next_states` class attributes let the rest of this body proceed
-        # unchanged, surfacing `aborted=True` on the result.
-        aborted = isinstance(response, AbortedResult)
-        if aborted and raise_on_aborted:
-            assert isinstance(response, AbortedResult)
+        # expect aborts pass `raise_on_aborted=False`; the `AbortedResult.reason`/`next_states`
+        # class attributes let the rest of this body proceed unchanged, and a no-progress abort
+        # surfaces as a depth-0 result.
+        if raise_on_aborted and isinstance(response, AbortedResult):
             unknown_predicate = response.unknown_predicate.text if response.unknown_predicate else None
             raise ValueError(f'Backend responded with aborted state. Unknown predicate: {unknown_predicate}')
 
@@ -228,7 +225,6 @@ class CTermSymbolic:
             next_states=next_states,
             depth=response.depth,
             vacuous=response.reason is StopReason.VACUOUS,
-            aborted=aborted,
             logs=response.logs,
         )
 
