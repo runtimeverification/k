@@ -17,7 +17,6 @@ from pyk.kore.rpc import (
     JsonRpcError,
     KoreClient,
     KoreClientError,
-    MultipleStatesError,
     ParseError,
     PatternError,
     SatResult,
@@ -407,12 +406,6 @@ ERROR_TEST_DATA: Final = (
         JsonRpcError(message='Aborted', code=6, data='unknown constraints'),
         AbortedError(data='unknown constraints'),
         'Backend aborted: unknown constraints',
-    ),
-    (
-        'multiple-states-error',
-        JsonRpcError(message='Multiple states', code=7, data='more than one state'),
-        MultipleStatesError(data='more than one state'),
-        'Multiple states: more than one state',
     ),
     (
         'default-error',

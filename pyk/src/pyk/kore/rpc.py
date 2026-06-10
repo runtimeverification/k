@@ -469,21 +469,6 @@ class AbortedError(KoreClientError):
 
 @final
 @dataclass
-class MultipleStatesError(KoreClientError):
-    """The backend returned multiple states where one was expected (JSON-RPC ``code: 7``).
-
-    ``data`` is the accompanying reason text.
-    """
-
-    data: str
-
-    def __init__(self, data: str):
-        self.data = data
-        super().__init__(f'Multiple states: {self.data}')
-
-
-@final
-@dataclass
 class DefaultError(KoreClientError):
     message: str
     code: int
@@ -1073,8 +1058,6 @@ class KoreClient(ContextManager['KoreClient']):
                 return SmtSolverError(error=err.data['error'], pattern=kore_term(err.data['term']))
             case 6:
                 return AbortedError(data=err.data)
-            case 7:
-                return MultipleStatesError(data=err.data)
             case 8:
                 return InvalidModuleError(error=err.data['error'], context=err.data.get('context'))
             case 9:
