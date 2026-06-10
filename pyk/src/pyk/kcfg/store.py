@@ -40,7 +40,7 @@ class OptimizedNodeStore(MutableMapping[int, KCFG.Node]):
 
     def __setitem__(self, key: int, node: KCFG.Node) -> None:
         # Term-dedup the canonical cterm and every variant cterm, carrying the provenance chain
-        # through unchanged (variants must survive the store, see C8).
+        # through unchanged (variants must survive the store).
         new_variants = tuple(
             NodeVariant(variant.producer, variant.request_id, self._optimize_cterm(variant.cterm))
             for variant in node.variants
