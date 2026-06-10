@@ -79,7 +79,9 @@ class CTermImplies(NamedTuple):
     failing_cells: tuple[tuple[str, KInner], ...]
     remaining_implication: KInner | None
     logs: tuple[LogEntry, ...]
-    indeterminate: bool | None = None
+    # True when the backend aborted the implies (it could not decide it) — a couldn't-determine,
+    # not a decisive verdict.  Recover-mode escalates on it instead of trusting `csubst is None`.
+    indeterminate: bool = False
 
 
 @final
@@ -335,9 +337,8 @@ class CTermSymbolic:
         except SmtSolverError as err:
             raise self._smt_solver_error(err) from err
         except AbortedError as err:
-            # kore-implies aborted because it could not decide the implication (e.g. constraints
-            # the engine cannot discharge).  Surface it as an indeterminate, not-subsumed result —
-            # uniform with how booster-implies reports a MatchIndeterminate (`indeterminate=True`) —
+            # The backend aborted because it could not decide the implication (e.g. constraints
+            # the engine cannot discharge).  Surface it as an indeterminate, not-subsumed result,
             # so callers (notably recover-mode's TRY_KORE escalation, which calls kore-implies
             # directly and so sees the raw abort the proxy would otherwise absorb) treat it as
             # "unknown" instead of crashing.
@@ -388,7 +389,7 @@ class CTermSymbolic:
                         )
                     )
                     remaining_implication = CTerm._ml_impl(antecedent.constraints, consequent_constraints)
-            return CTermImplies(None, tuple(failing_cells), remaining_implication, result.logs, result.indeterminate)
+            return CTermImplies(None, tuple(failing_cells), remaining_implication, result.logs)
 
         if result.substitution is None:
             raise ValueError('Received empty substutition for valid implication.')
@@ -398,7 +399,7 @@ class CTermSymbolic:
         ml_pred = self.kore_to_kast(result.predicate)
         ml_subst_pred = mlAnd(flatten_label('#And', ml_subst) + flatten_label('#And', ml_pred))
         csubst = CSubst.from_pred(ml_subst_pred)
-        return CTermImplies(csubst, (), None, result.logs, result.indeterminate)
+        return CTermImplies(csubst, (), None, result.logs)
 
     def assume_defined(
         self, cterm: CTerm, module_name: str | None = None, booster_only_simplify: bool = False

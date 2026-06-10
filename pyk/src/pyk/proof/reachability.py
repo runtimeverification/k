@@ -1041,8 +1041,8 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         if result.csubst is not None:
             _LOGGER.info(f'Subsumed into target node {proof_id}: {shorten_hashes((node.id, target_node.id))}')
             return Subsumed(result.csubst)
-        # Not subsumed: a decisive invalid is trusted; a couldn't-determine (booster
-        # `MatchIndeterminate`) is surfaced so recover-mode can escalate to a kore implies.
+        # Not subsumed: a decisive invalid is trusted; a couldn't-determine (an aborted implies)
+        # is surfaced so recover-mode can escalate to a kore implies.
         return Indeterminate() if result.indeterminate else DecisiveInvalid()
 
     def step_proof(self, step: APRProofStep) -> list[APRProofResult]:

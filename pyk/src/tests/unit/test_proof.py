@@ -276,9 +276,8 @@ def test_commit_stuck_result_marks_node_stuck() -> None:
 _CSUBST_SENTINEL: Final = CSubst()
 
 _CHECK_SUBSUME_DATA: Final = (
-    ('subsumed', _CSUBST_SENTINEL, None, Subsumed),
+    ('subsumed', _CSUBST_SENTINEL, False, Subsumed),
     ('decisive-invalid', None, False, DecisiveInvalid),
-    ('decisive-invalid-absent', None, None, DecisiveInvalid),
     ('indeterminate', None, True, Indeterminate),
 )
 
@@ -291,7 +290,7 @@ _CHECK_SUBSUME_DATA: Final = (
 def test_check_subsume_classification(
     test_id: str,
     csubst: CSubst | None,
-    indeterminate: bool | None,
+    indeterminate: bool,
     expected: type[SubsumptionCheck],
 ) -> None:
     # Given a prover whose implies returns a CTermImplies with the given csubst / indeterminate
