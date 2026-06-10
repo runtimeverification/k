@@ -5,18 +5,19 @@ from unittest.mock import Mock
 
 import pytest
 
-from pyk.cterm import CSubst
+from pyk.cterm import CSubst, CTerm
 from pyk.cterm.symbolic import CTermImplies
 from pyk.kast.prelude.kbool import BOOL
 from pyk.kast.prelude.kint import intToken
 from pyk.kcfg.exploration import KCFGExplorationNodeAttr
-from pyk.kcfg.kcfg import KCFG, KCFGNodeAttr, NodeVariant, Producer
+from pyk.kcfg.kcfg import KCFG, KCFGNodeAttr, NodeVariant, Producer, Vacuous
 from pyk.proof import EqualityProof
 from pyk.proof.implies import EqualitySummary
 from pyk.proof.proof import CompositeSummary, Proof, ProofStatus
 from pyk.proof.reachability import (
     APRFailureInfo,
     APRProof,
+    APRProofExtendResult,
     APRProofStuckResult,
     APRProver,
     APRSummary,
@@ -358,6 +359,25 @@ _TASK_DATA: tuple[tuple[str, int, list[NodeAttr], RecoverTask], ...] = (
 @pytest.mark.parametrize('test_id,rung,attrs,expected', _TASK_DATA, ids=[d[0] for d in _TASK_DATA])
 def test_recover_task_selection(test_id: str, rung: int, attrs: list[NodeAttr], expected: RecoverTask) -> None:
     assert recover_task_for(_node_at_rung(rung, attrs)) is expected
+
+
+def test_recover_step_bottom_node_judged_vacuous() -> None:
+    # Given a recover-mode step whose node configuration collapsed to bare #Bottom
+    # (a booster-only re-simplify of a vacuous node can land one via add_variant)
+    prover = Mock()
+    prover.optimize_kcfg = False
+    step = Mock(node=Mock(id=1, cterm=CTerm.bottom()), recover_task=RecoverTask.TRY_BOOSTER)
+
+    # When (call the unbound method with the Mock as self)
+    results = APRProver.step_proof(prover, step)
+
+    # Then the node is judged vacuous without consulting the semantics, whose callbacks
+    # may destructure cells that a bottom configuration does not have
+    assert results == [
+        APRProofExtendResult(node_id=1, extension_to_apply=Vacuous(), prior_loops_cache_update=(), optimize_kcfg=False)
+    ]
+    prover.kcfg_explore.kcfg_semantics.is_loop.assert_not_called()
+    prover.kcfg_explore.kcfg_semantics.is_terminal.assert_not_called()
 
 
 def test_apr_proof_minimization_and_terminals() -> None:

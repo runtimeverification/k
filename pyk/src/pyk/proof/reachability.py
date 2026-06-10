@@ -15,7 +15,7 @@ from ..kast.outer import KClaim, KFlatModule, KImport, KRule
 from ..kast.prelude.ml import mlAnd, mlTop
 from ..kcfg import KCFG, KCFGStore
 from ..kcfg.exploration import KCFGExploration
-from ..kcfg.kcfg import HandoffFlavour, KCFGNodeAttr, KoreHandoff, NoProgress, Producer
+from ..kcfg.kcfg import HandoffFlavour, KCFGNodeAttr, KoreHandoff, NoProgress, Producer, Vacuous
 from ..kore.rpc import LogEntry, client_label
 from ..ktool.claim_index import ClaimIndex
 from ..utils import FrozenDict, ensure_dir_path, hash_str, shorten_hashes, single
@@ -1046,6 +1046,22 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         return Indeterminate() if result.indeterminate else DecisiveInvalid()
 
     def step_proof(self, step: APRProofStep) -> list[APRProofResult]:
+        # Recover-mode only: a booster-only re-simplify can collapse a node's configuration to bare
+        # `#Bottom`, which has no destructurable cells, so any semantics callback (`is_loop`,
+        # `is_terminal`, ...) may crash on it.  Short-circuit to the same `Vacuous` judgment
+        # `commit` applies on the normal path — there `extend_cterm` owns vacuity detection and a
+        # bottom configuration never lands in a node, but the recover ladder's `add_variant`
+        # bypasses that path.
+        if step.recover_task is not None and step.node.cterm.is_bottom:
+            return [
+                APRProofExtendResult(
+                    node_id=step.node.id,
+                    extension_to_apply=Vacuous(),
+                    prior_loops_cache_update=(),
+                    optimize_kcfg=self.optimize_kcfg,
+                )
+            ]
+
         # Check if the current node should be bounded
         prior_loops: tuple[int, ...] = ()
         if step.bmc_depth is not None and self.kcfg_explore.kcfg_semantics.is_loop(step.node.cterm):
