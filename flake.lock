@@ -64,16 +64,16 @@
         "z3": "z3"
       },
       "locked": {
-        "lastModified": 1780590347,
-        "narHash": "sha256-iYTKRQzsC56EfHNuDO/O9MbMFmNV9c2CM4NwOXSeSc4=",
+        "lastModified": 1781176134,
+        "narHash": "sha256-DpXzGzQ6nDFqj2CvEhcSq2OQtX3gGh98sDlAb9/3W8o=",
         "owner": "runtimeverification",
         "repo": "haskell-backend",
-        "rev": "515eccf4a8ebbb0fe8ff807d15a96ce096ce2670",
+        "rev": "43e0664d0eea57e78f6985a5b6424d08fe90abfd",
         "type": "github"
       },
       "original": {
         "owner": "runtimeverification",
-        "ref": "v0.1.150",
+        "ref": "v0.1.151",
         "repo": "haskell-backend",
         "type": "github"
       }
@@ -141,11 +141,11 @@
     },
     "nixpkgs-unstable": {
       "locked": {
-        "lastModified": 1780243769,
-        "narHash": "sha256-x5UQuRsH3MqI0U9afaXSNqzTPSeZlRLvFAav2Ux1pNw=",
+        "lastModified": 1780749050,
+        "narHash": "sha256-3av0pIjlOWQ6rDbNOmpUSvbNnJkGORQKKjb4LtCZsIY=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "331800de5053fcebacf6813adb5db9c9dca22a0c",
+        "rev": "a799d3e3886da994fa307f817a6bc705ae538eeb",
         "type": "github"
       },
       "original": {
