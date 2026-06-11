@@ -86,13 +86,11 @@ class Transport(ContextManager['Transport'], ABC):
     def close(self) -> None: ...
 
     def send_interrupt(self, data: str) -> None:
-        """Inject `data` onto the live connection to abort an in-flight request.
+        """Send `data` on the live connection without waiting for a reply.
 
-        Used to deliver an out-of-band `cancel` message on a connection whose response is
-        currently being awaited by another thread, so the server aborts the in-flight request
-        and the awaiting thread receives a "cancelled" error shortly after. The connection is
-        left open and usable for subsequent requests. The default implementation does nothing;
-        transports backed by a persistent, multiplexable connection should override it.
+        Used to deliver a `cancel` to a connection whose reply another thread is already
+        awaiting. Default: no-op. Override only for connections that can be written to
+        while a request is in flight.
         """
         ...
 
@@ -155,11 +153,9 @@ class SingleSocketTransport(Transport):
         self._sock.close()
 
     def send_interrupt(self, data: str) -> None:
-        # Inject `data` (a `cancel` request) onto the current socket without reading a response:
-        # the server's read loop picks it up concurrently and aborts the in-flight request, so the
-        # thread blocked in `_request`'s `readline` receives the server's "cancelled" error for that
-        # request. The connection is left open and reusable -- no reconnect. The leading newline just
-        # guarantees the injected value is separated from any preceding request on the byte stream.
+        # Write the cancel to the socket but don't read the reply: the thread already blocked in
+        # `_request`'s `readline` will read the server's "cancelled" reply. The socket stays open.
+        # The leading newline separates the cancel from the request bytes already on the stream.
         self._sock.sendall(b'\n' + data.encode())
 
     def _request(self, req: str) -> str:
@@ -344,10 +340,9 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         self._transport.close()
 
     def interrupt(self) -> None:
-        # Send a `cancel` request on the live connection so the server aborts the in-flight request
-        # (the request currently being awaited by another thread). The cancel itself gets no response;
-        # the awaiting thread receives the server's "cancelled" error for the original request. We do
-        # not touch `_req_id` (it is owned by the requesting thread); the cancel id is purely for traceability.
+        # Send a `cancel` so the server aborts the in-flight request. The cancel gets no reply of its
+        # own; the thread awaiting that request gets a "cancelled" error instead. The id is only for
+        # logs, so we derive it from the last request rather than touching the requester's `_req_id`.
         cancel_id = f'{self._last_request_id}-cancel' if self._last_request_id is not None else 'cancel'
         payload = {
             'jsonrpc': self._JSON_RPC_VERSION,
@@ -1056,12 +1051,11 @@ class KoreClient(ContextManager['KoreClient']):
         return self._client.last_request_id
 
     def interrupt(self) -> None:
-        """Abort an `execute`/`simplify`/… request currently in flight on another thread.
+        """Abort an `execute`/`simplify`/… request running on another thread.
 
-        Sends a `cancel` request on the live connection so the server stops computing the
-        in-flight request; the interrupted call then raises a "cancelled" error and the
-        connection stays open and usable. Only effective for the single-socket transport;
-        a no-op for transports that cannot inject onto an in-flight request (e.g. HTTP).
+        Sends a `cancel` so the server stops computing; the interrupted call raises a
+        "cancelled" error and the connection stays usable. Works on the single-socket
+        transport only; a no-op for HTTP (one connection per request, nothing to cancel).
         """
         self._client.interrupt()
 
