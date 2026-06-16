@@ -461,6 +461,24 @@ class _ProverPool(ContextManager['_ProverPool'], Generic[P, PS, SR]):
         return step
 
 
+class _StepTimedOut(Exception):
+    """A timed `step_proof` exhausted its `step_timeout` budget. Carries the budget for logging."""
+
+    budget: int
+
+    def __init__(self, budget: int) -> None:
+        super().__init__(budget)
+        self.budget = budget
+
+
+class _StepShrunk(_StepTimedOut):
+    """The timed-out step was shrunk; `advance_proof` should re-fetch steps and retry it smaller."""
+
+
+class _StepExhausted(_StepTimedOut):
+    """The timed-out step could not be shrunk further; `advance_proof` should stop."""
+
+
 class Prover(ContextManager['Prover'], Generic[P, PS, SR]):
     """Abstract class which advances `Proof`s with `init_proof()` and `step_proof()`.
 
@@ -528,6 +546,27 @@ class Prover(ContextManager['Prover'], Generic[P, PS, SR]):
         """
         ...
 
+    def _execute_step(self, step: PS, executor: Executor | None) -> Iterable[SR]:
+        """Run one `step_proof`, honoring `step_timeout` when an `executor` is given.
+
+        With no executor, runs the step synchronously with no time limit. With one, runs the step
+        under the `step_timeout` budget; on timeout it interrupts the step, asks the prover to
+        `shrink_step`, and raises `_StepShrunk` (a smaller step is ready to retry) or `_StepExhausted`
+        (already minimal, give up). Returns the step results when the step completes within budget.
+        """
+        if executor is None:
+            return self.step_proof(step)
+
+        budget = self.step_timeout
+        assert budget is not None
+        future = executor.submit(self.step_proof, step)
+        try:
+            return future.result(timeout=budget)
+        except FuturesTimeoutError:
+            self.interrupt()
+            wait([future])  # let the interrupted step unwind before we reuse the prover
+            raise (_StepShrunk if self.shrink_step() else _StepExhausted)(budget) from None
+
     def advance_proof(
         self,
         proof: P,
@@ -553,8 +592,9 @@ class Prover(ContextManager['Prover'], Generic[P, PS, SR]):
         _LOGGER.info(f'Initializing proof: {proof.id}')
         self.init_proof(proof)
 
-        timed = self.step_timeout is not None
-        executor = ThreadPoolExecutor(max_workers=1) if timed else None
+        # When `step_timeout` is set, run each step on a worker thread so it can be timed and
+        # interrupted; otherwise steps run synchronously and `executor` stays `None`.
+        executor = ThreadPoolExecutor(max_workers=1) if self.step_timeout is not None else None
         try:
             while True:
                 steps = list(proof.get_steps())
@@ -569,31 +609,19 @@ class Prover(ContextManager['Prover'], Generic[P, PS, SR]):
                         return
                     if max_iterations is not None and max_iterations <= iterations:
                         return
-                    if timed:
-                        assert executor is not None
-                        budget = self.step_timeout
-                        assert budget is not None
-                        future = executor.submit(self.step_proof, step)
-                        try:
-                            results = future.result(timeout=budget)
-                        except FuturesTimeoutError:
-                            # The step exhausted its budget: interrupt it, ask the prover to do less
-                            # work per step, and re-fetch steps so the same node is retried smaller.
-                            self.interrupt()
-                            wait([future])
-                            if not self.shrink_step():
-                                _LOGGER.warning(
-                                    f'Proof {proof.id}: step exhausted {budget}s budget and cannot be '
-                                    f'shrunk further; stopping.'
-                                )
-                                return
-                            _LOGGER.warning(
-                                f'Proof {proof.id}: step exhausted {budget}s budget; shrinking and retrying.'
-                            )
-                            shrank_step = True
-                            break
-                    else:
-                        results = self.step_proof(step)
+                    try:
+                        results = self._execute_step(step, executor)
+                    except _StepShrunk as timeout:
+                        _LOGGER.warning(
+                            f'Proof {proof.id}: step exceeded {timeout.budget}s budget; shrinking and retrying.'
+                        )
+                        shrank_step = True  # re-fetch steps and retry the same node, now smaller
+                        break
+                    except _StepExhausted as timeout:
+                        _LOGGER.warning(
+                            f'Proof {proof.id}: step exceeded {timeout.budget}s budget and cannot shrink further; stopping.'
+                        )
+                        return
                     iterations += 1
                     for result in results:
                         proof.commit(result)
