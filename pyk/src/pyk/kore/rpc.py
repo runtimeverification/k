@@ -912,6 +912,7 @@ class ImpliesResult:
     substitution: Pattern | None
     predicate: Pattern | None
     logs: tuple[LogEntry, ...]
+    indeterminate: bool | None = None
     haskell_log_entries: tuple[Any, ...] | None = None
 
     @staticmethod
@@ -925,6 +926,10 @@ class ImpliesResult:
             substitution=kore_term(substitution) if substitution is not None else None,
             predicate=kore_term(predicate) if predicate is not None else None,
             logs=logs,
+            # Absent (a backend without the field) ⇒ None ⇒ decisive. A backend that ships
+            # `indeterminate: true` on a non-decisive `valid: false` lets recover-mode escalate
+            # to a kore implies instead of trusting the verdict.
+            indeterminate=dct.get('indeterminate'),
             haskell_log_entries=_parse_haskell_log_entries(dct),
         )
 
