@@ -53,6 +53,7 @@ class ProveRpc:
                 save_directory=options.save_directory,
                 max_iterations=options.max_iterations,
                 recover_mode=options.booster_recover_mode,
+                step_timeout=options.step_timeout,
             )
             for claim in all_claims
         ]
@@ -65,6 +66,7 @@ class ProveRpc:
         save_directory: Path | None = None,
         max_iterations: int | None = None,
         recover_mode: bool = False,
+        step_timeout: int | None = None,
     ) -> Proof:
         definition = self._kprove.definition
 
@@ -97,6 +99,7 @@ class ProveRpc:
                         execute_depth=max_depth,
                         assume_defined=assume_defined,
                         recover_mode=recover_mode,
+                        step_timeout=step_timeout,
                     )
                 prover.advance_proof(proof, max_iterations=max_iterations)  # type: ignore [arg-type]
 

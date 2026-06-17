@@ -85,6 +85,15 @@ class Transport(ContextManager['Transport'], ABC):
     @abstractmethod
     def close(self) -> None: ...
 
+    def send_interrupt(self, data: str) -> None:
+        """Send `data` on the live connection without waiting for a reply.
+
+        Used to deliver a `cancel` to a connection whose reply another thread is already
+        awaiting. Default: no-op. Override only for connections that can be written to
+        while a request is in flight.
+        """
+        ...
+
     @abstractmethod
     def _request(self, req: str) -> str: ...
 
@@ -101,6 +110,7 @@ class TransportType(Enum):
 class SingleSocketTransport(Transport):
     _host: str
     _port: int
+    _timeout: int | None
     _sock: socket.socket
     _file: IO[str]
 
@@ -113,6 +123,7 @@ class SingleSocketTransport(Transport):
     ):
         self._host = host
         self._port = port
+        self._timeout = timeout
         self._sock = self._create_connection(host, port, timeout)
         self._file = self._sock.makefile('r')
 
@@ -140,6 +151,12 @@ class SingleSocketTransport(Transport):
     def close(self) -> None:
         self._file.close()
         self._sock.close()
+
+    def send_interrupt(self, data: str) -> None:
+        # Write the cancel to the socket but don't read the reply: the thread already blocked in
+        # `_request`'s `readline` will read the server's "cancelled" reply. The socket stays open.
+        # The leading newline separates the cancel from the request bytes already on the stream.
+        self._sock.sendall(b'\n' + data.encode())
 
     def _request(self, req: str) -> str:
         self._sock.sendall(req.encode())
@@ -252,6 +269,12 @@ class JsonRpcClientFacade(ContextManager['JsonRpcClientFacade']):
         """The JSON-RPC id of the most recent request issued through this facade (``None`` if none yet)."""
         return self._last_request_id
 
+    def interrupt(self) -> None:
+        self._default_client.interrupt()
+        for clients in self._clients.values():
+            for client in clients:
+                client.interrupt()
+
     def request(self, method: str, **params: Any) -> dict[str, Any]:
         if method in self._clients:
             for client in self._clients[method]:
@@ -315,6 +338,19 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
 
     def close(self) -> None:
         self._transport.close()
+
+    def interrupt(self) -> None:
+        # Send a `cancel` so the server aborts the in-flight request. The cancel gets no reply of its
+        # own; the thread awaiting that request gets a "cancelled" error instead. The id is only for
+        # logs, so we derive it from the last request rather than touching the requester's `_req_id`.
+        cancel_id = f'{self._last_request_id}-cancel' if self._last_request_id is not None else 'cancel'
+        payload = {
+            'jsonrpc': self._JSON_RPC_VERSION,
+            'id': cancel_id,
+            'method': 'cancel',
+            'params': {},
+        }
+        self._transport.send_interrupt(json.dumps(payload))
 
     def request(self, method: str, **params: Any) -> dict[str, Any]:
         label = client_label.get()
@@ -1036,6 +1072,15 @@ class KoreClient(ContextManager['KoreClient']):
         (see ``_ProverPool``), so this needs no cross-thread synchronization.
         """
         return self._client.last_request_id
+
+    def interrupt(self) -> None:
+        """Abort an `execute`/`simplify`/… request running on another thread.
+
+        Sends a `cancel` so the server stops computing; the interrupted call raises a
+        "cancelled" error and the connection stays usable. Works on the single-socket
+        transport only; a no-op for HTTP (one connection per request, nothing to cancel).
+        """
+        self._client.interrupt()
 
     def _request(self, method: str, **params: Any) -> dict[str, Any]:
         try:
