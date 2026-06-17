@@ -127,6 +127,10 @@ class CTermSymbolic:
     def kore_to_kast(self, pattern: Pattern) -> KInner:
         return kore_to_kast(self._definition, pattern)
 
+    def interrupt(self) -> None:
+        """Abort a backend request currently in flight on another thread; see `KoreClient.interrupt`."""
+        self._kore_client.interrupt()
+
     def _haskell_logging_request(self, haskell_logging: bool | None) -> tuple[str, ...] | None:
         """Resolve the per-call on/off flag to the list of log entries to request.
 
