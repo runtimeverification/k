@@ -59,6 +59,10 @@ class KCFGExplore:
     def pretty_print(self, kinner: KInner) -> str:
         return self._pretty_printer.print(kinner)
 
+    def interrupt(self) -> None:
+        """Abort a backend request currently in flight on another thread; see `KoreClient.interrupt`."""
+        self.cterm_symbolic.interrupt()
+
     def _extract_rule_labels(self, _logs: tuple[LogEntry, ...]) -> list[str]:
         _rule_lines = []
         for node_log in _logs:

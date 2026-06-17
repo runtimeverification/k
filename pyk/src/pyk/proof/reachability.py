@@ -725,6 +725,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
     kcfg_explore: KCFGExplore
     extra_module: KFlatModule | None
     optimize_kcfg: bool
+    step_timeout: int | None
 
     def __init__(
         self,
@@ -738,6 +739,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         assume_defined: bool = False,
         extra_module: KFlatModule | None = None,
         optimize_kcfg: bool = False,
+        step_timeout: int | None = None,
     ) -> None:
 
         self.kcfg_explore = kcfg_explore
@@ -751,9 +753,22 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         self.assume_defined = assume_defined
         self.extra_module = extra_module
         self.optimize_kcfg = optimize_kcfg
+        # Whole seconds, floored at 1; None disables the per-step timeout/shrink policy entirely.
+        self.step_timeout = max(1, step_timeout) if step_timeout is not None else None
 
     def close(self) -> None:
         self.kcfg_explore.cterm_symbolic._kore_client.close()
+
+    def shrink_step(self) -> bool:
+        # On step timeout, halve the execution depth (floor 1) so the next attempt does less work
+        # per `extend_cterm`. Returns False once `execute_depth` is unset or already at the minimum.
+        if self.execute_depth is None or self.execute_depth <= 1:
+            return False
+        self.execute_depth = max(1, self.execute_depth // 2)
+        return True
+
+    def interrupt(self) -> None:
+        self.kcfg_explore.interrupt()
 
     def init_proof(self, proof: APRProof) -> None:
         # Stamp proof.id on every subsequent kore-RPC request from this thread so

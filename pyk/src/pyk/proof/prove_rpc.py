@@ -52,6 +52,7 @@ class ProveRpc:
                 max_depth=options.max_depth,
                 save_directory=options.save_directory,
                 max_iterations=options.max_iterations,
+                step_timeout=options.step_timeout,
             )
             for claim in all_claims
         ]
@@ -63,6 +64,7 @@ class ProveRpc:
         max_depth: int | None = None,
         save_directory: Path | None = None,
         max_iterations: int | None = None,
+        step_timeout: int | None = None,
     ) -> Proof:
         definition = self._kprove.definition
 
@@ -90,7 +92,12 @@ class ProveRpc:
                     prover = ImpliesProver(proof, kcfg_explore, assume_defined=assume_defined)
                 else:
                     assert type(proof) is APRProof
-                    prover = APRProver(kcfg_explore, execute_depth=max_depth, assume_defined=assume_defined)
+                    prover = APRProver(
+                        kcfg_explore,
+                        execute_depth=max_depth,
+                        assume_defined=assume_defined,
+                        step_timeout=step_timeout,
+                    )
                 prover.advance_proof(proof, max_iterations=max_iterations)  # type: ignore [arg-type]
 
         if proof.passed:
