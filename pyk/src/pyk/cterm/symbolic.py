@@ -16,6 +16,7 @@ from ..konvert import kast_to_kore, kflatmodule_to_kore, kore_to_kast
 from ..kore.rpc import (
     AbortedError,
     AbortedResult,
+    ImpliesStatus,
     KoreClient,
     KoreExecLogFormat,
     SatResult,
@@ -350,15 +351,16 @@ class CTermSymbolic:
             return CTermImplies(None, (), None, (), indeterminate=True)
         self._capture_haskell_log(result.haskell_log_entries)
 
-        if not result.valid:
-            if result.indeterminate:
-                # The backend could not decide the subsumption (the backend's
-                # doesNotImplyIndeterminate path, which replaced the old hard AbortedError on
-                # some non-decisive outcomes). Surface as indeterminate so recover-mode escalates
-                # to a kore implies, mirroring the AbortedError catch above. The decisive
-                # failing-cell / remaining-implication computation below is meaningless here.
-                _LOGGER.debug('implies returned indeterminate, treating as indeterminate')
-                return CTermImplies(None, (), None, result.logs, indeterminate=True)
+        if result.status is ImpliesStatus.INDETERMINATE:
+            # The backend could not decide the subsumption (booster's indeterminate-match or
+            # SMT-unknown path, which replaced the old hard AbortedError on some non-decisive
+            # outcomes). Surface as indeterminate so recover-mode escalates to a kore implies,
+            # mirroring the AbortedError catch above. The decisive failing-cell /
+            # remaining-implication computation below is meaningless here.
+            _LOGGER.debug('implies returned indeterminate, treating as indeterminate')
+            return CTermImplies(None, (), None, result.logs, indeterminate=True)
+
+        if result.status is ImpliesStatus.INVALID:
             if result.substitution is not None:
                 _LOGGER.debug(f'Received a non-empty substitution for falsifiable implication: {result.substitution}')
             if result.predicate is not None:

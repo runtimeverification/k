@@ -13,6 +13,7 @@ from pyk.kore.rpc import (
     DefaultError,
     ImplicationError,
     ImpliesResult,
+    ImpliesStatus,
     JsonRpcClient,
     JsonRpcError,
     KoreClient,
@@ -180,7 +181,7 @@ IMPLIES_TEST_DATA: Final = (
         int_top,
         {'antecedent': kore(int_bottom), 'consequent': kore(int_top), 'assume-defined': False},
         {'status': 'valid', 'implication': kore(int_top)},
-        ImpliesResult(True, int_top, None, None, ()),
+        ImpliesResult(ImpliesStatus.VALID, int_top, None, None, ()),
     ),
 )
 
