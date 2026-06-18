@@ -956,8 +956,14 @@ class ImpliesResult:
         substitution = dct.get('condition', {}).get('substitution')
         predicate = dct.get('condition', {}).get('predicate')
         logs = tuple(LogEntry.from_dict(l) for l in dct['logs']) if 'logs' in dct else ()
+        # The backend reports a tri-state `status`: valid | invalid | indeterminate.
+        # `indeterminate` is booster's "could not decide" signal; the kore-rpc proxy
+        # escalates it to a decisive kore verdict on every path except booster-only
+        # mode, so it only reaches us when the caller explicitly opted out of kore.
+        # Collapse it to `valid = False` — the conservative not-implied answer the
+        # binary consumers expect.
         return ImpliesResult(
-            valid=dct['valid'],
+            valid=dct['status'] == 'valid',
             implication=kore_term(dct['implication']),
             substitution=kore_term(substitution) if substitution is not None else None,
             predicate=kore_term(predicate) if predicate is not None else None,
