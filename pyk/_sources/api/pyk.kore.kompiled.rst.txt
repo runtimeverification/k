@@ -1,0 +1,7 @@
+pyk.kore.kompiled module
+========================
+
+.. automodule:: pyk.kore.kompiled
+   :members:
+   :undoc-members:
+   :show-inheritance:

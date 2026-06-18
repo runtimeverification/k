@@ -1,0 +1,7 @@
+pyk.kore.internal module
+========================
+
+.. automodule:: pyk.kore.internal
+   :members:
+   :undoc-members:
+   :show-inheritance:

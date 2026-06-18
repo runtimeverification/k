@@ -1,0 +1,7 @@
+pyk.kcfg.store module
+=====================
+
+.. automodule:: pyk.kcfg.store
+   :members:
+   :undoc-members:
+   :show-inheritance:

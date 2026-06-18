@@ -1,0 +1,7 @@
+pyk.kore.rule module
+====================
+
+.. automodule:: pyk.kore.rule
+   :members:
+   :undoc-members:
+   :show-inheritance:

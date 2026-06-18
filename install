@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+
+{ # Prevent execution if this script was only partially downloaded
+  set -e
+
+  GREEN='\033[0;32m'
+  RED='\033[0;31m'
+  NC='\033[0m'
+
+  NIX_POST_INSTALL_MESSAGE="To ensure that the necessary environment variables are set, either log in again, or type
+
+  . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+
+in your shell."
+
+  oops() {
+    >&2 echo -e "${RED}error:${NC} $1"
+    exit 1
+  }
+
+  [[ "$(id -u)" -eq 0 ]] && oops "Please run this script as a regular user"
+
+  # Check if nix is already installed and is at least version 2.4
+  if command -v nix > /dev/null; then
+    NIX_VERSION=$(nix --version | sed -ne 's/[^0-9]*\(\([0-9]\.\)\)/\1/p')
+    NIX_VERSION_MINOR=$(echo "$NIX_VERSION" | cut -d. -f2)
+    if [ "$NIX_VERSION_MINOR" -gt "3" ]; then
+      echo -e "Detected nix version $NIX_VERSION. Proceeding with K framework install."
+    else
+      oops "It appears that you have a version of nix on your system that's too old. The K framework installer requires nix >=2.4. Please update nix and try again."
+    fi
+  else
+    read -p "It appears that you don't have nix installed. Since the K framework needs nix for distribution, this script will attempt to install nix first. Would you like to proceed? [y/N]" -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]
+    then
+      echo "Downloading nix and running the installer..."
+      curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install --no-confirm \
+      --extra-conf "trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= k-framework.cachix.org-1:jeyMXB2h28gpNRjuVkehg+zLj62ma1RnyyopA/20yFE= k-framework-binary.cachix.org-1:pJedQ8iG19BW3v/DMMmiRVtwRBGO3fyMv2Ws0OpBADs=" \
+      --extra-conf "substituters = https://cache.nixos.org https://k-framework.cachix.org"
+      if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+          . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+      else
+        oops "Could not source nix."
+      fi
+      NIX_FRESH_INSTALL=true
+    else
+      oops "Cannot proceed with the installation without nix."
+    fi 
+  fi
+
+  PREV_KUP_INSTALL=$(nix profile list --experimental-features 'nix-command flakes' | awk '/packages\..*\.kup/ {print $1}')
+  if ! [[ -z "$PREV_KUP_INSTALL" ]]; then
+    echo "Removing previous K framework installer versions ..."
+    GC_DONT_GC=1 nix profile remove $PREV_KUP_INSTALL \
+    --experimental-features 'nix-command flakes'
+  fi
+
+  echo "Installing the K framework installer utility (kup) ..."
+
+  GC_DONT_GC=1 nix profile install github:runtimeverification/kup#kup \
+  --option extra-substituters 'https://k-framework.cachix.org' \
+  --option extra-trusted-public-keys 'k-framework.cachix.org-1:jeyMXB2h28gpNRjuVkehg+zLj62ma1RnyyopA/20yFE=' \
+  --experimental-features 'nix-command flakes'
+
+  echo -e "${GREEN}All set!${NC}"
+  if [ -n "$NIX_FRESH_INSTALL" ]; then
+    echo -e "$NIX_POST_INSTALL_MESSAGE"
+  fi
+
+}

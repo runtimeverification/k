@@ -1,0 +1,7 @@
+pyk.proof.show module
+=====================
+
+.. automodule:: pyk.proof.show
+   :members:
+   :undoc-members:
+   :show-inheritance:

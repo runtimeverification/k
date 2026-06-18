@@ -1,0 +1,7 @@
+pyk.kllvm.parser module
+=======================
+
+.. automodule:: pyk.kllvm.parser
+   :members:
+   :undoc-members:
+   :show-inheritance:

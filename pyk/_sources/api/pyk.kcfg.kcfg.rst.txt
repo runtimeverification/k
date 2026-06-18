@@ -1,0 +1,7 @@
+pyk.kcfg.kcfg module
+====================
+
+.. automodule:: pyk.kcfg.kcfg
+   :members:
+   :undoc-members:
+   :show-inheritance:

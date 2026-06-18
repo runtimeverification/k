@@ -1,0 +1,7 @@
+pyk.kore.rpc module
+===================
+
+.. automodule:: pyk.kore.rpc
+   :members:
+   :undoc-members:
+   :show-inheritance:

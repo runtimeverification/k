@@ -1,0 +1,7 @@
+pyk.proof.prove\_rpc module
+===========================
+
+.. automodule:: pyk.proof.prove_rpc
+   :members:
+   :undoc-members:
+   :show-inheritance:

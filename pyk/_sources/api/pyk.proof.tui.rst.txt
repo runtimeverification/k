@@ -1,0 +1,7 @@
+pyk.proof.tui module
+====================
+
+.. automodule:: pyk.proof.tui
+   :members:
+   :undoc-members:
+   :show-inheritance:

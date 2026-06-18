@@ -1,0 +1,7 @@
+pyk.kast.color module
+=====================
+
+.. automodule:: pyk.kast.color
+   :members:
+   :undoc-members:
+   :show-inheritance:

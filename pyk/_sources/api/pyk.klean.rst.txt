@@ -1,0 +1,17 @@
+pyk.klean package
+=================
+
+.. automodule:: pyk.klean
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pyk.klean.generate
+   pyk.klean.k2lean4
+   pyk.klean.model

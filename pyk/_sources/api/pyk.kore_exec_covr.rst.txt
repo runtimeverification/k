@@ -1,0 +1,15 @@
+pyk.kore\_exec\_covr package
+============================
+
+.. automodule:: pyk.kore_exec_covr
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pyk.kore_exec_covr.kore_exec_covr
