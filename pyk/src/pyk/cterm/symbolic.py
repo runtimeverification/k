@@ -15,8 +15,14 @@ from ..kast.pretty import PrettyPrinter
 from ..konvert import kast_to_kore, kflatmodule_to_kore, kore_to_kast
 from ..kore.rpc import (
     AbortedResult,
+    GuidedExecuteResult,
+    GuidedHaltReason,
+    GuidedRemainder,
+    GuidedStep,
+    GuidedUndecided,
     KoreClient,
     KoreExecLogFormat,
+    RuleRef,
     SatResult,
     SmtSolverError,
     StopReason,
@@ -77,6 +83,39 @@ class CTermImplies(NamedTuple):
     csubst: CSubst | None
     failing_cells: tuple[tuple[str, KInner], ...]
     remaining_implication: KInner | None
+    logs: tuple[LogEntry, ...]
+
+
+class CTermGuidedStep(NamedTuple):
+    rule_id: str
+    rule_label: str | None
+    rule_substitution: Subst | None
+    rule_predicate: KInner | None
+    post_state: CTerm
+    depth: int
+
+
+class CTermGuidedRemainder(NamedTuple):
+    depth: int
+    taken_branch_guard: KInner
+    remainder_predicate: KInner
+    model: KInner | None
+
+
+class CTermGuidedUndecided(NamedTuple):
+    depth: int
+    kind: str
+    rule_id: str | None
+    predicate: KInner
+    reason: str
+
+
+class CTermGuidedExecute(NamedTuple):
+    reason: GuidedHaltReason
+    terminal_state: CTerm
+    steps: tuple[CTermGuidedStep, ...]
+    next_states: tuple[CTermGuidedRemainder, ...] | None
+    undecided: tuple[CTermGuidedUndecided, ...]
     logs: tuple[LogEntry, ...]
 
 
@@ -394,6 +433,95 @@ class CTermSymbolic:
     def add_module(self, module: KFlatModule, name_as_id: bool = False) -> str:
         _kore_module = kflatmodule_to_kore(self._definition, module)
         return self._kore_client.add_module(_kore_module, name_as_id=name_as_id)
+
+    def guided_execute(
+        self,
+        cterm: CTerm,
+        rule_sequence: Iterable[RuleRef],
+        *,
+        assume_state_defined: bool | None = None,
+        check_branch_feasibility: bool | None = None,
+        skip_remainder_checks: bool | None = None,
+        skip_guard_smt: bool | None = None,
+        max_depth: int | None = None,
+        module_name: str | None = None,
+        booster_only_simplify: bool | None = None,
+        haskell_logging: bool | None = None,
+    ) -> CTermGuidedExecute:
+        _LOGGER.debug(f'Guided-executing: {cterm}')
+        kore = self.kast_to_kore(cterm.kast)
+        try:
+            response: GuidedExecuteResult = self._kore_client.guided_execute(
+                kore,
+                rule_sequence,
+                assume_state_defined=assume_state_defined,
+                check_branch_feasibility=check_branch_feasibility,
+                skip_remainder_checks=skip_remainder_checks,
+                skip_guard_smt=skip_guard_smt,
+                max_depth=max_depth,
+                module_name=module_name,
+                booster_only_simplify=(
+                    booster_only_simplify if booster_only_simplify is not None else self._booster_only_simplify
+                ),
+                haskell_logging=self._haskell_logging_request(haskell_logging),
+            )
+        except SmtSolverError as err:
+            raise self._smt_solver_error(err) from err
+        self._capture_haskell_log(response.haskell_log_entries)
+
+        terminal_state = CTerm.from_kast(self.kore_to_kast(response.terminal_state))
+
+        steps: list[CTermGuidedStep] = []
+        for s in response.steps:
+            rule_subst = None
+            if s.rule_substitution is not None:
+                rs_kast = self.kore_to_kast(s.rule_substitution)
+                rule_subst = Subst.from_pred(rs_kast)
+            rule_pred = self.kore_to_kast(s.rule_predicate) if s.rule_predicate is not None else None
+            steps.append(
+                CTermGuidedStep(
+                    rule_id=s.rule_id,
+                    rule_label=s.rule_label,
+                    rule_substitution=rule_subst,
+                    rule_predicate=rule_pred,
+                    post_state=CTerm.from_kast(self.kore_to_kast(s.post_state)),
+                    depth=s.depth,
+                )
+            )
+
+        next_states: list[CTermGuidedRemainder] | None = None
+        if response.next_states is not None:
+            next_states = []
+            for ns in response.next_states:
+                next_states.append(
+                    CTermGuidedRemainder(
+                        depth=ns.depth,
+                        taken_branch_guard=self.kore_to_kast(ns.taken_branch_guard),
+                        remainder_predicate=self.kore_to_kast(ns.remainder_predicate),
+                        model=self.kore_to_kast(ns.model) if ns.model is not None else None,
+                    )
+                )
+
+        undecided: list[CTermGuidedUndecided] = []
+        for u in response.undecided:
+            undecided.append(
+                CTermGuidedUndecided(
+                    depth=u.depth,
+                    kind=u.kind,
+                    rule_id=u.rule_id,
+                    predicate=self.kore_to_kast(u.predicate),
+                    reason=u.reason,
+                )
+            )
+
+        return CTermGuidedExecute(
+            reason=response.reason,
+            terminal_state=terminal_state,
+            steps=tuple(steps),
+            next_states=tuple(next_states) if next_states is not None else None,
+            undecided=tuple(undecided),
+            logs=response.logs,
+        )
 
     def _smt_solver_error(self, err: SmtSolverError) -> CTermSMTError:
         kast = self.kore_to_kast(err.pattern)

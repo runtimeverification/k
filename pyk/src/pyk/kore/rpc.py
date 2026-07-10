@@ -1006,6 +1006,161 @@ class SatResult(GetModelResult):
     haskell_log_entries: tuple[Any, ...] | None = None
 
 
+class GuidedHaltReason(str, Enum):
+    SEQUENCE_COMPLETE = 'sequence-complete'
+    BRANCHING = 'branching'
+    STUCK = 'stuck'
+    VACUOUS = 'vacuous'
+    DEPTH_BOUND = 'depth-bound'
+    RULE_NOT_FOUND = 'rule-not-found'
+    ABORTED = 'aborted'
+    TIMEOUT = 'timeout'
+
+
+@final
+@dataclass(frozen=True)
+class LocationRef:
+    file: str
+    start_line: int
+    start_col: int
+    end_line: int
+    end_col: int
+
+    def __init__(self, file: str, start_line: int, start_col: int, end_line: int, end_col: int):
+        object.__setattr__(self, 'file', file)
+        object.__setattr__(self, 'start_line', start_line)
+        object.__setattr__(self, 'start_col', start_col)
+        object.__setattr__(self, 'end_line', end_line)
+        object.__setattr__(self, 'end_col', end_col)
+
+    @staticmethod
+    def from_dict(dct: Mapping[str, Any]) -> LocationRef:
+        return LocationRef(
+            file=dct['file'],
+            start_line=dct['start-line'],
+            start_col=dct['start-col'],
+            end_line=dct['end-line'],
+            end_col=dct['end-col'],
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            'file': self.file,
+            'start-line': self.start_line,
+            'start-col': self.start_col,
+            'end-line': self.end_line,
+            'end-col': self.end_col,
+        }
+
+
+@final
+@dataclass(frozen=True)
+class RuleRef:
+    unique_id: str | None = None
+    label: str | None = None
+    location: LocationRef | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        result: dict[str, Any] = {}
+        if self.unique_id is not None:
+            result['unique-id'] = self.unique_id
+        if self.label is not None:
+            result['label'] = self.label
+        if self.location is not None:
+            result['location'] = self.location.to_dict()
+        return result
+
+
+@final
+@dataclass(frozen=True)
+class GuidedStep:
+    rule_id: str
+    rule_label: str | None
+    rule_substitution: Pattern | None
+    rule_predicate: Pattern | None
+    post_state: Pattern
+    depth: int
+
+    @staticmethod
+    def from_dict(dct: Mapping[str, Any]) -> GuidedStep:
+        return GuidedStep(
+            rule_id=dct['rule-id'],
+            rule_label=dct.get('rule-label'),
+            rule_substitution=kore_term(dct['rule-substitution']) if dct.get('rule-substitution') else None,
+            rule_predicate=kore_term(dct['rule-predicate']) if dct.get('rule-predicate') else None,
+            post_state=kore_term(dct['post-state']),
+            depth=dct['depth'],
+        )
+
+
+@final
+@dataclass(frozen=True)
+class GuidedRemainder:
+    depth: int
+    taken_branch_guard: Pattern
+    remainder_predicate: Pattern
+    model: Pattern | None
+
+    @staticmethod
+    def from_dict(dct: Mapping[str, Any]) -> GuidedRemainder:
+        return GuidedRemainder(
+            depth=dct['depth'],
+            taken_branch_guard=kore_term(dct['taken-branch-guard']),
+            remainder_predicate=kore_term(dct['remainder-predicate']),
+            model=kore_term(dct['model']) if dct.get('model') else None,
+        )
+
+
+@final
+@dataclass(frozen=True)
+class GuidedUndecided:
+    depth: int
+    kind: str
+    rule_id: str | None
+    predicate: Pattern
+    reason: str
+
+    @staticmethod
+    def from_dict(dct: Mapping[str, Any]) -> GuidedUndecided:
+        return GuidedUndecided(
+            depth=dct['depth'],
+            kind=dct['kind'],
+            rule_id=dct.get('rule-id'),
+            predicate=kore_term(dct['predicate']),
+            reason=dct['reason'],
+        )
+
+
+@final
+@dataclass(frozen=True)
+class GuidedExecuteResult:
+    reason: GuidedHaltReason
+    terminal_state: Pattern
+    steps: tuple[GuidedStep, ...]
+    next_states: tuple[GuidedRemainder, ...] | None
+    undecided: tuple[GuidedUndecided, ...]
+    logs: tuple[LogEntry, ...]
+    haskell_log_entries: tuple[Any, ...] | None = None
+
+    @staticmethod
+    def from_dict(dct: Mapping[str, Any]) -> GuidedExecuteResult:
+        logs = tuple(LogEntry.from_dict(l) for l in dct['logs']) if 'logs' in dct else ()
+        next_states = (
+            tuple(GuidedRemainder.from_dict(ns) for ns in dct['next-states']) if dct.get('next-states') else None
+        )
+        undecided = tuple(GuidedUndecided.from_dict(u) for u in dct.get('undecided', ()))
+        steps = tuple(GuidedStep.from_dict(s) for s in dct.get('steps', ()))
+        return GuidedExecuteResult(
+            reason=GuidedHaltReason(dct['reason']),
+            terminal_state=kore_term(dct['terminal-state']),
+            steps=steps,
+            next_states=next_states,
+            undecided=undecided,
+            logs=logs,
+            haskell_log_entries=_parse_haskell_log_entries(dct),
+        )
+
+
 class KoreClient(ContextManager['KoreClient']):
     _KORE_JSON_VERSION: Final = 1
 
@@ -1213,6 +1368,38 @@ class KoreClient(ContextManager['KoreClient']):
         )
         result = self._request('add-module', **params)
         return result['module']
+
+    def guided_execute(
+        self,
+        pattern: Pattern,
+        rule_sequence: Iterable[RuleRef],
+        *,
+        assume_state_defined: bool | None = None,
+        check_branch_feasibility: bool | None = None,
+        skip_remainder_checks: bool | None = None,
+        skip_guard_smt: bool | None = None,
+        max_depth: int | None = None,
+        module_name: str | None = None,
+        booster_only_simplify: bool | None = None,
+        haskell_logging: Iterable[str] | None = None,
+    ) -> GuidedExecuteResult:
+        params = filter_none(
+            {
+                'state': self._state(pattern),
+                'rule-sequence': [rr.to_dict() for rr in rule_sequence],
+                'assume-state-defined': assume_state_defined,
+                'check-branch-feasibility': check_branch_feasibility,
+                'skip-remainder-checks': skip_remainder_checks,
+                'skip-guard-smt': skip_guard_smt,
+                'max-depth': max_depth,
+                'module': module_name,
+                'booster-only': booster_only_simplify,
+                'haskell-logging': list(haskell_logging) if haskell_logging is not None else None,
+            }
+        )
+
+        result = self._request('guided-execute', **params)
+        return GuidedExecuteResult.from_dict(result)
 
 
 class KoreServerArgs(TypedDict, total=False):
