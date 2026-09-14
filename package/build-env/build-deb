@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+
+# Build one of K's Debian packages for one Ubuntu release.
+#
+# WHY THIS EXISTS
+#
+# The build RECIPE (package/debian/build-package) has always lived under
+# package/, versioned with the source it builds. The build ENVIRONMENT did not:
+# it was three Dockerfiles under .github/workflows/, reachable only from a
+# GitHub workflow. And the knowledge of how to DRIVE them -- that the main
+# image FROMs two others that must be built FIRST and tagged exactly
+# `stack:<distro>-<version>` and `maven:<distro>-<version>`, which LLVM and JDK
+# pair with which Ubuntu release, where Z3_VERSION comes from, how to map the
+# calling user into the container, where to mount the checkout -- was written
+# down nowhere executable, only spread across a composite action.
+#
+# Moving CI to the internal forge deletes .github/ outright. This is the
+# durable replacement: one entry point that owns the environment, callable from
+# a forge workflow, from the release repository, or from a developer's shell.
+#
+# Usage:  package/build-env/build-deb <distro> [package] [output.deb]
+#
+# `package` is kframework (default) or kframework-frontend.
+# Runnable from any directory. The deb is left at the root of the checkout.
+# Note that package/debian/build-package MOVES files out of package/debian/, so
+# a second run needs a clean tree.
+
+set -euo pipefail
+
+cd "$(dirname "${BASH_SOURCE[0]}")/../.."
+# shellcheck source=package/build-env/common.sh
+. package/build-env/common.sh
+
+distro="${1:-}"
+require_distro "${distro}"
+pkg="${2:-kframework}"
+require_package "${pkg}"
+pkg_name="${3:-$(default_pkg_name "${distro}" "${pkg}")}"
+
+llvm_version=$(llvm_version_for "${distro}")
+jdk_version=$(jdk_version_for "${distro}")
+
+# Both are read from the tree rather than passed in, so the images cannot be
+# built against a different z3 or a different version than the source says.
+z3_version=$(cat deps/z3)
+k_version=$(cat package/version)
+
+engine=$(container_engine)
+
+# The prerequisite images are FROMed by the main Dockerfile under exactly these
+# tags. They are not optional and not cosmetic: skip them and the build tries
+# to pull docker.io/library/stack:<distro>-<version> from the internet.
+base_args=(
+    --build-arg 'BASE_OS=ubuntu'
+    --build-arg "BASE_DISTRO=${distro}"
+    --build-arg "USER_ID=$(id -u)"
+    --build-arg "GROUP_ID=$(id -g)"
+)
+
+echo "--- Prerequisite image: stack:${distro}-${k_version} ---"
+"${engine}" build . \
+    --file package/build-env/Dockerfile.stack-deps \
+    "${base_args[@]}" \
+    --tag "stack:${distro}-${k_version}"
+
+echo "--- Prerequisite image: maven:${distro}-${k_version} ---"
+"${engine}" build . \
+    --file package/build-env/Dockerfile.maven-cache \
+    "${base_args[@]}" \
+    --tag "maven:${distro}-${k_version}"
+
+echo "--- Build environment: ${distro}, llvm-${llvm_version}, jdk-${jdk_version}, z3-${z3_version} ---"
+"${engine}" build . \
+    --file package/build-env/Dockerfile \
+    "${base_args[@]}" \
+    --build-arg "Z3_VERSION=${z3_version}" \
+    --build-arg "K_VERSION=${k_version}" \
+    --build-arg "LLVM_VERSION=${llvm_version}" \
+    --build-arg "JDK_VERSION=${jdk_version}" \
+    --tag "k-build:${distro}"
+
+# Rootless podman maps the calling uid to a different uid inside the container
+# by default, which leaves the bind mount unwritable by the image's user.
+# keep-id maps it through. Docker has no equivalent and takes --user instead.
+run_args=()
+case "${engine##*/}" in
+    podman) run_args+=(--userns=keep-id) ;;
+    *)      run_args+=(--user "$(id -u):$(id -g)") ;;
+esac
+
+# Mount at /opt/workspace/SOURCE, not at /opt/workspace. dpkg-buildpackage
+# writes the .deb to the parent of the directory it builds in, and
+# build-package globs ../<pkg>_*_amd64.deb to find it; with the checkout
+# mounted at /opt/workspace that parent is `/`, which the build user cannot
+# write. The Dockerfile creates /opt/workspace owned by the build user for
+# exactly this.
+echo "--- Building ${pkg_name} ---"
+"${engine}" run --rm "${run_args[@]}" \
+    --volume "${PWD}:/opt/workspace/source" \
+    --workdir /opt/workspace/source \
+    "k-build:${distro}" \
+    package/debian/build-package "${distro}" "${pkg}" "${pkg_name}"
+
+echo "--- Built ${pkg_name} ---"

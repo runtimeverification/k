@@ -1,0 +1,42 @@
+ARG BASE_OS
+ARG BASE_DISTRO
+FROM ${BASE_OS}:${BASE_DISTRO}
+
+ENV TZ=America/Chicago
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+RUN    apt-get update        \
+    && apt-get upgrade --yes \
+    && apt-get install --yes \
+            maven
+
+# The build runs as an account whose uid/gid match the CALLER's, so that files
+# written to the bind-mounted checkout are owned by whoever invoked the build.
+# Only the ids matter for that; the name is ours to pick, and picking it here
+# rather than taking it from the caller is what keeps the three images in this
+# directory agreeing -- the main Dockerfile COPYs /home/$USER/.stack and
+# /home/$USER/.m2 out of the other two, so a caller that passed a different
+# name to one build than another would produce an image missing its caches.
+#
+# It also stops the image colliding with the base: ubuntu:noble ships an
+# `ubuntu` account at uid/gid 1000, and `users` (gid 100) is the primary group
+# of many developer accounts. Either makes groupadd/useradd fail minutes into
+# the build with a message that never mentions a build arg. -o permits the ids
+# to be shared with an existing account rather than deleting a system account
+# that something else already uses.
+ARG USER=builder
+ARG GROUP=$USER
+ARG USER_ID=1000
+ARG GROUP_ID=$USER_ID
+RUN groupadd -o -g $GROUP_ID $GROUP && useradd -o -m -u $USER_ID -s /bin/sh -g $GROUP $USER
+
+USER $USER:$GROUP
+
+ADD pom.xml                                                    /home/$USER/.tmp-maven/
+ADD llvm-backend/pom.xml                                       /home/$USER/.tmp-maven/llvm-backend/
+ADD llvm-backend/src/main/native/llvm-backend/matching/pom.xml /home/$USER/.tmp-maven/llvm-backend/src/main/native/llvm-backend/matching/
+ADD haskell-backend/pom.xml                                    /home/$USER/.tmp-maven/haskell-backend/
+ADD k-frontend/pom.xml                                         /home/$USER/.tmp-maven/k-frontend/
+ADD k-distribution/pom.xml                                     /home/$USER/.tmp-maven/k-distribution/
+
+RUN cd /home/$USER/.tmp-maven && mvn --batch-mode dependency:go-offline

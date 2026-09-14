@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+# Install a built package into a clean Ubuntu image, as root.
+#
+# Separate from build-deb for a reason worth stating: the test MUST NOT run in
+# the build environment. That image already has every build dependency
+# installed, so a package with a missing or wrong entry in debian/control would
+# install cleanly there and fail only for a user. It also ends with a non-root
+# USER, and apt-get needs root. K's own CI ran this in a separate plain ubuntu
+# container for exactly that reason.
+#
+# Usage:  package/build-env/test-deb <distro> [package] [package.deb]
+#
+# `package` is kframework (default) or kframework-frontend; it selects the test
+# script, so the frontend deb cannot accidentally be checked with the full K
+# test. Runnable from any directory, after build-deb.
+
+set -euo pipefail
+
+cd "$(dirname "${BASH_SOURCE[0]}")/../.."
+# shellcheck source=package/build-env/common.sh
+. package/build-env/common.sh
+
+distro="${1:-}"
+require_distro "${distro}"
+pkg="${2:-kframework}"
+require_package "${pkg}"
+pkg_name="${3:-$(default_pkg_name "${distro}" "${pkg}")}"
+
+test_script=$(test_script_for "${pkg}")
+
+if [ ! -f "${pkg_name}" ]; then
+    echo "test-deb: ${pkg_name} not found -- run 'package/build-env/build-deb ${distro} ${pkg}' first" >&2
+    exit 1
+fi
+
+engine=$(container_engine)
+
+echo "--- Installing ${pkg_name} into a clean ubuntu:${distro} ---"
+"${engine}" run --rm \
+    --volume "${PWD}:/opt/workspace/source" \
+    --workdir /opt/workspace/source \
+    "docker.io/library/ubuntu:${distro}" \
+    "${test_script}" "${pkg_name}"
+
+echo "--- ${pkg_name} installs cleanly ---"

@@ -18,7 +18,7 @@ inputs:
   dockerfile:
     description: 'Hardcode the path of the dockerfile to use.'
     required: false
-    default: .github/workflows/Dockerfile
+    default: package/build-env/Dockerfile
   build-package:
     description: 'Script which builds the given package.'
     required: true
